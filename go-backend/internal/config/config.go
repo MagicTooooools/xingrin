@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/spf13/viper"
 )
@@ -13,6 +14,7 @@ type Config struct {
 	Database DatabaseConfig
 	Redis    RedisConfig
 	Log      LogConfig
+	JWT      JWTConfig
 }
 
 // ServerConfig holds server-related configuration
@@ -48,6 +50,12 @@ type LogConfig struct {
 	Format string `mapstructure:"LOG_FORMAT"`
 }
 
+// JWTConfig holds JWT-related configuration
+type JWTConfig struct {
+	Secret        string        `mapstructure:"JWT_SECRET"`
+	AccessExpire  time.Duration `mapstructure:"JWT_ACCESS_EXPIRE"`
+	RefreshExpire time.Duration `mapstructure:"JWT_REFRESH_EXPIRE"`
+}
 
 // Load reads configuration from environment variables
 func Load() (*Config, error) {
@@ -87,6 +95,11 @@ func Load() (*Config, error) {
 	cfg.Log.Level = v.GetString("LOG_LEVEL")
 	cfg.Log.Format = v.GetString("LOG_FORMAT")
 
+	// JWT config
+	cfg.JWT.Secret = v.GetString("JWT_SECRET")
+	cfg.JWT.AccessExpire = v.GetDuration("JWT_ACCESS_EXPIRE")
+	cfg.JWT.RefreshExpire = v.GetDuration("JWT_REFRESH_EXPIRE")
+
 	return cfg, nil
 }
 
@@ -116,6 +129,11 @@ func setDefaults(v *viper.Viper) {
 	// Log defaults
 	v.SetDefault("LOG_LEVEL", "info")
 	v.SetDefault("LOG_FORMAT", "json")
+
+	// JWT defaults
+	v.SetDefault("JWT_SECRET", "change-me-in-production-use-a-long-random-string")
+	v.SetDefault("JWT_ACCESS_EXPIRE", "15m")
+	v.SetDefault("JWT_REFRESH_EXPIRE", "168h") // 7 days
 }
 
 // DSN returns the database connection string
@@ -158,6 +176,11 @@ func GetDefaults() *Config {
 		Log: LogConfig{
 			Level:  "info",
 			Format: "json",
+		},
+		JWT: JWTConfig{
+			Secret:        "change-me-in-production-use-a-long-random-string",
+			AccessExpire:  15 * time.Minute,
+			RefreshExpire: 168 * time.Hour,
 		},
 	}
 }

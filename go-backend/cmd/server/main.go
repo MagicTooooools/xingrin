@@ -11,6 +11,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis/v8"
+	"github.com/xingrin/go-backend/internal/auth"
 	"github.com/xingrin/go-backend/internal/config"
 	"github.com/xingrin/go-backend/internal/database"
 	"github.com/xingrin/go-backend/internal/handler"
@@ -77,6 +78,12 @@ func main() {
 		}
 	}
 
+	// Initialize JWT manager
+	jwtManager := auth.NewJWTManager(
+		cfg.JWT.Secret,
+		cfg.JWT.AccessExpire,
+		cfg.JWT.RefreshExpire,
+	)
 
 	// Set Gin mode
 	gin.SetMode(cfg.Server.Mode)
@@ -90,11 +97,30 @@ func main() {
 
 	// Create handlers
 	healthHandler := handler.NewHealthHandler(db, redisClient)
+	authHandler := handler.NewAuthHandler(db, jwtManager)
 
-	// Register routes
+	// Register health routes
 	router.GET("/health", healthHandler.Check)
 	router.GET("/health/live", healthHandler.Liveness)
 	router.GET("/health/ready", healthHandler.Readiness)
+
+	// API routes
+	api := router.Group("/api")
+	{
+		// Auth routes (public)
+		authGroup := api.Group("/auth")
+		{
+			authGroup.POST("/login", authHandler.Login)
+			authGroup.POST("/refresh", authHandler.RefreshToken)
+		}
+
+		// Protected routes
+		protected := api.Group("")
+		protected.Use(middleware.AuthMiddleware(jwtManager))
+		{
+			protected.GET("/auth/me", authHandler.GetCurrentUser)
+		}
+	}
 
 	// Create HTTP server
 	srv := &http.Server{
