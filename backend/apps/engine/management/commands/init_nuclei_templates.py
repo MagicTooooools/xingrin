@@ -21,11 +21,11 @@ from apps.engine.services import NucleiTemplateRepoService
 logger = logging.getLogger(__name__)
 
 
-# 默认仓库配置
+# 默认仓库配置（从 settings 读取，支持 Gitee 镜像）
 DEFAULT_REPOS = [
     {
         "name": "nuclei-templates",
-        "repo_url": "https://github.com/projectdiscovery/nuclei-templates.git",
+        "repo_url": getattr(settings, 'NUCLEI_TEMPLATES_REPO_URL', 'https://github.com/projectdiscovery/nuclei-templates.git'),
         "description": "Nuclei 官方模板仓库，包含数千个漏洞检测模板",
     },
 ]

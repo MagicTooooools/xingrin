@@ -12,21 +12,20 @@ set -e
 # 解析参数
 START_ARGS=""
 DEV_MODE=false
-GIT_MIRROR=""
+USE_MIRROR=false
 for arg in "$@"; do
-    case $arg in
+    case ${arg} in
         --dev) 
             DEV_MODE=true 
-            START_ARGS="$START_ARGS --dev"
+            START_ARGS="${START_ARGS} --dev"
             ;;
         --no-frontend) 
-            START_ARGS="$START_ARGS --no-frontend" 
+            START_ARGS="${START_ARGS} --no-frontend" 
             ;;
         --mirror)
-            GIT_MIRROR="https://gh-proxy.org"
+            USE_MIRROR=true
             ;;
-        --mirror=*)
-            GIT_MIRROR="${arg#*=}"
+        *)
             ;;
     esac
 done
@@ -134,9 +133,9 @@ fi
 show_banner
 info "当前用户: ${BOLD}$REAL_USER${RESET}"
 info "项目路径: ${BOLD}$ROOT_DIR${RESET}"
-info "安装版本: ${BOLD}$APP_VERSION${RESET}"
-if [ -n "$GIT_MIRROR" ]; then
-    info "Git 加速: ${BOLD}${GREEN}已启用${RESET} - $GIT_MIRROR"
+info "安装版本: ${BOLD}${APP_VERSION}${RESET}"
+if [[ "${USE_MIRROR}" == true ]]; then
+    info "国内加速: ${BOLD}${GREEN}已启用${RESET}"
 fi
 
 # ==============================================================================
@@ -424,7 +423,7 @@ else
     info "正在安装 Docker..."
     
     # 根据是否启用加速选择下载方式
-    if [ -n "$GIT_MIRROR" ]; then
+    if [[ "${USE_MIRROR}" == true ]]; then
         # 使用阿里云 Docker 安装脚本（国内加速）
         info "使用国内镜像安装 Docker..."
         if curl -fsSL https://get.docker.com | sh -s -- --mirror Aliyun; then
@@ -452,13 +451,13 @@ else
     usermod -aG docker "$REAL_USER"
     
     # 配置 Docker 镜像加速（仅当启用 --mirror 时）
-    if [ -n "$GIT_MIRROR" ]; then
+    if [[ "${USE_MIRROR}" == true ]]; then
         configure_docker_mirror
     fi
 fi
 
 # 如果 Docker 已安装但启用了 --mirror，也配置镜像加速
-if [ -n "$GIT_MIRROR" ] && command -v docker &>/dev/null; then
+if [[ "${USE_MIRROR}" == true ]] && command -v docker &>/dev/null; then
     # 检查是否已配置镜像加速
     if [ ! -f "/etc/docker/daemon.json" ] || ! grep -q "registry-mirrors" /etc/docker/daemon.json 2>/dev/null; then
         configure_docker_mirror
@@ -537,10 +536,10 @@ if [ -f "$DOCKER_DIR/.env.example" ]; then
     update_env_var "$DOCKER_DIR/.env" "IMAGE_TAG" "$APP_VERSION"
     success "已锁定版本: IMAGE_TAG=$APP_VERSION"
     
-    # Git 加速仅用于安装过程，不写入运行时配置
-    # 运行时用户如需加速，可通过代理或其他方式自行配置
-    if [ -n "$GIT_MIRROR" ]; then
-        info "Git 加速已启用（仅用于安装阶段）"
+    # Git 加速：写入 Gitee 镜像地址到 .env，后续 git pull 也走 Gitee
+    if [[ "${USE_MIRROR}" == true ]]; then
+        update_env_var "${DOCKER_DIR}/.env" "NUCLEI_TEMPLATES_REPO_URL" "https://gitee.com/yianyuk/nuclei-templates.git"
+        info "Nuclei 模板将使用 Gitee 镜像"
     fi
     
     # 开发模式：开启调试日志
@@ -684,9 +683,9 @@ else
     info "正在拉取: $WORKER_IMAGE"
     
     # 镜像加速通过 daemon.json 的 registry-mirrors 实现
-    PULL_IMAGE="$WORKER_IMAGE"
+    PULL_IMAGE="${WORKER_IMAGE}"
     
-    if [ -n "$GIT_MIRROR" ]; then
+    if [[ "${USE_MIRROR}" == true ]]; then
         info "已配置 Docker 镜像加速，拉取将自动走加速通道"
     fi
     
@@ -694,9 +693,9 @@ else
         success "Worker 镜像拉取完成"
     else
         error "Worker 镜像拉取失败，无法继续安装"
-        error "镜像地址: $WORKER_IMAGE"
+        error "镜像地址: ${WORKER_IMAGE}"
         echo
-        if [ -z "$GIT_MIRROR" ]; then
+        if [[ "${USE_MIRROR}" != true ]]; then
             warn "如果您在中国大陆，建议使用 --mirror 参数启用加速："
             echo -e "   ${BOLD}sudo ./install.sh --mirror${RESET}"
         else
@@ -714,20 +713,21 @@ fi
 # ==============================================================================
 step "预下载 Nuclei 模板仓库..."
 NUCLEI_TEMPLATES_DIR="/opt/xingrin/nuclei-repos/nuclei-templates"
-NUCLEI_TEMPLATES_REPO="https://github.com/projectdiscovery/nuclei-templates.git"
+NUCLEI_TEMPLATES_REPO_GITHUB="https://github.com/projectdiscovery/nuclei-templates.git"
+NUCLEI_TEMPLATES_REPO_GITEE="https://gitee.com/yianyuk/nuclei-templates.git"
 
 # 确保目录存在
 mkdir -p /opt/xingrin/nuclei-repos
 
-if [ -d "$NUCLEI_TEMPLATES_DIR/.git" ]; then
+if [[ -d "$NUCLEI_TEMPLATES_DIR/.git" ]]; then
     info "Nuclei 模板仓库已存在，跳过下载"
 else
-    # 构建 clone URL（如果启用了 Git 加速）
-    if [ -n "$GIT_MIRROR" ]; then
-        CLONE_URL="${GIT_MIRROR}/${NUCLEI_TEMPLATES_REPO}"
-        info "使用 Git 加速下载: $CLONE_URL"
+    # 选择 clone URL（启用加速时使用 Gitee 镜像）
+    if [[ "${USE_MIRROR}" == true ]]; then
+        CLONE_URL="${NUCLEI_TEMPLATES_REPO_GITEE}"
+        info "使用 Gitee 镜像下载: ${CLONE_URL}"
     else
-        CLONE_URL="$NUCLEI_TEMPLATES_REPO"
+        CLONE_URL="$NUCLEI_TEMPLATES_REPO_GITHUB"
     fi
     
     # 执行 git clone
