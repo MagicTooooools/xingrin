@@ -7,7 +7,7 @@ import (
 // StatisticsHistory represents daily statistics history
 type StatisticsHistory struct {
 	ID              int       `gorm:"primaryKey;autoIncrement" json:"id"`
-	Date            time.Time `gorm:"column:date;type:date;uniqueIndex" json:"date"`
+	Date            time.Time `gorm:"column:date;type:date;uniqueIndex:unique_statistics_date;index:idx_statistics_date" json:"date"`
 	TotalTargets    int       `gorm:"column:total_targets;default:0" json:"totalTargets"`
 	TotalSubdomains int       `gorm:"column:total_subdomains;default:0" json:"totalSubdomains"`
 	TotalIPs        int       `gorm:"column:total_ips;default:0" json:"totalIps"`

@@ -160,13 +160,12 @@ func TestGORMColumnTags(t *testing.T) {
 	// Test Target model
 	targetType := reflect.TypeOf(Target{})
 	expectedColumns := map[string]string{
-		"ID":             "",           // primaryKey, no explicit column
-		"Name":           "name",
-		"Type":           "type",
-		"OrganizationID": "organization_id",
-		"CreatedAt":      "created_at",
-		"LastScannedAt":  "last_scanned_at",
-		"DeletedAt":      "deleted_at",
+		"ID":            "", // primaryKey, no explicit column
+		"Name":          "name",
+		"Type":          "type",
+		"CreatedAt":     "created_at",
+		"LastScannedAt": "last_scanned_at",
+		"DeletedAt":     "deleted_at",
 	}
 
 	for fieldName, expectedColumn := range expectedColumns {

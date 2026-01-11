@@ -7,7 +7,7 @@ import (
 // NucleiTemplateRepo represents a nuclei template git repository
 type NucleiTemplateRepo struct {
 	ID           int        `gorm:"primaryKey;autoIncrement" json:"id"`
-	Name         string     `gorm:"column:name;size:200;uniqueIndex" json:"name"`
+	Name         string     `gorm:"column:name;size:200;uniqueIndex:unique_nuclei_repo_name" json:"name"`
 	RepoURL      string     `gorm:"column:repo_url;size:500" json:"repoUrl"`
 	LocalPath    string     `gorm:"column:local_path;size:500" json:"localPath"`
 	CommitHash   string     `gorm:"column:commit_hash;size:40" json:"commitHash"`

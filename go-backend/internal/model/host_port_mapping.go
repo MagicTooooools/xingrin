@@ -4,14 +4,14 @@ import (
 	"time"
 )
 
-// HostPortMapping represents a host-IP-port mapping
+// HostPortMapping represents a host-port mapping
 type HostPortMapping struct {
 	ID        int       `gorm:"primaryKey;autoIncrement" json:"id"`
-	TargetID  int       `gorm:"column:target_id;not null" json:"targetId"`
-	Host      string    `gorm:"column:host;size:1000;not null" json:"host"`
-	IP        string    `gorm:"column:ip;type:inet;not null" json:"ip"`
-	Port      int       `gorm:"column:port;not null" json:"port"`
-	CreatedAt time.Time `gorm:"column:created_at;autoCreateTime" json:"createdAt"`
+	TargetID  int       `gorm:"column:target_id;not null;index:idx_hpm_target;uniqueIndex:unique_target_host_ip_port,priority:1" json:"targetId"`
+	Host      string    `gorm:"column:host;size:1000;not null;index:idx_hpm_host;uniqueIndex:unique_target_host_ip_port,priority:2" json:"host"`
+	IP        string    `gorm:"column:ip;type:inet;not null;index:idx_hpm_ip;uniqueIndex:unique_target_host_ip_port,priority:3" json:"ip"`
+	Port      int       `gorm:"column:port;not null;index:idx_hpm_port;uniqueIndex:unique_target_host_ip_port,priority:4" json:"port"`
+	CreatedAt time.Time `gorm:"column:created_at;autoCreateTime;index:idx_hpm_created_at" json:"createdAt"`
 
 	// Relationships
 	Target *Target `gorm:"foreignKey:TargetID" json:"target,omitempty"`

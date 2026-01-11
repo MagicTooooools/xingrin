@@ -4,18 +4,18 @@ import (
 	"time"
 )
 
-// DirectorySnapshot represents a directory discovered in a scan
+// DirectorySnapshot represents a directory snapshot
 type DirectorySnapshot struct {
 	ID            int       `gorm:"primaryKey;autoIncrement" json:"id"`
-	ScanID        int       `gorm:"column:scan_id;not null" json:"scanId"`
-	URL           string    `gorm:"column:url;size:2000" json:"url"`
-	Status        *int      `gorm:"column:status" json:"status"`
+	ScanID        int       `gorm:"column:scan_id;not null;index:idx_directory_snap_scan;uniqueIndex:unique_directory_per_scan_snapshot,priority:1" json:"scanId"`
+	URL           string    `gorm:"column:url;size:2000;index:idx_directory_snap_url;uniqueIndex:unique_directory_per_scan_snapshot,priority:2" json:"url"`
+	Status        *int      `gorm:"column:status;index:idx_directory_snap_status" json:"status"`
 	ContentLength *int64    `gorm:"column:content_length" json:"contentLength"`
 	Words         *int      `gorm:"column:words" json:"words"`
 	Lines         *int      `gorm:"column:lines" json:"lines"`
-	ContentType   string    `gorm:"column:content_type;size:200" json:"contentType"`
+	ContentType   string    `gorm:"column:content_type;size:200;index:idx_directory_snap_content_type" json:"contentType"`
 	Duration      *int64    `gorm:"column:duration" json:"duration"`
-	CreatedAt     time.Time `gorm:"column:created_at;autoCreateTime" json:"createdAt"`
+	CreatedAt     time.Time `gorm:"column:created_at;autoCreateTime;index:idx_directory_snap_created_at" json:"createdAt"`
 
 	// Relationships
 	Scan *Scan `gorm:"foreignKey:ScanID" json:"scan,omitempty"`
