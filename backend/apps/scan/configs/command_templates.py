@@ -203,7 +203,7 @@ VULN_SCAN_COMMANDS = {
         # -silent: 静默模式
         # -l: 输入 URL 列表文件
         # -t: 模板目录路径（支持多个仓库，多次 -t 由 template_args 直接拼接）
-        'base': "nuclei -j -silent -l '{endpoints_file}' {template_args}",
+        'base': "nuclei -j -silent -l '{input_file}' {template_args}",
         'optional': {
             'concurrency': '-c {concurrency}',           # 并发数（默认 25）
             'rate_limit': '-rl {rate_limit}',            # 每秒请求数限制
@@ -214,7 +214,12 @@ VULN_SCAN_COMMANDS = {
             'tags': '-tags {tags}',                      # 过滤标签
             'exclude_tags': '-etags {exclude_tags}',     # 排除标签
         },
-        'input_type': 'endpoints_file',
+        # 支持多种输入类型，用户通过 scan_endpoints/scan_websites 选择
+        'input_types': ['endpoints_file', 'websites_file'],
+        'defaults': {
+            'scan_endpoints': False,  # 默认不扫描 endpoints
+            'scan_websites': True,    # 默认扫描 websites
+        },
     },
 }
 

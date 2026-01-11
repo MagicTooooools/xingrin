@@ -108,7 +108,7 @@ def endpoints_vuln_scan_flow(
                 template_args = " ".join(f"-t {p}" for p in template_paths)
 
             # 构建命令参数
-            command_params = {"endpoints_file": str(endpoints_file)}
+            command_params = {"input_file": str(endpoints_file)}
             if template_args:
                 command_params["template_args"] = template_args
 

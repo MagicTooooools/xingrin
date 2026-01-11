@@ -158,7 +158,9 @@ vuln_scan:
 
     nuclei:
       enabled: true
-      # timeout: auto        # 自动计算（根据 endpoints 行数）
+      # timeout: auto        # 自动计算（根据输入 URL 行数）
+      scan-endpoints: false  # 是否扫描 endpoints（默认关闭）
+      scan-websites: true    # 是否扫描 websites（默认开启）
       template-repo-names:   # 模板仓库列表，对应「Nuclei 模板」中的仓库名
         - nuclei-templates
         # - nuclei-custom    # 可追加自定义仓库
