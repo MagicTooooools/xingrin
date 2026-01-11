@@ -107,8 +107,11 @@ def endpoints_vuln_scan_flow(
                     continue
                 template_args = " ".join(f"-t {p}" for p in template_paths)
 
-            # 构建命令参数
-            command_params = {"input_file": str(endpoints_file)}
+            # 构建命令参数（根据工具模板使用不同的参数名）
+            if tool_name == "nuclei":
+                command_params = {"input_file": str(endpoints_file)}
+            else:
+                command_params = {"endpoints_file": str(endpoints_file)}
             if template_args:
                 command_params["template_args"] = template_args
 
