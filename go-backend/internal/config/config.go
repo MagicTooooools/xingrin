@@ -57,14 +57,28 @@ type JWTConfig struct {
 	RefreshExpire time.Duration `mapstructure:"JWT_REFRESH_EXPIRE"`
 }
 
-// Load reads configuration from environment variables
+// Load reads configuration from .env file and environment variables
+// Priority: environment variables > .env file > defaults
 func Load() (*Config, error) {
 	v := viper.New()
 
 	// Set default values
 	setDefaults(v)
 
-	// Read from environment variables
+	// Try to read .env file (optional, won't fail if not found)
+	v.SetConfigName(".env")
+	v.SetConfigType("env")
+	v.AddConfigPath(".")            // Current directory (go-backend/)
+	v.AddConfigPath("./go-backend") // When running from project root
+	if err := v.ReadInConfig(); err != nil {
+		// .env file not found is OK, we'll use env vars or defaults
+		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
+			// Only return error if it's not a "file not found" error
+			return nil, fmt.Errorf("error reading config file: %w", err)
+		}
+	}
+
+	// Environment variables override .env file
 	v.AutomaticEnv()
 	v.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 

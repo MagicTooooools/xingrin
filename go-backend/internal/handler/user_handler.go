@@ -1,0 +1,115 @@
+package handler
+
+import (
+	"errors"
+	"net/http"
+
+	"github.com/gin-gonic/gin"
+	"github.com/xingrin/go-backend/internal/dto"
+	"github.com/xingrin/go-backend/internal/middleware"
+	"github.com/xingrin/go-backend/internal/service"
+)
+
+// UserHandler handles user endpoints
+type UserHandler struct {
+	svc *service.UserService
+}
+
+// NewUserHandler creates a new user handler
+func NewUserHandler(svc *service.UserService) *UserHandler {
+	return &UserHandler{svc: svc}
+}
+
+// Create creates a new user
+// POST /api/users
+func (h *UserHandler) Create(c *gin.Context) {
+	var req dto.CreateUserRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		dto.BadRequest(c, "Invalid request body")
+		return
+	}
+
+	user, err := h.svc.Create(&req)
+	if err != nil {
+		if errors.Is(err, service.ErrUsernameExists) {
+			dto.BadRequest(c, "Username already exists")
+			return
+		}
+		dto.InternalError(c, "Failed to create user")
+		return
+	}
+
+	dto.Created(c, dto.UserResponse{
+		ID:          user.ID,
+		Username:    user.Username,
+		Email:       user.Email,
+		IsActive:    user.IsActive,
+		IsSuperuser: user.IsSuperuser,
+		DateJoined:  user.DateJoined,
+		LastLogin:   user.LastLogin,
+	})
+}
+
+// List returns paginated users
+// GET /api/users
+func (h *UserHandler) List(c *gin.Context) {
+	var query dto.PaginationQuery
+	if err := c.ShouldBindQuery(&query); err != nil {
+		dto.BadRequest(c, "Invalid query parameters")
+		return
+	}
+
+	users, total, err := h.svc.List(&query)
+	if err != nil {
+		dto.InternalError(c, "Failed to list users")
+		return
+	}
+
+	var resp []dto.UserResponse
+	for _, u := range users {
+		resp = append(resp, dto.UserResponse{
+			ID:          u.ID,
+			Username:    u.Username,
+			Email:       u.Email,
+			IsActive:    u.IsActive,
+			IsSuperuser: u.IsSuperuser,
+			DateJoined:  u.DateJoined,
+			LastLogin:   u.LastLogin,
+		})
+	}
+
+	dto.Paginated(c, resp, total, query.GetPage(), query.GetPageSize())
+}
+
+// UpdatePassword updates user password
+// PUT /api/users/:id/password
+func (h *UserHandler) UpdatePassword(c *gin.Context) {
+	// Get current user from context
+	claims, ok := middleware.GetUserClaims(c)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Not authenticated"})
+		return
+	}
+
+	var req dto.UpdatePasswordRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		dto.BadRequest(c, "Invalid request body")
+		return
+	}
+
+	err := h.svc.UpdatePassword(claims.UserID, &req)
+	if err != nil {
+		if errors.Is(err, service.ErrUserNotFound) {
+			dto.NotFound(c, "User not found")
+			return
+		}
+		if errors.Is(err, service.ErrInvalidPassword) {
+			dto.BadRequest(c, "Invalid old password")
+			return
+		}
+		dto.InternalError(c, "Failed to update password")
+		return
+	}
+
+	dto.Success(c, gin.H{"message": "Password updated"})
+}

@@ -21,8 +21,6 @@ func NewDatabase(cfg *config.DatabaseConfig) (*gorm.DB, error) {
 		NamingStrategy: schema.NamingStrategy{
 			SingularTable: true, // Use singular table names (e.g., "target" not "targets")
 		},
-		// Disable auto-migration to prevent creating new tables
-		DisableForeignKeyConstraintWhenMigrating: true,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to database: %w", err)

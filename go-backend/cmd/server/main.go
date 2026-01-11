@@ -17,6 +17,8 @@ import (
 	"github.com/xingrin/go-backend/internal/handler"
 	"github.com/xingrin/go-backend/internal/middleware"
 	"github.com/xingrin/go-backend/internal/pkg"
+	"github.com/xingrin/go-backend/internal/repository"
+	"github.com/xingrin/go-backend/internal/service"
 	"go.uber.org/zap"
 )
 
@@ -95,9 +97,25 @@ func main() {
 	router.Use(middleware.Recovery())
 	router.Use(middleware.Logger())
 
+	// Create repositories
+	userRepo := repository.NewUserRepository(db)
+	orgRepo := repository.NewOrganizationRepository(db)
+	targetRepo := repository.NewTargetRepository(db)
+	engineRepo := repository.NewEngineRepository(db)
+
+	// Create services
+	userSvc := service.NewUserService(userRepo)
+	orgSvc := service.NewOrganizationService(orgRepo)
+	targetSvc := service.NewTargetService(targetRepo)
+	engineSvc := service.NewEngineService(engineRepo)
+
 	// Create handlers
 	healthHandler := handler.NewHealthHandler(db, redisClient)
 	authHandler := handler.NewAuthHandler(db, jwtManager)
+	userHandler := handler.NewUserHandler(userSvc)
+	orgHandler := handler.NewOrganizationHandler(orgSvc)
+	targetHandler := handler.NewTargetHandler(targetSvc)
+	engineHandler := handler.NewEngineHandler(engineSvc)
 
 	// Register health routes
 	router.GET("/health", healthHandler.Check)
@@ -118,7 +136,34 @@ func main() {
 		protected := api.Group("")
 		protected.Use(middleware.AuthMiddleware(jwtManager))
 		{
+			// Auth
 			protected.GET("/auth/me", authHandler.GetCurrentUser)
+
+			// Users
+			protected.POST("/users", userHandler.Create)
+			protected.GET("/users", userHandler.List)
+			protected.PUT("/users/password", userHandler.UpdatePassword)
+
+			// Organizations
+			protected.POST("/organizations", orgHandler.Create)
+			protected.GET("/organizations", orgHandler.List)
+			protected.GET("/organizations/:id", orgHandler.GetByID)
+			protected.PUT("/organizations/:id", orgHandler.Update)
+			protected.DELETE("/organizations/:id", orgHandler.Delete)
+
+			// Targets
+			protected.POST("/targets", targetHandler.Create)
+			protected.GET("/targets", targetHandler.List)
+			protected.GET("/targets/:id", targetHandler.GetByID)
+			protected.PUT("/targets/:id", targetHandler.Update)
+			protected.DELETE("/targets/:id", targetHandler.Delete)
+
+			// Engines
+			protected.POST("/engines", engineHandler.Create)
+			protected.GET("/engines", engineHandler.List)
+			protected.GET("/engines/:id", engineHandler.GetByID)
+			protected.PUT("/engines/:id", engineHandler.Update)
+			protected.DELETE("/engines/:id", engineHandler.Delete)
 		}
 	}
 
