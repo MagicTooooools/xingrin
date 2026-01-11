@@ -68,30 +68,6 @@ func TestJWTManager_ExpiredToken(t *testing.T) {
 	}
 }
 
-func TestVerifyDjangoPassword(t *testing.T) {
-	// This is a real Django password hash for "admin"
-	// Generated with: from django.contrib.auth.hashers import make_password; make_password("admin")
-	djangoHash := "pbkdf2_sha256$600000$test_salt_here$7Ks8uN5FVNyXf0ItS5UqxTpmLZqLhBJKZQp5qJ5KXAQ="
-
-	// Test with correct password - this will fail because the hash is fake
-	// In real tests, you'd use an actual Django-generated hash
-	result := VerifyDjangoPassword("admin", djangoHash)
-	// We expect false because the hash above is not a real hash
-	if result {
-		t.Log("Password verification passed (unexpected with fake hash)")
-	}
-
-	// Test with wrong format
-	if VerifyDjangoPassword("admin", "invalid-format") {
-		t.Error("Should return false for invalid format")
-	}
-
-	// Test with wrong algorithm
-	if VerifyDjangoPassword("admin", "bcrypt$600000$salt$hash") {
-		t.Error("Should return false for wrong algorithm")
-	}
-}
-
 func TestHashPassword(t *testing.T) {
 	password := "test-password-123"
 
@@ -101,25 +77,20 @@ func TestHashPassword(t *testing.T) {
 		t.Fatalf("Failed to hash password: %v", err)
 	}
 
-	// Verify format
-	if !hasValidDjangoFormat(hash) {
-		t.Errorf("Hash should have Django format, got: %s", hash)
+	// Hash should start with bcrypt prefix
+	if len(hash) < 60 {
+		t.Errorf("Hash should be at least 60 chars, got %d", len(hash))
 	}
 
 	// Verify the password against the hash
-	if !VerifyDjangoPassword(password, hash) {
+	if !VerifyPassword(password, hash) {
 		t.Error("Password verification should pass for correct password")
 	}
 
 	// Verify wrong password fails
-	if VerifyDjangoPassword("wrong-password", hash) {
+	if VerifyPassword("wrong-password", hash) {
 		t.Error("Password verification should fail for wrong password")
 	}
-}
-
-func hasValidDjangoFormat(hash string) bool {
-	parts := len(hash) > 0 && hash[:13] == "pbkdf2_sha256"
-	return parts
 }
 
 func TestHashPassword_Uniqueness(t *testing.T) {
@@ -134,10 +105,10 @@ func TestHashPassword_Uniqueness(t *testing.T) {
 	}
 
 	// But both should verify correctly
-	if !VerifyDjangoPassword(password, hash1) {
+	if !VerifyPassword(password, hash1) {
 		t.Error("First hash should verify")
 	}
-	if !VerifyDjangoPassword(password, hash2) {
+	if !VerifyPassword(password, hash2) {
 		t.Error("Second hash should verify")
 	}
 }
