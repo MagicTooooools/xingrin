@@ -6,8 +6,8 @@ import (
 	"github.com/lib/pq"
 )
 
-// WebSite represents a website asset
-type WebSite struct {
+// Website represents a website asset
+type Website struct {
 	ID              int            `gorm:"primaryKey;autoIncrement" json:"id"`
 	TargetID        int            `gorm:"column:target_id;not null;index:idx_website_target;uniqueIndex:unique_website_url_target,priority:2" json:"targetId"`
 	URL             string         `gorm:"column:url;type:text;index:idx_website_url;uniqueIndex:unique_website_url_target,priority:1" json:"url"`
@@ -28,7 +28,7 @@ type WebSite struct {
 	Target *Target `gorm:"foreignKey:TargetID" json:"target,omitempty"`
 }
 
-// TableName returns the table name for WebSite
-func (WebSite) TableName() string {
+// TableName returns the table name for Website
+func (Website) TableName() string {
 	return "website"
 }

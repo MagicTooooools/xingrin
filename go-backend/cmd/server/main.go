@@ -16,6 +16,7 @@ import (
 	"github.com/xingrin/go-backend/internal/database"
 	"github.com/xingrin/go-backend/internal/handler"
 	"github.com/xingrin/go-backend/internal/middleware"
+	"github.com/xingrin/go-backend/internal/model"
 	"github.com/xingrin/go-backend/internal/pkg"
 	"github.com/xingrin/go-backend/internal/repository"
 	"github.com/xingrin/go-backend/internal/service"
@@ -55,6 +56,57 @@ func main() {
 		zap.Int("port", cfg.Database.Port),
 		zap.String("name", cfg.Database.Name),
 	)
+
+	// Auto migrate database schema
+	pkg.Info("Running database migrations...")
+	if err := db.AutoMigrate(
+		// Core models (no dependencies)
+		&model.Organization{},
+		&model.User{},
+		&model.Target{},
+		&model.ScanEngine{},
+		&model.WorkerNode{},
+		&model.Wordlist{},
+		&model.NucleiTemplateRepo{},
+		&model.BlacklistRule{},
+		&model.NotificationSettings{},
+
+		// Scan related (depends on Target, ScanEngine)
+		&model.Scan{},
+		&model.ScanInputTarget{},
+		&model.ScanLog{},
+		&model.ScheduledScan{},
+
+		// Asset models (depends on Target, Scan)
+		&model.Subdomain{},
+		&model.HostPortMapping{},
+		&model.Website{},
+		&model.Endpoint{},
+		&model.Directory{},
+		&model.Screenshot{},
+		&model.Vulnerability{},
+
+		// Snapshot models (depends on Scan)
+		&model.SubdomainSnapshot{},
+		&model.HostPortMappingSnapshot{},
+		&model.WebsiteSnapshot{},
+		&model.EndpointSnapshot{},
+		&model.DirectorySnapshot{},
+		&model.ScreenshotSnapshot{},
+		&model.VulnerabilitySnapshot{},
+
+		// Statistics
+		&model.AssetStatistics{},
+		&model.StatisticsHistory{},
+		&model.Notification{},
+
+		// Auth
+		&model.Session{},
+		&model.SubfinderProviderSettings{},
+	); err != nil {
+		pkg.Fatal("Failed to migrate database", zap.Error(err))
+	}
+	pkg.Info("Database migrations completed")
 
 	// Initialize Redis (optional)
 	var redisClient *redis.Client
