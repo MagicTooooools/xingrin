@@ -11,7 +11,7 @@ import logging
 import subprocess
 from pathlib import Path
 from datetime import datetime
-from prefect import task
+
 from typing import Optional
 
 from apps.scan.utils import execute_and_wait
@@ -19,11 +19,11 @@ from apps.scan.utils import execute_and_wait
 logger = logging.getLogger(__name__)
 
 
-@task(
-    name='clean_urls_with_uro',
-    retries=1,
-    log_prints=True
-)
+
+
+
+
+
 def clean_urls_task(
     input_file: str,
     output_dir: str,

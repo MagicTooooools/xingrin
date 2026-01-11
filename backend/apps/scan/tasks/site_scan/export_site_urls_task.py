@@ -7,14 +7,14 @@
 """
 import logging
 from pathlib import Path
-from prefect import task
+
 
 from apps.scan.providers import TargetProvider
 
 logger = logging.getLogger(__name__)
 
 
-@task(name="export_site_urls")
+
 def export_site_urls_task(
     output_file: str,
     provider: TargetProvider,

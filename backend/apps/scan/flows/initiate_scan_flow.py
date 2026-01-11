@@ -5,13 +5,13 @@
 
 职责：
 - 使用 FlowOrchestrator 解析 YAML 配置
-- 在 Prefect Flow 中执行子 Flow（Subflow）
+- 执行子 Flow（Subflow）
 - 按照 YAML 顺序编排工作流
 - 根据 scan_mode 创建对应的 Provider
 - 不包含具体业务逻辑（由 Tasks 和 FlowOrchestrator 实现）
 
 架构：
-- Flow: Prefect 编排层（本文件）
+- Flow: 编排层（本文件）
 - FlowOrchestrator: 配置解析和执行计划（apps/scan/services/）
 - Tasks: 执行层（apps/scan/tasks/）
 - Handlers: 状态管理（apps/scan/handlers/）
@@ -19,13 +19,12 @@
 
 # Django 环境初始化（导入即生效）
 # 注意：动态扫描容器应使用 run_initiate_scan.py 启动，以便在导入前设置环境变量
-import apps.common.prefect_django_setup  # noqa: F401
+import apps.common.django_setup  # noqa: F401
 
 import logging
+from concurrent.futures import ThreadPoolExecutor
 
-from prefect import flow, task
-from prefect.futures import wait
-
+from apps.scan.decorators import scan_flow
 from apps.scan.handlers import (
     on_initiate_scan_flow_running,
     on_initiate_scan_flow_completed,
@@ -35,13 +34,6 @@ from apps.scan.orchestrators import FlowOrchestrator
 from apps.scan.utils import setup_scan_workspace
 
 logger = logging.getLogger(__name__)
-
-
-@task(name="run_subflow")
-def _run_subflow_task(scan_type: str, flow_func, flow_kwargs: dict):
-    """包装子 Flow 的 Task，用于在并行阶段并发执行子 Flow。"""
-    logger.info("开始执行子 Flow: %s", scan_type)
-    return flow_func(**flow_kwargs)
 
 
 def _create_provider(scan, target_id: int, scan_id: int):
@@ -83,40 +75,36 @@ def _execute_sequential_flows(valid_flows: list, results: dict, executed_flows: 
 
 
 def _execute_parallel_flows(valid_flows: list, results: dict, executed_flows: list):
-    """并行执行 Flow 列表"""
-    futures = []
-    for scan_type, flow_func, flow_kwargs in valid_flows:
-        logger.info("=" * 60)
-        logger.info("提交并行子 Flow 任务: %s", scan_type)
-        logger.info("=" * 60)
-        future = _run_subflow_task.submit(
-            scan_type=scan_type,
-            flow_func=flow_func,
-            flow_kwargs=flow_kwargs,
-        )
-        futures.append((scan_type, future))
-
-    if not futures:
+    """并行执行 Flow 列表（使用 ThreadPoolExecutor）"""
+    if not valid_flows:
         return
 
-    wait([f for _, f in futures])
+    logger.info("并行执行 %d 个 Flow", len(valid_flows))
 
-    for scan_type, future in futures:
-        try:
-            result = future.result()
-            executed_flows.append(scan_type)
-            results[scan_type] = result
-            logger.info("✓ %s 执行成功", scan_type)
-        except Exception as e:
-            logger.warning("%s 执行失败: %s", scan_type, e)
-            executed_flows.append(f"{scan_type} (失败)")
-            results[scan_type] = {'success': False, 'error': str(e)}
+    with ThreadPoolExecutor(max_workers=len(valid_flows)) as executor:
+        futures = []
+        for scan_type, flow_func, flow_kwargs in valid_flows:
+            logger.info("=" * 60)
+            logger.info("提交并行子 Flow 任务: %s", scan_type)
+            logger.info("=" * 60)
+            future = executor.submit(flow_func, **flow_kwargs)
+            futures.append((scan_type, future))
+
+        # 收集结果
+        for scan_type, future in futures:
+            try:
+                result = future.result()
+                executed_flows.append(scan_type)
+                results[scan_type] = result
+                logger.info("✓ %s 执行成功", scan_type)
+            except Exception as e:
+                logger.warning("%s 执行失败: %s", scan_type, e)
+                executed_flows.append(f"{scan_type} (失败)")
+                results[scan_type] = {'success': False, 'error': str(e)}
 
 
-@flow(
+@scan_flow(
     name='initiate_scan',
-    description='扫描任务初始化流程',
-    log_prints=True,
     on_running=[on_initiate_scan_flow_running],
     on_completion=[on_initiate_scan_flow_completed],
     on_failure=[on_initiate_scan_flow_failed],

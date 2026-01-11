@@ -4,8 +4,7 @@
 import logging
 from typing import Dict, Tuple
 
-from prefect import flow
-
+from apps.scan.decorators import scan_flow
 from apps.scan.handlers.scan_flow_handlers import (
     on_scan_flow_running,
     on_scan_flow_completed,
@@ -58,9 +57,8 @@ def _classify_vuln_tools(
     return endpoints_tools, websites_tools, other_tools
 
 
-@flow(
+@scan_flow(
     name="vuln_scan",
-    log_prints=True,
     on_running=[on_scan_flow_running],
     on_completion=[on_scan_flow_completed],
     on_failure=[on_scan_flow_failed],

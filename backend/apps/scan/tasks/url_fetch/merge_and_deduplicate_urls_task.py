@@ -10,17 +10,17 @@ import uuid
 import subprocess
 from pathlib import Path
 from datetime import datetime
-from prefect import task
+
 from typing import List
 
 logger = logging.getLogger(__name__)
 
 
-@task(
-    name='merge_and_deduplicate_urls',
-    retries=1,
-    log_prints=True
-)
+
+
+
+
+
 def merge_and_deduplicate_urls_task(
     result_files: List[str],
     result_dir: str

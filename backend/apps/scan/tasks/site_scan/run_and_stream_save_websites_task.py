@@ -25,7 +25,7 @@ import json
 import subprocess
 import time
 from pathlib import Path
-from prefect import task
+
 from typing import Generator, Optional, Dict, Any, TYPE_CHECKING
 from django.db import IntegrityError, OperationalError, DatabaseError
 from dataclasses import dataclass
@@ -659,7 +659,7 @@ def _cleanup_resources(data_generator) -> None:
             logger.error("关闭生成器时出错: %s", gen_close_error)
 
 
-@task(name='run_and_stream_save_websites', retries=0)
+
 def run_and_stream_save_websites_task(
     cmd: str,
     tool_name: str,

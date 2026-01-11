@@ -17,9 +17,7 @@ django-filter==24.3
 # 环境变量管理
 python-dotenv==1.0.1
 
-# 异步任务和工作流编排
-prefect==3.4.25
-fastapi==0.115.5  # 锁定版本，0.123+ 与 Prefect 不兼容
+# 异步任务
 redis==5.0.3  # 可选：用于缓存
 APScheduler>=3.10.0  # 定时任务调度器
 

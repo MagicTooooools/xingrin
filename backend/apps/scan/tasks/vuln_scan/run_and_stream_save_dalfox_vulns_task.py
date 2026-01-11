@@ -25,7 +25,7 @@ from pathlib import Path
 from dataclasses import dataclass
 from typing import Generator, Optional, TYPE_CHECKING
 
-from prefect import task
+
 from django.db import IntegrityError, OperationalError, DatabaseError
 from psycopg2 import InterfaceError
 
@@ -393,11 +393,11 @@ def _cleanup_resources(data_generator) -> None:
         logger.error("关闭生成器时出错: %s", gen_close_error)
 
 
-@task(
-    name="run_and_stream_save_dalfox_vulns",
-    retries=0,
-    log_prints=True,
-)
+
+
+
+
+
 def run_and_stream_save_dalfox_vulns_task(
     cmd: str,
     tool_name: str,

@@ -8,18 +8,18 @@
 
 import logging
 from pathlib import Path
-from prefect import task
+
 
 from apps.scan.providers import TargetProvider
 
 logger = logging.getLogger(__name__)
 
 
-@task(
-    name='export_sites_for_url_fetch',
-    retries=1,
-    log_prints=True
-)
+
+
+
+
+
 def export_sites_task(
     output_file: str,
     provider: TargetProvider,

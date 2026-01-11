@@ -10,17 +10,17 @@
 
 import logging
 from pathlib import Path
-from prefect import task
+
 from apps.scan.utils import execute_and_wait
 
 logger = logging.getLogger(__name__)
 
 
-@task(
-    name='run_url_fetcher',
-    retries=0,  # 不重试，工具本身会处理
-    log_prints=True
-)
+
+
+
+
+
 def run_url_fetcher_task(
     tool_name: str,
     command: str,

@@ -1,17 +1,13 @@
-from apps.common.prefect_django_setup import setup_django_for_prefect
+"""
+基于 Endpoint 的漏洞扫描 Flow
+"""
 
 import logging
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
-from pathlib import Path
 from typing import Dict
 
-from prefect import flow
-
-from apps.scan.handlers.scan_flow_handlers import (
-    on_scan_flow_running,
-    on_scan_flow_completed,
-    on_scan_flow_failed,
-)
+from apps.scan.decorators import scan_flow
 from apps.scan.utils import build_scan_command, ensure_nuclei_templates_local, user_log
 from apps.scan.tasks.vuln_scan import (
     export_endpoints_task,
@@ -25,13 +21,7 @@ from .utils import calculate_timeout_by_line_count
 logger = logging.getLogger(__name__)
 
 
-
-
-
-@flow(
-    name="endpoints_vuln_scan_flow",
-    log_prints=True,
-)
+@scan_flow(name="endpoints_vuln_scan_flow")
 def endpoints_vuln_scan_flow(
     scan_id: int,
     target_id: int,
@@ -82,12 +72,9 @@ def endpoints_vuln_scan_flow(
         logger.info("Endpoint 导出完成，共 %d 条，开始执行漏洞扫描", total_endpoints)
 
         tool_results: Dict[str, dict] = {}
+        tool_params: Dict[str, dict] = {}  # 存储每个工具的参数
 
-        # Step 2: 并行执行每个漏洞扫描工具（目前主要是 Dalfox）
-        # 1）先为每个工具 submit Prefect Task，让 Worker 并行调度
-        # 2）再统一收集各自的结果，组装成 tool_results
-        tool_futures: Dict[str, dict] = {}
-
+        # Step 2: 准备每个漏洞扫描工具的参数
         for tool_name, tool_config in enabled_tools.items():
             # Nuclei 需要先确保本地模板存在（支持多个模板仓库）
             template_args = ""
@@ -144,102 +131,105 @@ def endpoints_vuln_scan_flow(
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             log_file = vuln_scan_dir / f"{tool_name}_{timestamp}.log"
 
-            # Dalfox XSS 使用流式任务，一边解析一边保存漏洞结果
+            logger.info("开始执行漏洞扫描工具 %s", tool_name)
+            user_log(scan_id, "vuln_scan", f"Running {tool_name}: {command}")
+
+            # 确定工具类型
             if tool_name == "dalfox_xss":
-                logger.info("开始执行漏洞扫描工具 %s（流式保存漏洞结果，已提交任务）", tool_name)
-                user_log(scan_id, "vuln_scan", f"Running {tool_name}: {command}")
-                future = run_and_stream_save_dalfox_vulns_task.submit(
-                    cmd=command,
-                    tool_name=tool_name,
-                    scan_id=scan_id,
-                    target_id=target_id,
-                    cwd=str(vuln_scan_dir),
-                    shell=True,
-                    batch_size=1,
-                    timeout=timeout,
-                    log_file=str(log_file),
-                )
-
-                tool_futures[tool_name] = {
-                    "future": future,
-                    "command": command,
-                    "timeout": timeout,
-                    "log_file": str(log_file),
-                    "mode": "streaming",
-                }
+                mode = "dalfox"
             elif tool_name == "nuclei":
-                # Nuclei 使用流式任务
-                logger.info("开始执行漏洞扫描工具 %s（流式保存漏洞结果，已提交任务）", tool_name)
-                user_log(scan_id, "vuln_scan", f"Running {tool_name}: {command}")
-                future = run_and_stream_save_nuclei_vulns_task.submit(
-                    cmd=command,
-                    tool_name=tool_name,
-                    scan_id=scan_id,
-                    target_id=target_id,
-                    cwd=str(vuln_scan_dir),
-                    shell=True,
-                    batch_size=1,
-                    timeout=timeout,
-                    log_file=str(log_file),
-                )
-
-                tool_futures[tool_name] = {
-                    "future": future,
-                    "command": command,
-                    "timeout": timeout,
-                    "log_file": str(log_file),
-                    "mode": "streaming",
-                }
+                mode = "nuclei"
             else:
-                # 其他工具仍使用非流式执行逻辑
-                logger.info("开始执行漏洞扫描工具 %s（已提交任务）", tool_name)
-                user_log(scan_id, "vuln_scan", f"Running {tool_name}: {command}")
-                future = run_vuln_tool_task.submit(
-                    tool_name=tool_name,
-                    command=command,
-                    timeout=timeout,
-                    log_file=str(log_file),
-                )
+                mode = "normal"
 
-                tool_futures[tool_name] = {
-                    "future": future,
-                    "command": command,
-                    "timeout": timeout,
-                    "log_file": str(log_file),
-                    "mode": "normal",
-                }
+            tool_params[tool_name] = {
+                "command": command,
+                "timeout": timeout,
+                "log_file": str(log_file),
+                "mode": mode,
+            }
 
-        # 统一收集所有工具的执行结果
-        for tool_name, meta in tool_futures.items():
-            future = meta["future"]
-            try:
-                result = future.result()
+        # Step 3: 使用 ThreadPoolExecutor 并行执行
+        if tool_params:
+            with ThreadPoolExecutor(max_workers=len(tool_params)) as executor:
+                futures = {}
+                for tool_name, params in tool_params.items():
+                    if params["mode"] == "dalfox":
+                        future = executor.submit(
+                            run_and_stream_save_dalfox_vulns_task,
+                            cmd=params["command"],
+                            tool_name=tool_name,
+                            scan_id=scan_id,
+                            target_id=target_id,
+                            cwd=str(vuln_scan_dir),
+                            shell=True,
+                            batch_size=1,
+                            timeout=params["timeout"],
+                            log_file=params["log_file"],
+                        )
+                    elif params["mode"] == "nuclei":
+                        future = executor.submit(
+                            run_and_stream_save_nuclei_vulns_task,
+                            cmd=params["command"],
+                            tool_name=tool_name,
+                            scan_id=scan_id,
+                            target_id=target_id,
+                            cwd=str(vuln_scan_dir),
+                            shell=True,
+                            batch_size=1,
+                            timeout=params["timeout"],
+                            log_file=params["log_file"],
+                        )
+                    else:
+                        future = executor.submit(
+                            run_vuln_tool_task,
+                            tool_name=tool_name,
+                            command=params["command"],
+                            timeout=params["timeout"],
+                            log_file=params["log_file"],
+                        )
+                    futures[tool_name] = future
 
-                if meta["mode"] == "streaming":
-                    created_vulns = result.get("created_vulns", 0)
-                    tool_results[tool_name] = {
-                        "command": meta["command"],
-                        "timeout": meta["timeout"],
-                        "processed_records": result.get("processed_records"),
-                        "created_vulns": created_vulns,
-                        "command_log_file": meta["log_file"],
-                    }
-                    logger.info("✓ 工具 %s 执行完成 - 漏洞: %d", tool_name, created_vulns)
-                    user_log(scan_id, "vuln_scan", f"{tool_name} completed: found {created_vulns} vulnerabilities")
-                else:
-                    tool_results[tool_name] = {
-                        "command": meta["command"],
-                        "timeout": meta["timeout"],
-                        "duration": result.get("duration"),
-                        "returncode": result.get("returncode"),
-                        "command_log_file": result.get("command_log_file"),
-                    }
-                    logger.info("✓ 工具 %s 执行完成 - returncode=%s", tool_name, result.get("returncode"))
-                    user_log(scan_id, "vuln_scan", f"{tool_name} completed")
-            except Exception as e:
-                reason = str(e)
-                logger.error("工具 %s 执行失败: %s", tool_name, e, exc_info=True)
-                user_log(scan_id, "vuln_scan", f"{tool_name} failed: {reason}", "error")
+                # 收集结果
+                for tool_name, future in futures.items():
+                    params = tool_params[tool_name]
+                    try:
+                        result = future.result()
+
+                        if params["mode"] in ("dalfox", "nuclei"):
+                            created_vulns = result.get("created_vulns", 0)
+                            tool_results[tool_name] = {
+                                "command": params["command"],
+                                "timeout": params["timeout"],
+                                "processed_records": result.get("processed_records"),
+                                "created_vulns": created_vulns,
+                                "command_log_file": params["log_file"],
+                            }
+                            logger.info(
+                                "✓ 工具 %s 执行完成 - 漏洞: %d",
+                                tool_name, created_vulns
+                            )
+                            user_log(
+                                scan_id, "vuln_scan",
+                                f"{tool_name} completed: found {created_vulns} vulnerabilities"
+                            )
+                        else:
+                            tool_results[tool_name] = {
+                                "command": params["command"],
+                                "timeout": params["timeout"],
+                                "duration": result.get("duration"),
+                                "returncode": result.get("returncode"),
+                                "command_log_file": result.get("command_log_file"),
+                            }
+                            logger.info(
+                                "✓ 工具 %s 执行完成 - returncode=%s",
+                                tool_name, result.get("returncode")
+                            )
+                            user_log(scan_id, "vuln_scan", f"{tool_name} completed")
+                    except Exception as e:
+                        reason = str(e)
+                        logger.error("工具 %s 执行失败: %s", tool_name, e, exc_info=True)
+                        user_log(scan_id, "vuln_scan", f"{tool_name} failed: {reason}", "error")
 
         return {
             "success": True,

@@ -10,18 +10,18 @@
 import logging
 from typing import Dict
 
-from prefect import task
+
 
 from apps.scan.utils import execute_and_wait
 
 logger = logging.getLogger(__name__)
 
 
-@task(
-    name="run_vuln_tool",
-    retries=0,
-    log_prints=True,
-)
+
+
+
+
+
 def run_vuln_tool_task(
     tool_name: str,
     command: str,

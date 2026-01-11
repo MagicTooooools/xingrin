@@ -11,17 +11,14 @@
 - IP 和 CIDR 类型会自动跳过（被动收集工具不支持）
 """
 
-# Django 环境初始化
-from apps.common.prefect_django_setup import setup_django_for_prefect
-
 import logging
 import uuid
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 from pathlib import Path
 from typing import Dict
 
-from prefect import flow
-
+from apps.scan.decorators import scan_flow
 from apps.common.validators import validate_domain
 from apps.scan.tasks.url_fetch import run_url_fetcher_task
 from apps.scan.utils import build_scan_command
@@ -30,7 +27,7 @@ from apps.scan.utils import build_scan_command
 logger = logging.getLogger(__name__)
 
 
-@flow(name="domain_name_url_fetch_flow", log_prints=True)
+@scan_flow(name="domain_name_url_fetch_flow")
 def domain_name_url_fetch_flow(
     scan_id: int,
     target_id: int,
@@ -77,7 +74,7 @@ def domain_name_url_fetch_flow(
 
         if target and target.type != Target.TargetType.DOMAIN:
             logger.info(
-                "跳过 domain_name URL 获取: Target 类型为 %s (ID=%d, Name=%s)，waymore 等工具仅适用于域名类型",
+                "跳过 domain_name URL 获取: Target 类型为 %s (ID=%d, Name=%s)",
                 target.type, target_id, target_name
             )
             return {
@@ -96,10 +93,10 @@ def domain_name_url_fetch_flow(
             ", ".join(domain_name_tools.keys()) if domain_name_tools else "无",
         )
 
-        futures: dict[str, object] = {}
+        tool_params = {}  # 存储每个工具的参数
         failed_tools: list[dict] = []
 
-        # 提交所有基于域名的 URL 获取任务
+        # 准备所有工具的参数
         for tool_name, tool_config in domain_name_tools.items():
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             short_uuid = uuid.uuid4().hex[:4]
@@ -153,46 +150,62 @@ def domain_name_url_fetch_flow(
             # 记录工具开始执行日志
             user_log(scan_id, "url_fetch", f"Running {tool_name}: {command}")
 
-            future = run_url_fetcher_task.submit(
-                tool_name=tool_name,
-                command=command,
-                timeout=timeout,
-                output_file=output_file,
-            )
-            futures[tool_name] = future
+            tool_params[tool_name] = {
+                'command': command,
+                'timeout': timeout,
+                'output_file': output_file
+            }
 
         result_files: list[str] = []
         successful_tools: list[str] = []
 
-        # 收集执行结果
-        for tool_name, future in futures.items():
-            try:
-                result = future.result()
-                if result and result.get("success"):
-                    result_files.append(result["output_file"])
-                    successful_tools.append(tool_name)
-                    url_count = result.get("url_count", 0)
-                    logger.info(
-                        "✓ 工具 %s 执行成功 - 发现 URL: %d",
-                        tool_name,
-                        url_count,
+        # 使用 ThreadPoolExecutor 并行执行
+        if tool_params:
+            with ThreadPoolExecutor(max_workers=len(tool_params)) as executor:
+                futures = {}
+                for tool_name, params in tool_params.items():
+                    future = executor.submit(
+                        run_url_fetcher_task,
+                        tool_name=tool_name,
+                        command=params['command'],
+                        timeout=params['timeout'],
+                        output_file=params['output_file'],
                     )
-                    user_log(scan_id, "url_fetch", f"{tool_name} completed: found {url_count} urls")
-                else:
-                    reason = "未生成结果或无有效 URL"
-                    failed_tools.append(
-                        {
-                            "tool": tool_name,
-                            "reason": reason,
-                        }
-                    )
-                    logger.warning("⚠️ 工具 %s 未生成有效结果", tool_name)
-                    user_log(scan_id, "url_fetch", f"{tool_name} failed: {reason}", "error")
-            except Exception as e:
-                reason = str(e)
-                failed_tools.append({"tool": tool_name, "reason": reason})
-                logger.warning("⚠️ 工具 %s 执行失败: %s", tool_name, e)
-                user_log(scan_id, "url_fetch", f"{tool_name} failed: {reason}", "error")
+                    futures[tool_name] = future
+
+                # 收集执行结果
+                for tool_name, future in futures.items():
+                    try:
+                        result = future.result()
+                        if result and result.get("success"):
+                            result_files.append(result["output_file"])
+                            successful_tools.append(tool_name)
+                            url_count = result.get("url_count", 0)
+                            logger.info(
+                                "✓ 工具 %s 执行成功 - 发现 URL: %d",
+                                tool_name,
+                                url_count,
+                            )
+                            user_log(
+                                scan_id, "url_fetch",
+                                f"{tool_name} completed: found {url_count} urls"
+                            )
+                        else:
+                            reason = "未生成结果或无有效 URL"
+                            failed_tools.append({"tool": tool_name, "reason": reason})
+                            logger.warning("⚠️ 工具 %s 未生成有效结果", tool_name)
+                            user_log(
+                                scan_id, "url_fetch",
+                                f"{tool_name} failed: {reason}", "error"
+                            )
+                    except Exception as e:
+                        reason = str(e)
+                        failed_tools.append({"tool": tool_name, "reason": reason})
+                        logger.warning("⚠️ 工具 %s 执行失败: %s", tool_name, e)
+                        user_log(
+                            scan_id, "url_fetch",
+                            f"{tool_name} failed: {reason}", "error"
+                        )
 
         logger.info(
             "基于 domain_name 的 URL 获取完成 - 成功工具: %s, 失败工具: %s",

@@ -22,7 +22,7 @@ import json
 import subprocess
 import time
 from pathlib import Path
-from prefect import task
+
 from typing import Generator, Optional, Dict, Any
 from django.db import IntegrityError, OperationalError, DatabaseError
 from psycopg2 import InterfaceError
@@ -582,7 +582,7 @@ def _process_records_in_batches(
     }
 
 
-@task(name="run_and_stream_save_urls", retries=0)
+
 def run_and_stream_save_urls_task(
     cmd: str,
     tool_name: str,

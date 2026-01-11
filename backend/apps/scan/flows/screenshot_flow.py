@@ -9,8 +9,7 @@
 
 import logging
 
-from prefect import flow
-
+from apps.scan.decorators import scan_flow
 from apps.scan.handlers.scan_flow_handlers import (
     on_scan_flow_completed,
     on_scan_flow_failed,
@@ -34,9 +33,9 @@ def _parse_screenshot_config(enabled_tools: dict) -> dict:
 def _collect_urls_from_provider(provider: TargetProvider) -> tuple[list[str], str]:
     """
     从 Provider 收集网站 URL（带回退逻辑）
-    
+
     优先级：WebSite → HostPortMapping → Default URL
-    
+
     Returns:
         tuple: (urls, source)
             - urls: URL 列表
@@ -75,9 +74,8 @@ def _build_empty_result(scan_id: int, target_name: str) -> dict:
     }
 
 
-@flow(
+@scan_flow(
     name="screenshot",
-    log_prints=True,
     on_running=[on_scan_flow_running],
     on_completion=[on_scan_flow_completed],
     on_failure=[on_scan_flow_failed],

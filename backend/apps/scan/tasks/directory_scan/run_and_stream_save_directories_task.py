@@ -24,7 +24,7 @@ import json
 import subprocess
 import time
 from pathlib import Path
-from prefect import task
+
 from typing import Generator, Optional, TYPE_CHECKING
 from django.db import IntegrityError, OperationalError, DatabaseError
 from psycopg2 import InterfaceError
@@ -305,11 +305,11 @@ def _save_batch(
     return len(snapshot_items)
 
 
-@task(
-    name='run_and_stream_save_directories',
-    retries=0,
-    log_prints=True
-)
+
+
+
+
+
 def run_and_stream_save_directories_task(
     cmd: str,
     tool_name: str,

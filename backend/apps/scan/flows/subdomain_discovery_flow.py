@@ -26,10 +26,12 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
-from prefect import flow
+from concurrent.futures import ThreadPoolExecutor
+
+from apps.scan.decorators import scan_flow
 
 # Django 环境初始化（导入即生效，pylint: disable=unused-import）
-from apps.common.prefect_django_setup import setup_django_for_prefect  # noqa: F401
+from apps.common.django_setup import setup_django  # noqa: F401
 from apps.common.normalizer import normalize_domain
 from apps.common.validators import validate_domain
 from apps.engine.services.wordlist_service import WordlistService
@@ -178,7 +180,9 @@ def _run_scans_parallel(
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
     futures = {}
     failed_tools = []
+    tool_params = {}  # 存储每个工具的参数
 
+    # 准备所有工具的参数
     for tool_name, tool_config in enabled_tools.items():
         short_uuid = uuid.uuid4().hex[:4]
         output_file = str(result_dir / f"{tool_name}_{timestamp}_{short_uuid}.txt")
@@ -207,40 +211,51 @@ def _run_scans_parallel(
         logger.debug("提交任务 - 工具: %s, 超时: %ds, 输出: %s", tool_name, timeout, output_file)
         user_log(scan_id, "subdomain_discovery", f"Running {tool_name}: {command}")
 
-        future = run_subdomain_discovery_task.submit(
-            tool=tool_name,
-            command=command,
-            timeout=timeout,
-            output_file=output_file
-        )
-        futures[tool_name] = future
+        tool_params[tool_name] = {
+            'command': command,
+            'timeout': timeout,
+            'output_file': output_file
+        }
 
-    if not futures:
+    if not tool_params:
         logger.warning("所有扫描工具均无法启动 - 目标: %s", domain_name)
         return [], [{'tool': 'all', 'reason': '所有工具均无法启动'}], []
 
-    result_files = []
-    for tool_name, future in futures.items():
-        try:
-            result = future.result()
-            if result:
-                result_files.append(result)
-                logger.info("✓ 扫描工具 %s 执行成功: %s", tool_name, result)
-                user_log(scan_id, "subdomain_discovery", f"{tool_name} completed")
-            else:
-                failed_tools.append({'tool': tool_name, 'reason': '未生成结果文件'})
-                logger.warning("⚠️ 扫描工具 %s 未生成结果文件", tool_name)
-                user_log(scan_id, "subdomain_discovery", f"{tool_name} failed: no output", "error")
-        except (subprocess.TimeoutExpired, OSError) as e:
-            failed_tools.append({'tool': tool_name, 'reason': str(e)})
-            logger.warning("⚠️ 扫描工具 %s 执行失败: %s", tool_name, e)
-            user_log(scan_id, "subdomain_discovery", f"{tool_name} failed: {e}", "error")
+    # 使用 ThreadPoolExecutor 并行执行
+    with ThreadPoolExecutor(max_workers=len(tool_params)) as executor:
+        for tool_name, params in tool_params.items():
+            future = executor.submit(
+                run_subdomain_discovery_task,
+                tool=tool_name,
+                command=params['command'],
+                timeout=params['timeout'],
+                output_file=params['output_file']
+            )
+            futures[tool_name] = future
 
-    successful_tools = [name for name in futures if name not in [f['tool'] for f in failed_tools]]
+        # 收集结果
+        result_files = []
+        for tool_name, future in futures.items():
+            try:
+                result = future.result()
+                if result:
+                    result_files.append(result)
+                    logger.info("✓ 扫描工具 %s 执行成功: %s", tool_name, result)
+                    user_log(scan_id, "subdomain_discovery", f"{tool_name} completed")
+                else:
+                    failed_tools.append({'tool': tool_name, 'reason': '未生成结果文件'})
+                    logger.warning("⚠️ 扫描工具 %s 未生成结果文件", tool_name)
+                    user_log(scan_id, "subdomain_discovery", f"{tool_name} failed: no output", "error")
+            except (subprocess.TimeoutExpired, OSError) as e:
+                failed_tools.append({'tool': tool_name, 'reason': str(e)})
+                logger.warning("⚠️ 扫描工具 %s 执行失败: %s", tool_name, e)
+                user_log(scan_id, "subdomain_discovery", f"{tool_name} failed: {e}", "error")
+
+    successful_tools = [name for name in tool_params if name not in [f['tool'] for f in failed_tools]]
 
     logger.info(
         "✓ 扫描工具并行执行完成 - 成功: %d/%d",
-        len(result_files), len(futures)
+        len(result_files), len(tool_params)
     )
 
     return result_files, failed_tools, successful_tools
@@ -531,9 +546,8 @@ def _empty_result(scan_id: int, target: str, scan_workspace_dir: str) -> dict:
     }
 
 
-@flow(
+@scan_flow(
     name="subdomain_discovery",
-    log_prints=True,
     on_running=[on_scan_flow_running],
     on_completion=[on_scan_flow_completed],
     on_failure=[on_scan_flow_failed],

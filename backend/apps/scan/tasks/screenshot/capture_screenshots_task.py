@@ -6,7 +6,7 @@
 import asyncio
 import logging
 import time
-from prefect import task
+
 
 logger = logging.getLogger(__name__)
 
@@ -140,7 +140,7 @@ async def _capture_and_save_screenshots(
     }
 
 
-@task(name='capture_screenshots', retries=0)
+
 def capture_screenshots_task(
     urls: list[str],
     scan_id: int,

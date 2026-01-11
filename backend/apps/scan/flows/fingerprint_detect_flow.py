@@ -16,8 +16,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
-from prefect import flow
-
+from apps.scan.decorators import scan_flow
 from apps.scan.handlers.scan_flow_handlers import (
     on_scan_flow_completed,
     on_scan_flow_failed,
@@ -193,9 +192,8 @@ def _aggregate_results(tool_stats: dict) -> dict:
     }
 
 
-@flow(
+@scan_flow(
     name="fingerprint_detect",
-    log_prints=True,
     on_running=[on_scan_flow_running],
     on_completion=[on_scan_flow_completed],
     on_failure=[on_scan_flow_failed],

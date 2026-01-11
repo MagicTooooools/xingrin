@@ -17,10 +17,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
-from prefect import flow
+from apps.scan.decorators import scan_flow
 
-# Django 环境初始化（导入即生效）
-from apps.common.prefect_django_setup import setup_django_for_prefect  # noqa: F401
 from apps.scan.handlers.scan_flow_handlers import (
     on_scan_flow_completed,
     on_scan_flow_failed,
@@ -314,9 +312,8 @@ def _validate_flow_params(
         raise ValueError("scan_workspace_dir 不能为空")
 
 
-@flow(
+@scan_flow(
     name="site_scan",
-    log_prints=True,
     on_running=[on_scan_flow_running],
     on_completion=[on_scan_flow_completed],
     on_failure=[on_scan_flow_failed],

@@ -7,7 +7,7 @@
 
 import logging
 from pathlib import Path
-from prefect import task
+
 from typing import List, Optional
 from urllib.parse import urlparse
 from dataclasses import dataclass
@@ -70,11 +70,11 @@ def _parse_url(url: str) -> Optional[ParsedURL]:
         return None
 
 
-@task(
-    name='save_urls',
-    retries=1,
-    log_prints=True
-)
+
+
+
+
+
 def save_urls_task(
     urls_file: str,
     scan_id: int,

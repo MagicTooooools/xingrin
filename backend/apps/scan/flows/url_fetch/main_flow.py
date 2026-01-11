@@ -14,8 +14,7 @@ import logging
 from datetime import datetime
 from pathlib import Path
 
-from prefect import flow
-
+from apps.scan.decorators import scan_flow
 from apps.scan.handlers.scan_flow_handlers import (
     on_scan_flow_completed,
     on_scan_flow_failed,
@@ -231,9 +230,8 @@ def _save_urls_to_database(merged_file: str, scan_id: int, target_id: int) -> in
     return saved_count
 
 
-@flow(
+@scan_flow(
     name="url_fetch",
-    log_prints=True,
     on_running=[on_scan_flow_running],
     on_completion=[on_scan_flow_completed],
     on_failure=[on_scan_flow_failed],

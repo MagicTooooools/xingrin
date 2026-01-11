@@ -10,22 +10,26 @@
 """
 
 import logging
-from prefect import Flow
-from prefect.client.schemas import FlowRun, State
 
+from apps.scan.decorators import FlowContext
 from apps.scan.utils.performance import FlowPerformanceTracker
 from apps.scan.utils import user_log
 
 logger = logging.getLogger(__name__)
 
-# 存储每个 flow_run 的性能追踪器
+# 存储每个 flow 的性能追踪器（使用 scan_id + stage_name 作为 key）
 _flow_trackers: dict[str, FlowPerformanceTracker] = {}
+
+
+def _get_tracker_key(scan_id: int, stage_name: str) -> str:
+    """生成追踪器的唯一 key"""
+    return f"{scan_id}_{stage_name}"
 
 
 def _get_stage_from_flow_name(flow_name: str) -> str | None:
     """
     从 Flow name 获取对应的 stage
-    
+
     Flow name 直接作为 stage（与 engine_config 的 key 一致）
     排除主 Flow（initiate_scan）
     """
@@ -35,80 +39,81 @@ def _get_stage_from_flow_name(flow_name: str) -> str | None:
     return flow_name
 
 
-def on_scan_flow_running(flow: Flow, flow_run: FlowRun, state: State) -> None:
+def on_scan_flow_running(context: FlowContext) -> None:
     """
     扫描流程开始运行时的回调
-    
+
     职责：
     - 更新阶段进度为 running
     - 发送扫描开始通知
     - 启动性能追踪
-    
+
     Args:
-        flow: Prefect Flow 对象
-        flow_run: Flow 运行实例
-        state: Flow 当前状态
+        context: Flow 执行上下文
     """
-    logger.info("🚀 扫描流程开始运行 - Flow: %s, Run ID: %s", flow.name, flow_run.id)
-    
-    # 提取流程参数
-    flow_params = flow_run.parameters or {}
-    scan_id = flow_params.get('scan_id')
-    target_name = flow_params.get('target_name', 'unknown')
-    target_id = flow_params.get('target_id')
-    
+    logger.info(
+        "🚀 扫描流程开始运行 - Flow: %s, Scan ID: %s",
+        context.flow_name, context.scan_id
+    )
+
+    scan_id = context.scan_id
+    target_name = context.target_name or 'unknown'
+    target_id = context.target_id
+
     # 启动性能追踪
     if scan_id:
-        tracker = FlowPerformanceTracker(flow.name, scan_id)
+        tracker_key = _get_tracker_key(scan_id, context.stage_name)
+        tracker = FlowPerformanceTracker(context.flow_name, scan_id)
         tracker.start(target_id=target_id, target_name=target_name)
-        _flow_trackers[str(flow_run.id)] = tracker
-    
+        _flow_trackers[tracker_key] = tracker
+
     # 更新阶段进度
-    stage = _get_stage_from_flow_name(flow.name)
+    stage = _get_stage_from_flow_name(context.flow_name)
     if scan_id and stage:
         try:
             from apps.scan.services import ScanService
             service = ScanService()
             service.start_stage(scan_id, stage)
-            logger.info(f"✓ 阶段进度已更新为 running - Scan ID: {scan_id}, Stage: {stage}")
+            logger.info(
+                "✓ 阶段进度已更新为 running - Scan ID: %s, Stage: %s",
+                scan_id, stage
+            )
         except Exception as e:
-            logger.error(f"更新阶段进度失败 - Scan ID: {scan_id}, Stage: {stage}: {e}")
+            logger.error(
+                "更新阶段进度失败 - Scan ID: %s, Stage: %s: %s",
+                scan_id, stage, e
+            )
 
 
-def on_scan_flow_completed(flow: Flow, flow_run: FlowRun, state: State) -> None:
+def on_scan_flow_completed(context: FlowContext) -> None:
     """
     扫描流程完成时的回调
-    
+
     职责：
     - 更新阶段进度为 completed
     - 发送扫描完成通知（可选）
     - 记录性能指标
-    
+
     Args:
-        flow: Prefect Flow 对象
-        flow_run: Flow 运行实例
-        state: Flow 当前状态
+        context: Flow 执行上下文
     """
-    logger.info("✅ 扫描流程完成 - Flow: %s, Run ID: %s", flow.name, flow_run.id)
-    
-    # 提取流程参数
-    flow_params = flow_run.parameters or {}
-    scan_id = flow_params.get('scan_id')
-    
-    # 获取 flow result
-    result = None
-    try:
-        result = state.result() if state.result else None
-    except Exception:
-        pass
-    
+    logger.info(
+        "✅ 扫描流程完成 - Flow: %s, Scan ID: %s",
+        context.flow_name, context.scan_id
+    )
+
+    scan_id = context.scan_id
+    result = context.result
+
     # 记录性能指标
-    tracker = _flow_trackers.pop(str(flow_run.id), None)
-    if tracker:
-        tracker.finish(success=True)
-    
+    if scan_id:
+        tracker_key = _get_tracker_key(scan_id, context.stage_name)
+        tracker = _flow_trackers.pop(tracker_key, None)
+        if tracker:
+            tracker.finish(success=True)
+
     # 更新阶段进度
-    stage = _get_stage_from_flow_name(flow.name)
+    stage = _get_stage_from_flow_name(context.flow_name)
     if scan_id and stage:
         try:
             from apps.scan.services import ScanService
@@ -118,72 +123,88 @@ def on_scan_flow_completed(flow: Flow, flow_run: FlowRun, state: State) -> None:
             if isinstance(result, dict):
                 detail = result.get('detail')
             service.complete_stage(scan_id, stage, detail)
-            logger.info(f"✓ 阶段进度已更新为 completed - Scan ID: {scan_id}, Stage: {stage}")
+            logger.info(
+                "✓ 阶段进度已更新为 completed - Scan ID: %s, Stage: %s",
+                scan_id, stage
+            )
             # 每个阶段完成后刷新缓存统计，便于前端实时看到增量
             try:
                 service.update_cached_stats(scan_id)
                 logger.info("✓ 阶段完成后已刷新缓存统计 - Scan ID: %s", scan_id)
             except Exception as e:
-                logger.error("阶段完成后刷新缓存统计失败 - Scan ID: %s, 错误: %s", scan_id, e)
+                logger.error(
+                    "阶段完成后刷新缓存统计失败 - Scan ID: %s, 错误: %s",
+                    scan_id, e
+                )
         except Exception as e:
-            logger.error(f"更新阶段进度失败 - Scan ID: {scan_id}, Stage: {stage}: {e}")
+            logger.error(
+                "更新阶段进度失败 - Scan ID: %s, Stage: %s: %s",
+                scan_id, stage, e
+            )
 
 
-def on_scan_flow_failed(flow: Flow, flow_run: FlowRun, state: State) -> None:
+def on_scan_flow_failed(context: FlowContext) -> None:
     """
     扫描流程失败时的回调
-    
+
     职责：
     - 更新阶段进度为 failed
     - 发送扫描失败通知
     - 记录性能指标（含错误信息）
     - 写入 ScanLog 供前端显示
-    
+
     Args:
-        flow: Prefect Flow 对象
-        flow_run: Flow 运行实例
-        state: Flow 当前状态
+        context: Flow 执行上下文
     """
-    logger.info("❌ 扫描流程失败 - Flow: %s, Run ID: %s", flow.name, flow_run.id)
-    
-    # 提取流程参数
-    flow_params = flow_run.parameters or {}
-    scan_id = flow_params.get('scan_id')
-    target_name = flow_params.get('target_name', 'unknown')
-    
-    # 提取错误信息
-    error_message = str(state.message) if state.message else "未知错误"
-    
+    logger.info(
+        "❌ 扫描流程失败 - Flow: %s, Scan ID: %s",
+        context.flow_name, context.scan_id
+    )
+
+    scan_id = context.scan_id
+    target_name = context.target_name or 'unknown'
+    error_message = context.error_message or "未知错误"
+
     # 写入 ScanLog 供前端显示
-    stage = _get_stage_from_flow_name(flow.name)
+    stage = _get_stage_from_flow_name(context.flow_name)
     if scan_id and stage:
         user_log(scan_id, stage, f"Failed: {error_message}", "error")
-    
+
     # 记录性能指标（失败情况）
-    tracker = _flow_trackers.pop(str(flow_run.id), None)
-    if tracker:
-        tracker.finish(success=False, error_message=error_message)
-    
+    if scan_id:
+        tracker_key = _get_tracker_key(scan_id, context.stage_name)
+        tracker = _flow_trackers.pop(tracker_key, None)
+        if tracker:
+            tracker.finish(success=False, error_message=error_message)
+
     # 更新阶段进度
-    stage = _get_stage_from_flow_name(flow.name)
     if scan_id and stage:
         try:
             from apps.scan.services import ScanService
             service = ScanService()
             service.fail_stage(scan_id, stage, error_message)
-            logger.info(f"✓ 阶段进度已更新为 failed - Scan ID: {scan_id}, Stage: {stage}")
+            logger.info(
+                "✓ 阶段进度已更新为 failed - Scan ID: %s, Stage: %s",
+                scan_id, stage
+            )
         except Exception as e:
-            logger.error(f"更新阶段进度失败 - Scan ID: {scan_id}, Stage: {stage}: {e}")
-    
+            logger.error(
+                "更新阶段进度失败 - Scan ID: %s, Stage: %s: %s",
+                scan_id, stage, e
+            )
+
     # 发送通知
     try:
         from apps.scan.notifications import create_notification, NotificationLevel
-        message = f"任务：{flow.name}\n状态：执行失败\n错误：{error_message}"
+        message = f"任务：{context.flow_name}\n状态：执行失败\n错误：{error_message}"
         create_notification(
             title=target_name,
             message=message,
             level=NotificationLevel.HIGH
         )
-        logger.error(f"✓ 扫描失败通知已发送 - Target: {target_name}, Flow: {flow.name}, Error: {error_message}")
+        logger.error(
+            "✓ 扫描失败通知已发送 - Target: %s, Flow: %s, Error: %s",
+            target_name, context.flow_name, error_message
+        )
     except Exception as e:
-        logger.error(f"发送扫描失败通知失败 - Flow: {flow.name}: {e}")
+        logger.error("发送扫描失败通知失败 - Flow: %s: %s", context.flow_name, e)

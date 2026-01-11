@@ -9,14 +9,14 @@
 import logging
 from pathlib import Path
 
-from prefect import task
+
 
 from apps.scan.providers import TargetProvider
 
 logger = logging.getLogger(__name__)
 
 
-@task(name="export_site_urls_for_fingerprint")
+
 def export_site_urls_for_fingerprint_task(
     output_file: str,
     provider: TargetProvider,

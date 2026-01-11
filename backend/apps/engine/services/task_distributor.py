@@ -279,17 +279,11 @@ class TaskDistributor:
         
         # 环境变量：SERVER_URL + IS_LOCAL，其他配置容器启动时从配置中心获取
         # IS_LOCAL 用于 Worker 向配置中心声明身份，决定返回的数据库地址
-        # Prefect 本地模式配置：启用 ephemeral server（本地临时服务器）
         is_local_str = "true" if worker.is_local else "false"
         env_vars = [
             f"-e SERVER_URL={shlex.quote(server_url)}",
             f"-e IS_LOCAL={is_local_str}",
             f"-e WORKER_API_KEY={shlex.quote(settings.WORKER_API_KEY)}",  # Worker API 认证密钥
-            "-e PREFECT_HOME=/tmp/.prefect",  # 设置 Prefect 数据目录到可写位置
-            "-e PREFECT_SERVER_EPHEMERAL_ENABLED=true",  # 启用 ephemeral server（本地临时服务器）
-            "-e PREFECT_SERVER_EPHEMERAL_STARTUP_TIMEOUT_SECONDS=120",  # 增加启动超时时间
-            "-e PREFECT_SERVER_DATABASE_CONNECTION_URL=sqlite+aiosqlite:////tmp/.prefect/prefect.db",  # 使用 /tmp 下的 SQLite
-            "-e PREFECT_LOGGING_LEVEL=WARNING",  # 日志级别（减少 DEBUG 噪音）
         ]
         
         # 挂载卷（统一挂载整个 /opt/xingrin 目录）

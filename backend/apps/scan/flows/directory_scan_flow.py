@@ -17,8 +17,9 @@ from datetime import datetime
 from pathlib import Path
 from typing import List, Tuple
 
-from prefect import flow
+from concurrent.futures import ThreadPoolExecutor
 
+from apps.scan.decorators import scan_flow
 from apps.scan.handlers.scan_flow_handlers import (
     on_scan_flow_completed,
     on_scan_flow_failed,
@@ -220,45 +221,47 @@ def _execute_batch(
     directories_found = 0
     failed_sites = []
 
-    # 提交任务
-    futures = []
-    for params in batch_params:
-        future = run_and_stream_save_directories_task.submit(
-            cmd=params['command'],
-            tool_name=tool_name,
-            scan_id=scan_id,
-            target_id=target_id,
-            site_url=params['site_url'],
-            cwd=str(directory_scan_dir),
-            shell=True,
-            batch_size=1000,
-            timeout=params['timeout'],
-            log_file=params['log_file']
-        )
-        futures.append((params['idx'], params['site_url'], future))
-
-    # 等待结果
-    for idx, site_url, future in futures:
-        try:
-            result = future.result()
-            dirs_count = result.get('created_directories', 0)
-            directories_found += dirs_count
-            logger.info(
-                "✓ [%d/%d] 站点扫描完成: %s - 发现 %d 个目录",
-                idx, total_sites, site_url, dirs_count
+    # 使用 ThreadPoolExecutor 并行执行
+    with ThreadPoolExecutor(max_workers=len(batch_params)) as executor:
+        futures = []
+        for params in batch_params:
+            future = executor.submit(
+                run_and_stream_save_directories_task,
+                cmd=params['command'],
+                tool_name=tool_name,
+                scan_id=scan_id,
+                target_id=target_id,
+                site_url=params['site_url'],
+                cwd=str(directory_scan_dir),
+                shell=True,
+                batch_size=1000,
+                timeout=params['timeout'],
+                log_file=params['log_file']
             )
-        except Exception as exc:
-            failed_sites.append(site_url)
-            if 'timeout' in str(exc).lower():
-                logger.warning(
-                    "⚠️ [%d/%d] 站点扫描超时: %s - 错误: %s",
-                    idx, total_sites, site_url, exc
+            futures.append((params['idx'], params['site_url'], future))
+
+        # 等待结果
+        for idx, site_url, future in futures:
+            try:
+                result = future.result()
+                dirs_count = result.get('created_directories', 0)
+                directories_found += dirs_count
+                logger.info(
+                    "✓ [%d/%d] 站点扫描完成: %s - 发现 %d 个目录",
+                    idx, total_sites, site_url, dirs_count
                 )
-            else:
-                logger.error(
-                    "✗ [%d/%d] 站点扫描失败: %s - 错误: %s",
-                    idx, total_sites, site_url, exc
-                )
+            except Exception as exc:
+                failed_sites.append(site_url)
+                if 'timeout' in str(exc).lower():
+                    logger.warning(
+                        "⚠️ [%d/%d] 站点扫描超时: %s - 错误: %s",
+                        idx, total_sites, site_url, exc
+                    )
+                else:
+                    logger.error(
+                        "✗ [%d/%d] 站点扫描失败: %s - 错误: %s",
+                        idx, total_sites, site_url, exc
+                    )
 
     return directories_found, failed_sites
 
@@ -381,9 +384,8 @@ def _run_scans_concurrently(
     return total_directories, processed_sites_count, failed_sites
 
 
-@flow(
+@scan_flow(
     name="directory_scan",
-    log_prints=True,
     on_running=[on_scan_flow_running],
     on_completion=[on_scan_flow_completed],
     on_failure=[on_scan_flow_failed],

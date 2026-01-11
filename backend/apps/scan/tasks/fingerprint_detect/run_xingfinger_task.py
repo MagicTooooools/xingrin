@@ -11,7 +11,7 @@ from typing import Optional, Generator
 from urllib.parse import urlparse
 
 from django.db import connection
-from prefect import task
+
 
 from apps.scan.utils import execute_stream
 from apps.asset.dtos.snapshot import WebsiteSnapshotDTO
@@ -189,7 +189,7 @@ def _parse_xingfinger_stream_output(
     logger.info("流式解析完成 - 总行数: %d, 有效记录: %d", total_lines, valid_records)
 
 
-@task(name="run_xingfinger_and_stream_update_tech")
+
 def run_xingfinger_and_stream_update_tech_task(
     cmd: str,
     tool_name: str,

@@ -5,6 +5,7 @@ URL Fetch 共享工具函数
 import logging
 import subprocess
 import uuid
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 from pathlib import Path
 
@@ -21,13 +22,13 @@ def calculate_timeout_by_line_count(
 ) -> int:
     """
     根据文件行数自动计算超时时间
-    
+
     Args:
         tool_config: 工具配置（保留参数，未来可能用于更复杂的计算）
         file_path: 输入文件路径
         base_per_time: 每行的基础时间（秒）
         min_timeout: 最小超时时间（秒），默认60秒
-        
+
     Returns:
         int: 计算出的超时时间（秒），不低于 min_timeout
     """
@@ -64,7 +65,7 @@ def prepare_tool_execution(
 ) -> dict:
     """
     准备单个工具的执行参数
-    
+
     Args:
         tool_name: 工具名称
         tool_config: 工具配置
@@ -72,7 +73,7 @@ def prepare_tool_execution(
         input_type: 输入类型（domains_file 或 sites_file）
         output_dir: 输出目录
         scan_type: 扫描类型
-        
+
     Returns:
         dict: 执行参数，包含 command, input_file, output_file, timeout
               或包含 error 键表示失败
@@ -110,7 +111,7 @@ def prepare_tool_execution(
     # 4. 计算超时时间（支持 auto 和显式整数）
     raw_timeout = tool_config.get("timeout", 3600)
     timeout = 3600
-    
+
     if isinstance(raw_timeout, str) and raw_timeout == "auto":
         try:
             # katana / waymore 每个站点需要更长时间
@@ -157,24 +158,24 @@ def run_tools_parallel(
 ) -> tuple[list, list, list]:
     """
     并行执行工具列表
-    
+
     Args:
         tools: 工具配置字典 {tool_name: tool_config}
         input_file: 输入文件路径
         input_type: 输入类型
         output_dir: 输出目录
         scan_id: 扫描任务 ID（用于记录日志）
-        
+
     Returns:
         tuple: (result_files, failed_tools, successful_tool_names)
     """
     from apps.scan.tasks.url_fetch import run_url_fetcher_task
     from apps.scan.utils import user_log
 
-    futures: dict[str, object] = {}
+    tool_params = {}  # 存储每个工具的参数
     failed_tools: list[dict] = []
 
-    # 提交所有工具的并行任务
+    # 准备所有工具的参数
     for tool_name, tool_config in tools.items():
         exec_params = prepare_tool_execution(
             tool_name=tool_name,
@@ -198,44 +199,54 @@ def run_tools_parallel(
         # 记录工具开始执行日志
         user_log(scan_id, "url_fetch", f"Running {tool_name}: {exec_params['command']}")
 
-        # 提交并行任务
-        future = run_url_fetcher_task.submit(
-            tool_name=tool_name,
-            command=exec_params["command"],
-            timeout=exec_params["timeout"],
-            output_file=exec_params["output_file"],
-        )
-        futures[tool_name] = future
+        tool_params[tool_name] = exec_params
 
-    # 收集执行结果
+    # 使用 ThreadPoolExecutor 并行执行
     result_files = []
-    for tool_name, future in futures.items():
-        try:
-            result = future.result()
-            if result and result['success']:
-                result_files.append(result['output_file'])
-                url_count = result['url_count']
-                logger.info(
-                    "✓ 工具 %s 执行成功 - 发现 URL: %d",
-                    tool_name, url_count
+    if tool_params:
+        with ThreadPoolExecutor(max_workers=len(tool_params)) as executor:
+            futures = {}
+            for tool_name, params in tool_params.items():
+                future = executor.submit(
+                    run_url_fetcher_task,
+                    tool_name=tool_name,
+                    command=params["command"],
+                    timeout=params["timeout"],
+                    output_file=params["output_file"],
                 )
-                user_log(scan_id, "url_fetch", f"{tool_name} completed: found {url_count} urls")
-            else:
-                reason = '未生成结果或无有效URL'
-                failed_tools.append({
-                    'tool': tool_name,
-                    'reason': reason
-                })
-                logger.warning("⚠️ 工具 %s 未生成有效结果", tool_name)
-                user_log(scan_id, "url_fetch", f"{tool_name} failed: {reason}", "error")
-        except Exception as e:
-            reason = str(e)
-            failed_tools.append({
-                'tool': tool_name,
-                'reason': reason
-            })
-            logger.warning("⚠️ 工具 %s 执行失败: %s", tool_name, e)
-            user_log(scan_id, "url_fetch", f"{tool_name} failed: {reason}", "error")
+                futures[tool_name] = future
+
+            # 收集执行结果
+            for tool_name, future in futures.items():
+                try:
+                    result = future.result()
+                    if result and result['success']:
+                        result_files.append(result['output_file'])
+                        url_count = result['url_count']
+                        logger.info(
+                            "✓ 工具 %s 执行成功 - 发现 URL: %d",
+                            tool_name, url_count
+                        )
+                        user_log(
+                            scan_id, "url_fetch",
+                            f"{tool_name} completed: found {url_count} urls"
+                        )
+                    else:
+                        reason = '未生成结果或无有效URL'
+                        failed_tools.append({'tool': tool_name, 'reason': reason})
+                        logger.warning("⚠️ 工具 %s 未生成有效结果", tool_name)
+                        user_log(
+                            scan_id, "url_fetch",
+                            f"{tool_name} failed: {reason}", "error"
+                        )
+                except Exception as e:
+                    reason = str(e)
+                    failed_tools.append({'tool': tool_name, 'reason': reason})
+                    logger.warning("⚠️ 工具 %s 执行失败: %s", tool_name, e)
+                    user_log(
+                        scan_id, "url_fetch",
+                        f"{tool_name} failed: {reason}", "error"
+                    )
 
     # 计算成功的工具列表
     failed_tool_names = [f['tool'] for f in failed_tools]

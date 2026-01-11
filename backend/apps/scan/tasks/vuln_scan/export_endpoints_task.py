@@ -9,14 +9,14 @@ import logging
 from typing import Dict
 from pathlib import Path
 
-from prefect import task
+
 
 from apps.scan.providers import TargetProvider
 
 logger = logging.getLogger(__name__)
 
 
-@task(name="export_endpoints")
+
 def export_endpoints_task(
     output_file: str,
     provider: TargetProvider,

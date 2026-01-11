@@ -26,7 +26,7 @@ import subprocess
 import time
 from asyncio import CancelledError
 from pathlib import Path
-from prefect import task
+
 from typing import Generator, List, Optional, TYPE_CHECKING
 from django.db import IntegrityError, OperationalError, DatabaseError
 from psycopg2 import InterfaceError
@@ -582,11 +582,11 @@ def _cleanup_resources(data_generator) -> None:
         )
 
 
-@task(
-    name='run_and_stream_save_ports',
-    retries=0,
-    log_prints=True
-)
+
+
+
+
+
 def run_and_stream_save_ports_task(
     cmd: str,
     tool_name: str,

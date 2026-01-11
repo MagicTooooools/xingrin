@@ -7,7 +7,7 @@
 import logging
 import time
 from pathlib import Path
-from prefect import task
+
 from typing import List
 from dataclasses import dataclass
 from django.db import IntegrityError, OperationalError, DatabaseError
@@ -35,11 +35,11 @@ class ServiceSet:
         )
 
 
-@task(
-    name='save_domains',
-    retries=0,
-    log_prints=True
-)
+
+
+
+
+
 def save_domains_task(
     domains_file: str,
     scan_id: int,

@@ -9,8 +9,9 @@ import logging
 from datetime import datetime
 from typing import Dict
 
-from prefect import flow
+from concurrent.futures import ThreadPoolExecutor
 
+from apps.scan.decorators import scan_flow
 from apps.scan.utils import build_scan_command, ensure_nuclei_templates_local, user_log
 from apps.scan.tasks.vuln_scan import run_and_stream_save_nuclei_vulns_task
 from apps.scan.tasks.vuln_scan.export_websites_task import export_websites_task
@@ -19,10 +20,7 @@ from .utils import calculate_timeout_by_line_count
 logger = logging.getLogger(__name__)
 
 
-@flow(
-    name="websites_vuln_scan_flow",
-    log_prints=True,
-)
+@scan_flow(name="websites_vuln_scan_flow")
 def websites_vuln_scan_flow(
     scan_id: int,
     target_id: int,
@@ -134,47 +132,56 @@ def websites_vuln_scan_flow(
             logger.info("开始执行 %s 漏洞扫描（WebSite 模式）", tool_name)
             user_log(scan_id, "vuln_scan", f"Running {tool_name} (websites): {command}")
 
-            future = run_and_stream_save_nuclei_vulns_task.submit(
-                cmd=command,
-                tool_name=tool_name,
-                scan_id=scan_id,
-                target_id=target_id,
-                cwd=str(vuln_scan_dir),
-                shell=True,
-                batch_size=1,
-                timeout=timeout,
-                log_file=str(log_file),
-            )
-
             tool_futures[tool_name] = {
-                "future": future,
                 "command": command,
                 "timeout": timeout,
                 "log_file": str(log_file),
             }
 
-        # 收集结果
-        for tool_name, meta in tool_futures.items():
-            future = meta["future"]
-            try:
-                result = future.result()
-                created_vulns = result.get("created_vulns", 0)
-                tool_results[tool_name] = {
-                    "command": meta["command"],
-                    "timeout": meta["timeout"],
-                    "processed_records": result.get("processed_records"),
-                    "created_vulns": created_vulns,
-                    "command_log_file": meta["log_file"],
-                }
-                logger.info("✓ 工具 %s (websites) 执行完成 - 漏洞: %d", tool_name, created_vulns)
-                user_log(
-                    scan_id, "vuln_scan",
-                    f"{tool_name} (websites) completed: found {created_vulns} vulnerabilities"
-                )
-            except Exception as e:
-                reason = str(e)
-                logger.error("工具 %s 执行失败: %s", tool_name, e, exc_info=True)
-                user_log(scan_id, "vuln_scan", f"{tool_name} failed: {reason}", "error")
+        # 使用 ThreadPoolExecutor 并行执行
+        if tool_futures:
+            with ThreadPoolExecutor(max_workers=len(tool_futures)) as executor:
+                futures = {}
+                for tool_name, meta in tool_futures.items():
+                    future = executor.submit(
+                        run_and_stream_save_nuclei_vulns_task,
+                        cmd=meta["command"],
+                        tool_name=tool_name,
+                        scan_id=scan_id,
+                        target_id=target_id,
+                        cwd=str(vuln_scan_dir),
+                        shell=True,
+                        batch_size=1,
+                        timeout=meta["timeout"],
+                        log_file=meta["log_file"],
+                    )
+                    futures[tool_name] = future
+
+                # 收集结果
+                for tool_name, future in futures.items():
+                    meta = tool_futures[tool_name]
+                    try:
+                        result = future.result()
+                        created_vulns = result.get("created_vulns", 0)
+                        tool_results[tool_name] = {
+                            "command": meta["command"],
+                            "timeout": meta["timeout"],
+                            "processed_records": result.get("processed_records"),
+                            "created_vulns": created_vulns,
+                            "command_log_file": meta["log_file"],
+                        }
+                        logger.info(
+                            "✓ 工具 %s (websites) 执行完成 - 漏洞: %d",
+                            tool_name, created_vulns
+                        )
+                        user_log(
+                            scan_id, "vuln_scan",
+                            f"{tool_name} (websites) completed: found {created_vulns} vulnerabilities"
+                        )
+                    except Exception as e:
+                        reason = str(e)
+                        logger.error("工具 %s 执行失败: %s", tool_name, e, exc_info=True)
+                        user_log(scan_id, "vuln_scan", f"{tool_name} failed: {reason}", "error")
 
         return {
             "success": True,

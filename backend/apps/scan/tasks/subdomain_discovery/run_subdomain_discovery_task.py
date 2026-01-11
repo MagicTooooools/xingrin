@@ -6,17 +6,17 @@
 
 import logging
 from pathlib import Path
-from prefect import task
+
 from apps.scan.utils import execute_and_wait
 
 logger = logging.getLogger(__name__)
 
 
-@task(
-    name='run_subdomain_discovery',
-    retries=0,  # 显式禁用重试
-    log_prints=True
-)
+
+
+
+
+
 def run_subdomain_discovery_task(
     tool: str,
     command: str,

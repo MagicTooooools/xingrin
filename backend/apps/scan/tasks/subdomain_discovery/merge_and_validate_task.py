@@ -26,7 +26,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import List
 
-from prefect import task
+
 
 logger = logging.getLogger(__name__)
 
@@ -64,7 +64,7 @@ def _validate_input_files(result_files: List[str]) -> List[str]:
     return valid_files
 
 
-@task(name='merge_and_deduplicate', retries=1, log_prints=True)
+
 def merge_and_validate_task(result_files: List[str], result_dir: str) -> str:
     """
     合并扫描结果并去重（高性能流式处理）
