@@ -146,7 +146,9 @@ class ScreenshotService:
         """
         from apps.asset.models import Screenshot, ScreenshotSnapshot
         
-        snapshots = ScreenshotSnapshot.objects.filter(scan_id=scan_id)
+        # 使用 iterator() 避免 QuerySet 缓存大量 BinaryField 数据导致内存飙升
+        # chunk_size=50: 每次只加载 50 条记录，处理完后释放内存
+        snapshots = ScreenshotSnapshot.objects.filter(scan_id=scan_id).iterator(chunk_size=50)
         count = 0
         
         for snapshot in snapshots:

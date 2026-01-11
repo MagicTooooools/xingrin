@@ -31,10 +31,35 @@ def _parse_screenshot_config(enabled_tools: dict) -> dict:
     }
 
 
-def _collect_urls_from_provider(provider: TargetProvider) -> list[str]:
-    """从 Provider 收集网站 URL"""
+def _collect_urls_from_provider(provider: TargetProvider) -> tuple[list[str], str]:
+    """
+    从 Provider 收集网站 URL（带回退逻辑）
+    
+    优先级：WebSite → HostPortMapping → Default URL
+    
+    Returns:
+        tuple: (urls, source)
+            - urls: URL 列表
+            - source: 数据来源 ('website' | 'host_port' | 'default')
+    """
     logger.info("从 Provider 获取网站 URL - Provider: %s", type(provider).__name__)
-    return list(provider.iter_websites())
+
+    # 优先从 WebSite 获取
+    urls = list(provider.iter_websites())
+    if urls:
+        logger.info("使用 WebSite 数据源 - 数量: %d", len(urls))
+        return urls, "website"
+
+    # 回退到 HostPortMapping
+    urls = list(provider.iter_host_port_urls())
+    if urls:
+        logger.info("WebSite 为空，回退到 HostPortMapping - 数量: %d", len(urls))
+        return urls, "host_port"
+
+    # 最终回退到默认 URL
+    urls = list(provider.iter_default_urls())
+    logger.info("HostPortMapping 为空，回退到默认 URL - 数量: %d", len(urls))
+    return urls, "default"
 
 
 def _build_empty_result(scan_id: int, target_name: str) -> dict:
@@ -96,9 +121,9 @@ def screenshot_flow(
         concurrency = config['concurrency']
         logger.info("截图配置 - 并发: %d", concurrency)
 
-        # Step 2: 从 Provider 收集 URL 列表
-        urls = _collect_urls_from_provider(provider)
-        logger.info("URL 收集完成 - 数量: %d", len(urls))
+        # Step 2: 从 Provider 收集 URL 列表（带回退逻辑）
+        urls, source = _collect_urls_from_provider(provider)
+        logger.info("URL 收集完成 - 来源: %s, 数量: %d", source, len(urls))
 
         if not urls:
             logger.warning("没有可截图的 URL，跳过截图任务")
