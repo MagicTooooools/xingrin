@@ -43,7 +43,11 @@ func (r *OrganizationRepository) FindByID(id int) (*model.Organization, error) {
 func (r *OrganizationRepository) FindByIDWithCount(id int) (*OrganizationWithCount, error) {
 	var org OrganizationWithCount
 	err := r.db.Table("organization").
-		Select("organization.*, (SELECT COUNT(*) FROM organization_target WHERE organization_target.organization_id = organization.id) as target_count").
+		Select(`organization.*,
+			(SELECT COUNT(*) FROM organization_target
+			 INNER JOIN target ON target.id = organization_target.target_id
+			 WHERE organization_target.organization_id = organization.id
+			 AND target.deleted_at IS NULL) as target_count`).
 		Where("organization.id = ? AND organization.deleted_at IS NULL", id).
 		First(&org).Error
 	if err != nil {
@@ -66,9 +70,13 @@ func (r *OrganizationRepository) FindAll(offset, limit int, search string) ([]Or
 		return nil, 0, err
 	}
 
-	// Query with target count using subquery
+	// Query with target count using subquery (excluding soft deleted targets)
 	query := r.db.Table("organization").
-		Select("organization.*, (SELECT COUNT(*) FROM organization_target WHERE organization_target.organization_id = organization.id) as target_count").
+		Select(`organization.*,
+			(SELECT COUNT(*) FROM organization_target
+			 INNER JOIN target ON target.id = organization_target.target_id
+			 WHERE organization_target.organization_id = organization.id
+			 AND target.deleted_at IS NULL) as target_count`).
 		Where("organization.deleted_at IS NULL")
 
 	if search != "" {

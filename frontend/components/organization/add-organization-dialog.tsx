@@ -32,7 +32,7 @@ import {
 } from "@/components/ui/form"
 
 import { useCreateOrganization } from "@/hooks/use-organizations"
-import { useBatchCreateTargets } from "@/hooks/use-targets"
+import { batchCreateTargets } from "@/services/target.service"
 
 import type { Organization } from "@/types/organization.types"
 
@@ -68,7 +68,7 @@ export function AddOrganizationDialog({
   const textareaRef = useRef<HTMLTextAreaElement | null>(null)
 
   const createOrganization = useCreateOrganization()
-  const batchCreateTargets = useBatchCreateTargets()
+  const [isCreatingTargets, setIsCreatingTargets] = useState(false)
   
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -105,7 +105,7 @@ export function AddOrganizationDialog({
     }
   }
 
-  const onSubmit = (values: FormValues) => {
+  const onSubmit = async (values: FormValues) => {
     if (targetValidation.invalid.length > 0) return
 
     createOrganization.mutate(
@@ -114,7 +114,7 @@ export function AddOrganizationDialog({
         description: values.description?.trim() || "",
       },
       {
-        onSuccess: (newOrganization) => {
+        onSuccess: async (newOrganization) => {
           if (values.targets && values.targets.trim()) {
             const targetList = values.targets
               .split("\n")
@@ -123,40 +123,32 @@ export function AddOrganizationDialog({
               .map(name => ({ name }))
 
             if (targetList.length > 0) {
-              batchCreateTargets.mutate(
-                { targets: targetList, organizationId: newOrganization.id },
-                {
-                  onSuccess: () => {
-                    form.reset()
-                    setOpen(false)
-                    if (onAdd) onAdd(newOrganization)
-                  }
-                }
-              )
-            } else {
-              form.reset()
-              setOpen(false)
-              if (onAdd) onAdd(newOrganization)
+              setIsCreatingTargets(true)
+              try {
+                // Call service directly to avoid double toast
+                await batchCreateTargets({ targets: targetList, organizationId: newOrganization.id })
+              } finally {
+                setIsCreatingTargets(false)
+              }
             }
-          } else {
-            form.reset()
-            setOpen(false)
-            if (onAdd) onAdd(newOrganization)
           }
+          form.reset()
+          setOpen(false)
+          if (onAdd) onAdd(newOrganization)
         }
       }
     )
   }
 
   const handleOpenChange = (newOpen: boolean) => {
-    if (!createOrganization.isPending && !batchCreateTargets.isPending) {
+    if (!createOrganization.isPending && !isCreatingTargets) {
       setOpen(newOpen)
       if (!newOpen) form.reset()
     }
   }
 
   const isFormValid = form.formState.isValid && targetValidation.invalid.length === 0
-  const isSubmitting = createOrganization.isPending || batchCreateTargets.isPending
+  const isSubmitting = createOrganization.isPending || isCreatingTargets
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>

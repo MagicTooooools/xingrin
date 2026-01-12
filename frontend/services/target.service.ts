@@ -87,6 +87,16 @@ export async function batchCreateTargets(
   data: BatchCreateTargetsRequest
 ): Promise<BatchCreateTargetsResponse> {
   const response = await api.post<BatchCreateTargetsResponse>('/targets/batch_create/', data)
+  // Handle 204 No Content response - return default success response
+  if (response.status === 204 || !response.data) {
+    return {
+      createdCount: data.targets.length,
+      reusedCount: 0,
+      failedCount: 0,
+      failedTargets: [],
+      message: 'success',
+    }
+  }
   return response.data
 }
 
