@@ -35,6 +35,7 @@ export function AllTargetsDetailView() {
   const tTooltips = useTranslations("tooltips")
   const tCommon = useTranslations("common")
   const tConfirm = useTranslations("common.confirm")
+  const tTarget = useTranslations("target")
   
   // Build translation object
   const translations: AllTargetsTranslations = {
@@ -209,7 +210,7 @@ export function AllTargetsDetailView() {
         searchValue={searchQuery}
         onSearch={handleSearchChange}
         isSearching={isSearching}
-        addButtonText={tCommon("actions.add")}
+        addButtonText={tTarget("addTarget")}
         // 分页相关属性
         pagination={pagination}
         onPaginationChange={handlePaginationChange}

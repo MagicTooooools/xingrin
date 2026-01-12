@@ -21,11 +21,18 @@ type TargetListQuery struct {
 
 // TargetResponse represents target response
 type TargetResponse struct {
-	ID            int        `json:"id"`
-	Name          string     `json:"name"`
-	Type          string     `json:"type"`
-	CreatedAt     time.Time  `json:"createdAt"`
-	LastScannedAt *time.Time `json:"lastScannedAt"`
+	ID            int                 `json:"id"`
+	Name          string              `json:"name"`
+	Type          string              `json:"type"`
+	CreatedAt     time.Time           `json:"createdAt"`
+	LastScannedAt *time.Time          `json:"lastScannedAt"`
+	Organizations []OrganizationBrief `json:"organizations,omitempty"`
+}
+
+// OrganizationBrief represents brief organization info for target response
+type OrganizationBrief struct {
+	ID   int    `json:"id"`
+	Name string `json:"name"`
 }
 
 // BatchCreateTargetRequest represents batch create targets request

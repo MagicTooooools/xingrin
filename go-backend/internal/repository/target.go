@@ -34,24 +34,28 @@ func (r *TargetRepository) FindByID(id int) (*model.Target, error) {
 }
 
 // FindAll finds all targets with pagination and filters (excluding soft deleted)
+// Preloads organizations for each target
 func (r *TargetRepository) FindAll(offset, limit int, targetType, search string) ([]model.Target, int64, error) {
 	var targets []model.Target
 	var total int64
 
-	query := r.db.Model(&model.Target{}).Where("deleted_at IS NULL")
-
+	// Build base query with filters
+	baseQuery := r.db.Model(&model.Target{}).Where("deleted_at IS NULL")
 	if targetType != "" {
-		query = query.Where("type = ?", targetType)
+		baseQuery = baseQuery.Where("type = ?", targetType)
 	}
 	if search != "" {
-		query = query.Where("name ILIKE ?", "%"+search+"%")
+		baseQuery = baseQuery.Where("name ILIKE ?", "%"+search+"%")
 	}
 
-	if err := query.Count(&total).Error; err != nil {
+	// Count total
+	if err := baseQuery.Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
 
-	err := query.Offset(offset).Limit(limit).Order("created_at DESC").Find(&targets).Error
+	// Fetch with preload (reuse same conditions)
+	err := baseQuery.Preload("Organizations", "deleted_at IS NULL").
+		Offset(offset).Limit(limit).Order("created_at DESC").Find(&targets).Error
 	return targets, total, err
 }
 

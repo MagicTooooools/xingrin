@@ -30,11 +30,11 @@ import type {
  * 获取所有目标列表
  * 支持两种调用方式：
  * 1. useTargets(page, pageSize, type, search) - 直接传参数
- * 2. useTargets({ page, pageSize, organizationId }) - 传对象（已废弃，为了兼容性保留）
+ * 2. useTargets({ page, pageSize, organizationId, search }, options) - 传对象
  */
 export function useTargets(
   pageOrParams: number | { page?: number; pageSize?: number; organizationId?: number; search?: string } = 1,
-  pageSize = 10,
+  pageSizeOrOptions: number | { enabled?: boolean } = 10,
   type?: string,
   search?: string
 ) {
@@ -44,18 +44,23 @@ export function useTargets(
   let actualOrgId: number | undefined
   let actualSearch: string | undefined
   let actualType: string | undefined
+  let enabled: boolean = true
 
   if (typeof pageOrParams === 'object') {
-    // 对象参数方式（兼容旧代码）
+    // 对象参数方式
     actualPage = pageOrParams.page || 1
     actualPageSize = pageOrParams.pageSize || 10
     actualOrgId = pageOrParams.organizationId
     actualSearch = pageOrParams.search
     actualType = undefined
+    // 第二个参数是 options
+    if (typeof pageSizeOrOptions === 'object') {
+      enabled = pageSizeOrOptions.enabled !== false
+    }
   } else {
     // 独立参数方式
     actualPage = pageOrParams
-    actualPageSize = pageSize
+    actualPageSize = typeof pageSizeOrOptions === 'number' ? pageSizeOrOptions : 10
     actualOrgId = undefined
     actualSearch = search
     actualType = type
@@ -64,6 +69,7 @@ export function useTargets(
   return useQuery({
     queryKey: ['targets', { page: actualPage, pageSize: actualPageSize, organizationId: actualOrgId, search: actualSearch, type: actualType }],
     queryFn: () => getTargets(actualPage, actualPageSize, actualSearch, actualType),
+    enabled,
     select: (response) => {
       // 如果指定了 organizationId，过滤结果
       if (actualOrgId) {

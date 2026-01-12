@@ -120,14 +120,15 @@ export function CreateScheduledScanDialog({
   const handleOrgSearch = () => setOrgSearch(orgSearchInput)
   const handleTargetSearch = () => setTargetSearch(targetSearchInput)
 
-  const { data: organizationsData, isFetching: isOrgFetching } = useOrganizations({ 
-    pageSize: 50, 
-    search: orgSearch || undefined 
-  })
-  const { data: targetsData, isFetching: isTargetFetching } = useTargets({ 
-    pageSize: 50, 
-    search: targetSearch || undefined 
-  })
+  // Only fetch data when dialog is open (avoid unnecessary requests on page load)
+  const { data: organizationsData, isFetching: isOrgFetching } = useOrganizations({
+    pageSize: 20,
+    search: orgSearch || undefined
+  }, { enabled: open })
+  const { data: targetsData, isFetching: isTargetFetching } = useTargets({
+    pageSize: 20,
+    search: targetSearch || undefined
+  }, { enabled: open })
 
   const hasPreset = !!(presetOrganizationId || presetTargetId)
   const steps = hasPreset ? PRESET_STEPS : FULL_STEPS

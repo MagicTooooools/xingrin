@@ -66,12 +66,22 @@ func (h *TargetHandler) List(c *gin.Context) {
 
 	var resp []dto.TargetResponse
 	for _, t := range targets {
+		// Convert organizations to brief format
+		var orgs []dto.OrganizationBrief
+		for _, org := range t.Organizations {
+			orgs = append(orgs, dto.OrganizationBrief{
+				ID:   org.ID,
+				Name: org.Name,
+			})
+		}
+
 		resp = append(resp, dto.TargetResponse{
 			ID:            t.ID,
 			Name:          t.Name,
 			Type:          t.Type,
 			CreatedAt:     t.CreatedAt,
 			LastScannedAt: t.LastScannedAt,
+			Organizations: orgs,
 		})
 	}
 

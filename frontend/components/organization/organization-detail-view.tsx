@@ -315,7 +315,6 @@ export function OrganizationDetailView({
           searchValue={searchQuery}
           onSearch={handleSearchChange}
           isSearching={isSearching}
-          addButtonText={tCommon("actions.add")}
           pagination={pagination}
           setPagination={setPagination}
           paginationInfo={targetsData ? {
