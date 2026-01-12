@@ -16,7 +16,7 @@ type UpdateTargetRequest struct {
 type TargetListQuery struct {
 	PaginationQuery
 	Type   string `form:"type" binding:"omitempty,oneof=domain ip cidr"`
-	Search string `form:"search"`
+	Filter string `form:"filter"`
 }
 
 // TargetResponse represents target response

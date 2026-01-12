@@ -11,9 +11,9 @@ import (
 )
 
 var (
-	ErrUserNotFound      = errors.New("user not found")
-	ErrUsernameExists    = errors.New("username already exists")
-	ErrInvalidPassword   = errors.New("invalid password")
+	ErrUserNotFound    = errors.New("user not found")
+	ErrUsernameExists  = errors.New("username already exists")
+	ErrInvalidPassword = errors.New("invalid password")
 )
 
 // UserService handles user business logic
@@ -28,7 +28,6 @@ func NewUserService(repo *repository.UserRepository) *UserService {
 
 // Create creates a new user
 func (s *UserService) Create(req *dto.CreateUserRequest) (*model.User, error) {
-	// Check if username exists
 	exists, err := s.repo.ExistsByUsername(req.Username)
 	if err != nil {
 		return nil, err
@@ -37,7 +36,6 @@ func (s *UserService) Create(req *dto.CreateUserRequest) (*model.User, error) {
 		return nil, ErrUsernameExists
 	}
 
-	// Hash password
 	hashedPassword, err := auth.HashPassword(req.Password)
 	if err != nil {
 		return nil, err
@@ -59,7 +57,7 @@ func (s *UserService) Create(req *dto.CreateUserRequest) (*model.User, error) {
 
 // List returns paginated users
 func (s *UserService) List(query *dto.PaginationQuery) ([]model.User, int64, error) {
-	return s.repo.FindAll(query.GetOffset(), query.GetPageSize())
+	return s.repo.FindAll(query.GetPage(), query.GetPageSize())
 }
 
 // GetByID returns a user by ID
@@ -84,12 +82,10 @@ func (s *UserService) UpdatePassword(id int, req *dto.UpdatePasswordRequest) err
 		return err
 	}
 
-	// Verify old password
 	if !auth.VerifyPassword(req.OldPassword, user.Password) {
 		return ErrInvalidPassword
 	}
 
-	// Hash new password
 	hashedPassword, err := auth.HashPassword(req.NewPassword)
 	if err != nil {
 		return err

@@ -48,7 +48,7 @@ func (s *EngineService) Create(req *dto.CreateEngineRequest) (*model.ScanEngine,
 
 // List returns paginated engines
 func (s *EngineService) List(query *dto.PaginationQuery) ([]model.ScanEngine, int64, error) {
-	return s.repo.FindAll(query.GetOffset(), query.GetPageSize())
+	return s.repo.FindAll(query.GetPage(), query.GetPageSize())
 }
 
 // GetByID returns an engine by ID
@@ -73,7 +73,6 @@ func (s *EngineService) Update(id int, req *dto.UpdateEngineRequest) (*model.Sca
 		return nil, err
 	}
 
-	// Check name uniqueness if changed
 	if engine.Name != req.Name {
 		exists, err := s.repo.ExistsByName(req.Name, id)
 		if err != nil {

@@ -5,8 +5,14 @@ import (
 	"time"
 
 	"github.com/xingrin/go-backend/internal/model"
+	"github.com/xingrin/go-backend/internal/pkg/scope"
 	"gorm.io/gorm"
 )
+
+// OrganizationFilterMapping defines filter fields for organization
+var OrganizationFilterMapping = scope.FilterMapping{
+	"name": {Column: "organization.name", IsArray: false},
+}
 
 // OrganizationWithCount represents organization with target count
 type OrganizationWithCount struct {
@@ -32,7 +38,9 @@ func (r *OrganizationRepository) Create(org *model.Organization) error {
 // FindByID finds an organization by ID (excluding soft deleted)
 func (r *OrganizationRepository) FindByID(id int) (*model.Organization, error) {
 	var org model.Organization
-	err := r.db.Where("id = ? AND deleted_at IS NULL", id).First(&org).Error
+	err := r.db.Scopes(scope.WithNotDeleted()).
+		Where("id = ?", id).
+		First(&org).Error
 	if err != nil {
 		return nil, err
 	}
@@ -57,15 +65,14 @@ func (r *OrganizationRepository) FindByIDWithCount(id int) (*OrganizationWithCou
 }
 
 // FindAll finds all organizations with pagination and target count (excluding soft deleted)
-func (r *OrganizationRepository) FindAll(offset, limit int, search string) ([]OrganizationWithCount, int64, error) {
+func (r *OrganizationRepository) FindAll(page, pageSize int, filter string) ([]OrganizationWithCount, int64, error) {
 	var orgs []OrganizationWithCount
 	var total int64
 
 	// Base query for counting
-	countQuery := r.db.Model(&model.Organization{}).Where("deleted_at IS NULL")
-	if search != "" {
-		countQuery = countQuery.Where("name ILIKE ?", "%"+search+"%")
-	}
+	countQuery := r.db.Model(&model.Organization{}).
+		Scopes(scope.WithNotDeleted()).
+		Scopes(scope.WithFilterDefault(filter, OrganizationFilterMapping, "name"))
 	if err := countQuery.Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
@@ -77,13 +84,14 @@ func (r *OrganizationRepository) FindAll(offset, limit int, search string) ([]Or
 			 INNER JOIN target ON target.id = organization_target.target_id
 			 WHERE organization_target.organization_id = organization.id
 			 AND target.deleted_at IS NULL) as target_count`).
-		Where("organization.deleted_at IS NULL")
+		Where("organization.deleted_at IS NULL").
+		Scopes(scope.WithFilterDefault(filter, OrganizationFilterMapping, "name"))
 
-	if search != "" {
-		query = query.Where("organization.name ILIKE ?", "%"+search+"%")
-	}
+	err := query.Scopes(
+		scope.WithPagination(page, pageSize),
+		scope.OrderBy("organization.created_at", true),
+	).Find(&orgs).Error
 
-	err := query.Offset(offset).Limit(limit).Order("organization.created_at DESC").Find(&orgs).Error
 	return orgs, total, err
 }
 
@@ -102,7 +110,8 @@ func (r *OrganizationRepository) SoftDelete(id int) error {
 func (r *OrganizationRepository) BulkSoftDelete(ids []int) (int64, error) {
 	now := time.Now()
 	result := r.db.Model(&model.Organization{}).
-		Where("id IN ? AND deleted_at IS NULL", ids).
+		Scopes(scope.WithNotDeleted()).
+		Where("id IN ?", ids).
 		Update("deleted_at", now)
 	return result.RowsAffected, result.Error
 }
@@ -110,7 +119,9 @@ func (r *OrganizationRepository) BulkSoftDelete(ids []int) (int64, error) {
 // ExistsByName checks if organization name exists (excluding soft deleted)
 func (r *OrganizationRepository) ExistsByName(name string, excludeID ...int) (bool, error) {
 	var count int64
-	query := r.db.Model(&model.Organization{}).Where("name = ? AND deleted_at IS NULL", name)
+	query := r.db.Model(&model.Organization{}).
+		Scopes(scope.WithNotDeleted()).
+		Where("name = ?", name)
 	if len(excludeID) > 0 {
 		query = query.Where("id != ?", excludeID[0])
 	}
@@ -121,14 +132,22 @@ func (r *OrganizationRepository) ExistsByName(name string, excludeID ...int) (bo
 // Exists checks if organization exists by ID (excluding soft deleted)
 func (r *OrganizationRepository) Exists(id int) (bool, error) {
 	var count int64
-	err := r.db.Model(&model.Organization{}).Where("id = ? AND deleted_at IS NULL", id).Count(&count).Error
+	err := r.db.Model(&model.Organization{}).
+		Scopes(scope.WithNotDeleted()).
+		Where("id = ?", id).
+		Count(&count).Error
 	return count > 0, err
 }
 
 // FindTargets finds targets belonging to an organization with pagination
-func (r *OrganizationRepository) FindTargets(organizationID int, offset, limit int, targetType, search string) ([]model.Target, int64, error) {
+func (r *OrganizationRepository) FindTargets(organizationID int, page, pageSize int, targetType, filter string) ([]model.Target, int64, error) {
 	var targets []model.Target
 	var total int64
+
+	// Define filter mapping for target
+	targetFilterMapping := scope.FilterMapping{
+		"name": {Column: "target.name", IsArray: false},
+	}
 
 	// Base query: join organization_target to filter by organization
 	query := r.db.Model(&model.Target{}).
@@ -138,15 +157,18 @@ func (r *OrganizationRepository) FindTargets(organizationID int, offset, limit i
 	if targetType != "" {
 		query = query.Where("target.type = ?", targetType)
 	}
-	if search != "" {
-		query = query.Where("target.name ILIKE ?", "%"+search+"%")
-	}
+
+	query = query.Scopes(scope.WithFilterDefault(filter, targetFilterMapping, "name"))
 
 	if err := query.Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
 
-	err := query.Offset(offset).Limit(limit).Order("target.created_at DESC").Find(&targets).Error
+	err := query.Scopes(
+		scope.WithPagination(page, pageSize),
+		scope.OrderBy("target.created_at", true),
+	).Find(&targets).Error
+
 	return targets, total, err
 }
 
@@ -156,9 +178,7 @@ func (r *OrganizationRepository) BulkAddTargets(organizationID int, targetIDs []
 		return nil
 	}
 
-	// Use raw SQL for bulk insert with ON CONFLICT DO NOTHING
-	// This is more efficient than GORM's Association methods for bulk operations
-	values := make([]interface{}, 0, len(targetIDs)*2)
+	values := make([]any, 0, len(targetIDs)*2)
 	placeholders := make([]string, 0, len(targetIDs))
 
 	for _, targetID := range targetIDs {

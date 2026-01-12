@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tansta
 import { useToastMessages } from '@/lib/toast-helpers'
 import { getErrorCode } from '@/lib/response-parser'
 import { WebsiteService } from '@/services/website.service'
+import { api } from '@/lib/api-client'
 import type { WebSite, WebSiteListResponse } from '@/types/website.types'
 
 // API 服务函数
@@ -11,14 +12,11 @@ const websiteService = {
     targetId: number,
     params: { page: number; pageSize: number; filter?: string }
   ): Promise<WebSiteListResponse> => {
-    const filterParam = params.filter ? `&filter=${encodeURIComponent(params.filter)}` : ''
-    const response = await fetch(
-      `/api/targets/${targetId}/websites/?page=${params.page}&pageSize=${params.pageSize}${filterParam}`
+    const response = await api.get<WebSiteListResponse>(
+      `/targets/${targetId}/websites/`,
+      { params }
     )
-    if (!response.ok) {
-      throw new Error('获取网站列表失败')
-    }
-    return response.json()
+    return response.data
   },
 
   // 获取扫描的网站列表
@@ -26,14 +24,11 @@ const websiteService = {
     scanId: number,
     params: { page: number; pageSize: number; filter?: string }
   ): Promise<WebSiteListResponse> => {
-    const filterParam = params.filter ? `&filter=${encodeURIComponent(params.filter)}` : ''
-    const response = await fetch(
-      `/api/scans/${scanId}/websites/?page=${params.page}&pageSize=${params.pageSize}${filterParam}`
+    const response = await api.get<WebSiteListResponse>(
+      `/scans/${scanId}/websites/`,
+      { params }
     )
-    if (!response.ok) {
-      throw new Error('获取网站列表失败')
-    }
-    return response.json()
+    return response.data
   },
 
   // 批量删除网站（支持单个或多个）
@@ -43,17 +38,8 @@ const websiteService = {
     requestedIds: number[]
     cascadeDeleted: Record<string, number>
   }> => {
-    const response = await fetch('/api/websites/bulk-delete/', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ ids }),
-    })
-    if (!response.ok) {
-      throw new Error('批量删除网站失败')
-    }
-    return response.json()
+    const response = await api.post('/websites/bulk-delete/', { ids })
+    return response.data
   },
 
   // 删除单个网站（使用单独的 DELETE API）
@@ -68,13 +54,8 @@ const websiteService = {
       phase2: string
     }
   }> => {
-    const response = await fetch(`/api/websites/${websiteId}/`, {
-      method: 'DELETE',
-    })
-    if (!response.ok) {
-      throw new Error('删除网站失败')
-    }
-    return response.json()
+    const response = await api.delete(`/websites/${websiteId}/`)
+    return response.data
   },
 }
 
@@ -180,8 +161,20 @@ export function useBulkCreateWebsites() {
         toastMessages.warning('toast.asset.website.create.partialSuccess', { success: 0, skipped: 0 })
       }
       
-      queryClient.invalidateQueries({ queryKey: ['target-websites', targetId] })
-      queryClient.invalidateQueries({ queryKey: ['scan-websites'] })
+      queryClient.invalidateQueries({
+        queryKey: ['target-websites', targetId],
+        exact: false,
+        refetchType: 'active',
+      })
+      queryClient.invalidateQueries({
+        queryKey: ['scan-websites'],
+        exact: false,
+        refetchType: 'active',
+      })
+      queryClient.invalidateQueries({
+        queryKey: ['targets', targetId],
+        refetchType: 'active',
+      })
     },
     onError: (error: any) => {
       toastMessages.dismiss('bulk-create-websites')

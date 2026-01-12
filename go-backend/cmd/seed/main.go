@@ -7,6 +7,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/lib/pq"
 	"github.com/xingrin/go-backend/internal/config"
 	"github.com/xingrin/go-backend/internal/database"
 	"github.com/xingrin/go-backend/internal/model"
@@ -14,13 +15,19 @@ import (
 )
 
 var (
-	clear       = flag.Bool("clear", false, "Clear existing data before generating")
-	orgCount    = flag.Int("orgs", 20, "Number of organizations to generate")
-	targetCount = flag.Int("targets", 100, "Number of targets to generate")
+	clear    = flag.Bool("clear", false, "Clear existing data before generating")
+	orgCount = flag.Int("orgs", 20, "Number of organizations to generate")
+	// targetCount = orgCount * 20, websiteCount = targetCount * 20
 )
 
 func main() {
 	flag.Parse()
+
+	// Calculate counts based on org count
+	// Each org has 20 targets, each target has 20 websites
+	targetsPerOrg := 20
+	websitesPerTarget := 20
+	targetCount := *orgCount * targetsPerOrg
 
 	// Load config
 	cfg, err := config.Load()
@@ -38,7 +45,8 @@ func main() {
 
 	fmt.Println("🚀 Starting test data generation...")
 	fmt.Printf("   Organizations: %d\n", *orgCount)
-	fmt.Printf("   Targets: %d\n", *targetCount)
+	fmt.Printf("   Targets: %d (%d per org)\n", targetCount, targetsPerOrg)
+	fmt.Printf("   Websites: %d (%d per target)\n", targetCount*websitesPerTarget, websitesPerTarget)
 	fmt.Println()
 
 	if *clear {
@@ -47,7 +55,7 @@ func main() {
 			fmt.Printf("❌ Failed to clear data: %v\n", err)
 			os.Exit(1)
 		}
-		fmt.Println("   ✓ Data cleared\n")
+		fmt.Println("   ✓ Data cleared")
 	}
 
 	// Generate data
@@ -57,15 +65,21 @@ func main() {
 		os.Exit(1)
 	}
 
-	targetIDs, err := createTargets(db, *targetCount)
+	targetIDs, err := createTargets(db, targetCount)
 	if err != nil {
 		fmt.Printf("❌ Failed to create targets: %v\n", err)
 		os.Exit(1)
 	}
 
-	// Link targets to organizations
+	// Link targets to organizations (20 per org)
 	if err := linkTargetsToOrganizations(db, targetIDs, orgIDs); err != nil {
 		fmt.Printf("❌ Failed to link targets to organizations: %v\n", err)
+		os.Exit(1)
+	}
+
+	// Create websites for targets (20 per target)
+	if err := createWebsites(db, targetIDs, websitesPerTarget); err != nil {
+		fmt.Printf("❌ Failed to create websites: %v\n", err)
 		os.Exit(1)
 	}
 
@@ -75,6 +89,7 @@ func main() {
 func clearData(db *gorm.DB) error {
 	// Delete in order to respect foreign key constraints
 	tables := []string{
+		"website",
 		"organization_target",
 		"target",
 		"organization",
@@ -256,22 +271,21 @@ func linkTargetsToOrganizations(db *gorm.DB, targetIDs, orgIDs []int) error {
 		return nil
 	}
 
-	// Each target belongs to 1-3 organizations
+	// Each organization gets exactly 20 targets (evenly distributed)
+	targetsPerOrg := len(targetIDs) / len(orgIDs)
 	linkCount := 0
-	for _, targetID := range targetIDs {
-		numOrgs := rand.Intn(3) + 1 // 1-3 organizations
-		selectedOrgs := make(map[int]bool)
 
-		for i := 0; i < numOrgs; i++ {
-			orgID := orgIDs[rand.Intn(len(orgIDs))]
-			if selectedOrgs[orgID] {
-				continue
-			}
-			selectedOrgs[orgID] = true
+	for orgIdx, orgID := range orgIDs {
+		startIdx := orgIdx * targetsPerOrg
+		endIdx := startIdx + targetsPerOrg
+		if orgIdx == len(orgIDs)-1 {
+			endIdx = len(targetIDs) // Last org gets remaining targets
+		}
 
+		for i := startIdx; i < endIdx; i++ {
 			err := db.Exec(
 				"INSERT INTO organization_target (organization_id, target_id) VALUES (?, ?) ON CONFLICT DO NOTHING",
-				orgID, targetID,
+				orgID, targetIDs[i],
 			).Error
 			if err != nil {
 				return err
@@ -280,6 +294,127 @@ func linkTargetsToOrganizations(db *gorm.DB, targetIDs, orgIDs []int) error {
 		}
 	}
 
-	fmt.Printf("   ✓ Created %d target-organization links\n", linkCount)
+	fmt.Printf("   ✓ Created %d target-organization links (%d per org)\n", linkCount, targetsPerOrg)
 	return nil
+}
+
+func createWebsites(db *gorm.DB, targetIDs []int, websitesPerTarget int) error {
+	totalCount := len(targetIDs) * websitesPerTarget
+	fmt.Printf("🌐 Creating %d websites (%d per target)...\n", totalCount, websitesPerTarget)
+
+	if len(targetIDs) == 0 {
+		return nil
+	}
+
+	// Website data templates
+	protocols := []string{"https://", "http://"}
+	subdomains := []string{"www", "api", "app", "admin", "portal", "dashboard", "dev", "staging", "test", "cdn", "static", "assets", "mail", "blog", "docs", "support", "auth", "login", "shop", "store"}
+	paths := []string{"", "/", "/api", "/v1", "/v2", "/login", "/dashboard", "/admin", "/app", "/docs"}
+	ports := []string{"", ":8080", ":8443", ":3000", ":443"}
+
+	titles := []string{
+		"Welcome - Dashboard", "Admin Panel", "API Documentation", "Login Portal",
+		"Home Page", "User Dashboard", "Settings", "Analytics", "Reports",
+		"Management Console", "Control Panel", "Service Status", "Developer Portal",
+	}
+
+	webservers := []string{
+		"nginx/1.24.0", "Apache/2.4.57", "cloudflare", "Microsoft-IIS/10.0",
+		"nginx", "Apache", "LiteSpeed", "Caddy", "Traefik",
+	}
+
+	contentTypes := []string{
+		"text/html; charset=utf-8", "text/html", "application/json",
+		"text/html; charset=UTF-8", "application/xhtml+xml",
+	}
+
+	techStacks := [][]string{
+		{"nginx", "PHP", "MySQL"},
+		{"Apache", "Python", "PostgreSQL"},
+		{"nginx", "Node.js", "MongoDB"},
+		{"cloudflare", "React", "GraphQL"},
+		{"nginx", "Vue.js", "Redis"},
+		{"Apache", "Java", "Oracle"},
+		{"nginx", "Go", "PostgreSQL"},
+		{"cloudflare", "Next.js", "Vercel"},
+		{"nginx", "Django", "PostgreSQL"},
+		{"Apache", "Laravel", "MySQL"},
+		{"nginx", "Express", "MongoDB"},
+		{"cloudflare", "Angular", "Firebase"},
+	}
+
+	statusCodes := []int{200, 200, 200, 200, 200, 301, 302, 403, 404, 500}
+
+	createdCount := 0
+
+	// Each target gets exactly websitesPerTarget websites
+	for targetIdx, targetID := range targetIDs {
+		for i := 0; i < websitesPerTarget; i++ {
+			// Generate deterministic but varied URL
+			protocol := protocols[i%len(protocols)]
+			subdomain := subdomains[i%len(subdomains)]
+			port := ports[i%len(ports)]
+			path := paths[i%len(paths)]
+
+			domain := fmt.Sprintf("target%d-site%d.com", targetIdx, i)
+			url := fmt.Sprintf("%s%s.%s%s%s", protocol, subdomain, domain, port, path)
+
+			// Extract host from URL
+			host := extractHost(url)
+
+			// Deterministic but varied values
+			statusCode := statusCodes[i%len(statusCodes)]
+			contentLength := 1000 + (i * 100)
+			tech := pq.StringArray(techStacks[i%len(techStacks)])
+			vhost := i%5 == 0 // 20% are vhost
+
+			website := &model.Website{
+				TargetID:      targetID,
+				URL:           url,
+				Host:          host,
+				Title:         titles[i%len(titles)],
+				StatusCode:    &statusCode,
+				ContentLength: &contentLength,
+				ContentType:   contentTypes[i%len(contentTypes)],
+				Webserver:     webservers[i%len(webservers)],
+				Tech:          tech,
+				Vhost:         &vhost,
+				Location:      "",
+				CreatedAt:     time.Now().AddDate(0, 0, -i),
+			}
+
+			if err := db.Create(website).Error; err != nil {
+				continue
+			}
+			createdCount++
+		}
+	}
+
+	fmt.Printf("   ✓ Created %d websites\n", createdCount)
+	return nil
+}
+
+func extractHost(rawURL string) string {
+	// Simple host extraction
+	url := rawURL
+	// Remove protocol
+	if idx := len("https://"); len(url) > idx && url[:idx] == "https://" {
+		url = url[idx:]
+	} else if idx := len("http://"); len(url) > idx && url[:idx] == "http://" {
+		url = url[idx:]
+	}
+	// Remove path
+	if idx := findIndex(url, "/"); idx != -1 {
+		url = url[:idx]
+	}
+	return url
+}
+
+func findIndex(s string, substr string) int {
+	for i := 0; i < len(s); i++ {
+		if s[i] == substr[0] {
+			return i
+		}
+	}
+	return -1
 }

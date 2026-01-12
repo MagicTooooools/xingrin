@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"embed"
 	"fmt"
 	"net/http"
 	"os"
@@ -16,13 +17,15 @@ import (
 	"github.com/xingrin/go-backend/internal/database"
 	"github.com/xingrin/go-backend/internal/handler"
 	"github.com/xingrin/go-backend/internal/middleware"
-	"github.com/xingrin/go-backend/internal/model"
 	"github.com/xingrin/go-backend/internal/pkg"
 	pkgvalidator "github.com/xingrin/go-backend/internal/pkg/validator"
 	"github.com/xingrin/go-backend/internal/repository"
 	"github.com/xingrin/go-backend/internal/service"
 	"go.uber.org/zap"
 )
+
+//go:embed migrations/*.sql
+var migrationsFS embed.FS
 
 func main() {
 	// Load configuration
@@ -64,56 +67,18 @@ func main() {
 		zap.String("name", cfg.Database.Name),
 	)
 
-	// Auto migrate database schema
-	pkg.Info("Running database migrations...")
-	if err := db.AutoMigrate(
-		// Core models (no dependencies)
-		&model.Organization{},
-		&model.User{},
-		&model.Target{},
-		&model.ScanEngine{},
-		&model.WorkerNode{},
-		&model.Wordlist{},
-		&model.NucleiTemplateRepo{},
-		&model.BlacklistRule{},
-		&model.NotificationSettings{},
+	// Run SQL migrations
+	database.MigrationsFS = migrationsFS
+	database.MigrationsPath = "migrations"
 
-		// Scan related (depends on Target, ScanEngine)
-		&model.Scan{},
-		&model.ScanInputTarget{},
-		&model.ScanLog{},
-		&model.ScheduledScan{},
-
-		// Asset models (depends on Target, Scan)
-		&model.Subdomain{},
-		&model.HostPortMapping{},
-		&model.Website{},
-		&model.Endpoint{},
-		&model.Directory{},
-		&model.Screenshot{},
-		&model.Vulnerability{},
-
-		// Snapshot models (depends on Scan)
-		&model.SubdomainSnapshot{},
-		&model.HostPortMappingSnapshot{},
-		&model.WebsiteSnapshot{},
-		&model.EndpointSnapshot{},
-		&model.DirectorySnapshot{},
-		&model.ScreenshotSnapshot{},
-		&model.VulnerabilitySnapshot{},
-
-		// Statistics
-		&model.AssetStatistics{},
-		&model.StatisticsHistory{},
-		&model.Notification{},
-
-		// Auth
-		&model.Session{},
-		&model.SubfinderProviderSettings{},
-	); err != nil {
-		pkg.Fatal("Failed to migrate database", zap.Error(err))
+	sqlDB, err := db.DB()
+	if err != nil {
+		pkg.Fatal("Failed to get underlying sql.DB", zap.Error(err))
 	}
-	pkg.Info("Database migrations completed")
+
+	if err := database.RunMigrations(sqlDB); err != nil {
+		pkg.Fatal("Failed to run database migrations", zap.Error(err))
+	}
 
 	// Initialize Redis (optional)
 	var redisClient *redis.Client
@@ -166,12 +131,14 @@ func main() {
 	orgRepo := repository.NewOrganizationRepository(db)
 	targetRepo := repository.NewTargetRepository(db)
 	engineRepo := repository.NewEngineRepository(db)
+	websiteRepo := repository.NewWebsiteRepository(db)
 
 	// Create services
 	userSvc := service.NewUserService(userRepo)
 	orgSvc := service.NewOrganizationService(orgRepo)
 	targetSvc := service.NewTargetService(targetRepo, orgRepo)
 	engineSvc := service.NewEngineService(engineRepo)
+	websiteSvc := service.NewWebsiteService(websiteRepo, targetRepo)
 
 	// Create handlers
 	healthHandler := handler.NewHealthHandler(db, redisClient)
@@ -180,6 +147,7 @@ func main() {
 	orgHandler := handler.NewOrganizationHandler(orgSvc)
 	targetHandler := handler.NewTargetHandler(targetSvc)
 	engineHandler := handler.NewEngineHandler(engineSvc)
+	websiteHandler := handler.NewWebsiteHandler(websiteSvc)
 
 	// Register health routes
 	router.GET("/health", healthHandler.Check)
@@ -227,6 +195,16 @@ func main() {
 			protected.GET("/targets/:id", targetHandler.GetByID)
 			protected.PUT("/targets/:id", targetHandler.Update)
 			protected.DELETE("/targets/:id", targetHandler.Delete)
+
+			// Websites (nested under targets)
+			protected.GET("/targets/:id/websites", websiteHandler.List)
+			protected.GET("/targets/:id/websites/export", websiteHandler.Export)
+			protected.POST("/targets/:id/websites/bulk-create", websiteHandler.BulkCreate)
+			protected.POST("/targets/:id/websites/bulk-delete", websiteHandler.BulkDelete)
+
+			// Websites (standalone)
+			protected.GET("/websites/:id", websiteHandler.GetByID)
+			protected.DELETE("/websites/:id", websiteHandler.Delete)
 
 			// Engines
 			protected.POST("/engines", engineHandler.Create)

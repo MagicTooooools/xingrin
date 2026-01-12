@@ -300,8 +300,16 @@ export function useBulkCreateSubdomains() {
         })
       }
       
-      queryClient.invalidateQueries({ queryKey: ['targets', targetId, 'subdomains'] })
-      queryClient.invalidateQueries({ queryKey: ['subdomains'] })
+      queryClient.invalidateQueries({
+        queryKey: ['targets', targetId, 'subdomains'],
+        exact: false,
+        refetchType: 'active',
+      })
+      queryClient.invalidateQueries({
+        queryKey: ['subdomains'],
+        exact: false,
+        refetchType: 'active',
+      })
     },
     onError: (error: any) => {
       toastMessages.dismiss('bulk-create-subdomains')

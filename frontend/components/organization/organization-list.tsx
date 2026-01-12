@@ -58,6 +58,7 @@ export function OrganizationList() {
   const tCommon = useTranslations("common")
   const tTooltips = useTranslations("tooltips")
   const tConfirm = useTranslations("common.confirm")
+  const tOrg = useTranslations("organization")
   const locale = useLocale()
   
   // 构建翻译对象
@@ -120,7 +121,7 @@ export function OrganizationList() {
   } = useOrganizations({
     page: pagination.pageIndex + 1, // 转换为 1-based
     pageSize: pagination.pageSize,
-    search: searchQuery || undefined,
+    filter: searchQuery || undefined,
   }, { enabled: true })
 
   useEffect(() => {
@@ -272,7 +273,7 @@ export function OrganizationList() {
         onAddNew={() => setAddDialogOpen(true)}
         onBulkDelete={handleBulkDelete}
         onSelectionChange={setSelectedOrganizations}
-        searchPlaceholder={tColumns("organization.organization")}
+        searchPlaceholder={tOrg("name")}
         searchColumn="name"
         searchValue={searchQuery}
         onSearch={handleSearchChange}

@@ -347,6 +347,7 @@ export function AddTargetDialog({
                 {t("linkOrganization")}
               </Label>
               <Button
+                type="button"
                 variant="outline"
                 role="combobox"
                 className="w-full justify-between"
@@ -447,6 +448,7 @@ export function AddTargetDialog({
                       </div>
                       <div className="flex items-center space-x-2">
                         <Button
+                          type="button"
                           variant="outline"
                           className="hidden h-8 w-8 p-0 lg:flex"
                           onClick={() => setOrgPage(1)}
@@ -456,6 +458,7 @@ export function AddTargetDialog({
                           <IconChevronsLeft />
                         </Button>
                         <Button
+                          type="button"
                           variant="outline"
                           className="h-8 w-8 p-0"
                           onClick={() => setOrgPage(prev => Math.max(1, prev - 1))}
@@ -465,6 +468,7 @@ export function AddTargetDialog({
                           <IconChevronLeft />
                         </Button>
                         <Button
+                          type="button"
                           variant="outline"
                           className="h-8 w-8 p-0"
                           onClick={() => setOrgPage(prev => Math.min(organizationsData.pagination.totalPages, prev + 1))}
@@ -474,6 +478,7 @@ export function AddTargetDialog({
                           <IconChevronRight />
                         </Button>
                         <Button
+                          type="button"
                           variant="outline"
                           className="hidden h-8 w-8 p-0 lg:flex"
                           onClick={() => setOrgPage(organizationsData.pagination.totalPages)}

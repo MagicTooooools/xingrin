@@ -213,8 +213,16 @@ export function useBulkCreateEndpoints() {
         toastMessages.warning('toast.asset.endpoint.create.partialSuccess', { success: 0, skipped: 0 })
       }
       
-      queryClient.invalidateQueries({ queryKey: endpointKeys.byTarget(targetId, {}) })
-      queryClient.invalidateQueries({ queryKey: ['endpoints'] })
+      queryClient.invalidateQueries({
+        queryKey: endpointKeys.byTarget(targetId, {}),
+        exact: false,
+        refetchType: 'active',
+      })
+      queryClient.invalidateQueries({
+        queryKey: ['endpoints'],
+        exact: false,
+        refetchType: 'active',
+      })
     },
     onError: (error: any) => {
       toastMessages.dismiss('bulk-create-endpoints')

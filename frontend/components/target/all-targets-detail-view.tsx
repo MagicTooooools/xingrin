@@ -206,7 +206,7 @@ export function AllTargetsDetailView() {
         onAddHover={() => setShouldPrefetchOrgs(true)}
         onBulkDelete={handleBatchDelete}
         onSelectionChange={setSelectedTargets}
-        searchPlaceholder={tColumns("target.target")}
+        searchPlaceholder={tTarget("name")}
         searchValue={searchQuery}
         onSearch={handleSearchChange}
         isSearching={isSearching}

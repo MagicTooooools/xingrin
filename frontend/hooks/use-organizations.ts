@@ -28,7 +28,7 @@ export function useOrganizations(
   params: {
     page?: number
     pageSize?: number
-    search?: string
+    filter?: string
   } = {},
   options?: {
     enabled?: boolean
@@ -38,7 +38,7 @@ export function useOrganizations(
     queryKey: ['organizations', {
       page: params.page || 1,
       pageSize: params.pageSize || 10,
-      search: params.search || undefined,
+      filter: params.filter || undefined,
     }],
     queryFn: () => OrganizationService.getOrganizations(params || {}),
     select: (response) => {

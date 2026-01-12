@@ -58,7 +58,7 @@ func (s *TargetService) Create(req *dto.CreateTargetRequest) (*model.Target, err
 
 // List returns paginated targets
 func (s *TargetService) List(query *dto.TargetListQuery) ([]model.Target, int64, error) {
-	return s.repo.FindAll(query.GetOffset(), query.GetPageSize(), query.Type, query.Search)
+	return s.repo.FindAll(query.GetPage(), query.GetPageSize(), query.Type, query.Filter)
 }
 
 // GetByID returns a target by ID
@@ -217,7 +217,6 @@ func (s *TargetService) BatchCreate(req *dto.BatchCreateTargetRequest) *dto.Batc
 		// Query all targets by names to get their IDs
 		targets, err := s.repo.FindByNames(validNames)
 		if err != nil {
-			// Targets created but association failed - still return success for creation
 			return &dto.BatchCreateTargetResponse{
 				CreatedCount:  createdCount,
 				FailedCount:   len(failedTargets),

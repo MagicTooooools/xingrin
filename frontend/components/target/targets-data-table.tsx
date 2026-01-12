@@ -151,7 +151,7 @@ export function TargetsDataTable({
           </Button>
           {onTypeFilterChange && (
             <Select value={typeFilter || "all"} onValueChange={(value) => onTypeFilterChange(value === "all" ? "" : value)}>
-              <SelectTrigger className="h-8 w-[120px]">
+              <SelectTrigger size="sm" className="w-[120px]">
                 <SelectValue placeholder={tActions("filter")} />
               </SelectTrigger>
               <SelectContent>

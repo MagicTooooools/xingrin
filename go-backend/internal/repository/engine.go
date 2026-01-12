@@ -2,6 +2,7 @@ package repository
 
 import (
 	"github.com/xingrin/go-backend/internal/model"
+	"github.com/xingrin/go-backend/internal/pkg/scope"
 	"gorm.io/gorm"
 )
 
@@ -31,7 +32,7 @@ func (r *EngineRepository) FindByID(id int) (*model.ScanEngine, error) {
 }
 
 // FindAll finds all engines with pagination
-func (r *EngineRepository) FindAll(offset, limit int) ([]model.ScanEngine, int64, error) {
+func (r *EngineRepository) FindAll(page, pageSize int) ([]model.ScanEngine, int64, error) {
 	var engines []model.ScanEngine
 	var total int64
 
@@ -39,7 +40,11 @@ func (r *EngineRepository) FindAll(offset, limit int) ([]model.ScanEngine, int64
 		return nil, 0, err
 	}
 
-	err := r.db.Offset(offset).Limit(limit).Order("created_at DESC").Find(&engines).Error
+	err := r.db.Scopes(
+		scope.WithPagination(page, pageSize),
+		scope.OrderByCreatedAtDesc(),
+	).Find(&engines).Error
+
 	return engines, total, err
 }
 

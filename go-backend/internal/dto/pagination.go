@@ -27,11 +27,6 @@ func (p *PaginationQuery) GetPageSize() int {
 	return p.PageSize
 }
 
-// GetOffset returns offset for database query
-func (p *PaginationQuery) GetOffset() int {
-	return (p.GetPage() - 1) * p.GetPageSize()
-}
-
 // PaginatedResponse represents a paginated response (matches Python format)
 type PaginatedResponse[T any] struct {
 	Results    []T   `json:"results"`

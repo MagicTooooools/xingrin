@@ -17,16 +17,16 @@ import { USE_MOCK, mockDelay, getMockTargets, getMockTargetById, getMockTargetBl
 /**
  * Get all targets list (paginated)
  */
-export async function getTargets(page = 1, pageSize = 10, search?: string, type?: string): Promise<TargetsResponse> {
+export async function getTargets(page = 1, pageSize = 10, filter?: string, type?: string): Promise<TargetsResponse> {
   if (USE_MOCK) {
     await mockDelay()
-    return getMockTargets({ page, pageSize, search })
+    return getMockTargets({ page, pageSize, search: filter })
   }
   const response = await api.get<TargetsResponse>('/targets/', {
     params: {
       page,
       pageSize,
-      ...(search && { search }),
+      ...(filter && { filter }),
       ...(type && { type }),
     },
   })

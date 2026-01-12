@@ -11,13 +11,14 @@ export class OrganizationService {
    * @param params - Query parameter object
    * @param params.page - Current page number, 1-based
    * @param params.pageSize - Page size
+   * @param params.filter - Filter string (plain text or smart filter syntax)
    * @returns Promise<OrganizationsResponse<Organization>>
    * @description Backend is fixed to sort by update time in descending order, does not support custom sorting
    */
   static async getOrganizations(params?: {
     page?: number
     pageSize?: number
-    search?: string
+    filter?: string
   }): Promise<OrganizationsResponse<Organization>> {
     if (USE_MOCK) {
       await mockDelay()

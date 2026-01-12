@@ -27,7 +27,7 @@ func TestTableNames(t *testing.T) {
 		{Target{}, "target"},
 		{Scan{}, "scan"},
 		{Subdomain{}, "subdomain"},
-		{WebSite{}, "website"},
+		{Website{}, "website"},
 		{WorkerNode{}, "worker_node"},
 		{ScanEngine{}, "scan_engine"},
 		// Asset models
@@ -150,7 +150,6 @@ func TestScanJSONFieldNames(t *testing.T) {
 		}
 	}
 }
-
 
 // TestGORMColumnTags tests that GORM column tags use snake_case
 // Property 3: 数据库字段映射正确性

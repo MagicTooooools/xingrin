@@ -5,7 +5,7 @@
  * 1. Unified HTTP request wrapper
  * 2. Unified error handling
  * 3. Request/response logging
- * 4. JWT token management
+ * 4. JWT token management with auto-refresh
  * 
  * Naming convention explanation:
  * - Frontend (TypeScript/React): camelCase
@@ -18,11 +18,33 @@
  *   Example: pageSize, createdAt, organizationId
  */
 
-import axios, { AxiosRequestConfig } from 'axios';
+import axios, { AxiosRequestConfig, AxiosError, InternalAxiosRequestConfig } from 'axios';
 
 // Token storage keys
 const ACCESS_TOKEN_KEY = 'accessToken';
 const REFRESH_TOKEN_KEY = 'refreshToken';
+
+// Track if we're currently refreshing to prevent multiple refresh calls
+let isRefreshing = false;
+// Queue of failed requests to retry after token refresh
+let failedQueue: Array<{
+  resolve: (token: string) => void;
+  reject: (error: unknown) => void;
+}> = [];
+
+/**
+ * Process the queue of failed requests after token refresh
+ */
+const processQueue = (error: unknown, token: string | null = null) => {
+  failedQueue.forEach((prom) => {
+    if (error) {
+      prom.reject(error);
+    } else if (token) {
+      prom.resolve(token);
+    }
+  });
+  failedQueue = [];
+};
 
 /**
  * Token management utilities
@@ -42,6 +64,11 @@ export const tokenManager = {
     if (typeof window === 'undefined') return;
     localStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
     localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
+  },
+
+  setAccessToken: (accessToken: string): void => {
+    if (typeof window === 'undefined') return;
+    localStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
   },
   
   clearTokens: (): void => {
@@ -106,15 +133,12 @@ apiClient.interceptors.request.use(
 );
 
 /**
- * Response interceptor: Handle response data
+ * Response interceptor: Handle response data and auto-refresh token
  * 
  * Workflow:
  * 1. Log response (for development debugging)
- * 2. Return response data
- * 
- * Notes:
- * - Backend returns camelCase JSON
- * - Frontend can use directly, no additional conversion needed
+ * 2. On 401 error, try to refresh token and retry the request
+ * 3. Return response data
  */
 apiClient.interceptors.response.use(
   (response) => {
@@ -130,42 +154,89 @@ apiClient.interceptors.response.use(
 
     return response;
   },
-  (error) => {
+  async (error: AxiosError) => {
+    const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
+
     // Only output error logs in development environment
     if (process.env.NODE_ENV === 'development') {
-      // Check if it's an Axios error
-      if (axios.isAxiosError(error)) {
-        console.error('[ERROR] API Error:', {
-          status: error.response?.status,
-          statusText: error.response?.statusText,
-          url: error.config?.url,
-          method: error.config?.method,
-          data: error.response?.data,
-          message: error.message,
-          code: error.code
-        });
-      } else if (error instanceof Error) {
-        // Regular Error object
-        console.error('[ERROR] API Error:', error.message, error.stack);
-      } else {
-        // Unknown error type
-        console.error('[ERROR] API Error: Unknown error', String(error));
-      }
+      console.error('[ERROR] API Error:', {
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        url: error.config?.url,
+        method: error.config?.method,
+        data: error.response?.data,
+        message: error.message,
+        code: error.code
+      });
     }
 
-    // Handle 401 Unauthorized: clear tokens and redirect to login page
-    if (axios.isAxiosError(error) && error.response?.status === 401) {
-      const url = error.config?.url || '';
-      // Exclude auth-related APIs to avoid redirect loops
+    // Handle 401 Unauthorized with auto-refresh
+    if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {
+      const url = originalRequest.url || '';
+      
+      // Don't try to refresh for auth-related APIs
       const isAuthApi = url.includes('/auth/login') || 
                         url.includes('/auth/logout') || 
-                        url.includes('/auth/me') ||
                         url.includes('/auth/refresh');
       
-      if (!isAuthApi && typeof window !== 'undefined') {
-        // Clear tokens and redirect to login
+      if (isAuthApi) {
+        return Promise.reject(error);
+      }
+
+      // Check if we have a refresh token
+      const refreshToken = tokenManager.getRefreshToken();
+      if (!refreshToken) {
+        // No refresh token, redirect to login
         tokenManager.clearTokens();
-        window.location.href = '/login';
+        if (typeof window !== 'undefined') {
+          window.location.href = '/login';
+        }
+        return Promise.reject(error);
+      }
+
+      // If already refreshing, queue this request
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        })
+          .then((token) => {
+            originalRequest.headers.Authorization = `Bearer ${token}`;
+            return apiClient(originalRequest);
+          })
+          .catch((err) => Promise.reject(err));
+      }
+
+      // Mark as retrying and start refresh
+      originalRequest._retry = true;
+      isRefreshing = true;
+
+      try {
+        // Call refresh token API
+        const response = await axios.post('/api/auth/refresh/', {
+          refreshToken: refreshToken,
+        });
+
+        const { accessToken: newAccessToken } = response.data;
+        
+        // Save new access token
+        tokenManager.setAccessToken(newAccessToken);
+        
+        // Process queued requests with new token
+        processQueue(null, newAccessToken);
+        
+        // Retry original request with new token
+        originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+        return apiClient(originalRequest);
+      } catch (refreshError) {
+        // Refresh failed, clear tokens and redirect to login
+        processQueue(refreshError, null);
+        tokenManager.clearTokens();
+        if (typeof window !== 'undefined') {
+          window.location.href = '/login';
+        }
+        return Promise.reject(refreshError);
+      } finally {
+        isRefreshing = false;
       }
     }
 

@@ -2267,6 +2267,31 @@
       "creating": "Creating...",
       "bulkAdd": "Bulk Add"
     },
+    "url": {
+      "endpoint": {
+        "title": "Bulk Add Endpoints",
+        "description": "Enter endpoint URL list, one per line.",
+        "placeholder": "Enter endpoint URLs, one per line\nExample:\nhttps://example.com/api/v1\nhttps://example.com/api/v2\nhttps://example.com/login"
+      },
+      "website": {
+        "title": "Bulk Add Websites",
+        "description": "Enter website URL list, one per line.",
+        "placeholder": "Enter website URLs, one per line\nExample:\nhttps://example.com\nhttps://www.example.com\nhttps://api.example.com"
+      },
+      "directory": {
+        "title": "Bulk Add Directories",
+        "description": "Enter directory URL list, one per line.",
+        "placeholder": "Enter directory URLs, one per line\nExample:\nhttps://example.com/admin\nhttps://example.com/api\nhttps://example.com/uploads"
+      },
+      "label": "URL List",
+      "valid": "Valid: {count}",
+      "duplicate": "Duplicate: {count}",
+      "invalid": "Invalid: {count}",
+      "mismatched": "Mismatched: {count}",
+      "lineError": "Line {line}: \"{value}\" - {error}",
+      "mismatchError": "Line {line}: \"{value}\" - URL does not belong to target {target}, please remove before submitting",
+      "creating": "Creating..."
+    },
     "common": {
       "cancel": "Cancel",
       "bulkAdd": "Bulk Add",

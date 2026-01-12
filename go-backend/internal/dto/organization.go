@@ -17,7 +17,7 @@ type UpdateOrganizationRequest struct {
 // OrganizationListQuery represents organization list query parameters
 type OrganizationListQuery struct {
 	PaginationQuery
-	Search string `form:"search"`
+	Filter string `form:"filter"`
 }
 
 // OrganizationResponse represents organization response

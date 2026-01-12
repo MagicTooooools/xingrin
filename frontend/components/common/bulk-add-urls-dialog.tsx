@@ -34,36 +34,6 @@ interface BulkAddUrlsDialogProps {
   onSuccess?: () => void
 }
 
-const ASSET_TYPE_LABELS: Record<AssetType, { title: string; description: string; placeholder: string }> = {
-  endpoint: {
-    title: 'Bulk Add Endpoints',
-    description: 'Enter endpoint URL list, one per line.',
-    placeholder: `Please enter endpoint URLs, one per line
-Example:
-https://example.com/api/v1
-https://example.com/api/v2
-https://example.com/login`,
-  },
-  website: {
-    title: 'Bulk Add Websites',
-    description: 'Enter website URL list, one per line.',
-    placeholder: `Please enter website URLs, one per line
-Example:
-https://example.com
-https://www.example.com
-https://api.example.com`,
-  },
-  directory: {
-    title: 'Bulk Add Directories',
-    description: 'Enter directory URL list, one per line.',
-    placeholder: `Please enter directory URLs, one per line
-Example:
-https://example.com/admin
-https://example.com/api
-https://example.com/uploads`,
-  },
-}
-
 /**
  * Bulk add URLs dialog component
  * 
@@ -80,6 +50,14 @@ export function BulkAddUrlsDialog({
   onSuccess,
 }: BulkAddUrlsDialogProps) {
   const tBulkAdd = useTranslations("bulkAdd.common")
+  const tUrl = useTranslations("bulkAdd.url")
+  
+  // Get translated labels based on asset type
+  const labels = {
+    title: tUrl(`${assetType}.title`),
+    description: tUrl(`${assetType}.description`),
+    placeholder: tUrl(`${assetType}.placeholder`),
+  }
   
   // Dialog open/close state
   const [internalOpen, setInternalOpen] = useState(false)
@@ -121,7 +99,6 @@ export function BulkAddUrlsDialog({
   }
 
   const mutation = getMutation()
-  const labels = ASSET_TYPE_LABELS[assetType]
 
   // Handle input changes
   const handleInputChange = (value: string) => {
@@ -222,7 +199,7 @@ export function BulkAddUrlsDialog({
         <DialogTrigger asChild>
           <Button size="sm" variant="outline">
             <Plus className="h-4 w-4" />
-            Bulk Add
+            {tBulkAdd("bulkAdd")}
           </Button>
         </DialogTrigger>
       )}
@@ -242,7 +219,7 @@ export function BulkAddUrlsDialog({
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
               <Label htmlFor="urls">
-                URL List <span className="text-destructive">*</span>
+                {tUrl("label")} <span className="text-destructive">*</span>
               </Label>
               <div className="flex border rounded-md overflow-hidden h-[220px]">
                 {/* Line number column */}
@@ -278,39 +255,43 @@ export function BulkAddUrlsDialog({
               {validationResult && (
                 <div className="text-xs space-y-1">
                   <div className="text-muted-foreground">
-                    Valid: {validationResult.validCount} items
+                    {tUrl("valid", { count: validationResult.validCount })}
                     {validationResult.duplicateCount > 0 && (
                       <span className="text-yellow-600 ml-2">
-                        Duplicate: {validationResult.duplicateCount} items
+                        {tUrl("duplicate", { count: validationResult.duplicateCount })}
                       </span>
                     )}
                     {validationResult.invalidCount > 0 && (
                       <span className="text-destructive ml-2">
-                        Invalid: {validationResult.invalidCount} items
+                        {tUrl("invalid", { count: validationResult.invalidCount })}
                       </span>
                     )}
                     {validationResult.mismatchedCount > 0 && (
                       <span className="text-destructive ml-2">
-                        Mismatched: {validationResult.mismatchedCount} items
+                        {tUrl("mismatched", { count: validationResult.mismatchedCount })}
                       </span>
                     )}
                   </div>
                   {validationResult.firstError && (
                     <div className="text-destructive">
-                      Line {validationResult.firstError.index + 1}: &quot;
-                      {validationResult.firstError.url.length > 50 
-                        ? validationResult.firstError.url.substring(0, 50) + '...'
-                        : validationResult.firstError.url}&quot; -{" "}
-                      {validationResult.firstError.error}
+                      {tUrl("lineError", {
+                        line: validationResult.firstError.index + 1,
+                        value: validationResult.firstError.url.length > 50 
+                          ? validationResult.firstError.url.substring(0, 50) + '...'
+                          : validationResult.firstError.url,
+                        error: validationResult.firstError.error,
+                      })}
                     </div>
                   )}
                   {validationResult.firstMismatch && !validationResult.firstError && (
                     <div className="text-destructive">
-                      Line {validationResult.firstMismatch.index + 1}: &quot;
-                      {validationResult.firstMismatch.url.length > 50 
-                        ? validationResult.firstMismatch.url.substring(0, 50) + '...'
-                        : validationResult.firstMismatch.url}&quot; - 
-                      URL does not belong to target {targetName}, please remove before submitting
+                      {tUrl("mismatchError", {
+                        line: validationResult.firstMismatch.index + 1,
+                        value: validationResult.firstMismatch.url.length > 50 
+                          ? validationResult.firstMismatch.url.substring(0, 50) + '...'
+                          : validationResult.firstMismatch.url,
+                        target: targetName,
+                      })}
                     </div>
                   )}
                 </div>
@@ -325,7 +306,7 @@ export function BulkAddUrlsDialog({
               onClick={() => handleOpenChange(false)}
               disabled={mutation.isPending}
             >
-              Cancel
+              {tBulkAdd("cancel")}
             </Button>
             <Button
               type="submit"
@@ -334,12 +315,12 @@ export function BulkAddUrlsDialog({
               {mutation.isPending ? (
                 <>
                   <LoadingSpinner />
-                  Creating...
+                  {tUrl("creating")}
                 </>
               ) : (
                 <>
                   <Plus className="h-4 w-4" />
-                  Bulk Add
+                  {tBulkAdd("bulkAdd")}
                 </>
               )}
             </Button>

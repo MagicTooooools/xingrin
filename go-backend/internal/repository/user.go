@@ -2,6 +2,7 @@ package repository
 
 import (
 	"github.com/xingrin/go-backend/internal/model"
+	"github.com/xingrin/go-backend/internal/pkg/scope"
 	"gorm.io/gorm"
 )
 
@@ -41,7 +42,7 @@ func (r *UserRepository) FindByUsername(username string) (*model.User, error) {
 }
 
 // FindAll finds all users with pagination
-func (r *UserRepository) FindAll(offset, limit int) ([]model.User, int64, error) {
+func (r *UserRepository) FindAll(page, pageSize int) ([]model.User, int64, error) {
 	var users []model.User
 	var total int64
 
@@ -49,7 +50,11 @@ func (r *UserRepository) FindAll(offset, limit int) ([]model.User, int64, error)
 		return nil, 0, err
 	}
 
-	err := r.db.Offset(offset).Limit(limit).Order("id DESC").Find(&users).Error
+	err := r.db.Scopes(
+		scope.WithPagination(page, pageSize),
+		scope.OrderBy("id", true),
+	).Find(&users).Error
+
 	return users, total, err
 }
 

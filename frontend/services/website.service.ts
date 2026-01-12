@@ -47,6 +47,12 @@ export class WebsiteService {
     const response = await api.get<Blob>(`/targets/${targetId}/websites/export/`, {
       responseType: "blob",
     })
+    // Check if response is actually an error (JSON instead of CSV)
+    if (response.data.type === 'application/json') {
+      const text = await response.data.text()
+      const error = JSON.parse(text)
+      throw new Error(error.error?.message || 'Export failed')
+    }
     return response.data
   }
 
@@ -55,6 +61,12 @@ export class WebsiteService {
     const response = await api.get<Blob>(`/scans/${scanId}/websites/export/`, {
       responseType: "blob",
     })
+    // Check if response is actually an error (JSON instead of CSV)
+    if (response.data.type === 'application/json') {
+      const text = await response.data.text()
+      const error = JSON.parse(text)
+      throw new Error(error.error?.message || 'Export failed')
+    }
     return response.data
   }
 }

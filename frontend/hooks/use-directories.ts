@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tansta
 import { useToastMessages } from '@/lib/toast-helpers'
 import { getErrorCode } from '@/lib/response-parser'
 import { DirectoryService } from '@/services/directory.service'
+import { api } from '@/lib/api-client'
 import type { Directory, DirectoryListResponse } from '@/types/directory.types'
 
 // API 服务函数
@@ -11,14 +12,11 @@ const directoryService = {
     targetId: number,
     params: { page: number; pageSize: number; filter?: string }
   ): Promise<DirectoryListResponse> => {
-    const filterParam = params.filter ? `&filter=${encodeURIComponent(params.filter)}` : ''
-    const response = await fetch(
-      `/api/targets/${targetId}/directories/?page=${params.page}&pageSize=${params.pageSize}${filterParam}`
+    const response = await api.get<DirectoryListResponse>(
+      `/targets/${targetId}/directories/`,
+      { params }
     )
-    if (!response.ok) {
-      throw new Error('获取目录列表失败')
-    }
-    return response.json()
+    return response.data
   },
 
   // 获取扫描的目录列表
@@ -26,14 +24,11 @@ const directoryService = {
     scanId: number,
     params: { page: number; pageSize: number; filter?: string }
   ): Promise<DirectoryListResponse> => {
-    const filterParam = params.filter ? `&filter=${encodeURIComponent(params.filter)}` : ''
-    const response = await fetch(
-      `/api/scans/${scanId}/directories/?page=${params.page}&pageSize=${params.pageSize}${filterParam}`
+    const response = await api.get<DirectoryListResponse>(
+      `/scans/${scanId}/directories/`,
+      { params }
     )
-    if (!response.ok) {
-      throw new Error('获取目录列表失败')
-    }
-    return response.json()
+    return response.data
   },
 
   // 批量删除目录（支持单个或多个）
@@ -43,17 +38,8 @@ const directoryService = {
     requestedIds: number[]
     cascadeDeleted: Record<string, number>
   }> => {
-    const response = await fetch('/api/directories/bulk-delete/', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ ids }),
-    })
-    if (!response.ok) {
-      throw new Error('批量删除目录失败')
-    }
-    return response.json()
+    const response = await api.post('/directories/bulk-delete/', { ids })
+    return response.data
   },
 
   // 删除单个目录（使用单独的 DELETE API）
@@ -68,13 +54,8 @@ const directoryService = {
       phase2: string
     }
   }> => {
-    const response = await fetch(`/api/directories/${directoryId}/`, {
-      method: 'DELETE',
-    })
-    if (!response.ok) {
-      throw new Error('删除目录失败')
-    }
-    return response.json()
+    const response = await api.delete(`/directories/${directoryId}/`)
+    return response.data
   },
 }
 
@@ -180,8 +161,16 @@ export function useBulkCreateDirectories() {
         toastMessages.warning('toast.asset.directory.create.partialSuccess', { success: 0, skipped: 0 })
       }
       
-      queryClient.invalidateQueries({ queryKey: ['target-directories', targetId] })
-      queryClient.invalidateQueries({ queryKey: ['scan-directories'] })
+      queryClient.invalidateQueries({
+        queryKey: ['target-directories', targetId],
+        exact: false,
+        refetchType: 'active',
+      })
+      queryClient.invalidateQueries({
+        queryKey: ['scan-directories'],
+        exact: false,
+        refetchType: 'active',
+      })
     },
     onError: (error: any) => {
       toastMessages.dismiss('bulk-create-directories')

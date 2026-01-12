@@ -2267,6 +2267,31 @@
       "creating": "创建中...",
       "bulkAdd": "批量添加"
     },
+    "url": {
+      "endpoint": {
+        "title": "批量添加端点",
+        "description": "输入端点 URL 列表，每行一个。",
+        "placeholder": "请输入端点 URL，每行一个\n例如：\nhttps://example.com/api/v1\nhttps://example.com/api/v2\nhttps://example.com/login"
+      },
+      "website": {
+        "title": "批量添加网站",
+        "description": "输入网站 URL 列表，每行一个。",
+        "placeholder": "请输入网站 URL，每行一个\n例如：\nhttps://example.com\nhttps://www.example.com\nhttps://api.example.com"
+      },
+      "directory": {
+        "title": "批量添加目录",
+        "description": "输入目录 URL 列表，每行一个。",
+        "placeholder": "请输入目录 URL，每行一个\n例如：\nhttps://example.com/admin\nhttps://example.com/api\nhttps://example.com/uploads"
+      },
+      "label": "URL 列表",
+      "valid": "有效: {count} 个",
+      "duplicate": "重复: {count} 个",
+      "invalid": "无效: {count} 个",
+      "mismatched": "不匹配: {count} 个",
+      "lineError": "第 {line} 行: \"{value}\" - {error}",
+      "mismatchError": "第 {line} 行: \"{value}\" - URL 不属于目标 {target}，请移除后再提交",
+      "creating": "创建中..."
+    },
     "common": {
       "cancel": "取消",
       "bulkAdd": "批量添加",
