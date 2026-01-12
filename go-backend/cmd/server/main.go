@@ -200,11 +200,11 @@ func main() {
 			protected.GET("/targets/:id/websites", websiteHandler.List)
 			protected.GET("/targets/:id/websites/export", websiteHandler.Export)
 			protected.POST("/targets/:id/websites/bulk-create", websiteHandler.BulkCreate)
-			protected.POST("/targets/:id/websites/bulk-delete", websiteHandler.BulkDelete)
 
 			// Websites (standalone)
 			protected.GET("/websites/:id", websiteHandler.GetByID)
 			protected.DELETE("/websites/:id", websiteHandler.Delete)
+			protected.POST("/websites/bulk-delete", websiteHandler.BulkDelete)
 
 			// Engines
 			protected.POST("/engines", engineHandler.Create)

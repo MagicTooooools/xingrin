@@ -131,7 +131,7 @@ func (h *WebsiteHandler) Delete(c *gin.Context) {
 }
 
 // BulkDelete deletes multiple websites by IDs
-// POST /api/targets/:id/websites/bulk-delete
+// POST /api/websites/bulk-delete
 func (h *WebsiteHandler) BulkDelete(c *gin.Context) {
 	var req dto.BulkDeleteRequest
 	if !dto.BindJSON(c, &req) {

@@ -18,11 +18,11 @@ export interface BulkDeleteResponse {
 export class WebsiteService {
   /**
    * Bulk delete websites
-   * POST /api/assets/websites/bulk-delete/
+   * POST /api/websites/bulk-delete/
    */
   static async bulkDelete(ids: number[]): Promise<BulkDeleteResponse> {
     const response = await api.post<BulkDeleteResponse>(
-      `/assets/websites/bulk-delete/`,
+      `/websites/bulk-delete/`,
       { ids }
     )
     return response.data
