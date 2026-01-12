@@ -14,10 +14,22 @@ type UpdateOrganizationRequest struct {
 	Description string `json:"description" binding:"max=1000"`
 }
 
+// OrganizationListQuery represents organization list query parameters
+type OrganizationListQuery struct {
+	PaginationQuery
+	Search string `form:"search"`
+}
+
 // OrganizationResponse represents organization response
 type OrganizationResponse struct {
 	ID          int       `json:"id"`
 	Name        string    `json:"name"`
 	Description string    `json:"description"`
 	CreatedAt   time.Time `json:"createdAt"`
+	TargetCount int64     `json:"targetCount"`
+}
+
+// LinkTargetsRequest represents link/unlink targets request
+type LinkTargetsRequest struct {
+	TargetIDs []int `json:"targetIds" binding:"required,min=1"`
 }

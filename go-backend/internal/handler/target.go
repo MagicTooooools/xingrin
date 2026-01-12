@@ -23,8 +23,7 @@ func NewTargetHandler(svc *service.TargetService) *TargetHandler {
 // POST /api/targets
 func (h *TargetHandler) Create(c *gin.Context) {
 	var req dto.CreateTargetRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		dto.BadRequest(c, "Invalid request body")
+	if !dto.BindJSON(c, &req) {
 		return
 	}
 
@@ -55,8 +54,7 @@ func (h *TargetHandler) Create(c *gin.Context) {
 // GET /api/targets
 func (h *TargetHandler) List(c *gin.Context) {
 	var query dto.TargetListQuery
-	if err := c.ShouldBindQuery(&query); err != nil {
-		dto.BadRequest(c, "Invalid query parameters")
+	if !dto.BindQuery(c, &query) {
 		return
 	}
 
@@ -118,8 +116,7 @@ func (h *TargetHandler) Update(c *gin.Context) {
 	}
 
 	var req dto.UpdateTargetRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		dto.BadRequest(c, "Invalid request body")
+	if !dto.BindJSON(c, &req) {
 		return
 	}
 
@@ -170,4 +167,33 @@ func (h *TargetHandler) Delete(c *gin.Context) {
 	}
 
 	dto.NoContent(c)
+}
+
+// BatchCreate creates multiple targets at once
+// POST /api/targets/batch_create
+func (h *TargetHandler) BatchCreate(c *gin.Context) {
+	var req dto.BatchCreateTargetRequest
+	if !dto.BindJSON(c, &req) {
+		return
+	}
+
+	result := h.svc.BatchCreate(&req)
+	dto.Created(c, result)
+}
+
+// BulkDelete soft deletes multiple targets
+// POST /api/targets/bulk-delete
+func (h *TargetHandler) BulkDelete(c *gin.Context) {
+	var req dto.BulkDeleteRequest
+	if !dto.BindJSON(c, &req) {
+		return
+	}
+
+	deletedCount, err := h.svc.BulkDelete(req.IDs)
+	if err != nil {
+		dto.InternalError(c, "Failed to delete targets")
+		return
+	}
+
+	dto.Success(c, dto.BulkDeleteResponse{DeletedCount: deletedCount})
 }

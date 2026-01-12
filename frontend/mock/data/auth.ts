@@ -3,8 +3,7 @@ import type { User, MeResponse, LoginResponse, LogoutResponse } from '@/types/au
 export const mockUser: User = {
   id: 1,
   username: 'admin',
-  isStaff: true,
-  isSuperuser: true,
+  email: 'admin@example.com',
 }
 
 export const mockMeResponse: MeResponse = {
@@ -13,7 +12,9 @@ export const mockMeResponse: MeResponse = {
 }
 
 export const mockLoginResponse: LoginResponse = {
-  message: 'Login successful',
+  accessToken: 'mock-access-token',
+  refreshToken: 'mock-refresh-token',
+  expiresIn: 900,
   user: mockUser,
 }
 

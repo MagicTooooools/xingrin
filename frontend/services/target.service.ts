@@ -17,7 +17,7 @@ import { USE_MOCK, mockDelay, getMockTargets, getMockTargetById, getMockTargetBl
 /**
  * Get all targets list (paginated)
  */
-export async function getTargets(page = 1, pageSize = 10, search?: string): Promise<TargetsResponse> {
+export async function getTargets(page = 1, pageSize = 10, search?: string, type?: string): Promise<TargetsResponse> {
   if (USE_MOCK) {
     await mockDelay()
     return getMockTargets({ page, pageSize, search })
@@ -27,6 +27,7 @@ export async function getTargets(page = 1, pageSize = 10, search?: string): Prom
       page,
       pageSize,
       ...(search && { search }),
+      ...(type && { type }),
     },
   })
   return response.data
@@ -63,31 +64,10 @@ export async function updateTarget(id: number, data: UpdateTargetRequest): Promi
 }
 
 /**
- * Delete single target (using separate DELETE API)
+ * Delete single target (RESTful 204 No Content)
  */
-export async function deleteTarget(id: number): Promise<{
-  message: string
-  targetId: number
-  targetName: string
-  deletedCount: number
-  deletedTargets: string[]
-  detail: {
-    phase1: string
-    phase2: string
-  }
-}> {
-  const response = await api.delete<{
-    message: string
-    targetId: number
-    targetName: string
-    deletedCount: number
-    deletedTargets: string[]
-    detail: {
-      phase1: string
-      phase2: string
-    }
-  }>(`/targets/${id}/`)
-  return response.data
+export async function deleteTarget(id: number): Promise<void> {
+  await api.delete(`/targets/${id}/`)
 }
 
 /**

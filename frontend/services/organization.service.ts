@@ -56,6 +56,7 @@ export class OrganizationService {
     page?: number
     pageSize?: number
     search?: string
+    type?: string
   }): Promise<any> {
     const response = await api.get<any>(
       `/organizations/${id}/targets/`,

@@ -6,8 +6,9 @@
 export interface User {
   id: number
   username: string
-  isStaff: boolean
-  isSuperuser: boolean
+  email?: string
+  isStaff?: boolean
+  isSuperuser?: boolean
 }
 
 // Login request
@@ -16,9 +17,11 @@ export interface LoginRequest {
   password: string
 }
 
-// Login response
+// Login response (JWT)
 export interface LoginResponse {
-  message: string
+  accessToken: string
+  refreshToken: string
+  expiresIn: number
   user: User
 }
 
@@ -42,4 +45,15 @@ export interface ChangePasswordRequest {
 // Change password response
 export interface ChangePasswordResponse {
   message: string
+}
+
+// Refresh token request
+export interface RefreshTokenRequest {
+  refreshToken: string
+}
+
+// Refresh token response
+export interface RefreshTokenResponse {
+  accessToken: string
+  expiresIn: number
 }

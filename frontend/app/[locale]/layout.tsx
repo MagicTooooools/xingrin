@@ -40,7 +40,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     title: t('title'),
     description: t('description'),
     keywords: t('keywords').split(',').map(k => k.trim()),
-    generator: "Xingrin ASM Platform",
+    generator: "Star Patrol ASM Platform",
     authors: [{ name: "yyhuni" }],
     openGraph: {
       title: t('ogTitle'),

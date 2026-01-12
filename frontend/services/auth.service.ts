@@ -1,7 +1,7 @@
 /**
  * Authentication service
  */
-import { api } from '@/lib/api-client'
+import { api, tokenManager } from '@/lib/api-client'
 import type { 
   LoginRequest, 
   LoginResponse, 
@@ -14,6 +14,7 @@ import { USE_MOCK, mockDelay, mockLoginResponse, mockLogoutResponse, mockMeRespo
 
 /**
  * User login
+ * Stores JWT tokens on successful login
  */
 export async function login(data: LoginRequest): Promise<LoginResponse> {
   if (USE_MOCK) {
@@ -21,31 +22,65 @@ export async function login(data: LoginRequest): Promise<LoginResponse> {
     return mockLoginResponse
   }
   const res = await api.post<LoginResponse>('/auth/login/', data)
+  
+  // Store JWT tokens
+  if (res.data.accessToken && res.data.refreshToken) {
+    tokenManager.setTokens(res.data.accessToken, res.data.refreshToken)
+  }
+  
   return res.data
 }
 
 /**
  * User logout
+ * Clears JWT tokens
  */
 export async function logout(): Promise<LogoutResponse> {
   if (USE_MOCK) {
     await mockDelay()
+    tokenManager.clearTokens()
     return mockLogoutResponse
   }
-  const res = await api.post<LogoutResponse>('/auth/logout/')
-  return res.data
+  
+  // Clear tokens first (even if API call fails)
+  tokenManager.clearTokens()
+  
+  // Optionally notify backend (for token blacklisting if implemented)
+  try {
+    const res = await api.post<LogoutResponse>('/auth/logout/')
+    return res.data
+  } catch {
+    // Logout is successful even if API call fails (tokens are cleared)
+    return { message: 'Logged out successfully' }
+  }
 }
 
 /**
  * Get current user information
+ * Returns authenticated: false if no token
  */
 export async function getMe(): Promise<MeResponse> {
   if (USE_MOCK) {
     await mockDelay()
     return mockMeResponse
   }
-  const res = await api.get<MeResponse>('/auth/me/')
-  return res.data
+  
+  // If no token, return unauthenticated
+  if (!tokenManager.hasTokens()) {
+    return { authenticated: false, user: null }
+  }
+  
+  try {
+    const res = await api.get<{ id: number; username: string; email: string }>('/auth/me/')
+    return {
+      authenticated: true,
+      user: res.data
+    }
+  } catch {
+    // Token invalid or expired
+    tokenManager.clearTokens()
+    return { authenticated: false, user: null }
+  }
 }
 
 /**

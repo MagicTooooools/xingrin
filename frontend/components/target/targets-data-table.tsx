@@ -6,6 +6,13 @@ import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { UnifiedDataTable } from "@/components/ui/data-table"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import type { ColumnDef } from "@tanstack/react-table"
 import type { Target } from "@/types/target.types"
 import type { PaginationInfo } from "@/types/common.types"
@@ -27,6 +34,9 @@ interface TargetsDataTableProps {
   onPaginationChange?: (pagination: { pageIndex: number, pageSize: number }) => void
   totalCount?: number
   manualPagination?: boolean
+  // Type filter
+  typeFilter?: string
+  onTypeFilterChange?: (value: string) => void
 }
 
 /**
@@ -49,6 +59,8 @@ export function TargetsDataTable({
   onPaginationChange,
   totalCount,
   manualPagination = false,
+  typeFilter,
+  onTypeFilterChange,
 }: TargetsDataTableProps) {
   const t = useTranslations("common.status")
   const tActions = useTranslations("common.actions")
@@ -137,6 +149,19 @@ export function TargetsDataTable({
               <IconSearch className="h-4 w-4" />
             )}
           </Button>
+          {onTypeFilterChange && (
+            <Select value={typeFilter || "all"} onValueChange={(value) => onTypeFilterChange(value === "all" ? "" : value)}>
+              <SelectTrigger className="h-8 w-[120px]">
+                <SelectValue placeholder={tActions("filter")} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">{tActions("all")}</SelectItem>
+                <SelectItem value="domain">{tTarget("types.domain")}</SelectItem>
+                <SelectItem value="ip">{tTarget("types.ip")}</SelectItem>
+                <SelectItem value="cidr">{tTarget("types.cidr")}</SelectItem>
+              </SelectContent>
+            </Select>
+          )}
         </div>
       }
     />

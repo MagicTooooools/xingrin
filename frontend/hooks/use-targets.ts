@@ -29,13 +29,13 @@ import type {
 /**
  * 获取所有目标列表
  * 支持两种调用方式：
- * 1. useTargets(page, pageSize, organizationId) - 直接传参数
+ * 1. useTargets(page, pageSize, type, search) - 直接传参数
  * 2. useTargets({ page, pageSize, organizationId }) - 传对象（已废弃，为了兼容性保留）
  */
 export function useTargets(
   pageOrParams: number | { page?: number; pageSize?: number; organizationId?: number; search?: string } = 1,
   pageSize = 10,
-  organizationId?: number,
+  type?: string,
   search?: string
 ) {
   // 处理参数：支持对象参数或独立参数
@@ -43,6 +43,7 @@ export function useTargets(
   let actualPageSize: number
   let actualOrgId: number | undefined
   let actualSearch: string | undefined
+  let actualType: string | undefined
 
   if (typeof pageOrParams === 'object') {
     // 对象参数方式（兼容旧代码）
@@ -50,17 +51,19 @@ export function useTargets(
     actualPageSize = pageOrParams.pageSize || 10
     actualOrgId = pageOrParams.organizationId
     actualSearch = pageOrParams.search
+    actualType = undefined
   } else {
     // 独立参数方式
     actualPage = pageOrParams
     actualPageSize = pageSize
-    actualOrgId = organizationId
+    actualOrgId = undefined
     actualSearch = search
+    actualType = type
   }
 
   return useQuery({
-    queryKey: ['targets', { page: actualPage, pageSize: actualPageSize, organizationId: actualOrgId, search: actualSearch }],
-    queryFn: () => getTargets(actualPage, actualPageSize, actualSearch),
+    queryKey: ['targets', { page: actualPage, pageSize: actualPageSize, organizationId: actualOrgId, search: actualSearch, type: actualType }],
+    queryFn: () => getTargets(actualPage, actualPageSize, actualSearch, actualType),
     select: (response) => {
       // 如果指定了 organizationId，过滤结果
       if (actualOrgId) {
@@ -149,28 +152,25 @@ export function useUpdateTarget() {
 }
 
 /**
- * 删除目标（使用单独的 DELETE API）
+ * 删除目标（RESTful 204 No Content）
  */
 export function useDeleteTarget() {
   const queryClient = useQueryClient()
   const toastMessages = useToastMessages()
 
   return useMutation({
-    mutationFn: (id: number) => deleteTarget(id),
-    onMutate: (id) => {
+    mutationFn: ({ id, name }: { id: number; name: string }) => deleteTarget(id),
+    onMutate: ({ id }) => {
       toastMessages.loading('common.status.deleting', {}, `delete-target-${id}`)
     },
-    onSuccess: (response, id) => {
+    onSuccess: (_response, { id, name }) => {
       toastMessages.dismiss(`delete-target-${id}`)
-      
-      // 显示删除成功信息
-      const { targetName } = response
-      toastMessages.success('toast.target.delete.success', { name: targetName })
+      toastMessages.success('toast.target.delete.success', { name })
       
       queryClient.invalidateQueries({ queryKey: ['targets'] })
       queryClient.invalidateQueries({ queryKey: ['organizations'] })
     },
-    onError: (error: any, id) => {
+    onError: (error: any, { id }) => {
       toastMessages.dismiss(`delete-target-${id}`)
       toastMessages.errorFromCode(getErrorCode(error?.response?.data), 'toast.target.delete.error')
     },

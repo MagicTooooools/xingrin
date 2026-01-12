@@ -1,10 +1,9 @@
 package handler
 
 import (
-	"net/http"
-
 	"github.com/gin-gonic/gin"
 	"github.com/xingrin/go-backend/internal/auth"
+	"github.com/xingrin/go-backend/internal/dto"
 	"github.com/xingrin/go-backend/internal/middleware"
 	"github.com/xingrin/go-backend/internal/model"
 	"gorm.io/gorm"
@@ -32,9 +31,9 @@ type LoginRequest struct {
 
 // LoginResponse represents login response
 type LoginResponse struct {
-	AccessToken  string `json:"accessToken"`
-	RefreshToken string `json:"refreshToken"`
-	ExpiresIn    int64  `json:"expiresIn"`
+	AccessToken  string   `json:"accessToken"`
+	RefreshToken string   `json:"refreshToken"`
+	ExpiresIn    int64    `json:"expiresIn"`
 	User         UserInfo `json:"user"`
 }
 
@@ -60,8 +59,7 @@ type RefreshResponse struct {
 // POST /api/auth/login
 func (h *AuthHandler) Login(c *gin.Context) {
 	var req LoginRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+	if !dto.BindJSON(c, &req) {
 		return
 	}
 
@@ -69,33 +67,33 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	var user model.User
 	if err := h.db.Where("username = ?", req.Username).First(&user).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid username or password"})
+			dto.Unauthorized(c, "Invalid username or password")
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
+		dto.InternalError(c, "Database error")
 		return
 	}
 
 	// Check if user is active
 	if !user.IsActive {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "User account is disabled"})
+		dto.Unauthorized(c, "User account is disabled")
 		return
 	}
 
 	// Verify password
 	if !auth.VerifyPassword(req.Password, user.Password) {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid username or password"})
+		dto.Unauthorized(c, "Invalid username or password")
 		return
 	}
 
 	// Generate token pair
 	tokenPair, err := h.jwtManager.GenerateTokenPair(user.ID, user.Username)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
+		dto.InternalError(c, "Failed to generate token")
 		return
 	}
 
-	c.JSON(http.StatusOK, LoginResponse{
+	dto.Success(c, LoginResponse{
 		AccessToken:  tokenPair.AccessToken,
 		RefreshToken: tokenPair.RefreshToken,
 		ExpiresIn:    tokenPair.ExpiresIn,
@@ -111,26 +109,25 @@ func (h *AuthHandler) Login(c *gin.Context) {
 // POST /api/auth/refresh
 func (h *AuthHandler) RefreshToken(c *gin.Context) {
 	var req RefreshRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+	if !dto.BindJSON(c, &req) {
 		return
 	}
 
 	// Validate refresh token
 	claims, err := h.jwtManager.ValidateToken(req.RefreshToken)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid or expired refresh token"})
+		dto.Unauthorized(c, "Invalid or expired refresh token")
 		return
 	}
 
 	// Generate new access token
 	accessToken, expiresIn, err := h.jwtManager.GenerateAccessToken(claims.UserID, claims.Username)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
+		dto.InternalError(c, "Failed to generate token")
 		return
 	}
 
-	c.JSON(http.StatusOK, RefreshResponse{
+	dto.Success(c, RefreshResponse{
 		AccessToken: accessToken,
 		ExpiresIn:   expiresIn,
 	})
@@ -141,18 +138,18 @@ func (h *AuthHandler) RefreshToken(c *gin.Context) {
 func (h *AuthHandler) GetCurrentUser(c *gin.Context) {
 	claims, ok := middleware.GetUserClaims(c)
 	if !ok {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Not authenticated"})
+		dto.Unauthorized(c, "Not authenticated")
 		return
 	}
 
 	// Get user from database
 	var user model.User
 	if err := h.db.First(&user, claims.UserID).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		dto.NotFound(c, "User not found")
 		return
 	}
 
-	c.JSON(http.StatusOK, UserInfo{
+	dto.Success(c, UserInfo{
 		ID:       user.ID,
 		Username: user.Username,
 		Email:    user.Email,

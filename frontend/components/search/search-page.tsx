@@ -57,7 +57,7 @@ const QUICK_SEARCH_TAGS = [
 ]
 
 // 最近搜索本地存储 key
-const RECENT_SEARCHES_KEY = 'xingrin_recent_searches'
+const RECENT_SEARCHES_KEY = 'star_patrol_recent_searches'
 const MAX_RECENT_SEARCHES = 5
 
 // 获取最近搜索记录

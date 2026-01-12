@@ -248,7 +248,7 @@ export function OrganizationTargetsDetailView({
         onBulkDelete={handleBulkDelete}
         onSelectionChange={setSelectedTargets}
         searchPlaceholder={tColumns("target.target")}
-        addButtonText={tCommon("actions.add")}
+        addButtonText={tTarget("addTarget")}
         pagination={pagination}
         setPagination={setPagination}
         paginationInfo={targetsData ? {

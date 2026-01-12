@@ -2,13 +2,13 @@ import type { SystemLogResponse, LogFilesResponse, LogFile } from '@/types/syste
 
 export const mockLogFiles: LogFile[] = [
   {
-    filename: 'xingrin.log',
+    filename: 'star-patrol.log',
     category: 'system',
     size: 1234567,
     modifiedAt: '2024-12-28T10:00:00Z',
   },
   {
-    filename: 'xingrin-error.log',
+    filename: 'star-patrol-error.log',
     category: 'error',
     size: 45678,
     modifiedAt: '2024-12-28T09:30:00Z',
@@ -80,7 +80,7 @@ export function getMockSystemLogs(params?: {
   file?: string
   lines?: number
 }): SystemLogResponse {
-  const filename = params?.file || 'xingrin.log'
+  const filename = params?.file || 'star-patrol.log'
   const lines = params?.lines || 100
 
   let content: string

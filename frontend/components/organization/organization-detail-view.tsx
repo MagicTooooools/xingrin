@@ -82,9 +82,17 @@ export function OrganizationDetailView({
   const [searchQuery, setSearchQuery] = useState("")
   const [isSearching, setIsSearching] = useState(false)
 
+  // Type filter state
+  const [typeFilter, setTypeFilter] = useState<string>("")
+
   const handleSearchChange = (value: string) => {
     setIsSearching(true)
     setSearchQuery(value)
+    setPagination((prev) => ({ ...prev, pageIndex: 0 }))
+  }
+
+  const handleTypeFilterChange = (value: string) => {
+    setTypeFilter(value)
     setPagination((prev) => ({ ...prev, pageIndex: 0 }))
   }
 
@@ -111,6 +119,7 @@ export function OrganizationDetailView({
       page: pagination.pageIndex + 1,
       pageSize: pagination.pageSize,
       search: searchQuery || undefined,
+      type: typeFilter || undefined,
     }
   )
 
@@ -316,6 +325,8 @@ export function OrganizationDetailView({
             totalPages: targetsData.totalPages,
           } : undefined}
           onPaginationChange={handlePaginationChange}
+          typeFilter={typeFilter}
+          onTypeFilterChange={handleTypeFilterChange}
         />
       </div>
 

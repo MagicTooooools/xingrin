@@ -389,24 +389,6 @@ class TargetViewSet(viewsets.ModelViewSet):
         # 3. 返回响应
         return success_response(data=result, status_code=status.HTTP_201_CREATED)
     
-    # subdomains action 已迁移到 SubdomainViewSet 嵌套路由
-    # GET /api/targets/{id}/subdomains/ -> SubdomainViewSet
-
-    # vulnerabilities action 已迁移到 VulnerabilityViewSet 嵌套路由
-    # GET /api/targets/{id}/vulnerabilities/ -> VulnerabilityViewSet
-
-    # 所有资产相关的 action 和 export 已迁移到 asset/views.py 中的各 ViewSet
-    # GET /api/targets/{id}/subdomains/ -> SubdomainViewSet
-    # GET /api/targets/{id}/subdomains/export/ -> SubdomainViewSet.export
-    # GET /api/targets/{id}/websites/ -> WebSiteViewSet
-    # GET /api/targets/{id}/websites/export/ -> WebSiteViewSet.export
-    # GET /api/targets/{id}/endpoints/ -> EndpointViewSet
-    # GET /api/targets/{id}/endpoints/export/ -> EndpointViewSet.export
-    # GET /api/targets/{id}/directories/ -> DirectoryViewSet
-    # GET /api/targets/{id}/directories/export/ -> DirectoryViewSet.export
-    # GET /api/targets/{id}/ip-addresses/ -> HostPortMappingViewSet
-    # GET /api/targets/{id}/ip-addresses/export/ -> HostPortMappingViewSet.export
-    # GET /api/targets/{id}/vulnerabilities/ -> VulnerabilityViewSet
 
     # ==================== 黑名单管理 ====================
     

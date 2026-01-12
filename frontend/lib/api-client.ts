@@ -5,40 +5,55 @@
  * 1. Unified HTTP request wrapper
  * 2. Unified error handling
  * 3. Request/response logging
+ * 4. JWT token management
  * 
  * Naming convention explanation:
  * - Frontend (TypeScript/React): camelCase
  *   Example: pageSize, createdAt, organizationId
  * 
- * - Backend (Django/Python): snake_case (model fields)
- *   Example: page_size, created_at, organization_id
- * 
- * - API JSON format: camelCase (automatically converted by backend)
+ * - Backend (Go): Uses JSON tags for camelCase output
  *   Example: pageSize, createdAt, organizationId
  * 
- * Naming conversion mechanism:
- * ══════════════════════════════════════════════════════════════════════
- * 【Backend Processing】Django REST Framework + djangorestframework-camel-case
- * ══════════════════════════════════════════════════════════════════════
- * 
- * 1. Frontend sends request (camelCase):
- *    { pageSize: 10, sortBy: "name" }
- *    
- * 2. Django receives and automatically converts to snake_case:
- *    { page_size: 10, sort_by: "name" }
- *    
- * 3. Django processes backend logic (using snake_case model fields)
- * 
- * 4. Django returns data automatically converted to camelCase:
- *    { pageSize: 10, createdAt: "2024-01-01" }
- *    
- * 5. Frontend uses directly (camelCase):
- *    response.data.pageSize  // [OK] Use directly
- * 
- * [NOTE] Key point: Naming conversion is handled uniformly by backend, frontend needs no conversion
+ * - API JSON format: camelCase
+ *   Example: pageSize, createdAt, organizationId
  */
 
 import axios, { AxiosRequestConfig } from 'axios';
+
+// Token storage keys
+const ACCESS_TOKEN_KEY = 'accessToken';
+const REFRESH_TOKEN_KEY = 'refreshToken';
+
+/**
+ * Token management utilities
+ */
+export const tokenManager = {
+  getAccessToken: (): string | null => {
+    if (typeof window === 'undefined') return null;
+    return localStorage.getItem(ACCESS_TOKEN_KEY);
+  },
+  
+  getRefreshToken: (): string | null => {
+    if (typeof window === 'undefined') return null;
+    return localStorage.getItem(REFRESH_TOKEN_KEY);
+  },
+  
+  setTokens: (accessToken: string, refreshToken: string): void => {
+    if (typeof window === 'undefined') return;
+    localStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
+    localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
+  },
+  
+  clearTokens: (): void => {
+    if (typeof window === 'undefined') return;
+    localStorage.removeItem(ACCESS_TOKEN_KEY);
+    localStorage.removeItem(REFRESH_TOKEN_KEY);
+  },
+  
+  hasTokens: (): boolean => {
+    return !!tokenManager.getAccessToken();
+  }
+};
 
 /**
  * Create axios instance
@@ -50,22 +65,23 @@ const apiClient = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  withCredentials: true,  // Send cookies with requests (required for session auth)
 });
 
 /**
  * Request interceptor: Handle preparation work before request
  * 
  * Workflow:
- * 1. Ensure URL format is correct (Django requires trailing slash)
+ * 1. Add Authorization header with JWT token
  * 2. Log request (for development debugging)
- * 
- * Notes:
- * - Naming conversion is handled by backend, frontend needs no conversion
- * - Frontend can directly use camelCase naming
  */
 apiClient.interceptors.request.use(
   (config) => {
+    // Add JWT token to Authorization header
+    const token = tokenManager.getAccessToken();
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+
     // Only output debug logs in development environment
     if (process.env.NODE_ENV === 'development') {
       console.log('[REQUEST] API Request:', {
@@ -74,7 +90,8 @@ apiClient.interceptors.request.use(
         baseURL: config.baseURL,
         fullURL: `${config.baseURL}${config.url}`,
         data: config.data,
-        params: config.params
+        params: config.params,
+        hasToken: !!token
       });
     }
 
@@ -93,10 +110,10 @@ apiClient.interceptors.request.use(
  * 
  * Workflow:
  * 1. Log response (for development debugging)
- * 2. Return response data (backend already converted to camelCase)
+ * 2. Return response data
  * 
  * Notes:
- * - Backend has automatically converted snake_case to camelCase
+ * - Backend returns camelCase JSON
  * - Frontend can use directly, no additional conversion needed
  */
 apiClient.interceptors.response.use(
@@ -136,16 +153,18 @@ apiClient.interceptors.response.use(
       }
     }
 
-    // Handle 401 Unauthorized: redirect to login page
+    // Handle 401 Unauthorized: clear tokens and redirect to login page
     if (axios.isAxiosError(error) && error.response?.status === 401) {
       const url = error.config?.url || '';
       // Exclude auth-related APIs to avoid redirect loops
       const isAuthApi = url.includes('/auth/login') || 
                         url.includes('/auth/logout') || 
-                        url.includes('/auth/me');
+                        url.includes('/auth/me') ||
+                        url.includes('/auth/refresh');
       
       if (!isAuthApi && typeof window !== 'undefined') {
-        // Clear any cached state and redirect to login
+        // Clear tokens and redirect to login
+        tokenManager.clearTokens();
         window.location.href = '/login';
       }
     }

@@ -2,7 +2,6 @@ package handler
 
 import (
 	"errors"
-	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/xingrin/go-backend/internal/dto"
@@ -24,8 +23,7 @@ func NewUserHandler(svc *service.UserService) *UserHandler {
 // POST /api/users
 func (h *UserHandler) Create(c *gin.Context) {
 	var req dto.CreateUserRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		dto.BadRequest(c, "Invalid request body")
+	if !dto.BindJSON(c, &req) {
 		return
 	}
 
@@ -54,8 +52,7 @@ func (h *UserHandler) Create(c *gin.Context) {
 // GET /api/users
 func (h *UserHandler) List(c *gin.Context) {
 	var query dto.PaginationQuery
-	if err := c.ShouldBindQuery(&query); err != nil {
-		dto.BadRequest(c, "Invalid query parameters")
+	if !dto.BindQuery(c, &query) {
 		return
 	}
 
@@ -87,13 +84,12 @@ func (h *UserHandler) UpdatePassword(c *gin.Context) {
 	// Get current user from context
 	claims, ok := middleware.GetUserClaims(c)
 	if !ok {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Not authenticated"})
+		dto.Unauthorized(c, "Not authenticated")
 		return
 	}
 
 	var req dto.UpdatePasswordRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		dto.BadRequest(c, "Invalid request body")
+	if !dto.BindJSON(c, &req) {
 		return
 	}
 

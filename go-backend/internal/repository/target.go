@@ -5,6 +5,7 @@ import (
 
 	"github.com/xingrin/go-backend/internal/model"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 // TargetRepository handles target database operations
@@ -65,6 +66,16 @@ func (r *TargetRepository) SoftDelete(id int) error {
 	return r.db.Model(&model.Target{}).Where("id = ?", id).Update("deleted_at", now).Error
 }
 
+// BulkSoftDelete soft deletes multiple targets by IDs
+func (r *TargetRepository) BulkSoftDelete(ids []int) (int64, error) {
+	if len(ids) == 0 {
+		return 0, nil
+	}
+	now := time.Now()
+	result := r.db.Model(&model.Target{}).Where("id IN ? AND deleted_at IS NULL", ids).Update("deleted_at", now)
+	return result.RowsAffected, result.Error
+}
+
 // ExistsByName checks if target name exists (excluding soft deleted)
 func (r *TargetRepository) ExistsByName(name string, excludeID ...int) (bool, error) {
 	var count int64
@@ -74,4 +85,30 @@ func (r *TargetRepository) ExistsByName(name string, excludeID ...int) (bool, er
 	}
 	err := query.Count(&count).Error
 	return count > 0, err
+}
+
+// BulkCreateIgnoreConflicts creates multiple targets, ignoring duplicates
+func (r *TargetRepository) BulkCreateIgnoreConflicts(targets []model.Target) (int, error) {
+	if len(targets) == 0 {
+		return 0, nil
+	}
+
+	// Use ON CONFLICT DO NOTHING to ignore duplicates
+	result := r.db.Clauses(clause.OnConflict{DoNothing: true}).Create(&targets)
+	if result.Error != nil {
+		return 0, result.Error
+	}
+
+	return int(result.RowsAffected), nil
+}
+
+// FindByNames finds targets by names (excluding soft deleted)
+func (r *TargetRepository) FindByNames(names []string) ([]model.Target, error) {
+	if len(names) == 0 {
+		return nil, nil
+	}
+
+	var targets []model.Target
+	err := r.db.Where("name IN ? AND deleted_at IS NULL", names).Find(&targets).Error
+	return targets, err
 }

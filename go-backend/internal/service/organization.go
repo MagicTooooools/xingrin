@@ -46,14 +46,14 @@ func (s *OrganizationService) Create(req *dto.CreateOrganizationRequest) (*model
 	return org, nil
 }
 
-// List returns paginated organizations
-func (s *OrganizationService) List(query *dto.PaginationQuery) ([]model.Organization, int64, error) {
-	return s.repo.FindAll(query.GetOffset(), query.GetPageSize())
+// List returns paginated organizations with target count
+func (s *OrganizationService) List(query *dto.OrganizationListQuery) ([]repository.OrganizationWithCount, int64, error) {
+	return s.repo.FindAll(query.GetOffset(), query.GetPageSize(), query.Search)
 }
 
-// GetByID returns an organization by ID
-func (s *OrganizationService) GetByID(id int) (*model.Organization, error) {
-	org, err := s.repo.FindByID(id)
+// GetByID returns an organization by ID with target count
+func (s *OrganizationService) GetByID(id int) (*repository.OrganizationWithCount, error) {
+	org, err := s.repo.FindByIDWithCount(id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, ErrOrganizationNotFound
@@ -106,4 +106,51 @@ func (s *OrganizationService) Delete(id int) error {
 	}
 
 	return s.repo.SoftDelete(id)
+}
+
+// BulkDelete soft deletes multiple organizations
+func (s *OrganizationService) BulkDelete(ids []int) (int64, error) {
+	return s.repo.BulkSoftDelete(ids)
+}
+
+// ListTargets returns paginated targets for an organization
+func (s *OrganizationService) ListTargets(organizationID int, query *dto.TargetListQuery) ([]model.Target, int64, error) {
+	// Check if organization exists
+	_, err := s.repo.FindByID(organizationID)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, 0, ErrOrganizationNotFound
+		}
+		return nil, 0, err
+	}
+
+	return s.repo.FindTargets(organizationID, query.GetOffset(), query.GetPageSize(), query.Type, query.Search)
+}
+
+// LinkTargets adds targets to an organization
+func (s *OrganizationService) LinkTargets(organizationID int, targetIDs []int) error {
+	// Check if organization exists
+	_, err := s.repo.FindByID(organizationID)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return ErrOrganizationNotFound
+		}
+		return err
+	}
+
+	return s.repo.BulkAddTargets(organizationID, targetIDs)
+}
+
+// UnlinkTargets removes targets from an organization
+func (s *OrganizationService) UnlinkTargets(organizationID int, targetIDs []int) (int64, error) {
+	// Check if organization exists
+	_, err := s.repo.FindByID(organizationID)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return 0, ErrOrganizationNotFound
+		}
+		return 0, err
+	}
+
+	return s.repo.UnlinkTargets(organizationID, targetIDs)
 }

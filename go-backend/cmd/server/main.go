@@ -18,6 +18,7 @@ import (
 	"github.com/xingrin/go-backend/internal/middleware"
 	"github.com/xingrin/go-backend/internal/model"
 	"github.com/xingrin/go-backend/internal/pkg"
+	pkgvalidator "github.com/xingrin/go-backend/internal/pkg/validator"
 	"github.com/xingrin/go-backend/internal/repository"
 	"github.com/xingrin/go-backend/internal/service"
 	"go.uber.org/zap"
@@ -45,6 +46,12 @@ func main() {
 		zap.Int("port", cfg.Server.Port),
 		zap.String("mode", cfg.Server.Mode),
 	)
+
+	// Initialize custom validator with translations
+	if err := pkgvalidator.Init(); err != nil {
+		pkg.Fatal("Failed to initialize validator", zap.Error(err))
+	}
+	pkg.Info("Validator initialized with custom translations")
 
 	// Initialize database
 	db, err := database.NewDatabase(&cfg.Database)
@@ -145,6 +152,11 @@ func main() {
 	// Create Gin router
 	router := gin.New()
 
+	// Disable automatic redirect for trailing slash
+	// This prevents 301/307 redirects when URL has/doesn't have trailing slash
+	router.RedirectTrailingSlash = false
+	router.RedirectFixedPath = false
+
 	// Add middleware
 	router.Use(middleware.Recovery())
 	router.Use(middleware.Logger())
@@ -158,7 +170,7 @@ func main() {
 	// Create services
 	userSvc := service.NewUserService(userRepo)
 	orgSvc := service.NewOrganizationService(orgRepo)
-	targetSvc := service.NewTargetService(targetRepo)
+	targetSvc := service.NewTargetService(targetRepo, orgRepo)
 	engineSvc := service.NewEngineService(engineRepo)
 
 	// Create handlers
@@ -198,13 +210,19 @@ func main() {
 
 			// Organizations
 			protected.POST("/organizations", orgHandler.Create)
+			protected.POST("/organizations/bulk-delete", orgHandler.BulkDelete)
 			protected.GET("/organizations", orgHandler.List)
 			protected.GET("/organizations/:id", orgHandler.GetByID)
+			protected.GET("/organizations/:id/targets", orgHandler.ListTargets)
+			protected.POST("/organizations/:id/link_targets", orgHandler.LinkTargets)
+			protected.POST("/organizations/:id/unlink_targets", orgHandler.UnlinkTargets)
 			protected.PUT("/organizations/:id", orgHandler.Update)
 			protected.DELETE("/organizations/:id", orgHandler.Delete)
 
 			// Targets
 			protected.POST("/targets", targetHandler.Create)
+			protected.POST("/targets/batch_create", targetHandler.BatchCreate)
+			protected.POST("/targets/bulk-delete", targetHandler.BulkDelete)
 			protected.GET("/targets", targetHandler.List)
 			protected.GET("/targets/:id", targetHandler.GetByID)
 			protected.PUT("/targets/:id", targetHandler.Update)
@@ -219,10 +237,10 @@ func main() {
 		}
 	}
 
-	// Create HTTP server
+	// Create HTTP server with trailing slash normalization
 	srv := &http.Server{
 		Addr:         fmt.Sprintf(":%d", cfg.Server.Port),
-		Handler:      router,
+		Handler:      middleware.NormalizeTrailingSlash(router), // Wrap router to strip trailing slashes
 		ReadTimeout:  30 * time.Second,
 		WriteTimeout: 30 * time.Second,
 		IdleTimeout:  60 * time.Second,

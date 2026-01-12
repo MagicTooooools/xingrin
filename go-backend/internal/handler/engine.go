@@ -23,8 +23,7 @@ func NewEngineHandler(svc *service.EngineService) *EngineHandler {
 // POST /api/engines
 func (h *EngineHandler) Create(c *gin.Context) {
 	var req dto.CreateEngineRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		dto.BadRequest(c, "Invalid request body")
+	if !dto.BindJSON(c, &req) {
 		return
 	}
 
@@ -51,8 +50,7 @@ func (h *EngineHandler) Create(c *gin.Context) {
 // GET /api/engines
 func (h *EngineHandler) List(c *gin.Context) {
 	var query dto.PaginationQuery
-	if err := c.ShouldBindQuery(&query); err != nil {
-		dto.BadRequest(c, "Invalid query parameters")
+	if !dto.BindQuery(c, &query) {
 		return
 	}
 
@@ -114,8 +112,7 @@ func (h *EngineHandler) Update(c *gin.Context) {
 	}
 
 	var req dto.UpdateEngineRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		dto.BadRequest(c, "Invalid request body")
+	if !dto.BindJSON(c, &req) {
 		return
 	}
 

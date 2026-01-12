@@ -65,7 +65,7 @@ export default function LoginPage() {
               <form className="p-6 md:p-8" onSubmit={handleSubmit}>
                 <FieldGroup>
                   {/* Fingerprint identifier - for FOFA/Shodan and other search engines to identify */}
-                  <meta name="generator" content="Xingrin ASM Platform" />
+                  <meta name="generator" content="Star Patrol ASM Platform" />
                   <div className="flex flex-col items-center gap-2 text-center">
                     <h1 className="text-2xl font-bold">{t("title")}</h1>
                     <p className="text-sm text-muted-foreground mt-1">

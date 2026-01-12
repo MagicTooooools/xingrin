@@ -85,6 +85,7 @@ export function useOrganizationTargets(
     sortBy?: string
     sortOrder?: 'asc' | 'desc'
     search?: string
+    type?: string
   },
   options?: {
     enabled?: boolean

@@ -177,7 +177,9 @@
       "description": "Description",
       "processing": "Processing...",
       "confirmDelete": "Confirm Delete",
-      "deleteConfirmMessage": "Are you sure you want to delete {count} selected items? This action cannot be undone."
+      "deleteConfirmMessage": "Are you sure you want to delete {count} selected items? This action cannot be undone.",
+      "all": "All",
+      "filter": "Filter"
     },
     "yamlEditor": {
       "syntaxError": "Syntax Error",
@@ -515,11 +517,11 @@
     "pattern": "Invalid format"
   },
   "auth": {
-    "title": "XingRin",
+    "title": "Star Patrol",
     "subtitle": "Automated Asset Discovery & Vulnerability Scanning Platform",
     "login": "Login",
-    "pageTitle": "Login - XingRin | Attack Surface Management",
-    "pageDescription": "XingRin - Attack Surface Management (ASM) Platform, providing automated asset discovery and vulnerability scanning",
+    "pageTitle": "Login - Star Patrol | Attack Surface Management",
+    "pageDescription": "Star Patrol - Attack Surface Management (ASM) Platform, providing automated asset discovery and vulnerability scanning",
     "loggingIn": "Logging in...",
     "logout": "Logout",
     "username": "Username",
@@ -1097,14 +1099,14 @@
         "editDesc": "Modify fingerprint rule configuration"
       },
       "toast": {
-        "createSuccess": "Created successfully",
-        "updateSuccess": "Updated successfully",
-        "createFailed": "Failed to create",
-        "updateFailed": "Failed to update",
-        "exportSuccess": "Exported successfully",
-        "exportFailed": "Failed to export",
-        "deleteSuccess": "Deleted successfully: {count} items",
-        "deleteFailed": "Failed to delete"
+        "createSuccess": "Create successful",
+        "updateSuccess": "Update successful",
+        "createFailed": "Create failed",
+        "updateFailed": "Update failed",
+        "exportSuccess": "Export successful",
+        "exportFailed": "Export failed",
+        "deleteSuccess": "Delete successful",
+        "deleteFailed": "Delete failed"
       },
       "form": {
         "cmsPlaceholder": "e.g., WordPress, Nginx",
@@ -1522,17 +1524,17 @@
     "copied": "Copied",
     "copyFailed": "Copy failed",
     "downloadFailed": "Download failed",
-    "deleteSuccess": "Deleted successfully: {count} items",
-    "deleteFailed": "Delete failed, please retry",
-    "deletedScanRecord": "Deleted scan record: {name}",
-    "stoppedScan": "Stopped scan task: {name}",
-    "stopFailed": "Stop failed, please retry",
-    "bulkDeleteSuccess": "Deleted {count} scan records",
-    "bulkDeleteFailed": "Bulk delete failed, please retry",
+    "deleteSuccess": "Delete successful",
+    "deleteFailed": "Delete failed",
+    "deletedScanRecord": "Delete successful",
+    "stoppedScan": "Stop successful",
+    "stopFailed": "Stop failed",
+    "bulkDeleteSuccess": "Delete successful",
+    "bulkDeleteFailed": "Delete failed",
     "paramError": "Parameter error",
     "paramErrorDesc": "Organization ID or Target ID is required",
     "scanInitiated": "Scan initiated",
-    "scanInitiatedDesc": "Successfully created {count} scan tasks",
+    "scanInitiatedDesc": "Scan initiated",
     "initiateScanFailed": "Failed to initiate scan",
     "noScansCreated": "No scan tasks were created",
     "unknownError": "Unknown error",
@@ -1541,140 +1543,140 @@
     "engineNameRequired": "Please enter engine name",
     "configRequired": "Configuration content is required",
     "yamlSyntaxError": "YAML syntax error",
-    "engineCreateSuccess": "Engine created successfully",
-    "engineCreateSuccessDesc": "Engine \"{name}\" has been created",
-    "engineCreateFailed": "Failed to create engine",
-    "configSaveSuccess": "Configuration saved successfully",
-    "configSaveSuccessDesc": "Configuration for engine \"{name}\" has been updated",
-    "configSaveFailed": "Failed to save configuration",
+    "engineCreateSuccess": "Create successful",
+    "engineCreateSuccessDesc": "Create successful",
+    "engineCreateFailed": "Create failed",
+    "configSaveSuccess": "Save successful",
+    "configSaveSuccessDesc": "Save successful",
+    "configSaveFailed": "Save failed",
     "selectFileFirst": "Please select a file first",
     "invalidJsonFile": "Invalid JSON file",
     "importSuccess": "Import successful",
     "importFailed": "Import failed",
-    "loadScanHistoryFailed": "Failed to load scan history",
+    "loadScanHistoryFailed": "Load failed",
     "scan": {
       "quick": {
-        "success": "Started {count} scan tasks",
-        "error": "Failed to start scan"
+        "success": "Start successful",
+        "error": "Start failed"
       },
       "stop": {
-        "success": "Scan stopped, {count} tasks cancelled"
+        "success": "Stop successful"
       },
       "delete": {
-        "success": "Deleted scan task: {name}",
-        "bulkSuccess": "Deleted {count} scan tasks"
+        "success": "Delete successful",
+        "bulkSuccess": "Delete successful"
       },
       "initiate": {
-        "success": "Scan initiated successfully",
-        "error": "Failed to initiate scan"
+        "success": "Initiate successful",
+        "error": "Initiate failed"
       }
     },
     "scheduledScan": {
       "create": {
-        "success": "Scheduled scan created successfully",
-        "error": "Failed to create scheduled scan"
+        "success": "Create successful",
+        "error": "Create failed"
       },
       "update": {
-        "success": "Scheduled scan updated successfully",
-        "error": "Failed to update scheduled scan"
+        "success": "Update successful",
+        "error": "Update failed"
       },
       "delete": {
-        "success": "Scheduled scan deleted successfully",
-        "error": "Failed to delete scheduled scan"
+        "success": "Delete successful",
+        "error": "Delete failed"
       },
       "toggle": {
-        "enabled": "Scheduled scan enabled",
-        "disabled": "Scheduled scan disabled",
-        "error": "Failed to toggle scheduled scan"
+        "enabled": "Enabled",
+        "disabled": "Disabled",
+        "error": "Toggle failed"
       }
     },
     "target": {
       "create": {
-        "success": "Target created successfully",
-        "bulkSuccess": "Created {count} targets",
-        "error": "Failed to create target"
+        "success": "Create successful",
+        "bulkSuccess": "Create successful",
+        "error": "Create failed"
       },
       "update": {
-        "success": "Target updated successfully",
-        "error": "Failed to update target"
+        "success": "Update successful",
+        "error": "Update failed"
       },
       "delete": {
-        "success": "Target \"{name}\" deleted",
-        "bulkSuccess": "Deleted {count} targets",
-        "error": "Failed to delete target"
+        "success": "Delete successful",
+        "bulkSuccess": "Delete successful",
+        "error": "Delete failed"
       },
       "link": {
-        "success": "Target linked to organization",
-        "error": "Failed to link target"
+        "success": "Link successful",
+        "error": "Link failed"
       },
       "unlink": {
-        "success": "Target unlinked from organization",
-        "bulkSuccess": "Unlinked {count} targets",
-        "error": "Failed to unlink target"
+        "success": "Unlink successful",
+        "bulkSuccess": "Unlink successful",
+        "error": "Unlink failed"
       }
     },
     "organization": {
       "create": {
-        "success": "Organization created successfully",
-        "error": "Failed to create organization"
+        "success": "Create successful",
+        "error": "Create failed"
       },
       "update": {
-        "success": "Organization updated successfully",
-        "error": "Failed to update organization"
+        "success": "Update successful",
+        "error": "Update failed"
       },
       "delete": {
-        "success": "Organization \"{name}\" deleted",
-        "bulkSuccess": "Deleted {count} organizations",
-        "error": "Failed to delete organization"
+        "success": "Delete successful",
+        "bulkSuccess": "Delete successful",
+        "error": "Delete failed"
       }
     },
     "asset": {
       "subdomain": {
         "create": {
-          "success": "Created {count} subdomains",
-          "partialSuccess": "Created {success} subdomains, skipped {skipped}",
-          "error": "Failed to create subdomains"
+          "success": "Create successful",
+          "partialSuccess": "Create successful",
+          "error": "Create failed"
         },
         "delete": {
-          "success": "Subdomain deleted",
-          "bulkSuccess": "Deleted {count} subdomains",
-          "error": "Failed to delete subdomain"
+          "success": "Delete successful",
+          "bulkSuccess": "Delete successful",
+          "error": "Delete failed"
         }
       },
       "website": {
         "create": {
-          "success": "Created {count} websites",
-          "partialSuccess": "Created {success} websites, skipped {skipped}",
-          "error": "Failed to create websites"
+          "success": "Create successful",
+          "partialSuccess": "Create successful",
+          "error": "Create failed"
         },
         "delete": {
-          "success": "Website deleted",
-          "bulkSuccess": "Deleted {count} websites",
-          "error": "Failed to delete website"
+          "success": "Delete successful",
+          "bulkSuccess": "Delete successful",
+          "error": "Delete failed"
         }
       },
       "endpoint": {
         "create": {
-          "success": "Created {count} endpoints",
-          "partialSuccess": "Created {success} endpoints, skipped {skipped}",
-          "error": "Failed to create endpoints"
+          "success": "Create successful",
+          "partialSuccess": "Create successful",
+          "error": "Create failed"
         },
         "delete": {
-          "success": "Endpoint deleted",
-          "bulkSuccess": "Deleted {count} endpoints",
-          "error": "Failed to delete endpoint"
+          "success": "Delete successful",
+          "bulkSuccess": "Delete successful",
+          "error": "Delete failed"
         }
       },
       "directory": {
         "create": {
-          "success": "Created {count} directories",
-          "partialSuccess": "Created {success} directories, skipped {skipped}",
-          "error": "Failed to create directories"
+          "success": "Create successful",
+          "partialSuccess": "Create successful",
+          "error": "Create failed"
         },
         "delete": {
-          "success": "Directory deleted",
-          "bulkSuccess": "Deleted {count} directories",
-          "error": "Failed to delete directory"
+          "success": "Delete successful",
+          "bulkSuccess": "Delete successful",
+          "error": "Delete failed"
         }
       }
     },
@@ -1686,161 +1688,161 @@
         "success": "Logged out"
       },
       "changePassword": {
-        "success": "Password changed successfully",
-        "error": "Failed to change password"
+        "success": "Change successful",
+        "error": "Change failed"
       }
     },
     "worker": {
       "create": {
-        "success": "Worker created successfully",
-        "error": "Failed to create worker"
+        "success": "Create successful",
+        "error": "Create failed"
       },
       "update": {
-        "success": "Worker updated successfully",
-        "error": "Failed to update worker"
+        "success": "Update successful",
+        "error": "Update failed"
       },
       "delete": {
-        "success": "Worker deleted successfully",
-        "error": "Failed to delete worker"
+        "success": "Delete successful",
+        "error": "Delete failed"
       },
       "deploy": {
-        "success": "Worker deployment started",
-        "error": "Failed to deploy worker"
+        "success": "Deployment started",
+        "error": "Deploy failed"
       },
       "restart": {
-        "success": "Worker is restarting",
-        "error": "Failed to restart worker"
+        "success": "Restarting...",
+        "error": "Restart failed"
       },
       "stop": {
-        "success": "Worker stopped",
-        "error": "Failed to stop worker"
+        "success": "Stopped",
+        "error": "Stop failed"
       }
     },
     "nucleiRepo": {
       "create": {
-        "success": "Repository added successfully",
-        "error": "Failed to add repository"
+        "success": "Create successful",
+        "error": "Create failed"
       },
       "update": {
-        "success": "Repository updated successfully",
-        "error": "Failed to update repository"
+        "success": "Update successful",
+        "error": "Update failed"
       },
       "delete": {
-        "success": "Repository deleted successfully",
-        "error": "Failed to delete repository"
+        "success": "Delete successful",
+        "error": "Delete failed"
       },
       "sync": {
-        "success": "Repository synced successfully",
-        "error": "Failed to sync repository"
+        "success": "Sync successful",
+        "error": "Sync failed"
       }
     },
     "wordlist": {
       "upload": {
-        "success": "Wordlist uploaded successfully",
-        "error": "Failed to upload wordlist"
+        "success": "Upload successful",
+        "error": "Upload failed"
       },
       "update": {
-        "success": "Wordlist updated successfully",
-        "error": "Failed to update wordlist"
+        "success": "Update successful",
+        "error": "Update failed"
       },
       "delete": {
-        "success": "Wordlist deleted successfully",
-        "error": "Failed to delete wordlist"
+        "success": "Delete successful",
+        "error": "Delete failed"
       }
     },
     "notification": {
       "settings": {
-        "success": "Notification settings saved",
-        "error": "Failed to save notification settings"
+        "success": "Save successful",
+        "error": "Save failed"
       },
       "markRead": {
-        "success": "Marked as read",
-        "error": "Failed to mark as read"
+        "success": "Success",
+        "error": "Failed"
       },
       "connection": {
-        "error": "Notification connection error: {message}"
+        "error": "Connection error"
       }
     },
     "apiKeys": {
       "settings": {
-        "success": "API key settings saved",
-        "error": "Failed to save API key settings"
+        "success": "Save successful",
+        "error": "Save failed"
       }
     },
     "tool": {
       "create": {
-        "success": "Tool created successfully",
-        "error": "Failed to create tool"
+        "success": "Create successful",
+        "error": "Create failed"
       },
       "update": {
-        "success": "Tool updated successfully",
-        "error": "Failed to update tool"
+        "success": "Update successful",
+        "error": "Update failed"
       },
       "delete": {
-        "success": "Tool deleted successfully",
-        "error": "Failed to delete tool"
+        "success": "Delete successful",
+        "error": "Delete failed"
       }
     },
     "engine": {
       "create": {
-        "success": "Engine created successfully",
-        "error": "Failed to create engine"
+        "success": "Create successful",
+        "error": "Create failed"
       },
       "update": {
-        "success": "Engine updated successfully",
-        "error": "Failed to update engine"
+        "success": "Update successful",
+        "error": "Update failed"
       },
       "delete": {
-        "success": "Engine deleted successfully",
-        "error": "Failed to delete engine"
+        "success": "Delete successful",
+        "error": "Delete failed"
       }
     },
     "command": {
       "create": {
-        "success": "Command created successfully",
-        "error": "Failed to create command"
+        "success": "Create successful",
+        "error": "Create failed"
       },
       "update": {
-        "success": "Command updated successfully",
-        "error": "Failed to update command"
+        "success": "Update successful",
+        "error": "Update failed"
       },
       "delete": {
-        "success": "Command deleted successfully",
-        "bulkSuccess": "Deleted {count} commands",
-        "error": "Failed to delete command"
+        "success": "Delete successful",
+        "bulkSuccess": "Delete successful",
+        "error": "Delete failed"
       }
     },
     "nucleiTemplate": {
       "refresh": {
-        "loading": "Syncing templates...",
-        "success": "Templates synced successfully",
-        "error": "Failed to sync templates"
+        "loading": "Syncing...",
+        "success": "Sync successful",
+        "error": "Sync failed"
       },
       "upload": {
-        "success": "Template uploaded successfully",
-        "error": "Failed to upload template"
+        "success": "Upload successful",
+        "error": "Upload failed"
       },
       "save": {
-        "success": "Template saved successfully",
-        "error": "Failed to save template"
+        "success": "Save successful",
+        "error": "Save failed"
       }
     },
     "nucleiGit": {
       "settings": {
-        "success": "Git settings saved successfully",
-        "error": "Failed to save Git settings"
+        "success": "Save successful",
+        "error": "Save failed"
       }
     },
     "systemLog": {
       "fetch": {
-        "error": "Failed to fetch system logs, please check backend",
-        "recovered": "System log connection recovered"
+        "error": "Fetch failed",
+        "recovered": "Recovered"
       }
     },
     "blacklist": {
       "save": {
-        "success": "Blacklist rules saved",
-        "error": "Failed to save blacklist rules"
+        "success": "Save successful",
+        "error": "Save failed"
       }
     }
   },
@@ -1897,10 +1899,10 @@
       "selectEngine": "Please select a scan engine",
       "emptyConfig": "Scan configuration cannot be empty",
       "getEnginesFailed": "Failed to get engine list",
-      "createFailed": "Failed to create scan task",
-      "createSuccess": "Created {count} scan tasks",
-      "createSuccessDesc": "{created} targets succeeded, {failed} failed",
-      "targetsFailed": "{count} targets failed",
+      "createFailed": "Create failed",
+      "createSuccess": "Create successful",
+      "createSuccessDesc": "",
+      "targetsFailed": "Failed",
       "configConflict": "Engine configuration conflict"
     }
   },
@@ -2237,17 +2239,17 @@
         "placeholder": "Enter rules, one per line\n\nExamples:\n*.gov\n*.edu\n*cdn*\n192.168.0.0/16\n10.0.0.1",
         "save": "Save Rules",
         "toast": {
-          "saveSuccess": "Blacklist rules saved",
-          "saveError": "Failed to save blacklist rules"
+          "saveSuccess": "Save successful",
+          "saveError": "Save failed"
         }
       }
     }
   },
   "metadata": {
-    "title": "Xingrin - Attack Surface Management Platform | ASM",
-    "description": "Xingrin - Attack Surface Management (ASM) platform, providing automated asset discovery, vulnerability scanning, subdomain enumeration, port scanning, and more. Supports distributed scanning, Nuclei integration, and scheduled tasks.",
+    "title": "Star Patrol - Attack Surface Management Platform | ASM",
+    "description": "Star Patrol - Attack Surface Management (ASM) platform, providing automated asset discovery, vulnerability scanning, subdomain enumeration, port scanning, and more. Supports distributed scanning, Nuclei integration, and scheduled tasks.",
     "keywords": "ASM, Attack Surface Management, Vulnerability Scanning, Asset Discovery, Bug Bounty, Penetration Testing, Nuclei, Subdomain Enumeration, Security Tools, EASM, Security",
-    "ogTitle": "Xingrin - Attack Surface Management Platform",
+    "ogTitle": "Star Patrol - Attack Surface Management Platform",
     "ogDescription": "Attack Surface Management (ASM) platform providing automated asset discovery and vulnerability scanning"
   },
   "bulkAdd": {
@@ -2293,7 +2295,7 @@
     "rateLimited": "Too many requests, please try again later"
   },
   "about": {
-    "title": "About XingRin",
+    "title": "About Star Patrol",
     "description": "Attack Surface Management Platform",
     "currentVersion": "Current Version",
     "latestVersion": "Latest Version",

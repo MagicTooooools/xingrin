@@ -1,11 +1,18 @@
 "use client"
 
 import * as React from "react"
-import { IconSearch, IconLoader2, IconPlus } from "@tabler/icons-react"
+import { IconSearch, IconLoader2 } from "@tabler/icons-react"
 import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { UnifiedDataTable } from "@/components/ui/data-table"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import type { ColumnDef } from "@tanstack/react-table"
 import type { Target } from "@/types/target.types"
 import type { PaginationInfo } from "@/types/common.types"
@@ -26,6 +33,8 @@ interface TargetsDataTableProps {
   setPagination?: React.Dispatch<React.SetStateAction<{ pageIndex: number; pageSize: number }>>
   paginationInfo?: PaginationInfo
   onPaginationChange?: (pagination: { pageIndex: number; pageSize: number }) => void
+  typeFilter?: string
+  onTypeFilterChange?: (value: string) => void
 }
 
 /**
@@ -48,9 +57,13 @@ export function TargetsDataTable({
   setPagination: setExternalPagination,
   paginationInfo,
   onPaginationChange,
+  typeFilter,
+  onTypeFilterChange,
 }: TargetsDataTableProps) {
   const t = useTranslations("common.status")
   const tTarget = useTranslations("target")
+  const tTooltips = useTranslations("tooltips")
+  const tCommon = useTranslations("common")
   
   // 本地搜索输入状态
   const [localSearchValue, setLocalSearchValue] = React.useState(searchValue || "")
@@ -71,14 +84,6 @@ export function TargetsDataTable({
     }
   }
 
-  // 自定义添加按钮（支持 onAddHover）
-  const addButton = onAddNew ? (
-    <Button onClick={onAddNew} onMouseEnter={onAddHover} size="sm">
-      <IconPlus className="h-4 w-4" />
-      {addButtonText || tTarget("createTarget")}
-    </Button>
-  ) : undefined
-
   return (
     <UnifiedDataTable
       data={data}
@@ -92,8 +97,14 @@ export function TargetsDataTable({
       // 选择
       onSelectionChange={onSelectionChange}
       // 批量操作
-      showBulkDelete={false}
-      showAddButton={false}
+      showBulkDelete={!!onBulkDelete}
+      onBulkDelete={onBulkDelete}
+      bulkDeleteLabel={tTooltips("unlinkTarget")}
+      // 添加按钮（在解除关联按钮之后）
+      showAddButton={!!onAddNew}
+      onAddNew={onAddNew}
+      onAddHover={onAddHover}
+      addButtonLabel={addButtonText || tTarget("addTarget")}
       // 空状态
       emptyMessage={t("noData")}
       // 自定义工具栏
@@ -113,9 +124,21 @@ export function TargetsDataTable({
               <IconSearch className="h-4 w-4" />
             )}
           </Button>
+          {onTypeFilterChange && (
+            <Select value={typeFilter || "all"} onValueChange={(value) => onTypeFilterChange(value === "all" ? "" : value)}>
+              <SelectTrigger className="h-8 w-[120px]">
+                <SelectValue placeholder={tCommon("actions.filter")} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">{tCommon("actions.all")}</SelectItem>
+                <SelectItem value="domain">{tTarget("types.domain")}</SelectItem>
+                <SelectItem value="ip">{tTarget("types.ip")}</SelectItem>
+                <SelectItem value="cidr">{tTarget("types.cidr")}</SelectItem>
+              </SelectContent>
+            </Select>
+          )}
         </div>
       }
-      toolbarRight={addButton}
     />
   )
 }

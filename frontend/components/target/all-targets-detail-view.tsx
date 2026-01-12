@@ -60,6 +60,7 @@ export function AllTargetsDetailView() {
   }
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 })
   const [searchQuery, setSearchQuery] = useState("")
+  const [typeFilter, setTypeFilter] = useState("")
   const [selectedTargets, setSelectedTargets] = useState<Target[]>([])
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
@@ -84,8 +85,13 @@ export function AllTargetsDetailView() {
     setPagination((prev) => ({ ...prev, pageIndex: 0 }))
   }
 
+  const handleTypeFilterChange = (value: string) => {
+    setTypeFilter(value)
+    setPagination((prev) => ({ ...prev, pageIndex: 0 }))
+  }
+
   // Use API hooks
-  const { data, isLoading, isFetching, error } = useTargets(pagination.pageIndex + 1, pagination.pageSize, undefined, searchQuery || undefined)
+  const { data, isLoading, isFetching, error } = useTargets(pagination.pageIndex + 1, pagination.pageSize, typeFilter || undefined, searchQuery || undefined)
   const deleteTargetMutation = useDeleteTarget()
   const batchDeleteMutation = useBatchDeleteTargets()
 
@@ -114,7 +120,7 @@ export function AllTargetsDetailView() {
     if (!targetToDelete) return
 
     try {
-      await deleteTargetMutation.mutateAsync(targetToDelete.id)
+      await deleteTargetMutation.mutateAsync({ id: targetToDelete.id, name: targetToDelete.name })
       setDeleteDialogOpen(false)
       setTargetToDelete(null)
     } catch (error) {
@@ -209,6 +215,9 @@ export function AllTargetsDetailView() {
         onPaginationChange={handlePaginationChange}
         totalCount={totalCount}
         manualPagination={true}
+        // 类型筛选
+        typeFilter={typeFilter}
+        onTypeFilterChange={handleTypeFilterChange}
       />
 
       {/* Add target dialog */}
