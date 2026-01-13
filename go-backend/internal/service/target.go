@@ -73,6 +73,47 @@ func (s *TargetService) GetByID(id int) (*model.Target, error) {
 	return target, nil
 }
 
+// GetDetailByID returns a target with asset summary by ID
+func (s *TargetService) GetDetailByID(id int) (*model.Target, *dto.TargetSummary, error) {
+	target, err := s.repo.FindByID(id)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil, ErrTargetNotFound
+		}
+		return nil, nil, err
+	}
+
+	// Get asset counts
+	assetCounts, err := s.repo.GetAssetCounts(id)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// Get vulnerability counts
+	vulnCounts, err := s.repo.GetVulnerabilityCounts(id)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	summary := &dto.TargetSummary{
+		Subdomains:  assetCounts.Subdomains,
+		Websites:    assetCounts.Websites,
+		Endpoints:   assetCounts.Endpoints,
+		IPs:         assetCounts.IPs,
+		Directories: assetCounts.Directories,
+		Screenshots: assetCounts.Screenshots,
+		Vulnerabilities: &dto.VulnerabilitySummary{
+			Total:    vulnCounts.Total,
+			Critical: vulnCounts.Critical,
+			High:     vulnCounts.High,
+			Medium:   vulnCounts.Medium,
+			Low:      vulnCounts.Low,
+		},
+	}
+
+	return target, summary, nil
+}
+
 // Update updates a target
 func (s *TargetService) Update(id int, req *dto.UpdateTargetRequest) (*model.Target, error) {
 	target, err := s.repo.FindByID(id)

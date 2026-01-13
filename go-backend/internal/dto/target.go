@@ -69,3 +69,34 @@ type BulkDeleteRequest struct {
 type BulkDeleteResponse struct {
 	DeletedCount int64 `json:"deletedCount"`
 }
+
+// TargetDetailResponse represents target detail response with summary
+type TargetDetailResponse struct {
+	ID            int                 `json:"id"`
+	Name          string              `json:"name"`
+	Type          string              `json:"type"`
+	CreatedAt     time.Time           `json:"createdAt"`
+	LastScannedAt *time.Time          `json:"lastScannedAt"`
+	Organizations []OrganizationBrief `json:"organizations,omitempty"`
+	Summary       *TargetSummary      `json:"summary"`
+}
+
+// TargetSummary represents target asset statistics
+type TargetSummary struct {
+	Subdomains      int64                 `json:"subdomains"`
+	Websites        int64                 `json:"websites"`
+	Endpoints       int64                 `json:"endpoints"`
+	IPs             int64                 `json:"ips"`
+	Directories     int64                 `json:"directories"`
+	Screenshots     int64                 `json:"screenshots"`
+	Vulnerabilities *VulnerabilitySummary `json:"vulnerabilities"`
+}
+
+// VulnerabilitySummary represents vulnerability statistics by severity
+type VulnerabilitySummary struct {
+	Total    int64 `json:"total"`
+	Critical int64 `json:"critical"`
+	High     int64 `json:"high"`
+	Medium   int64 `json:"medium"`
+	Low      int64 `json:"low"`
+}

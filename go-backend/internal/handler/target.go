@@ -97,7 +97,7 @@ func (h *TargetHandler) GetByID(c *gin.Context) {
 		return
 	}
 
-	target, err := h.svc.GetByID(id)
+	target, summary, err := h.svc.GetDetailByID(id)
 	if err != nil {
 		if errors.Is(err, service.ErrTargetNotFound) {
 			dto.NotFound(c, "Target not found")
@@ -107,12 +107,13 @@ func (h *TargetHandler) GetByID(c *gin.Context) {
 		return
 	}
 
-	dto.Success(c, dto.TargetResponse{
+	dto.Success(c, dto.TargetDetailResponse{
 		ID:            target.ID,
 		Name:          target.Name,
 		Type:          target.Type,
 		CreatedAt:     target.CreatedAt,
 		LastScannedAt: target.LastScannedAt,
+		Summary:       summary,
 	})
 }
 

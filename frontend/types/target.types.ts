@@ -33,6 +33,8 @@ export interface TargetDetail extends Target {
     websites: number
     endpoints: number
     ips: number
+    directories: number
+    screenshots: number
     vulnerabilities: {
       total: number
       critical: number
