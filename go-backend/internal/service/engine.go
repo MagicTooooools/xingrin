@@ -93,6 +93,39 @@ func (s *EngineService) Update(id int, req *dto.UpdateEngineRequest) (*model.Sca
 	return engine, nil
 }
 
+// Patch partially updates an engine
+func (s *EngineService) Patch(id int, req *dto.PatchEngineRequest) (*model.ScanEngine, error) {
+	engine, err := s.repo.FindByID(id)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, ErrEngineNotFound
+		}
+		return nil, err
+	}
+
+	// Only update fields that are provided
+	if req.Name != nil && *req.Name != engine.Name {
+		exists, err := s.repo.ExistsByName(*req.Name, id)
+		if err != nil {
+			return nil, err
+		}
+		if exists {
+			return nil, ErrEngineExists
+		}
+		engine.Name = *req.Name
+	}
+
+	if req.Configuration != nil {
+		engine.Configuration = *req.Configuration
+	}
+
+	if err := s.repo.Update(engine); err != nil {
+		return nil, err
+	}
+
+	return engine, nil
+}
+
 // Delete deletes an engine
 func (s *EngineService) Delete(id int) error {
 	_, err := s.repo.FindByID(id)

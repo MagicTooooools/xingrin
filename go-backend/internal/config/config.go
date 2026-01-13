@@ -15,6 +15,7 @@ type Config struct {
 	Redis    RedisConfig
 	Log      LogConfig
 	JWT      JWTConfig
+	Storage  StorageConfig
 }
 
 // ServerConfig holds server-related configuration
@@ -55,6 +56,11 @@ type JWTConfig struct {
 	Secret        string        `mapstructure:"JWT_SECRET"`
 	AccessExpire  time.Duration `mapstructure:"JWT_ACCESS_EXPIRE"`
 	RefreshExpire time.Duration `mapstructure:"JWT_REFRESH_EXPIRE"`
+}
+
+// StorageConfig holds storage-related configuration
+type StorageConfig struct {
+	WordlistsBasePath string `mapstructure:"WORDLISTS_BASE_PATH"`
 }
 
 // Load reads configuration from .env file and environment variables
@@ -114,6 +120,9 @@ func Load() (*Config, error) {
 	cfg.JWT.AccessExpire = v.GetDuration("JWT_ACCESS_EXPIRE")
 	cfg.JWT.RefreshExpire = v.GetDuration("JWT_REFRESH_EXPIRE")
 
+	// Storage config
+	cfg.Storage.WordlistsBasePath = v.GetString("WORDLISTS_BASE_PATH")
+
 	return cfg, nil
 }
 
@@ -148,6 +157,9 @@ func setDefaults(v *viper.Viper) {
 	v.SetDefault("JWT_SECRET", "change-me-in-production-use-a-long-random-string")
 	v.SetDefault("JWT_ACCESS_EXPIRE", "15m")
 	v.SetDefault("JWT_REFRESH_EXPIRE", "168h") // 7 days
+
+	// Storage defaults
+	v.SetDefault("WORDLISTS_BASE_PATH", "/opt/xingrin/wordlists")
 }
 
 // DSN returns the database connection string
@@ -195,6 +207,9 @@ func GetDefaults() *Config {
 			Secret:        "change-me-in-production-use-a-long-random-string",
 			AccessExpire:  15 * time.Minute,
 			RefreshExpire: 168 * time.Hour,
+		},
+		Storage: StorageConfig{
+			WordlistsBasePath: "/opt/xingrin/wordlists",
 		},
 	}
 }

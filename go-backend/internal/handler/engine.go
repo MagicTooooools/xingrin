@@ -139,6 +139,43 @@ func (h *EngineHandler) Update(c *gin.Context) {
 	})
 }
 
+// Patch partially updates an engine
+// PATCH /api/engines/:id
+func (h *EngineHandler) Patch(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		dto.BadRequest(c, "Invalid engine ID")
+		return
+	}
+
+	var req dto.PatchEngineRequest
+	if !dto.BindJSON(c, &req) {
+		return
+	}
+
+	engine, err := h.svc.Patch(id, &req)
+	if err != nil {
+		if errors.Is(err, service.ErrEngineNotFound) {
+			dto.NotFound(c, "Engine not found")
+			return
+		}
+		if errors.Is(err, service.ErrEngineExists) {
+			dto.BadRequest(c, "Engine name already exists")
+			return
+		}
+		dto.InternalError(c, "Failed to update engine")
+		return
+	}
+
+	dto.Success(c, dto.EngineResponse{
+		ID:            engine.ID,
+		Name:          engine.Name,
+		Configuration: engine.Configuration,
+		CreatedAt:     engine.CreatedAt,
+		UpdatedAt:     engine.UpdatedAt,
+	})
+}
+
 // Delete deletes an engine
 // DELETE /api/engines/:id
 func (h *EngineHandler) Delete(c *gin.Context) {

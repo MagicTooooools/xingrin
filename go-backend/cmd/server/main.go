@@ -131,6 +131,7 @@ func main() {
 	orgRepo := repository.NewOrganizationRepository(db)
 	targetRepo := repository.NewTargetRepository(db)
 	engineRepo := repository.NewEngineRepository(db)
+	wordlistRepo := repository.NewWordlistRepository(db)
 	websiteRepo := repository.NewWebsiteRepository(db)
 	subdomainRepo := repository.NewSubdomainRepository(db)
 	endpointRepo := repository.NewEndpointRepository(db)
@@ -143,6 +144,7 @@ func main() {
 	orgSvc := service.NewOrganizationService(orgRepo)
 	targetSvc := service.NewTargetService(targetRepo, orgRepo)
 	engineSvc := service.NewEngineService(engineRepo)
+	wordlistSvc := service.NewWordlistService(wordlistRepo, cfg.Storage.WordlistsBasePath)
 	websiteSvc := service.NewWebsiteService(websiteRepo, targetRepo)
 	subdomainSvc := service.NewSubdomainService(subdomainRepo, targetRepo)
 	endpointSvc := service.NewEndpointService(endpointRepo, targetRepo)
@@ -157,6 +159,7 @@ func main() {
 	orgHandler := handler.NewOrganizationHandler(orgSvc)
 	targetHandler := handler.NewTargetHandler(targetSvc)
 	engineHandler := handler.NewEngineHandler(engineSvc)
+	wordlistHandler := handler.NewWordlistHandler(wordlistSvc)
 	websiteHandler := handler.NewWebsiteHandler(websiteSvc)
 	subdomainHandler := handler.NewSubdomainHandler(subdomainSvc)
 	endpointHandler := handler.NewEndpointHandler(endpointSvc)
@@ -271,7 +274,16 @@ func main() {
 			protected.GET("/engines", engineHandler.List)
 			protected.GET("/engines/:id", engineHandler.GetByID)
 			protected.PUT("/engines/:id", engineHandler.Update)
+			protected.PATCH("/engines/:id", engineHandler.Patch)
 			protected.DELETE("/engines/:id", engineHandler.Delete)
+
+			// Wordlists
+			protected.POST("/wordlists", wordlistHandler.Create)
+			protected.GET("/wordlists", wordlistHandler.List)
+			protected.DELETE("/wordlists/:id", wordlistHandler.Delete)
+			protected.GET("/wordlists/download", wordlistHandler.Download)
+			protected.GET("/wordlists/:id/content", wordlistHandler.GetContent)
+			protected.PUT("/wordlists/:id/content", wordlistHandler.UpdateContent)
 		}
 	}
 

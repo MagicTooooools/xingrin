@@ -8,10 +8,16 @@ type CreateEngineRequest struct {
 	Configuration string `json:"configuration"`
 }
 
-// UpdateEngineRequest represents update engine request
+// UpdateEngineRequest represents update engine request (PUT - full update)
 type UpdateEngineRequest struct {
 	Name          string `json:"name" binding:"required,max=200"`
 	Configuration string `json:"configuration"`
+}
+
+// PatchEngineRequest represents patch engine request (PATCH - partial update)
+type PatchEngineRequest struct {
+	Name          *string `json:"name,omitempty" binding:"omitempty,max=200"`
+	Configuration *string `json:"configuration,omitempty"`
 }
 
 // EngineResponse represents engine response

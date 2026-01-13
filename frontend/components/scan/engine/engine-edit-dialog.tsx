@@ -205,16 +205,11 @@ url_fetch:
         await new Promise(resolve => setTimeout(resolve, 1000))
       }
 
-      toast.success(tToast("configSaveSuccess"), {
-        description: tToast("configSaveSuccessDesc", { name: engine.name }),
-      })
       setHasChanges(false)
       onOpenChange(false)
     } catch (error) {
       console.error("Failed to save YAML config:", error)
-      toast.error(tToast("configSaveFailed"), {
-        description: error instanceof Error ? error.message : tToast("unknownError"),
-      })
+      // Error toast is handled by useUpdateEngine hook
     } finally {
       setIsSubmitting(false)
     }
