@@ -5,6 +5,7 @@ import (
 
 	"github.com/xingrin/go-backend/internal/dto"
 	"github.com/xingrin/go-backend/internal/model"
+	"github.com/xingrin/go-backend/internal/pkg/validator"
 	"github.com/xingrin/go-backend/internal/repository"
 	"gorm.io/gorm"
 )
@@ -64,7 +65,7 @@ func (s *ScreenshotService) BulkDelete(ids []int) (int64, error) {
 // BulkUpsert creates or updates multiple screenshots for a target
 func (s *ScreenshotService) BulkUpsert(targetID int, req *dto.BulkUpsertScreenshotRequest) (int64, error) {
 	// Verify target exists
-	_, err := s.targetRepo.FindByID(targetID)
+	target, err := s.targetRepo.FindByID(targetID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return 0, ErrTargetNotFound
@@ -72,15 +73,21 @@ func (s *ScreenshotService) BulkUpsert(targetID int, req *dto.BulkUpsertScreensh
 		return 0, err
 	}
 
-	// Convert DTO to models
+	// Filter valid URLs that match target and convert to models
 	screenshots := make([]model.Screenshot, 0, len(req.Screenshots))
 	for _, item := range req.Screenshots {
-		screenshots = append(screenshots, model.Screenshot{
-			TargetID:   targetID,
-			URL:        item.URL,
-			StatusCode: item.StatusCode,
-			Image:      item.Image,
-		})
+		if validator.IsURLMatchTarget(item.URL, target.Name, target.Type) {
+			screenshots = append(screenshots, model.Screenshot{
+				TargetID:   targetID,
+				URL:        item.URL,
+				StatusCode: item.StatusCode,
+				Image:      item.Image,
+			})
+		}
+	}
+
+	if len(screenshots) == 0 {
+		return 0, nil
 	}
 
 	return s.repo.BulkUpsert(screenshots)
