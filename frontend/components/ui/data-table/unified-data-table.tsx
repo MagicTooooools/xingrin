@@ -151,6 +151,7 @@ export function UnifiedDataTable<TData>({
   enableAutoColumnSizing = false,
 }: UnifiedDataTableProps<TData>) {
   const tActions = useTranslations("common.actions")
+  const tDataTable = useTranslations("dataTable")
   const locale = useLocale()
   
   // Internal state
@@ -438,7 +439,7 @@ export function UnifiedDataTable<TData>({
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="sm">
                 <IconLayoutColumns className="h-4 w-4" />
-                Columns
+                {tDataTable("showColumns")}
                 <IconChevronDown className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>

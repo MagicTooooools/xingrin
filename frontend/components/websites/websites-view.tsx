@@ -49,7 +49,7 @@ export function WebSitesView({
       url: tColumns("common.url"),
       host: tColumns("website.host"),
       title: tColumns("endpoint.title"),
-      status: tColumns("common.status"),
+      status: tColumns("website.statusCode"),
       technologies: tColumns("endpoint.technologies"),
       contentLength: tColumns("endpoint.contentLength"),
       location: tColumns("endpoint.location"),

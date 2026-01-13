@@ -1,13 +1,13 @@
 {
   "columns": {
     "common": {
-      "name": "Name",
-      "description": "Description",
-      "createdAt": "Created At",
-      "updatedAt": "Updated At",
-      "status": "Status",
-      "actions": "Actions",
-      "type": "Type",
+      "name": "名称",
+      "description": "描述",
+      "createdAt": "创建时间",
+      "updatedAt": "更新时间",
+      "status": "状态",
+      "actions": "操作",
+      "type": "类型",
       "url": "URL"
     },
     "scanHistory": {
@@ -23,22 +23,25 @@
       "vulnerabilities": "Vulnerabilities"
     },
     "vulnerability": {
-      "severity": "Severity",
-      "source": "Source",
-      "vulnType": "Vuln Type"
+      "severity": "严重程度",
+      "source": "来源",
+      "vulnType": "漏洞类型",
+      "url": "URL",
+      "createdAt": "创建时间"
     },
     "organization": {
-      "organization": "Organization",
-      "totalTargets": "Total Targets",
-      "added": "Added"
+      "organization": "组织名称",
+      "totalTargets": "目标总数",
+      "added": "添加时间"
     },
     "target": {
-      "target": "Target",
-      "addedOn": "Added On",
-      "lastScanned": "Last Scanned"
+      "target": "目标名称",
+      "addedOn": "添加时间",
+      "lastScanned": "最后扫描时间"
     },
     "subdomain": {
-      "subdomain": "Subdomain"
+      "subdomain": "子域名",
+      "createdAt": "创建时间"
     },
     "ipAddress": {
       "ipAddress": "IP Address",
@@ -48,28 +51,38 @@
       "allOpenPorts": "All Open Ports"
     },
     "endpoint": {
-      "title": "Title",
-      "host": "Host",
-      "contentLength": "Content Length",
-      "location": "Location",
-      "webServer": "Web Server",
-      "contentType": "Content Type",
-      "technologies": "Technologies",
-      "responseBody": "Response Body",
-      "vhost": "VHost",
+      "title": "标题",
+      "host": "主机名",
+      "contentLength": "内容长度",
+      "location": "跳转地址",
+      "webServer": "Web 服务器",
+      "contentType": "内容类型",
+      "technologies": "技术栈",
+      "responseBody": "响应体",
+      "vhost": "虚拟主机",
       "gfPatterns": "GF Patterns",
-      "responseHeaders": "Response Headers",
-      "responseTime": "Response Time"
+      "responseHeaders": "响应头",
+      "responseTime": "响应时间"
     },
     "website": {
-      "host": "Host",
-      "responseHeaders": "Response Headers"
+      "url": "URL",
+      "host": "主机名",
+      "title": "标题",
+      "statusCode": "状态码",
+      "technologies": "技术栈",
+      "contentLength": "内容长度",
+      "location": "跳转地址",
+      "webServer": "Web 服务器",
+      "contentType": "内容类型",
+      "responseBody": "响应体",
+      "responseHeaders": "响应头",
+      "vhost": "虚拟主机",
+      "createdAt": "创建时间"
     },
     "directory": {
-      "length": "Length",
-      "words": "Words",
-      "lines": "Lines",
-      "duration": "Duration"
+      "length": "内容长度",
+      "contentType": "内容类型",
+      "createdAt": "创建时间"
     },
     "engine": {
       "engineName": "Engine Name",
@@ -84,13 +97,14 @@
       "screenshot": "Screenshot"
     },
     "scheduledScan": {
-      "taskName": "Task Name",
-      "scanEngine": "Scan Engine",
-      "cronExpression": "Cron Expression",
-      "scope": "Scope",
-      "nextRun": "Next Run",
-      "runCount": "Run Count",
-      "lastRun": "Last Run"
+      "taskName": "任务名称",
+      "scanEngine": "扫描引擎",
+      "cronExpression": "执行周期",
+      "scope": "扫描范围",
+      "status": "状态",
+      "nextRun": "下次执行",
+      "runCount": "执行次数",
+      "lastRun": "上次执行"
     },
     "fingerprint": {
       "name": "Name",
