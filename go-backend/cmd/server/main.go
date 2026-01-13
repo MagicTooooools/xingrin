@@ -282,6 +282,10 @@ func main() {
 
 			// Vulnerabilities (standalone)
 			protected.POST("/vulnerabilities/bulk-delete", vulnerabilityHandler.BulkDelete)
+			protected.PATCH("/vulnerabilities/:id/review", vulnerabilityHandler.MarkAsReviewed)
+			protected.PATCH("/vulnerabilities/:id/unreview", vulnerabilityHandler.MarkAsUnreviewed)
+			protected.POST("/vulnerabilities/bulk-review", vulnerabilityHandler.BulkMarkAsReviewed)
+			protected.POST("/vulnerabilities/bulk-unreview", vulnerabilityHandler.BulkMarkAsUnreviewed)
 
 			// Engines
 			protected.POST("/engines", engineHandler.Create)

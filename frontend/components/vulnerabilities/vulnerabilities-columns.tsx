@@ -27,6 +27,8 @@ export interface VulnerabilityTranslations {
   }
   tooltips: {
     vulnDetails: string
+    reviewed: string
+    pending: string
   }
   severity: {
     critical: string
@@ -40,12 +42,14 @@ export interface VulnerabilityTranslations {
 interface ColumnActions {
   formatDate: (date: string) => string
   handleViewDetail: (vulnerability: Vulnerability) => void
+  onToggleReview?: (vulnerability: Vulnerability) => void
   t: VulnerabilityTranslations
 }
 
 export function createVulnerabilityColumns({
   formatDate,
   handleViewDetail,
+  onToggleReview,
   t,
 }: ColumnActions): ColumnDef<Vulnerability>[] {
   // Unified vulnerability severity color configuration
@@ -81,6 +85,41 @@ export function createVulnerabilityColumns({
           aria-label={t.actions.selectRow}
         />
       ),
+      enableSorting: false,
+      enableHiding: false,
+    },
+    {
+      id: "reviewStatus",
+      size: 40,
+      minSize: 40,
+      maxSize: 40,
+      enableResizing: false,
+      header: "",
+      cell: ({ row }) => {
+        const isReviewed = row.original.isReviewed
+        return (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                onClick={() => onToggleReview?.(row.original)}
+                className="p-1 hover:bg-muted rounded transition-colors"
+                disabled={!onToggleReview}
+              >
+                <span
+                  className={`inline-block w-2 h-2 rounded-full transition-colors ${
+                    isReviewed
+                      ? "bg-muted-foreground/30"
+                      : "bg-blue-500"
+                  }`}
+                />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent>
+              {isReviewed ? t.tooltips.reviewed : t.tooltips.pending}
+            </TooltipContent>
+          </Tooltip>
+        )
+      },
       enableSorting: false,
       enableHiding: false,
     },

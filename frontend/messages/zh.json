@@ -142,7 +142,9 @@
     "vulnDetails": "漏洞详情",
     "copied": "已复制",
     "allHosts": "所有主机",
-    "allOpenPorts": "所有开放端口"
+    "allOpenPorts": "所有开放端口",
+    "reviewed": "已审查",
+    "pending": "待审查"
   },
   "severity": {
     "critical": "严重",
@@ -1971,6 +1973,25 @@
   "vulnerabilities": {
     "title": "漏洞管理",
     "description": "查看和管理所有扫描发现的漏洞",
+    "reviewStatus": {
+      "all": "全部",
+      "pending": "待审查",
+      "reviewed": "已审查"
+    },
+    "reviewSuccess": "已标记为已审查",
+    "unreviewSuccess": "已标记为待审查",
+    "reviewError": "标记已审查失败",
+    "unreviewError": "标记待审查失败",
+    "bulkReviewSuccess": "已将 {count} 个漏洞标记为已审查",
+    "bulkUnreviewSuccess": "已将 {count} 个漏洞标记为待审查",
+    "bulkReviewError": "批量标记已审查失败",
+    "bulkUnreviewError": "批量标记待审查失败",
+    "markAsReviewed": "标记已审查",
+    "markAsPending": "标记待审查",
+    "tooltips": {
+      "reviewed": "已审查",
+      "pending": "待审查"
+    },
     "detail": {
       "vulnUrl": "漏洞 URL",
       "tabs": {

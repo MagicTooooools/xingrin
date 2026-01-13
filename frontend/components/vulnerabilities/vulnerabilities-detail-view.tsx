@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from "react"
 import { useTranslations, useLocale } from "next-intl"
-import { VulnerabilitiesDataTable } from "./vulnerabilities-data-table"
+import { VulnerabilitiesDataTable, type ReviewFilter } from "./vulnerabilities-data-table"
 import { createVulnerabilityColumns } from "./vulnerabilities-columns"
 import { VulnerabilityDetailDialog } from "./vulnerability-detail-dialog"
 import { DataTableSkeleton } from "@/components/ui/data-table-skeleton"
@@ -18,7 +18,15 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import type { Vulnerability } from "@/types/vulnerability.types"
-import { useScanVulnerabilities, useTargetVulnerabilities, useAllVulnerabilities } from "@/hooks/use-vulnerabilities"
+import {
+  useScanVulnerabilities,
+  useTargetVulnerabilities,
+  useAllVulnerabilities,
+  useMarkAsReviewed,
+  useMarkAsUnreviewed,
+  useBulkMarkAsReviewed,
+  useBulkMarkAsUnreviewed,
+} from "@/hooks/use-vulnerabilities"
 
 interface VulnerabilitiesDetailViewProps {
   /** Used in scan history page: view vulnerabilities by scan dimension */
@@ -41,6 +49,7 @@ export function VulnerabilitiesDetailView({
   const [isLoading, setIsLoading] = useState(false)
   const [detailDialogOpen, setDetailDialogOpen] = useState(false)
   const [selectedVulnerability, setSelectedVulnerability] = useState<Vulnerability | null>(null)
+  const [reviewFilter, setReviewFilter] = useState<ReviewFilter>("all")
 
   const [pagination, setPagination] = useState({
     pageIndex: 0,
@@ -71,6 +80,8 @@ export function VulnerabilitiesDetailView({
     },
     tooltips: {
       vulnDetails: tTooltips("vulnDetails"),
+      reviewed: tTooltips("reviewed"),
+      pending: tTooltips("pending"),
     },
     severity: {
       critical: tSeverity("critical"),
@@ -81,6 +92,12 @@ export function VulnerabilitiesDetailView({
     },
   }), [tColumns, tCommon, tTooltips, tSeverity])
 
+  // Review mutations
+  const markAsReviewed = useMarkAsReviewed()
+  const markAsUnreviewed = useMarkAsUnreviewed()
+  const bulkMarkAsReviewed = useBulkMarkAsReviewed()
+  const bulkMarkAsUnreviewed = useBulkMarkAsUnreviewed()
+
   // Smart filter query
   const [filterQuery, setFilterQuery] = useState("")
 
@@ -89,9 +106,18 @@ export function VulnerabilitiesDetailView({
     setPagination((prev) => ({ ...prev, pageIndex: 0 }))
   }
 
+  const handleReviewFilterChange = (filter: ReviewFilter) => {
+    setReviewFilter(filter)
+    setPagination((prev) => ({ ...prev, pageIndex: 0 }))
+  }
+
+  // Convert review filter to API parameter
+  const isReviewedParam = reviewFilter === "all" ? undefined : reviewFilter === "reviewed"
+
   const paginationParams = {
     page: pagination.pageIndex + 1,
     pageSize: pagination.pageSize,
+    isReviewed: isReviewedParam,
   }
 
   // Load by scan dimension (scan history page)
@@ -128,6 +154,11 @@ export function VulnerabilitiesDetailView({
     pageSize: pagination.pageSize,
     totalPages: 1,
   }
+
+  // Calculate pending count from current data
+  const pendingCount = useMemo(() => {
+    return vulnerabilities.filter(v => !v.isReviewed).length
+  }, [vulnerabilities])
 
   const formatDate = (dateString: string): string => {
     return new Date(dateString).toLocaleString(getDateLocale(locale), {
@@ -194,6 +225,37 @@ export function VulnerabilitiesDetailView({
     setPagination(newPagination)
   }
 
+  // Handle toggle review status for single vulnerability
+  const handleToggleReview = (vulnerability: Vulnerability) => {
+    if (vulnerability.isReviewed) {
+      markAsUnreviewed.mutate(vulnerability.id)
+    } else {
+      markAsReviewed.mutate(vulnerability.id)
+    }
+  }
+
+  // Handle bulk mark as reviewed
+  const handleBulkMarkAsReviewed = () => {
+    if (selectedVulnerabilities.length === 0) return
+    const ids = selectedVulnerabilities.map(v => v.id)
+    bulkMarkAsReviewed.mutate(ids, {
+      onSuccess: () => {
+        setSelectedVulnerabilities([])
+      },
+    })
+  }
+
+  // Handle bulk mark as pending
+  const handleBulkMarkAsPending = () => {
+    if (selectedVulnerabilities.length === 0) return
+    const ids = selectedVulnerabilities.map(v => v.id)
+    bulkMarkAsUnreviewed.mutate(ids, {
+      onSuccess: () => {
+        setSelectedVulnerabilities([])
+      },
+    })
+  }
+
   // Handle download all vulnerabilities
   const handleDownloadAll = () => {
     // TODO: Implement download all vulnerabilities functionality
@@ -214,9 +276,10 @@ export function VulnerabilitiesDetailView({
       createVulnerabilityColumns({
         formatDate,
         handleViewDetail,
+        onToggleReview: handleToggleReview,
         t: translations,
       }),
-    [handleViewDetail, translations]
+    [handleViewDetail, handleToggleReview, translations]
   )
 
   if ((isLoading || isQueryLoading) && !activeQuery.data) {
@@ -253,6 +316,12 @@ export function VulnerabilitiesDetailView({
         onPaginationChange={handlePaginationChange}
         onSelectionChange={setSelectedVulnerabilities}
         hideToolbar={hideToolbar}
+        reviewFilter={reviewFilter}
+        onReviewFilterChange={handleReviewFilterChange}
+        pendingCount={pendingCount}
+        selectedRows={selectedVulnerabilities}
+        onBulkMarkAsReviewed={handleBulkMarkAsReviewed}
+        onBulkMarkAsPending={handleBulkMarkAsPending}
       />
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>

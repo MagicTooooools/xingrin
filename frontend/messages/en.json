@@ -128,7 +128,9 @@
     "vulnDetails": "Vulnerability Details",
     "copied": "Copied",
     "allHosts": "All Hosts",
-    "allOpenPorts": "All Open Ports"
+    "allOpenPorts": "All Open Ports",
+    "reviewed": "Reviewed",
+    "pending": "Pending review"
   },
   "severity": {
     "critical": "Critical",
@@ -1957,6 +1959,25 @@
   "vulnerabilities": {
     "title": "Vulnerability Management",
     "description": "View and manage all vulnerabilities found by scans",
+    "reviewStatus": {
+      "all": "All",
+      "pending": "Pending",
+      "reviewed": "Reviewed"
+    },
+    "reviewSuccess": "Marked as reviewed",
+    "unreviewSuccess": "Marked as pending",
+    "reviewError": "Failed to mark as reviewed",
+    "unreviewError": "Failed to mark as pending",
+    "bulkReviewSuccess": "{count} vulnerabilities marked as reviewed",
+    "bulkUnreviewSuccess": "{count} vulnerabilities marked as pending",
+    "bulkReviewError": "Failed to bulk mark as reviewed",
+    "bulkUnreviewError": "Failed to bulk mark as pending",
+    "markAsReviewed": "Mark as Reviewed",
+    "markAsPending": "Mark as Pending",
+    "tooltips": {
+      "reviewed": "Reviewed",
+      "pending": "Pending review"
+    },
     "detail": {
       "vulnUrl": "Vulnerability URL",
       "tabs": {

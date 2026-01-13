@@ -1,6 +1,8 @@
 "use client"
 
-import { useQuery, keepPreviousData } from "@tanstack/react-query"
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query"
+import { useTranslations } from "next-intl"
+import { toast } from "sonner"
 
 import { VulnerabilityService } from "@/services/vulnerability.service"
 import type {
@@ -66,6 +68,8 @@ export function useAllVulnerabilities(
           source: item.source || "scan",
           cvssScore,
           rawOutput: item.rawOutput || {},
+          isReviewed: item.isReviewed ?? false,
+          reviewedAt: item.reviewedAt ?? null,
           createdAt,
         }
       })
@@ -137,6 +141,8 @@ export function useScanVulnerabilities(
           source: item.source || "scan",
           cvssScore,
           rawOutput: item.rawOutput || {},
+          isReviewed: item.isReviewed ?? false,
+          reviewedAt: item.reviewedAt ?? null,
           createdAt,
         }
       })
@@ -209,6 +215,8 @@ export function useTargetVulnerabilities(
           target: item.target ?? targetId,
           cvssScore,
           rawOutput: item.rawOutput || {},
+          isReviewed: item.isReviewed ?? false,
+          reviewedAt: item.reviewedAt ?? null,
           createdAt,
         }
       })
@@ -230,5 +238,73 @@ export function useTargetVulnerabilities(
       return { vulnerabilities, pagination }
     },
     placeholderData: keepPreviousData,
+  })
+}
+
+/** Mark a single vulnerability as reviewed */
+export function useMarkAsReviewed() {
+  const queryClient = useQueryClient()
+  const t = useTranslations("vulnerabilities")
+
+  return useMutation({
+    mutationFn: (id: number) => VulnerabilityService.markAsReviewed(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: vulnerabilityKeys.all })
+      toast.success(t("reviewSuccess"))
+    },
+    onError: () => {
+      toast.error(t("reviewError"))
+    },
+  })
+}
+
+/** Mark a single vulnerability as pending (unreview) */
+export function useMarkAsUnreviewed() {
+  const queryClient = useQueryClient()
+  const t = useTranslations("vulnerabilities")
+
+  return useMutation({
+    mutationFn: (id: number) => VulnerabilityService.markAsUnreviewed(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: vulnerabilityKeys.all })
+      toast.success(t("unreviewSuccess"))
+    },
+    onError: () => {
+      toast.error(t("unreviewError"))
+    },
+  })
+}
+
+/** Bulk mark vulnerabilities as reviewed */
+export function useBulkMarkAsReviewed() {
+  const queryClient = useQueryClient()
+  const t = useTranslations("vulnerabilities")
+
+  return useMutation({
+    mutationFn: (ids: number[]) => VulnerabilityService.bulkMarkAsReviewed(ids),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: vulnerabilityKeys.all })
+      toast.success(t("bulkReviewSuccess", { count: data.updatedCount }))
+    },
+    onError: () => {
+      toast.error(t("bulkReviewError"))
+    },
+  })
+}
+
+/** Bulk mark vulnerabilities as pending (unreview) */
+export function useBulkMarkAsUnreviewed() {
+  const queryClient = useQueryClient()
+  const t = useTranslations("vulnerabilities")
+
+  return useMutation({
+    mutationFn: (ids: number[]) => VulnerabilityService.bulkMarkAsUnreviewed(ids),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: vulnerabilityKeys.all })
+      toast.success(t("bulkUnreviewSuccess", { count: data.updatedCount }))
+    },
+    onError: () => {
+      toast.error(t("bulkUnreviewError"))
+    },
   })
 }
