@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/lib/pq"
+	"github.com/shopspring/decimal"
 	"github.com/xingrin/go-backend/internal/config"
 	"github.com/xingrin/go-backend/internal/database"
 	"github.com/xingrin/go-backend/internal/model"
@@ -16,18 +17,16 @@ import (
 
 var (
 	clear    = flag.Bool("clear", false, "Clear existing data before generating")
-	orgCount = flag.Int("orgs", 20, "Number of organizations to generate")
-	// targetCount = orgCount * 20, websiteCount = targetCount * 20
+	orgCount = flag.Int("orgs", 15, "Number of organizations to generate")
 )
 
 func main() {
 	flag.Parse()
 
 	// Calculate counts based on org count
-	// Each org has 20 targets, each target has 20 websites/endpoints/directories
-	// Subdomains only for domain-type targets
-	targetsPerOrg := 20
-	assetsPerTarget := 20
+	// 15 orgs × 15 targets/org × 15 assets/target
+	targetsPerOrg := 15
+	assetsPerTarget := 15
 	targetCount := *orgCount * targetsPerOrg
 
 	// Load config
@@ -121,12 +120,19 @@ func main() {
 		os.Exit(1)
 	}
 
+	// Create vulnerabilities for targets
+	if err := createVulnerabilities(db, targets, assetsPerTarget); err != nil {
+		fmt.Printf("❌ Failed to create vulnerabilities: %v\n", err)
+		os.Exit(1)
+	}
+
 	fmt.Println("\n✅ Test data generation completed!")
 }
 
 func clearData(db *gorm.DB) error {
 	// Delete in order to respect foreign key constraints
 	tables := []string{
+		"vulnerability",
 		"screenshot",
 		"host_port_mapping",
 		"directory",
@@ -829,5 +835,91 @@ func createScreenshots(db *gorm.DB, targets []model.Target, screenshotsPerTarget
 	}
 
 	fmt.Printf("   ✓ Created %d screenshots (without image data)\n", createdCount)
+	return nil
+}
+
+func createVulnerabilities(db *gorm.DB, targets []model.Target, vulnsPerTarget int) error {
+	totalCount := len(targets) * vulnsPerTarget
+	fmt.Printf("🔓 Creating %d vulnerabilities (%d per target)...\n", totalCount, vulnsPerTarget)
+
+	if len(targets) == 0 {
+		return nil
+	}
+
+	// Vulnerability data templates
+	vulnTypes := []string{
+		"SQL Injection", "Cross-Site Scripting (XSS)", "Remote Code Execution",
+		"Server-Side Request Forgery (SSRF)", "Local File Inclusion (LFI)",
+		"XML External Entity (XXE)", "Insecure Deserialization", "Command Injection",
+		"Path Traversal", "Open Redirect", "CRLF Injection", "CORS Misconfiguration",
+		"Information Disclosure", "Authentication Bypass", "Privilege Escalation",
+	}
+
+	severities := []string{"critical", "high", "high", "medium", "medium", "medium", "low", "low", "info"}
+
+	sources := []string{"nuclei", "dalfox", "sqlmap", "burpsuite", "manual"}
+
+	descriptions := []string{
+		"A SQL injection vulnerability was found that allows an attacker to execute arbitrary SQL queries.",
+		"A reflected XSS vulnerability exists that could allow attackers to inject malicious scripts.",
+		"Remote code execution is possible through unsafe deserialization of user input.",
+		"SSRF vulnerability allows an attacker to make requests to internal services.",
+		"Local file inclusion vulnerability could expose sensitive files on the server.",
+		"XXE vulnerability found that could lead to information disclosure or SSRF.",
+		"Insecure deserialization could lead to remote code execution.",
+		"OS command injection vulnerability found in user-controlled input.",
+		"Path traversal vulnerability allows access to files outside the web root.",
+		"Open redirect vulnerability could be used for phishing attacks.",
+	}
+
+	paths := []string{
+		"/login", "/api/v1/users", "/api/v1/search", "/admin/config",
+		"/api/export", "/upload", "/api/v2/data", "/graphql",
+		"/api/auth", "/dashboard", "/api/profile", "/settings",
+	}
+
+	cvssScores := []float64{9.8, 9.1, 8.6, 7.5, 6.5, 5.4, 4.3, 3.1, 2.0}
+
+	// Build all vulnerabilities in memory first
+	vulns := make([]model.Vulnerability, 0, totalCount)
+
+	for _, target := range targets {
+		for i := 0; i < vulnsPerTarget; i++ {
+			var url string
+			path := paths[i%len(paths)]
+
+			switch target.Type {
+			case "domain":
+				url = fmt.Sprintf("https://www.%s%s", target.Name, path)
+			case "ip":
+				url = fmt.Sprintf("https://%s%s", target.Name, path)
+			case "cidr":
+				baseIP := target.Name[:len(target.Name)-3]
+				url = fmt.Sprintf("https://%s%s", baseIP, path)
+			default:
+				continue
+			}
+
+			cvss := decimal.NewFromFloat(cvssScores[i%len(cvssScores)])
+
+			vulns = append(vulns, model.Vulnerability{
+				TargetID:    target.ID,
+				URL:         url,
+				VulnType:    vulnTypes[i%len(vulnTypes)],
+				Severity:    severities[i%len(severities)],
+				Source:      sources[i%len(sources)],
+				CVSSScore:   &cvss,
+				Description: descriptions[i%len(descriptions)],
+				CreatedAt:   time.Now().AddDate(0, 0, -i),
+			})
+		}
+	}
+
+	// Batch insert (100 records per batch)
+	if err := db.CreateInBatches(vulns, 100).Error; err != nil {
+		return err
+	}
+
+	fmt.Printf("   ✓ Created %d vulnerabilities\n", len(vulns))
 	return nil
 }

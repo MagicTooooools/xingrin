@@ -138,6 +138,7 @@ func main() {
 	directoryRepo := repository.NewDirectoryRepository(db)
 	ipAddressRepo := repository.NewIPAddressRepository(db)
 	screenshotRepo := repository.NewScreenshotRepository(db)
+	vulnerabilityRepo := repository.NewVulnerabilityRepository(db)
 
 	// Create services
 	userSvc := service.NewUserService(userRepo)
@@ -151,6 +152,7 @@ func main() {
 	directorySvc := service.NewDirectoryService(directoryRepo, targetRepo)
 	ipAddressSvc := service.NewIPAddressService(ipAddressRepo, targetRepo)
 	screenshotSvc := service.NewScreenshotService(screenshotRepo, targetRepo)
+	vulnerabilitySvc := service.NewVulnerabilityService(vulnerabilityRepo, targetRepo)
 
 	// Create handlers
 	healthHandler := handler.NewHealthHandler(db, redisClient)
@@ -166,6 +168,7 @@ func main() {
 	directoryHandler := handler.NewDirectoryHandler(directorySvc)
 	ipAddressHandler := handler.NewIPAddressHandler(ipAddressSvc)
 	screenshotHandler := handler.NewScreenshotHandler(screenshotSvc)
+	vulnerabilityHandler := handler.NewVulnerabilityHandler(vulnerabilitySvc)
 
 	// Register health routes
 	router.GET("/health", healthHandler.Check)
@@ -268,6 +271,17 @@ func main() {
 			// Screenshots (standalone)
 			protected.GET("/screenshots/:id/image", screenshotHandler.GetImage)
 			protected.POST("/screenshots/bulk-delete", screenshotHandler.BulkDelete)
+
+			// Vulnerabilities (global)
+			protected.GET("/assets/vulnerabilities", vulnerabilityHandler.ListAll)
+			protected.GET("/assets/vulnerabilities/:id", vulnerabilityHandler.GetByID)
+
+			// Vulnerabilities (nested under targets)
+			protected.GET("/targets/:id/vulnerabilities", vulnerabilityHandler.ListByTarget)
+			protected.POST("/targets/:id/vulnerabilities/bulk-upsert", vulnerabilityHandler.BulkUpsert)
+
+			// Vulnerabilities (standalone)
+			protected.POST("/vulnerabilities/bulk-delete", vulnerabilityHandler.BulkDelete)
 
 			// Engines
 			protected.POST("/engines", engineHandler.Create)
