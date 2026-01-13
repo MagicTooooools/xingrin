@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/lib/pq"
@@ -13,6 +14,7 @@ import (
 	"github.com/xingrin/go-backend/internal/database"
 	"github.com/xingrin/go-backend/internal/model"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 var (
@@ -184,9 +186,10 @@ func createOrganizations(db *gorm.DB, count int) ([]int, error) {
 		"Cloud-native systems developer specializing in Kubernetes and microservices.",
 	}
 
-	var ids []int
 	suffix := rand.Intn(9000) + 1000
 
+	// Build all organizations in memory first
+	orgs := make([]model.Organization, 0, count)
 	for i := 0; i < count; i++ {
 		name := fmt.Sprintf("%s - %s (%d-%d)",
 			orgNames[i%len(orgNames)],
@@ -194,21 +197,25 @@ func createOrganizations(db *gorm.DB, count int) ([]int, error) {
 			suffix, i)
 
 		desc := descriptions[rand.Intn(len(descriptions))]
-
-		// Random created_at within last year
 		daysAgo := rand.Intn(365)
 		createdAt := time.Now().AddDate(0, 0, -daysAgo)
 
-		org := &model.Organization{
+		orgs = append(orgs, model.Organization{
 			Name:        name,
 			Description: desc,
 			CreatedAt:   createdAt,
-		}
+		})
+	}
 
-		if err := db.Create(org).Error; err != nil {
-			return nil, err
-		}
-		ids = append(ids, org.ID)
+	// Batch insert
+	if err := db.CreateInBatches(orgs, 100).Error; err != nil {
+		return nil, err
+	}
+
+	// Extract IDs
+	ids := make([]int, len(orgs))
+	for i := range orgs {
+		ids[i] = orgs[i].ID
 	}
 
 	fmt.Printf("   ✓ Created %d organizations\n", len(ids))
@@ -223,9 +230,11 @@ func createTargets(db *gorm.DB, count int) ([]model.Target, error) {
 	companies := []string{"acme", "techstart", "globalfinance", "healthcare", "ecommerce", "smartcity", "cybersec", "cloudnative", "dataflow", "mobilefirst"}
 	tlds := []string{".com", ".io", ".net", ".org", ".dev", ".app", ".cloud", ".tech"}
 
-	var targets []model.Target
 	suffix := rand.Intn(9000) + 1000
 	usedNames := make(map[string]bool)
+
+	// Build all targets in memory first
+	targets := make([]model.Target, 0, count)
 
 	// Generate domains (70%)
 	domainCount := count * 70 / 100
@@ -242,20 +251,16 @@ func createTargets(db *gorm.DB, count int) ([]model.Target, error) {
 			}
 		}
 
-		target := model.Target{
+		targets = append(targets, model.Target{
 			Name:      name,
 			Type:      "domain",
 			CreatedAt: time.Now().AddDate(0, 0, -rand.Intn(365)),
-		}
-
-		if err := db.Create(&target).Error; err != nil {
-			return nil, err
-		}
-		targets = append(targets, target)
+		})
 	}
 
 	// Generate IPs (20%)
 	ipCount := count * 20 / 100
+	actualIPCount := 0
 	for i := 0; i < ipCount; i++ {
 		name := fmt.Sprintf("%d.%d.%d.%d",
 			rand.Intn(223)+1,
@@ -268,20 +273,17 @@ func createTargets(db *gorm.DB, count int) ([]model.Target, error) {
 		}
 		usedNames[name] = true
 
-		target := model.Target{
+		targets = append(targets, model.Target{
 			Name:      name,
 			Type:      "ip",
 			CreatedAt: time.Now().AddDate(0, 0, -rand.Intn(365)),
-		}
-
-		if err := db.Create(&target).Error; err != nil {
-			return nil, err
-		}
-		targets = append(targets, target)
+		})
+		actualIPCount++
 	}
 
 	// Generate CIDRs (10%)
 	cidrCount := count * 10 / 100
+	actualCIDRCount := 0
 	for i := 0; i < cidrCount; i++ {
 		masks := []int{8, 16, 24}
 		mask := masks[rand.Intn(len(masks))]
@@ -296,20 +298,21 @@ func createTargets(db *gorm.DB, count int) ([]model.Target, error) {
 		}
 		usedNames[name] = true
 
-		target := model.Target{
+		targets = append(targets, model.Target{
 			Name:      name,
 			Type:      "cidr",
 			CreatedAt: time.Now().AddDate(0, 0, -rand.Intn(365)),
-		}
+		})
+		actualCIDRCount++
+	}
 
-		if err := db.Create(&target).Error; err != nil {
-			return nil, err
-		}
-		targets = append(targets, target)
+	// Batch insert
+	if err := db.CreateInBatches(targets, 100).Error; err != nil {
+		return nil, err
 	}
 
 	fmt.Printf("   ✓ Created %d targets (domains: %d, IPs: %d, CIDRs: %d)\n",
-		len(targets), domainCount, ipCount, cidrCount)
+		len(targets), domainCount, actualIPCount, actualCIDRCount)
 	return targets, nil
 }
 
@@ -320,9 +323,12 @@ func linkTargetsToOrganizations(db *gorm.DB, targetIDs, orgIDs []int) error {
 		return nil
 	}
 
-	// Each organization gets exactly 20 targets (evenly distributed)
+	// Each organization gets exactly targetsPerOrg targets (evenly distributed)
 	targetsPerOrg := len(targetIDs) / len(orgIDs)
-	linkCount := 0
+
+	// Build all values for batch insert
+	var values []string
+	var args []interface{}
 
 	for orgIdx, orgID := range orgIDs {
 		startIdx := orgIdx * targetsPerOrg
@@ -332,18 +338,31 @@ func linkTargetsToOrganizations(db *gorm.DB, targetIDs, orgIDs []int) error {
 		}
 
 		for i := startIdx; i < endIdx; i++ {
-			err := db.Exec(
-				"INSERT INTO organization_target (organization_id, target_id) VALUES (?, ?) ON CONFLICT DO NOTHING",
-				orgID, targetIDs[i],
-			).Error
-			if err != nil {
-				return err
-			}
-			linkCount++
+			values = append(values, "(?, ?)")
+			args = append(args, orgID, targetIDs[i])
 		}
 	}
 
-	fmt.Printf("   ✓ Created %d target-organization links (%d per org)\n", linkCount, targetsPerOrg)
+	// Batch insert in chunks of 500
+	chunkSize := 500
+	for i := 0; i < len(values); i += chunkSize {
+		end := i + chunkSize
+		if end > len(values) {
+			end = len(values)
+		}
+
+		query := "INSERT INTO organization_target (organization_id, target_id) VALUES " +
+			strings.Join(values[i:end], ", ") + " ON CONFLICT DO NOTHING"
+
+		// Calculate args range: each value has 2 args
+		argsStart := i * 2
+		argsEnd := end * 2
+		if err := db.Exec(query, args[argsStart:argsEnd]...).Error; err != nil {
+			return err
+		}
+	}
+
+	fmt.Printf("   ✓ Created %d target-organization links (%d per org)\n", len(values), targetsPerOrg)
 	return nil
 }
 
@@ -394,7 +413,8 @@ func createWebsites(db *gorm.DB, targets []model.Target, websitesPerTarget int) 
 
 	statusCodes := []int{200, 200, 200, 200, 200, 301, 302, 403, 404, 500}
 
-	createdCount := 0
+	// Build all websites in memory first
+	websites := make([]model.Website, 0, totalCount)
 
 	// Each target gets exactly websitesPerTarget websites
 	for targetIdx, target := range targets {
@@ -428,7 +448,7 @@ func createWebsites(db *gorm.DB, targets []model.Target, websitesPerTarget int) 
 			tech := pq.StringArray(techStacks[i%len(techStacks)])
 			vhost := i%5 == 0 // 20% are vhost
 
-			website := &model.Website{
+			websites = append(websites, model.Website{
 				TargetID:      target.ID,
 				URL:           url,
 				Host:          host,
@@ -441,16 +461,16 @@ func createWebsites(db *gorm.DB, targets []model.Target, websitesPerTarget int) 
 				Vhost:         &vhost,
 				Location:      "",
 				CreatedAt:     time.Now().AddDate(0, 0, -i),
-			}
-
-			if err := db.Create(website).Error; err != nil {
-				continue
-			}
-			createdCount++
+			})
 		}
 	}
 
-	fmt.Printf("   ✓ Created %d websites\n", createdCount)
+	// Batch insert with ON CONFLICT DO NOTHING
+	if err := db.Clauses(clause.OnConflict{DoNothing: true}).CreateInBatches(websites, 100).Error; err != nil {
+		return err
+	}
+
+	fmt.Printf("   ✓ Created %d websites\n", len(websites))
 	return nil
 }
 
@@ -504,27 +524,28 @@ func createSubdomains(db *gorm.DB, targets []model.Target, subdomainsPerTarget i
 		"auth", "login", "shop", "store",
 	}
 
-	createdCount := 0
+	// Build all subdomains in memory first
+	subdomains := make([]model.Subdomain, 0, totalCount)
 
 	for _, target := range domainTargets {
 		for i := 0; i < subdomainsPerTarget; i++ {
 			prefix := prefixes[i%len(prefixes)]
 			name := fmt.Sprintf("%s.%s", prefix, target.Name)
 
-			subdomain := &model.Subdomain{
+			subdomains = append(subdomains, model.Subdomain{
 				TargetID:  target.ID,
 				Name:      name,
 				CreatedAt: time.Now().AddDate(0, 0, -i),
-			}
-
-			if err := db.Create(subdomain).Error; err != nil {
-				continue
-			}
-			createdCount++
+			})
 		}
 	}
 
-	fmt.Printf("   ✓ Created %d subdomains\n", createdCount)
+	// Batch insert with ON CONFLICT DO NOTHING
+	if err := db.Clauses(clause.OnConflict{DoNothing: true}).CreateInBatches(subdomains, 100).Error; err != nil {
+		return err
+	}
+
+	fmt.Printf("   ✓ Created %d subdomains\n", len(subdomains))
 	return nil
 }
 
@@ -569,7 +590,8 @@ func createEndpoints(db *gorm.DB, targets []model.Target, endpointsPerTarget int
 	}
 	statusCodes := []int{200, 200, 200, 201, 301, 400, 401, 403, 404, 500}
 
-	createdCount := 0
+	// Build all endpoints in memory first
+	endpoints := make([]model.Endpoint, 0, totalCount)
 
 	for _, target := range targets {
 		for i := 0; i < endpointsPerTarget; i++ {
@@ -597,7 +619,7 @@ func createEndpoints(db *gorm.DB, targets []model.Target, endpointsPerTarget int
 			matchedGF := pq.StringArray(gfPatterns[i%len(gfPatterns)])
 			vhost := i%10 == 0
 
-			endpoint := &model.Endpoint{
+			endpoints = append(endpoints, model.Endpoint{
 				TargetID:          target.ID,
 				URL:               url,
 				Host:              host,
@@ -610,16 +632,16 @@ func createEndpoints(db *gorm.DB, targets []model.Target, endpointsPerTarget int
 				MatchedGFPatterns: matchedGF,
 				Vhost:             &vhost,
 				CreatedAt:         time.Now().AddDate(0, 0, -i),
-			}
-
-			if err := db.Create(endpoint).Error; err != nil {
-				continue
-			}
-			createdCount++
+			})
 		}
 	}
 
-	fmt.Printf("   ✓ Created %d endpoints\n", createdCount)
+	// Batch insert with ON CONFLICT DO NOTHING
+	if err := db.Clauses(clause.OnConflict{DoNothing: true}).CreateInBatches(endpoints, 100).Error; err != nil {
+		return err
+	}
+
+	fmt.Printf("   ✓ Created %d endpoints\n", len(endpoints))
 	return nil
 }
 
@@ -644,7 +666,8 @@ func createDirectories(db *gorm.DB, targets []model.Target, directoriesPerTarget
 	contentTypes := []string{"text/html", "application/json", "text/plain", "application/xml"}
 	statusCodes := []int{200, 200, 200, 301, 302, 403, 404}
 
-	createdCount := 0
+	// Build all directories in memory first
+	dirs := make([]model.Directory, 0, totalCount)
 
 	for _, target := range targets {
 		for i := 0; i < directoriesPerTarget; i++ {
@@ -669,7 +692,7 @@ func createDirectories(db *gorm.DB, targets []model.Target, directoriesPerTarget
 			contentLength := int64(1000 + (i * 100))
 			duration := int64(50 + (i * 5))
 
-			directory := &model.Directory{
+			dirs = append(dirs, model.Directory{
 				TargetID:      target.ID,
 				URL:           url,
 				Status:        &status,
@@ -677,16 +700,16 @@ func createDirectories(db *gorm.DB, targets []model.Target, directoriesPerTarget
 				ContentType:   contentTypes[i%len(contentTypes)],
 				Duration:      &duration,
 				CreatedAt:     time.Now().AddDate(0, 0, -i),
-			}
-
-			if err := db.Create(directory).Error; err != nil {
-				continue
-			}
-			createdCount++
+			})
 		}
 	}
 
-	fmt.Printf("   ✓ Created %d directories\n", createdCount)
+	// Batch insert with ON CONFLICT DO NOTHING
+	if err := db.Clauses(clause.OnConflict{DoNothing: true}).CreateInBatches(dirs, 100).Error; err != nil {
+		return err
+	}
+
+	fmt.Printf("   ✓ Created %d directories\n", len(dirs))
 	return nil
 }
 
@@ -706,7 +729,8 @@ func createHostPortMappings(db *gorm.DB, targets []model.Target, mappingsPerTarg
 	// Subdomain prefixes for hosts
 	subdomains := []string{"www", "api", "app", "admin", "portal", "dashboard", "dev", "staging", "test", "cdn", "mail", "ftp", "db", "cache", "search", "auth", "login", "shop", "store", "blog"}
 
-	createdCount := 0
+	// Build all mappings in memory first
+	mappings := make([]model.HostPortMapping, 0, totalCount)
 
 	for _, target := range targets {
 		// Generate base IP for this target
@@ -751,25 +775,24 @@ func createHostPortMappings(db *gorm.DB, targets []model.Target, mappingsPerTarg
 				for portIdx := 0; portIdx < numPorts; portIdx++ {
 					port := ports[(ipIdx*numHosts*numPorts+hostIdx*numPorts+portIdx)%len(ports)]
 
-					mapping := &model.HostPortMapping{
+					mappings = append(mappings, model.HostPortMapping{
 						TargetID:  target.ID,
 						Host:      host,
 						IP:        ip,
 						Port:      port,
 						CreatedAt: time.Now().AddDate(0, 0, -(ipIdx*numHosts*numPorts + hostIdx*numPorts + portIdx)),
-					}
-
-					if err := db.Create(mapping).Error; err != nil {
-						// Ignore duplicate key errors
-						continue
-					}
-					createdCount++
+					})
 				}
 			}
 		}
 	}
 
-	fmt.Printf("   ✓ Created %d host port mappings\n", createdCount)
+	// Batch insert with ON CONFLICT DO NOTHING
+	if err := db.Clauses(clause.OnConflict{DoNothing: true}).CreateInBatches(mappings, 100).Error; err != nil {
+		return err
+	}
+
+	fmt.Printf("   ✓ Created %d host port mappings\n", len(mappings))
 	return nil
 }
 
@@ -796,7 +819,8 @@ func createScreenshots(db *gorm.DB, targets []model.Target, screenshotsPerTarget
 	paths := []string{"", "/", "/login", "/dashboard", "/admin", "/app", "/docs", "/api"}
 	statusCodes := []int{200, 200, 200, 200, 301, 302, 403, 404}
 
-	createdCount := 0
+	// Build all screenshots in memory first
+	screenshots := make([]model.Screenshot, 0, totalCount)
 
 	for _, target := range targets {
 		for i := 0; i < screenshotsPerTarget; i++ {
@@ -819,22 +843,22 @@ func createScreenshots(db *gorm.DB, targets []model.Target, screenshotsPerTarget
 
 			statusCode := int16(statusCodes[i%len(statusCodes)])
 
-			screenshot := &model.Screenshot{
+			screenshots = append(screenshots, model.Screenshot{
 				TargetID:   target.ID,
 				URL:        url,
 				StatusCode: &statusCode,
 				Image:      nil, // No actual image data in seed data
 				CreatedAt:  time.Now().AddDate(0, 0, -i),
-			}
-
-			if err := db.Create(screenshot).Error; err != nil {
-				continue
-			}
-			createdCount++
+			})
 		}
 	}
 
-	fmt.Printf("   ✓ Created %d screenshots (without image data)\n", createdCount)
+	// Batch insert with ON CONFLICT DO NOTHING
+	if err := db.Clauses(clause.OnConflict{DoNothing: true}).CreateInBatches(screenshots, 100).Error; err != nil {
+		return err
+	}
+
+	fmt.Printf("   ✓ Created %d screenshots (without image data)\n", len(screenshots))
 	return nil
 }
 
