@@ -30,8 +30,10 @@ type FilterGroup struct {
 
 // FieldConfig represents field configuration for filtering
 type FieldConfig struct {
-	Column  string // Database column name
-	IsArray bool   // Whether it's a PostgreSQL array field
+	Column    string // Database column name
+	IsArray   bool   // Whether it's a PostgreSQL array field
+	IsNumeric bool   // Whether it's a numeric field (int, float)
+	NeedsCast bool   // Whether it needs ::text cast (e.g. inet, uuid)
 }
 
 // FilterMapping is a map of field name to field config
@@ -270,6 +272,15 @@ func buildSingleCondition(config FieldConfig, filter ParsedFilter) (string, []in
 		return buildArrayCondition(column, filter)
 	}
 
+	if config.IsNumeric {
+		return buildNumericCondition(column, filter)
+	}
+
+	// For fields that need text cast (inet, uuid, etc)
+	if config.NeedsCast {
+		column = column + "::text"
+	}
+
 	switch filter.Operator {
 	case "==":
 		// Exact match
@@ -280,6 +291,22 @@ func buildSingleCondition(config FieldConfig, filter ParsedFilter) (string, []in
 	default: // "="
 		// Fuzzy match (ILIKE for case-insensitive)
 		return column + " ILIKE ?", []interface{}{"%" + filter.Value + "%"}
+	}
+}
+
+// buildNumericCondition builds condition for numeric fields
+// Uses ::text cast to enable string operations on numeric columns
+func buildNumericCondition(column string, filter ParsedFilter) (string, []interface{}) {
+	switch filter.Operator {
+	case "==":
+		// Exact match
+		return column + "::text = ?", []interface{}{filter.Value}
+	case "!=":
+		// Not equal
+		return column + "::text != ?", []interface{}{filter.Value}
+	default: // "="
+		// Fuzzy match
+		return column + "::text ILIKE ?", []interface{}{"%" + filter.Value + "%"}
 	}
 }
 

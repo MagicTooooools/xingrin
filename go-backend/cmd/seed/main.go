@@ -108,12 +108,19 @@ func main() {
 		os.Exit(1)
 	}
 
+	// Create host port mappings for targets (20 per target)
+	if err := createHostPortMappings(db, targets, assetsPerTarget); err != nil {
+		fmt.Printf("❌ Failed to create host port mappings: %v\n", err)
+		os.Exit(1)
+	}
+
 	fmt.Println("\n✅ Test data generation completed!")
 }
 
 func clearData(db *gorm.DB) error {
 	// Delete in order to respect foreign key constraints
 	tables := []string{
+		"host_port_mapping",
 		"directory",
 		"endpoint",
 		"subdomain",
@@ -666,5 +673,88 @@ func createDirectories(db *gorm.DB, targets []model.Target, directoriesPerTarget
 	}
 
 	fmt.Printf("   ✓ Created %d directories\n", createdCount)
+	return nil
+}
+
+func createHostPortMappings(db *gorm.DB, targets []model.Target, mappingsPerTarget int) error {
+	// Increase mappings to ensure pagination (100 per target = more IPs)
+	actualMappingsPerTarget := mappingsPerTarget * 5 // 20 * 5 = 100 mappings per target
+	totalCount := len(targets) * actualMappingsPerTarget
+	fmt.Printf("🔌 Creating %d host port mappings (%d per target)...\n", totalCount, actualMappingsPerTarget)
+
+	if len(targets) == 0 {
+		return nil
+	}
+
+	// Common ports
+	ports := []int{22, 80, 443, 8080, 8443, 3000, 3306, 5432, 6379, 27017, 9200, 9300, 5000, 8000, 8888, 9000, 9090, 10000, 11211, 25}
+
+	// Subdomain prefixes for hosts
+	subdomains := []string{"www", "api", "app", "admin", "portal", "dashboard", "dev", "staging", "test", "cdn", "mail", "ftp", "db", "cache", "search", "auth", "login", "shop", "store", "blog"}
+
+	createdCount := 0
+
+	for _, target := range targets {
+		// Generate base IP for this target
+		baseIP1 := rand.Intn(223) + 1
+		baseIP2 := rand.Intn(256)
+		baseIP3 := rand.Intn(256)
+
+		// Generate more unique IPs per target (10-15 IPs with 6-10 ports each)
+		numIPs := 10 + rand.Intn(6) // 10-15 unique IPs
+		portsPerIP := actualMappingsPerTarget / numIPs
+
+		for ipIdx := 0; ipIdx < numIPs; ipIdx++ {
+			// Generate unique IP
+			ip := fmt.Sprintf("%d.%d.%d.%d", baseIP1, baseIP2, baseIP3, ipIdx+1)
+
+			// Generate multiple hosts for this IP
+			numHosts := 3 + rand.Intn(4) // 3-6 hosts per IP
+
+			for hostIdx := 0; hostIdx < numHosts; hostIdx++ {
+				var host string
+
+				// Generate host based on target type
+				switch target.Type {
+				case "domain":
+					subdomain := subdomains[(ipIdx*numHosts+hostIdx)%len(subdomains)]
+					host = fmt.Sprintf("%s.%s", subdomain, target.Name)
+				case "ip":
+					host = target.Name
+				case "cidr":
+					baseIP := target.Name[:len(target.Name)-3]
+					host = baseIP
+				default:
+					continue
+				}
+
+				// Generate multiple ports for this host-IP combination
+				numPorts := portsPerIP / numHosts
+				if numPorts < 1 {
+					numPorts = 1
+				}
+
+				for portIdx := 0; portIdx < numPorts; portIdx++ {
+					port := ports[(ipIdx*numHosts*numPorts+hostIdx*numPorts+portIdx)%len(ports)]
+
+					mapping := &model.HostPortMapping{
+						TargetID:  target.ID,
+						Host:      host,
+						IP:        ip,
+						Port:      port,
+						CreatedAt: time.Now().AddDate(0, 0, -(ipIdx*numHosts*numPorts + hostIdx*numPorts + portIdx)),
+					}
+
+					if err := db.Create(mapping).Error; err != nil {
+						// Ignore duplicate key errors
+						continue
+					}
+					createdCount++
+				}
+			}
+		}
+	}
+
+	fmt.Printf("   ✓ Created %d host port mappings\n", createdCount)
 	return nil
 }

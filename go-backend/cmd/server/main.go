@@ -135,6 +135,7 @@ func main() {
 	subdomainRepo := repository.NewSubdomainRepository(db)
 	endpointRepo := repository.NewEndpointRepository(db)
 	directoryRepo := repository.NewDirectoryRepository(db)
+	ipAddressRepo := repository.NewIPAddressRepository(db)
 
 	// Create services
 	userSvc := service.NewUserService(userRepo)
@@ -145,6 +146,7 @@ func main() {
 	subdomainSvc := service.NewSubdomainService(subdomainRepo, targetRepo)
 	endpointSvc := service.NewEndpointService(endpointRepo, targetRepo)
 	directorySvc := service.NewDirectoryService(directoryRepo, targetRepo)
+	ipAddressSvc := service.NewIPAddressService(ipAddressRepo, targetRepo)
 
 	// Create handlers
 	healthHandler := handler.NewHealthHandler(db, redisClient)
@@ -157,6 +159,7 @@ func main() {
 	subdomainHandler := handler.NewSubdomainHandler(subdomainSvc)
 	endpointHandler := handler.NewEndpointHandler(endpointSvc)
 	directoryHandler := handler.NewDirectoryHandler(directorySvc)
+	ipAddressHandler := handler.NewIPAddressHandler(ipAddressSvc)
 
 	// Register health routes
 	router.GET("/health", healthHandler.Check)
@@ -243,6 +246,14 @@ func main() {
 
 			// Directories (standalone)
 			protected.POST("/directories/bulk-delete", directoryHandler.BulkDelete)
+
+			// IP Addresses (nested under targets)
+			protected.GET("/targets/:id/ip-addresses", ipAddressHandler.List)
+			protected.GET("/targets/:id/ip-addresses/export", ipAddressHandler.Export)
+			protected.POST("/targets/:id/ip-addresses/bulk-upsert", ipAddressHandler.BulkUpsert)
+
+			// IP Addresses (standalone)
+			protected.POST("/ip-addresses/bulk-delete", ipAddressHandler.BulkDelete)
 
 			// Engines
 			protected.POST("/engines", engineHandler.Create)

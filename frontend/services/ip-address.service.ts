@@ -9,12 +9,12 @@ export interface BulkDeleteResponse {
 export class IPAddressService {
   /**
    * Bulk delete IP addresses
-   * POST /api/assets/ip-addresses/bulk-delete/
+   * POST /api/ip-addresses/bulk-delete/
    * Note: IP addresses are aggregated, so we pass IP strings instead of IDs
    */
   static async bulkDelete(ips: string[]): Promise<BulkDeleteResponse> {
     const response = await api.post<BulkDeleteResponse>(
-      `/assets/ip-addresses/bulk-delete/`,
+      `/ip-addresses/bulk-delete/`,
       { ips }
     )
     return response.data
@@ -48,15 +48,20 @@ export class IPAddressService {
     return response.data
   }
 
-  /** Export all IP addresses by target (text file, one per line) */
-  static async exportIPAddressesByTargetId(targetId: number): Promise<Blob> {
+  /** Export all IP addresses by target (CSV format) */
+  static async exportIPAddressesByTargetId(targetId: number, ips?: string[]): Promise<Blob> {
+    const params: Record<string, string> = {}
+    if (ips && ips.length > 0) {
+      params.ips = ips.join(',')
+    }
     const response = await api.get<Blob>(`/targets/${targetId}/ip-addresses/export/`, {
+      params,
       responseType: 'blob',
     })
     return response.data
   }
 
-  /** Export all IP addresses by scan task (text file, one per line) */
+  /** Export all IP addresses by scan task (CSV format) */
   static async exportIPAddressesByScanId(scanId: number): Promise<Blob> {
     const response = await api.get<Blob>(`/scans/${scanId}/ip-addresses/export/`, {
       responseType: 'blob',

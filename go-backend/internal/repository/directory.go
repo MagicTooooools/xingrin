@@ -22,7 +22,7 @@ func NewDirectoryRepository(db *gorm.DB) *DirectoryRepository {
 // DirectoryFilterMapping defines field mapping for directory filtering
 var DirectoryFilterMapping = scope.FilterMapping{
 	"url":    {Column: "url"},
-	"status": {Column: "status"},
+	"status": {Column: "status", IsNumeric: true},
 }
 
 // FindByTargetID finds directories by target ID with pagination and filter

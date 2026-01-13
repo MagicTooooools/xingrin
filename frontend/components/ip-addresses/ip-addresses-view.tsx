@@ -200,22 +200,42 @@ export function IPAddressesView({
   }
 
   // Handle download selected IP addresses
-  const handleDownloadSelected = () => {
+  const handleDownloadSelected = async () => {
     if (selectedIPAddresses.length === 0) {
       return
     }
     
-    const csvContent = generateCSV(selectedIPAddresses)
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8" })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement("a")
-    const prefix = scanId ? `scan-${scanId}` : targetId ? `target-${targetId}` : "ip-addresses"
-    a.href = url
-    a.download = `${prefix}-ip-addresses-selected-${Date.now()}.csv`
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-    URL.revokeObjectURL(url)
+    try {
+      // Get selected IPs and call backend export API
+      const ips = selectedIPAddresses.map(ip => ip.ip)
+      let blob: Blob | null = null
+
+      if (targetId) {
+        blob = await IPAddressService.exportIPAddressesByTargetId(targetId, ips)
+      } else if (scanId) {
+        // For scan, use frontend CSV generation as fallback (scan export doesn't support IP filter yet)
+        const csvContent = generateCSV(selectedIPAddresses)
+        blob = new Blob([csvContent], { type: "text/csv;charset=utf-8" })
+      } else {
+        const csvContent = generateCSV(selectedIPAddresses)
+        blob = new Blob([csvContent], { type: "text/csv;charset=utf-8" })
+      }
+
+      if (!blob) return
+
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      const prefix = scanId ? `scan-${scanId}` : targetId ? `target-${targetId}` : "ip-addresses"
+      a.href = url
+      a.download = `${prefix}-ip-addresses-selected-${Date.now()}.csv`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+    } catch (error) {
+      console.error("Failed to download selected IP addresses", error)
+      toast.error(tToast("downloadFailed"))
+    }
   }
 
   // Handle bulk delete

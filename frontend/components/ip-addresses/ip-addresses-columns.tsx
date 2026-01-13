@@ -91,41 +91,8 @@ export function createIPAddressColumns({
       ),
       cell: ({ getValue }) => {
         const hosts = getValue<string[]>()
-        if (!hosts || hosts.length === 0) {
-          return <span className="text-muted-foreground">-</span>
-        }
-        
-        const displayHosts = hosts.slice(0, 3)
-        const hasMore = hosts.length > 3
-        
-        return (
-          <div className="flex flex-col gap-1">
-            {displayHosts.map((host, index) => (
-              <ExpandableCell key={index} value={host} maxLines={1} />
-            ))}
-            {hasMore && (
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Badge variant="secondary" className="text-xs w-fit cursor-pointer hover:bg-muted">
-                    +{hosts.length - 3} more
-                  </Badge>
-                </PopoverTrigger>
-                <PopoverContent className="w-80 p-3">
-                  <div className="space-y-2">
-                    <h4 className="font-medium text-sm">{t.tooltips.allHosts} ({hosts.length})</h4>
-                    <div className="flex flex-col gap-1 max-h-48 overflow-y-auto">
-                      {hosts.map((host, index) => (
-                        <span key={index} className="text-sm break-all">
-                          {host}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </PopoverContent>
-              </Popover>
-            )}
-          </div>
-        )
+        const value = hosts?.length ? hosts.join("\n") : null
+        return <ExpandableCell value={value} maxLines={3} />
       },
     },
     {

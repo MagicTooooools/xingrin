@@ -25,7 +25,7 @@ var WebsiteFilterMapping = scope.FilterMapping{
 	"url":    {Column: "url"},
 	"host":   {Column: "host"},
 	"title":  {Column: "title"},
-	"status": {Column: "status_code"},
+	"status": {Column: "status_code", IsNumeric: true},
 	"tech":   {Column: "tech", IsArray: true},
 }
 

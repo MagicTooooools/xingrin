@@ -44,11 +44,11 @@
       "createdAt": "创建时间"
     },
     "ipAddress": {
-      "ipAddress": "IP Address",
-      "hosts": "Hosts",
-      "openPorts": "Open Ports",
-      "allHosts": "All Hosts",
-      "allOpenPorts": "All Open Ports"
+      "ipAddress": "IP 地址",
+      "hosts": "主机名",
+      "openPorts": "开放端口",
+      "allHosts": "所有主机",
+      "allOpenPorts": "所有开放端口"
     },
     "endpoint": {
       "title": "标题",
