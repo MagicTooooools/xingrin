@@ -731,7 +731,12 @@
         "overview": "Overview",
         "assets": "Assets",
         "screenshots": "Screenshots",
-        "vulnerabilities": "Vulnerabilities"
+        "vulnerabilities": "Vulnerabilities",
+        "websites": "Websites",
+        "subdomains": "Subdomains",
+        "ips": "IPs",
+        "urls": "URLs",
+        "directories": "Directories"
       },
       "status": {
         "completed": "Completed",
@@ -2116,7 +2121,12 @@
         "assets": "Assets",
         "screenshots": "Screenshots",
         "vulnerabilities": "Vulnerabilities",
-        "settings": "Settings"
+        "settings": "Settings",
+        "websites": "Websites",
+        "subdomains": "Subdomains",
+        "ips": "IPs",
+        "urls": "URLs",
+        "directories": "Directories"
       },
       "settings": {
         "loadError": "Failed to load settings",

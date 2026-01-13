@@ -348,7 +348,7 @@
       "vulnerabilities": "漏洞"
     },
     "assetTypes": {
-      "website": "网站",
+      "website": "站点",
       "endpoint": "URL"
     },
     "fields": {
@@ -403,15 +403,15 @@
       "completedScans": "已完成扫描",
       "totalOrganizations": "组织总数",
       "totalSubdomains": "子域名总数",
-      "totalEndpoints": "端点总数",
-      "totalWebsites": "网站总数"
+      "totalEndpoints": "URL 总数",
+      "totalWebsites": "站点总数"
     },
     "statCards": {
       "assetsFound": "发现资产",
       "vulnsFound": "发现漏洞",
       "monitoredTargets": "监控目标",
       "runningScans": "正在扫描",
-      "assetsFooter": "子域名 + IP + 端点 + 网站",
+      "assetsFooter": "子域名 + IP + URL + 站点",
       "vulnsFooter": "所有扫描发现的漏洞",
       "targetsFooter": "已添加的目标总数",
       "scansFooter": "当前运行中的任务",
@@ -425,17 +425,17 @@
       "current": "当前",
       "subdomains": "子域名",
       "ips": "IP",
-      "endpoints": "端点",
-      "websites": "网站"
+      "endpoints": "URL",
+      "websites": "站点"
     },
     "assetDistribution": {
       "title": "资产分布",
       "description": "各类资产数量统计",
       "totalAssets": "资产总计",
       "subdomains": "子域名",
-      "ipAddresses": "IP地址",
-      "endpoints": "端点",
-      "websites": "网站",
+      "ipAddresses": "IP 地址",
+      "endpoints": "URL",
+      "websites": "站点",
       "count": "数量"
     },
     "vulnDistribution": {
@@ -499,7 +499,7 @@
     "descriptions": {
       "directoryUrl": "目录 URL",
       "subdomainName": "子域名",
-      "endpointUrl": "端点 URL",
+      "endpointUrl": "URL",
       "vulnType": "漏洞类型",
       "scannerSource": "扫描器来源"
     }
@@ -731,7 +731,12 @@
         "overview": "概览",
         "assets": "资产",
         "screenshots": "截图",
-        "vulnerabilities": "漏洞"
+        "vulnerabilities": "漏洞",
+        "websites": "站点",
+        "subdomains": "子域名",
+        "ips": "IP 地址",
+        "urls": "URL",
+        "directories": "目录"
       },
       "status": {
         "completed": "已完成",
@@ -758,10 +763,10 @@
         "totalVulns": "共 {count} 个",
         "viewAll": "查看全部",
         "cards": {
-          "websites": "网站",
+          "websites": "站点",
           "subdomains": "子域名",
           "ips": "IP 地址",
-          "urls": "URLs",
+          "urls": "URL",
           "directories": "目录",
           "vulnerabilities": "漏洞"
         },
@@ -780,7 +785,7 @@
         "allScanTasks": "所有扫描任务",
         "runningScans": "正在执行的扫描",
         "completedScansFound": "已完成扫描发现",
-        "assetTypes": "子域名 + IP + 端点 + 网站",
+        "assetTypes": "子域名 + IP + URL + 站点",
         "all": "全部"
       }
     },
@@ -947,7 +952,7 @@
         "site_scan": "站点扫描",
         "fingerprint_detect": "指纹识别",
         "directory_scan": "目录扫描",
-        "screenshot": "网站截图",
+        "screenshot": "站点截图",
         "url_fetch": "URL 抓取",
         "vuln_scan": "漏洞扫描"
       },
@@ -2116,7 +2121,12 @@
         "assets": "资产",
         "screenshots": "截图",
         "vulnerabilities": "漏洞",
-        "settings": "设置"
+        "settings": "设置",
+        "websites": "站点",
+        "subdomains": "子域名",
+        "ips": "IP 地址",
+        "urls": "URL",
+        "directories": "目录"
       },
       "settings": {
         "loadError": "加载设置失败",
@@ -2180,7 +2190,7 @@
         "noScans": "暂无扫描记录",
         "viewAll": "查看全部",
         "cards": {
-          "websites": "网站",
+          "websites": "站点",
           "subdomains": "子域名",
           "ips": "IP 地址",
           "urls": "URL",
@@ -2269,14 +2279,14 @@
     },
     "url": {
       "endpoint": {
-        "title": "批量添加端点",
-        "description": "输入端点 URL 列表，每行一个。",
-        "placeholder": "请输入端点 URL，每行一个\n例如：\nhttps://example.com/api/v1\nhttps://example.com/api/v2\nhttps://example.com/login"
+        "title": "批量添加 URL",
+        "description": "输入 URL 列表，每行一个。",
+        "placeholder": "请输入 URL，每行一个\n例如：\nhttps://example.com/api/v1\nhttps://example.com/api/v2\nhttps://example.com/login"
       },
       "website": {
-        "title": "批量添加网站",
-        "description": "输入网站 URL 列表，每行一个。",
-        "placeholder": "请输入网站 URL，每行一个\n例如：\nhttps://example.com\nhttps://www.example.com\nhttps://api.example.com"
+        "title": "批量添加站点",
+        "description": "输入站点 URL 列表，每行一个。",
+        "placeholder": "请输入站点 URL，每行一个\n例如：\nhttps://example.com\nhttps://www.example.com\nhttps://api.example.com"
       },
       "directory": {
         "title": "批量添加目录",

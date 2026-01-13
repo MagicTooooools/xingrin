@@ -220,7 +220,7 @@ export default function TargetLayout({
             <TabsList variant="underline">
               <TabsTrigger value="websites" variant="underline" asChild>
                 <Link href={secondaryPaths.websites} className="flex items-center gap-0.5">
-                  Websites
+                  {t("tabs.websites")}
                   {counts.websites > 0 && (
                     <Badge variant="secondary" className="ml-1.5 h-5 min-w-5 rounded-full px-1.5 text-xs">
                       {counts.websites}
@@ -230,7 +230,7 @@ export default function TargetLayout({
               </TabsTrigger>
               <TabsTrigger value="subdomain" variant="underline" asChild>
                 <Link href={secondaryPaths.subdomain} className="flex items-center gap-0.5">
-                  Subdomains
+                  {t("tabs.subdomains")}
                   {counts.subdomain > 0 && (
                     <Badge variant="secondary" className="ml-1.5 h-5 min-w-5 rounded-full px-1.5 text-xs">
                       {counts.subdomain}
@@ -240,7 +240,7 @@ export default function TargetLayout({
               </TabsTrigger>
               <TabsTrigger value="ip-addresses" variant="underline" asChild>
                 <Link href={secondaryPaths["ip-addresses"]} className="flex items-center gap-0.5">
-                  IPs
+                  {t("tabs.ips")}
                   {counts["ip-addresses"] > 0 && (
                     <Badge variant="secondary" className="ml-1.5 h-5 min-w-5 rounded-full px-1.5 text-xs">
                       {counts["ip-addresses"]}
@@ -250,7 +250,7 @@ export default function TargetLayout({
               </TabsTrigger>
               <TabsTrigger value="endpoints" variant="underline" asChild>
                 <Link href={secondaryPaths.endpoints} className="flex items-center gap-0.5">
-                  URLs
+                  {t("tabs.urls")}
                   {counts.endpoints > 0 && (
                     <Badge variant="secondary" className="ml-1.5 h-5 min-w-5 rounded-full px-1.5 text-xs">
                       {counts.endpoints}
@@ -260,7 +260,7 @@ export default function TargetLayout({
               </TabsTrigger>
               <TabsTrigger value="directories" variant="underline" asChild>
                 <Link href={secondaryPaths.directories} className="flex items-center gap-0.5">
-                  Directories
+                  {t("tabs.directories")}
                   {counts.directories > 0 && (
                     <Badge variant="secondary" className="ml-1.5 h-5 min-w-5 rounded-full px-1.5 text-xs">
                       {counts.directories}
