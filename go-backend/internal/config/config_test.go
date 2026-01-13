@@ -19,7 +19,9 @@ func TestConfigDefaults(t *testing.T) {
 		"LOG_LEVEL", "LOG_FORMAT",
 	}
 	for _, env := range envVars {
-		os.Unsetenv(env)
+		if err := os.Unsetenv(env); err != nil {
+			t.Logf("Warning: failed to unset %s: %v", env, err)
+		}
 	}
 
 	cfg, err := Load()
@@ -86,15 +88,23 @@ func TestConfigDefaults(t *testing.T) {
 // TestConfigFromEnv tests that environment variables override defaults
 func TestConfigFromEnv(t *testing.T) {
 	// Set custom environment variables
-	os.Setenv("SERVER_PORT", "9999")
-	os.Setenv("DB_HOST", "custom-host")
-	os.Setenv("DB_PORT", "5433")
-	os.Setenv("LOG_LEVEL", "debug")
+	if err := os.Setenv("SERVER_PORT", "9999"); err != nil {
+		t.Fatalf("Failed to set SERVER_PORT: %v", err)
+	}
+	if err := os.Setenv("DB_HOST", "custom-host"); err != nil {
+		t.Fatalf("Failed to set DB_HOST: %v", err)
+	}
+	if err := os.Setenv("DB_PORT", "5433"); err != nil {
+		t.Fatalf("Failed to set DB_PORT: %v", err)
+	}
+	if err := os.Setenv("LOG_LEVEL", "debug"); err != nil {
+		t.Fatalf("Failed to set LOG_LEVEL: %v", err)
+	}
 	defer func() {
-		os.Unsetenv("SERVER_PORT")
-		os.Unsetenv("DB_HOST")
-		os.Unsetenv("DB_PORT")
-		os.Unsetenv("LOG_LEVEL")
+		_ = os.Unsetenv("SERVER_PORT")
+		_ = os.Unsetenv("DB_HOST")
+		_ = os.Unsetenv("DB_PORT")
+		_ = os.Unsetenv("LOG_LEVEL")
 	}()
 
 	cfg, err := Load()

@@ -212,7 +212,7 @@ export function ScreenshotsGallery({ targetId, scanId }: ScreenshotsGalleryProps
             onKeyDown={handleKeyDown}
             className="w-64"
           />
-          <Button variant="outline" size="sm" onClick={handleSearch}>
+          <Button variant="outline" size="icon" onClick={handleSearch}>
             <Search className="h-4 w-4" />
           </Button>
         </div>

@@ -136,6 +136,7 @@ func main() {
 	endpointRepo := repository.NewEndpointRepository(db)
 	directoryRepo := repository.NewDirectoryRepository(db)
 	ipAddressRepo := repository.NewIPAddressRepository(db)
+	screenshotRepo := repository.NewScreenshotRepository(db)
 
 	// Create services
 	userSvc := service.NewUserService(userRepo)
@@ -147,6 +148,7 @@ func main() {
 	endpointSvc := service.NewEndpointService(endpointRepo, targetRepo)
 	directorySvc := service.NewDirectoryService(directoryRepo, targetRepo)
 	ipAddressSvc := service.NewIPAddressService(ipAddressRepo, targetRepo)
+	screenshotSvc := service.NewScreenshotService(screenshotRepo, targetRepo)
 
 	// Create handlers
 	healthHandler := handler.NewHealthHandler(db, redisClient)
@@ -160,6 +162,7 @@ func main() {
 	endpointHandler := handler.NewEndpointHandler(endpointSvc)
 	directoryHandler := handler.NewDirectoryHandler(directorySvc)
 	ipAddressHandler := handler.NewIPAddressHandler(ipAddressSvc)
+	screenshotHandler := handler.NewScreenshotHandler(screenshotSvc)
 
 	// Register health routes
 	router.GET("/health", healthHandler.Check)
@@ -255,6 +258,14 @@ func main() {
 			// IP Addresses (standalone)
 			protected.POST("/ip-addresses/bulk-delete", ipAddressHandler.BulkDelete)
 
+			// Screenshots (nested under targets)
+			protected.GET("/targets/:id/screenshots", screenshotHandler.ListByTargetID)
+			protected.POST("/targets/:id/screenshots/bulk-upsert", screenshotHandler.BulkUpsert)
+
+			// Screenshots (standalone)
+			protected.GET("/screenshots/:id/image", screenshotHandler.GetImage)
+			protected.POST("/screenshots/bulk-delete", screenshotHandler.BulkDelete)
+
 			// Engines
 			protected.POST("/engines", engineHandler.Create)
 			protected.GET("/engines", engineHandler.List)
@@ -298,12 +309,16 @@ func main() {
 
 	// Close database connection
 	if sqlDB, err := db.DB(); err == nil {
-		sqlDB.Close()
+		if err := sqlDB.Close(); err != nil {
+			pkg.Error("Failed to close database connection", zap.Error(err))
+		}
 	}
 
 	// Close Redis connection
 	if redisClient != nil {
-		redisClient.Close()
+		if err := redisClient.Close(); err != nil {
+			pkg.Error("Failed to close Redis connection", zap.Error(err))
+		}
 	}
 
 	pkg.Info("Server exited")

@@ -82,11 +82,11 @@ export class ScreenshotService {
 
   /**
    * Bulk delete screenshots
-   * POST /api/assets/screenshots/bulk-delete/
+   * POST /api/screenshots/bulk-delete/
    */
   static async bulkDelete(ids: number[]): Promise<BulkDeleteResponse> {
     const response = await api.post<BulkDeleteResponse>(
-      `/assets/screenshots/bulk-delete/`,
+      `/screenshots/bulk-delete/`,
       { ids }
     )
     return response.data
