@@ -6,6 +6,7 @@ import (
 
 	"github.com/xingrin/go-backend/internal/dto"
 	"github.com/xingrin/go-backend/internal/model"
+	"github.com/xingrin/go-backend/internal/pkg/validator"
 	"github.com/xingrin/go-backend/internal/repository"
 	"gorm.io/gorm"
 )
@@ -44,7 +45,7 @@ func (s *WebsiteService) GetByID(id int) (*model.Website, error) {
 
 // BulkCreate creates multiple websites for a target
 func (s *WebsiteService) BulkCreate(targetID int, urls []string) (int, error) {
-	_, err := s.targetRepo.FindByID(targetID)
+	target, err := s.targetRepo.FindByID(targetID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return 0, ErrTargetNotFound
@@ -52,14 +53,21 @@ func (s *WebsiteService) BulkCreate(targetID int, urls []string) (int, error) {
 		return 0, err
 	}
 
+	// Filter valid URLs that match target
 	websites := make([]model.Website, 0, len(urls))
 	for _, u := range urls {
-		host := repository.ExtractHostFromURL(u)
-		websites = append(websites, model.Website{
-			TargetID: targetID,
-			URL:      u,
-			Host:     host,
-		})
+		if validator.IsURLMatchTarget(u, target.Name, target.Type) {
+			host := repository.ExtractHostFromURL(u)
+			websites = append(websites, model.Website{
+				TargetID: targetID,
+				URL:      u,
+				Host:     host,
+			})
+		}
+	}
+
+	if len(websites) == 0 {
+		return 0, nil
 	}
 
 	return s.repo.BulkCreate(websites)
@@ -113,4 +121,48 @@ func (s *WebsiteService) CountByTarget(targetID int) (int64, error) {
 // ScanRow scans a row into Website model
 func (s *WebsiteService) ScanRow(rows *sql.Rows) (*model.Website, error) {
 	return s.repo.ScanRow(rows)
+}
+
+// BulkUpsert creates or updates multiple websites for a target (for scanner import)
+func (s *WebsiteService) BulkUpsert(targetID int, items []dto.WebsiteUpsertItem) (int64, error) {
+	target, err := s.targetRepo.FindByID(targetID)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return 0, ErrTargetNotFound
+		}
+		return 0, err
+	}
+
+	// Filter valid URLs that match target and convert to models
+	websites := make([]model.Website, 0, len(items))
+	for _, item := range items {
+		if validator.IsURLMatchTarget(item.URL, target.Name, target.Type) {
+			host := item.Host
+			if host == "" {
+				host = repository.ExtractHostFromURL(item.URL)
+			}
+
+			websites = append(websites, model.Website{
+				TargetID:        targetID,
+				URL:             item.URL,
+				Host:            host,
+				Location:        item.Location,
+				Title:           item.Title,
+				Webserver:       item.Webserver,
+				ResponseBody:    item.ResponseBody,
+				ContentType:     item.ContentType,
+				Tech:            item.Tech,
+				StatusCode:      item.StatusCode,
+				ContentLength:   item.ContentLength,
+				Vhost:           item.Vhost,
+				ResponseHeaders: item.ResponseHeaders,
+			})
+		}
+	}
+
+	if len(websites) == 0 {
+		return 0, nil
+	}
+
+	return s.repo.BulkUpsert(websites)
 }

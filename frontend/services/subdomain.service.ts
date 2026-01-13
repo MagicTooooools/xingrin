@@ -23,7 +23,7 @@ export class SubdomainService {
   ): Promise<BulkCreateSubdomainsResponse> {
     const response = await api.post<BulkCreateSubdomainsResponse>(
       `/targets/${targetId}/subdomains/bulk-create/`,
-      { subdomains }
+      { names: subdomains }
     )
     return response.data
   }
@@ -89,7 +89,7 @@ export class SubdomainService {
       requestedIds: number[]
       cascadeDeleted: Record<string, number>
     }>(
-      `/assets/subdomains/bulk-delete/`,
+      `/subdomains/bulk-delete/`,
       { ids }
     )
     return response.data
@@ -117,7 +117,7 @@ export class SubdomainService {
         phase1: string
         phase2: string
       }
-    }>(`/assets/subdomains/${id}/`)
+    }>(`/subdomains/${id}/`)
     return response.data
   }
 

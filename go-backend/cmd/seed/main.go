@@ -24,9 +24,10 @@ func main() {
 	flag.Parse()
 
 	// Calculate counts based on org count
-	// Each org has 20 targets, each target has 20 websites
+	// Each org has 20 targets, each target has 20 websites/endpoints/directories
+	// Subdomains only for domain-type targets
 	targetsPerOrg := 20
-	websitesPerTarget := 20
+	assetsPerTarget := 20
 	targetCount := *orgCount * targetsPerOrg
 
 	// Load config
@@ -46,7 +47,7 @@ func main() {
 	fmt.Println("🚀 Starting test data generation...")
 	fmt.Printf("   Organizations: %d\n", *orgCount)
 	fmt.Printf("   Targets: %d (%d per org)\n", targetCount, targetsPerOrg)
-	fmt.Printf("   Websites: %d (%d per target)\n", targetCount*websitesPerTarget, websitesPerTarget)
+	fmt.Printf("   Assets per target: %d (websites, endpoints, directories, subdomains for domains)\n", assetsPerTarget)
 	fmt.Println()
 
 	if *clear {
@@ -65,10 +66,16 @@ func main() {
 		os.Exit(1)
 	}
 
-	targetIDs, err := createTargets(db, targetCount)
+	targets, err := createTargets(db, targetCount)
 	if err != nil {
 		fmt.Printf("❌ Failed to create targets: %v\n", err)
 		os.Exit(1)
+	}
+
+	// Extract target IDs
+	targetIDs := make([]int, len(targets))
+	for i, t := range targets {
+		targetIDs[i] = t.ID
 	}
 
 	// Link targets to organizations (20 per org)
@@ -78,8 +85,26 @@ func main() {
 	}
 
 	// Create websites for targets (20 per target)
-	if err := createWebsites(db, targetIDs, websitesPerTarget); err != nil {
+	if err := createWebsites(db, targets, assetsPerTarget); err != nil {
 		fmt.Printf("❌ Failed to create websites: %v\n", err)
+		os.Exit(1)
+	}
+
+	// Create subdomains for domain-type targets only (20 per target)
+	if err := createSubdomains(db, targets, assetsPerTarget); err != nil {
+		fmt.Printf("❌ Failed to create subdomains: %v\n", err)
+		os.Exit(1)
+	}
+
+	// Create endpoints for targets (20 per target)
+	if err := createEndpoints(db, targets, assetsPerTarget); err != nil {
+		fmt.Printf("❌ Failed to create endpoints: %v\n", err)
+		os.Exit(1)
+	}
+
+	// Create directories for targets (20 per target)
+	if err := createDirectories(db, targets, assetsPerTarget); err != nil {
+		fmt.Printf("❌ Failed to create directories: %v\n", err)
 		os.Exit(1)
 	}
 
@@ -89,6 +114,9 @@ func main() {
 func clearData(db *gorm.DB) error {
 	// Delete in order to respect foreign key constraints
 	tables := []string{
+		"directory",
+		"endpoint",
+		"subdomain",
 		"website",
 		"organization_target",
 		"target",
@@ -166,7 +194,7 @@ func createOrganizations(db *gorm.DB, count int) ([]int, error) {
 	return ids, nil
 }
 
-func createTargets(db *gorm.DB, count int) ([]int, error) {
+func createTargets(db *gorm.DB, count int) ([]model.Target, error) {
 	fmt.Printf("🎯 Creating %d targets...\n", count)
 
 	// Domain templates
@@ -174,7 +202,7 @@ func createTargets(db *gorm.DB, count int) ([]int, error) {
 	companies := []string{"acme", "techstart", "globalfinance", "healthcare", "ecommerce", "smartcity", "cybersec", "cloudnative", "dataflow", "mobilefirst"}
 	tlds := []string{".com", ".io", ".net", ".org", ".dev", ".app", ".cloud", ".tech"}
 
-	var ids []int
+	var targets []model.Target
 	suffix := rand.Intn(9000) + 1000
 	usedNames := make(map[string]bool)
 
@@ -193,16 +221,16 @@ func createTargets(db *gorm.DB, count int) ([]int, error) {
 			}
 		}
 
-		target := &model.Target{
+		target := model.Target{
 			Name:      name,
 			Type:      "domain",
 			CreatedAt: time.Now().AddDate(0, 0, -rand.Intn(365)),
 		}
 
-		if err := db.Create(target).Error; err != nil {
+		if err := db.Create(&target).Error; err != nil {
 			return nil, err
 		}
-		ids = append(ids, target.ID)
+		targets = append(targets, target)
 	}
 
 	// Generate IPs (20%)
@@ -219,16 +247,16 @@ func createTargets(db *gorm.DB, count int) ([]int, error) {
 		}
 		usedNames[name] = true
 
-		target := &model.Target{
+		target := model.Target{
 			Name:      name,
 			Type:      "ip",
 			CreatedAt: time.Now().AddDate(0, 0, -rand.Intn(365)),
 		}
 
-		if err := db.Create(target).Error; err != nil {
+		if err := db.Create(&target).Error; err != nil {
 			return nil, err
 		}
-		ids = append(ids, target.ID)
+		targets = append(targets, target)
 	}
 
 	// Generate CIDRs (10%)
@@ -247,21 +275,21 @@ func createTargets(db *gorm.DB, count int) ([]int, error) {
 		}
 		usedNames[name] = true
 
-		target := &model.Target{
+		target := model.Target{
 			Name:      name,
 			Type:      "cidr",
 			CreatedAt: time.Now().AddDate(0, 0, -rand.Intn(365)),
 		}
 
-		if err := db.Create(target).Error; err != nil {
+		if err := db.Create(&target).Error; err != nil {
 			return nil, err
 		}
-		ids = append(ids, target.ID)
+		targets = append(targets, target)
 	}
 
 	fmt.Printf("   ✓ Created %d targets (domains: %d, IPs: %d, CIDRs: %d)\n",
-		len(ids), domainCount, ipCount, cidrCount)
-	return ids, nil
+		len(targets), domainCount, ipCount, cidrCount)
+	return targets, nil
 }
 
 func linkTargetsToOrganizations(db *gorm.DB, targetIDs, orgIDs []int) error {
@@ -298,11 +326,11 @@ func linkTargetsToOrganizations(db *gorm.DB, targetIDs, orgIDs []int) error {
 	return nil
 }
 
-func createWebsites(db *gorm.DB, targetIDs []int, websitesPerTarget int) error {
-	totalCount := len(targetIDs) * websitesPerTarget
+func createWebsites(db *gorm.DB, targets []model.Target, websitesPerTarget int) error {
+	totalCount := len(targets) * websitesPerTarget
 	fmt.Printf("🌐 Creating %d websites (%d per target)...\n", totalCount, websitesPerTarget)
 
-	if len(targetIDs) == 0 {
+	if len(targets) == 0 {
 		return nil
 	}
 
@@ -348,16 +376,27 @@ func createWebsites(db *gorm.DB, targetIDs []int, websitesPerTarget int) error {
 	createdCount := 0
 
 	// Each target gets exactly websitesPerTarget websites
-	for targetIdx, targetID := range targetIDs {
+	for targetIdx, target := range targets {
 		for i := 0; i < websitesPerTarget; i++ {
-			// Generate deterministic but varied URL
+			// Generate URL based on target type
+			var url string
 			protocol := protocols[i%len(protocols)]
 			subdomain := subdomains[i%len(subdomains)]
 			port := ports[i%len(ports)]
 			path := paths[i%len(paths)]
 
-			domain := fmt.Sprintf("target%d-site%d.com", targetIdx, i)
-			url := fmt.Sprintf("%s%s.%s%s%s", protocol, subdomain, domain, port, path)
+			switch target.Type {
+			case "domain":
+				url = fmt.Sprintf("%s%s.%s%s%s", protocol, subdomain, target.Name, port, path)
+			case "ip":
+				url = fmt.Sprintf("%s%s%s%s", protocol, target.Name, port, path)
+			case "cidr":
+				// Generate IP within CIDR range (simplified: use base IP)
+				baseIP := target.Name[:len(target.Name)-3] // Remove /XX
+				url = fmt.Sprintf("%s%s%s%s", protocol, baseIP, port, path)
+			default:
+				url = fmt.Sprintf("%s%s.target%d-site%d.com%s%s", protocol, subdomain, targetIdx, i, port, path)
+			}
 
 			// Extract host from URL
 			host := extractHost(url)
@@ -369,7 +408,7 @@ func createWebsites(db *gorm.DB, targetIDs []int, websitesPerTarget int) error {
 			vhost := i%5 == 0 // 20% are vhost
 
 			website := &model.Website{
-				TargetID:      targetID,
+				TargetID:      target.ID,
 				URL:           url,
 				Host:          host,
 				Title:         titles[i%len(titles)],
@@ -417,4 +456,215 @@ func findIndex(s string, substr string) int {
 		}
 	}
 	return -1
+}
+
+func createSubdomains(db *gorm.DB, targets []model.Target, subdomainsPerTarget int) error {
+	// Only create subdomains for domain-type targets
+	domainTargets := make([]model.Target, 0)
+	for _, t := range targets {
+		if t.Type == "domain" {
+			domainTargets = append(domainTargets, t)
+		}
+	}
+
+	totalCount := len(domainTargets) * subdomainsPerTarget
+	fmt.Printf("📝 Creating %d subdomains (%d per domain target, %d domain targets)...\n",
+		totalCount, subdomainsPerTarget, len(domainTargets))
+
+	if len(domainTargets) == 0 {
+		fmt.Println("   ⚠ No domain targets found, skipping subdomains")
+		return nil
+	}
+
+	// Subdomain prefixes
+	prefixes := []string{
+		"www", "api", "app", "admin", "portal", "dashboard", "dev", "staging",
+		"test", "cdn", "static", "assets", "mail", "blog", "docs", "support",
+		"auth", "login", "shop", "store",
+	}
+
+	createdCount := 0
+
+	for _, target := range domainTargets {
+		for i := 0; i < subdomainsPerTarget; i++ {
+			prefix := prefixes[i%len(prefixes)]
+			name := fmt.Sprintf("%s.%s", prefix, target.Name)
+
+			subdomain := &model.Subdomain{
+				TargetID:  target.ID,
+				Name:      name,
+				CreatedAt: time.Now().AddDate(0, 0, -i),
+			}
+
+			if err := db.Create(subdomain).Error; err != nil {
+				continue
+			}
+			createdCount++
+		}
+	}
+
+	fmt.Printf("   ✓ Created %d subdomains\n", createdCount)
+	return nil
+}
+
+func createEndpoints(db *gorm.DB, targets []model.Target, endpointsPerTarget int) error {
+	totalCount := len(targets) * endpointsPerTarget
+	fmt.Printf("🔗 Creating %d endpoints (%d per target)...\n", totalCount, endpointsPerTarget)
+
+	if len(targets) == 0 {
+		return nil
+	}
+
+	// Endpoint data templates
+	protocols := []string{"https://", "http://"}
+	subdomains := []string{"www", "api", "app", "admin", "portal", "dashboard", "dev", "staging", "test", "cdn"}
+	paths := []string{
+		"/api/v1/users", "/api/v1/products", "/api/v2/orders", "/login", "/dashboard",
+		"/admin/settings", "/app/config", "/docs/api", "/health", "/metrics",
+		"/api/auth/login", "/api/auth/logout", "/api/data/export", "/api/search",
+		"/graphql", "/ws/connect", "/api/upload", "/api/download", "/status", "/version",
+	}
+
+	titles := []string{
+		"API Endpoint", "User Service", "Product API", "Authentication",
+		"Dashboard API", "Admin Panel", "Configuration", "Documentation",
+		"Health Check", "Metrics Endpoint", "GraphQL API", "WebSocket",
+	}
+
+	webservers := []string{"nginx/1.24.0", "Apache/2.4.57", "cloudflare", "nginx", "Apache"}
+	contentTypes := []string{"application/json", "text/html", "application/xml", "text/plain"}
+	techStacks := [][]string{
+		{"nginx", "Node.js", "Express"},
+		{"Apache", "Python", "FastAPI"},
+		{"nginx", "Go", "Gin"},
+		{"cloudflare", "Rust", "Actix"},
+	}
+	gfPatterns := [][]string{
+		{"debug-pages", "potential-takeover"},
+		{"cors", "ssrf"},
+		{"sqli", "xss"},
+		{"lfi", "rce"},
+		{},
+	}
+	statusCodes := []int{200, 200, 200, 201, 301, 400, 401, 403, 404, 500}
+
+	createdCount := 0
+
+	for _, target := range targets {
+		for i := 0; i < endpointsPerTarget; i++ {
+			var url string
+			protocol := protocols[i%len(protocols)]
+			subdomain := subdomains[i%len(subdomains)]
+			path := paths[i%len(paths)]
+
+			switch target.Type {
+			case "domain":
+				url = fmt.Sprintf("%s%s.%s%s", protocol, subdomain, target.Name, path)
+			case "ip":
+				url = fmt.Sprintf("%s%s%s", protocol, target.Name, path)
+			case "cidr":
+				baseIP := target.Name[:len(target.Name)-3]
+				url = fmt.Sprintf("%s%s%s", protocol, baseIP, path)
+			default:
+				continue
+			}
+
+			host := extractHost(url)
+			statusCode := statusCodes[i%len(statusCodes)]
+			contentLength := 500 + (i * 50)
+			tech := pq.StringArray(techStacks[i%len(techStacks)])
+			matchedGF := pq.StringArray(gfPatterns[i%len(gfPatterns)])
+			vhost := i%10 == 0
+
+			endpoint := &model.Endpoint{
+				TargetID:          target.ID,
+				URL:               url,
+				Host:              host,
+				Title:             titles[i%len(titles)],
+				StatusCode:        &statusCode,
+				ContentLength:     &contentLength,
+				ContentType:       contentTypes[i%len(contentTypes)],
+				Webserver:         webservers[i%len(webservers)],
+				Tech:              tech,
+				MatchedGFPatterns: matchedGF,
+				Vhost:             &vhost,
+				CreatedAt:         time.Now().AddDate(0, 0, -i),
+			}
+
+			if err := db.Create(endpoint).Error; err != nil {
+				continue
+			}
+			createdCount++
+		}
+	}
+
+	fmt.Printf("   ✓ Created %d endpoints\n", createdCount)
+	return nil
+}
+
+func createDirectories(db *gorm.DB, targets []model.Target, directoriesPerTarget int) error {
+	totalCount := len(targets) * directoriesPerTarget
+	fmt.Printf("📁 Creating %d directories (%d per target)...\n", totalCount, directoriesPerTarget)
+
+	if len(targets) == 0 {
+		return nil
+	}
+
+	// Directory data templates
+	protocols := []string{"https://", "http://"}
+	subdomains := []string{"www", "api", "app", "admin", "portal", "dashboard", "dev", "staging", "test", "cdn"}
+	directories := []string{
+		"/admin/", "/backup/", "/config/", "/data/", "/debug/",
+		"/files/", "/images/", "/js/", "/css/", "/uploads/",
+		"/api/", "/docs/", "/logs/", "/temp/", "/cache/",
+		"/static/", "/assets/", "/media/", "/public/", "/private/",
+	}
+
+	contentTypes := []string{"text/html", "application/json", "text/plain", "application/xml"}
+	statusCodes := []int{200, 200, 200, 301, 302, 403, 404}
+
+	createdCount := 0
+
+	for _, target := range targets {
+		for i := 0; i < directoriesPerTarget; i++ {
+			var url string
+			protocol := protocols[i%len(protocols)]
+			subdomain := subdomains[i%len(subdomains)]
+			dir := directories[i%len(directories)]
+
+			switch target.Type {
+			case "domain":
+				url = fmt.Sprintf("%s%s.%s%s", protocol, subdomain, target.Name, dir)
+			case "ip":
+				url = fmt.Sprintf("%s%s%s", protocol, target.Name, dir)
+			case "cidr":
+				baseIP := target.Name[:len(target.Name)-3]
+				url = fmt.Sprintf("%s%s%s", protocol, baseIP, dir)
+			default:
+				continue
+			}
+
+			status := statusCodes[i%len(statusCodes)]
+			contentLength := int64(1000 + (i * 100))
+			duration := int64(50 + (i * 5))
+
+			directory := &model.Directory{
+				TargetID:      target.ID,
+				URL:           url,
+				Status:        &status,
+				ContentLength: &contentLength,
+				ContentType:   contentTypes[i%len(contentTypes)],
+				Duration:      &duration,
+				CreatedAt:     time.Now().AddDate(0, 0, -i),
+			}
+
+			if err := db.Create(directory).Error; err != nil {
+				continue
+			}
+			createdCount++
+		}
+	}
+
+	fmt.Printf("   ✓ Created %d directories\n", createdCount)
+	return nil
 }

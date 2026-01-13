@@ -125,3 +125,66 @@ func (r *WebsiteRepository) ScanRow(rows *sql.Rows) (*model.Website, error) {
 	}
 	return &website, nil
 }
+
+// BulkUpsert creates or updates multiple websites
+// Uses ON CONFLICT DO UPDATE with COALESCE for non-null updates
+// Tech array is merged and deduplicated
+func (r *WebsiteRepository) BulkUpsert(websites []model.Website) (int64, error) {
+	if len(websites) == 0 {
+		return 0, nil
+	}
+
+	var totalAffected int64
+
+	// Process in batches to avoid parameter limits
+	batchSize := 100
+	for i := 0; i < len(websites); i += batchSize {
+		end := i + batchSize
+		if end > len(websites) {
+			end = len(websites)
+		}
+		batch := websites[i:end]
+
+		affected, err := r.upsertBatch(batch)
+		if err != nil {
+			return totalAffected, err
+		}
+		totalAffected += affected
+	}
+
+	return totalAffected, nil
+}
+
+// upsertBatch upserts a single batch of websites
+func (r *WebsiteRepository) upsertBatch(websites []model.Website) (int64, error) {
+	if len(websites) == 0 {
+		return 0, nil
+	}
+
+	// Use GORM's OnConflict with custom UpdateAll
+	// For tech array merge, we need raw SQL in the update clause
+	result := r.db.Clauses(clause.OnConflict{
+		Columns: []clause.Column{{Name: "url"}, {Name: "target_id"}},
+		DoUpdates: clause.Assignments(map[string]interface{}{
+			"host":             gorm.Expr("COALESCE(NULLIF(EXCLUDED.host, ''), website.host)"),
+			"location":         gorm.Expr("COALESCE(NULLIF(EXCLUDED.location, ''), website.location)"),
+			"title":            gorm.Expr("COALESCE(NULLIF(EXCLUDED.title, ''), website.title)"),
+			"webserver":        gorm.Expr("COALESCE(NULLIF(EXCLUDED.webserver, ''), website.webserver)"),
+			"response_body":    gorm.Expr("COALESCE(NULLIF(EXCLUDED.response_body, ''), website.response_body)"),
+			"content_type":     gorm.Expr("COALESCE(NULLIF(EXCLUDED.content_type, ''), website.content_type)"),
+			"status_code":      gorm.Expr("COALESCE(EXCLUDED.status_code, website.status_code)"),
+			"content_length":   gorm.Expr("COALESCE(EXCLUDED.content_length, website.content_length)"),
+			"vhost":            gorm.Expr("COALESCE(EXCLUDED.vhost, website.vhost)"),
+			"response_headers": gorm.Expr("COALESCE(NULLIF(EXCLUDED.response_headers, ''), website.response_headers)"),
+			// Merge tech arrays and deduplicate
+			"tech": gorm.Expr(`(
+				SELECT ARRAY(SELECT DISTINCT unnest FROM unnest(
+					COALESCE(website.tech, ARRAY[]::varchar(100)[]) ||
+					COALESCE(EXCLUDED.tech, ARRAY[]::varchar(100)[])
+				) ORDER BY unnest)
+			)`),
+		}),
+	}).Create(&websites)
+
+	return result.RowsAffected, result.Error
+}

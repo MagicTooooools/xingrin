@@ -14,10 +14,7 @@ export interface DirectoryTranslations {
     url: string
     status: string
     length: string
-    words: string
-    lines: string
     contentType: string
-    duration: string
     createdAt: string
   }
   actions: {
@@ -54,15 +51,6 @@ function StatusBadge({ status }: { status: number | null }) {
       {status}
     </Badge>
   )
-}
-
-/**
- * Format duration (nanoseconds to milliseconds)
- */
-function formatDuration(nanoseconds: number | null): string {
-  if (nanoseconds === null) return "-"
-  const milliseconds = nanoseconds / 1000000
-  return `${milliseconds.toFixed(2)} ms`
 }
 
 /**
@@ -139,34 +127,6 @@ export function createDirectoryColumns({
       },
     },
     {
-      accessorKey: "words",
-      size: 80,
-      minSize: 60,
-      maxSize: 120,
-      meta: { title: t.columns.words },
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={t.columns.words} />
-      ),
-      cell: ({ row }) => {
-        const words = row.getValue("words") as number | null
-        return <span>{words !== null ? words.toLocaleString() : "-"}</span>
-      },
-    },
-    {
-      accessorKey: "lines",
-      size: 80,
-      minSize: 60,
-      maxSize: 120,
-      meta: { title: t.columns.lines },
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={t.columns.lines} />
-      ),
-      cell: ({ row }) => {
-        const lines = row.getValue("lines") as number | null
-        return <span>{lines !== null ? lines.toLocaleString() : "-"}</span>
-      },
-    },
-    {
       accessorKey: "contentType",
       size: 120,
       minSize: 80,
@@ -183,20 +143,6 @@ export function createDirectoryColumns({
         ) : (
           <span className="text-muted-foreground">-</span>
         )
-      },
-    },
-    {
-      accessorKey: "duration",
-      size: 100,
-      minSize: 80,
-      maxSize: 150,
-      meta: { title: t.columns.duration },
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={t.columns.duration} />
-      ),
-      cell: ({ row }) => {
-        const duration = row.getValue("duration") as number | null
-        return <span className="text-muted-foreground">{formatDuration(duration)}</span>
       },
     },
     {

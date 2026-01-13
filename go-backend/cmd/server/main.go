@@ -132,6 +132,9 @@ func main() {
 	targetRepo := repository.NewTargetRepository(db)
 	engineRepo := repository.NewEngineRepository(db)
 	websiteRepo := repository.NewWebsiteRepository(db)
+	subdomainRepo := repository.NewSubdomainRepository(db)
+	endpointRepo := repository.NewEndpointRepository(db)
+	directoryRepo := repository.NewDirectoryRepository(db)
 
 	// Create services
 	userSvc := service.NewUserService(userRepo)
@@ -139,6 +142,9 @@ func main() {
 	targetSvc := service.NewTargetService(targetRepo, orgRepo)
 	engineSvc := service.NewEngineService(engineRepo)
 	websiteSvc := service.NewWebsiteService(websiteRepo, targetRepo)
+	subdomainSvc := service.NewSubdomainService(subdomainRepo, targetRepo)
+	endpointSvc := service.NewEndpointService(endpointRepo, targetRepo)
+	directorySvc := service.NewDirectoryService(directoryRepo, targetRepo)
 
 	// Create handlers
 	healthHandler := handler.NewHealthHandler(db, redisClient)
@@ -148,6 +154,9 @@ func main() {
 	targetHandler := handler.NewTargetHandler(targetSvc)
 	engineHandler := handler.NewEngineHandler(engineSvc)
 	websiteHandler := handler.NewWebsiteHandler(websiteSvc)
+	subdomainHandler := handler.NewSubdomainHandler(subdomainSvc)
+	endpointHandler := handler.NewEndpointHandler(endpointSvc)
+	directoryHandler := handler.NewDirectoryHandler(directorySvc)
 
 	// Register health routes
 	router.GET("/health", healthHandler.Check)
@@ -200,11 +209,40 @@ func main() {
 			protected.GET("/targets/:id/websites", websiteHandler.List)
 			protected.GET("/targets/:id/websites/export", websiteHandler.Export)
 			protected.POST("/targets/:id/websites/bulk-create", websiteHandler.BulkCreate)
+			protected.POST("/targets/:id/websites/bulk-upsert", websiteHandler.BulkUpsert)
 
 			// Websites (standalone)
 			protected.GET("/websites/:id", websiteHandler.GetByID)
 			protected.DELETE("/websites/:id", websiteHandler.Delete)
 			protected.POST("/websites/bulk-delete", websiteHandler.BulkDelete)
+
+			// Subdomains (nested under targets)
+			protected.GET("/targets/:id/subdomains", subdomainHandler.List)
+			protected.GET("/targets/:id/subdomains/export", subdomainHandler.Export)
+			protected.POST("/targets/:id/subdomains/bulk-create", subdomainHandler.BulkCreate)
+
+			// Subdomains (standalone)
+			protected.POST("/subdomains/bulk-delete", subdomainHandler.BulkDelete)
+
+			// Endpoints (nested under targets)
+			protected.GET("/targets/:id/endpoints", endpointHandler.List)
+			protected.GET("/targets/:id/endpoints/export", endpointHandler.Export)
+			protected.POST("/targets/:id/endpoints/bulk-create", endpointHandler.BulkCreate)
+			protected.POST("/targets/:id/endpoints/bulk-upsert", endpointHandler.BulkUpsert)
+
+			// Endpoints (standalone)
+			protected.GET("/endpoints/:id", endpointHandler.GetByID)
+			protected.DELETE("/endpoints/:id", endpointHandler.Delete)
+			protected.POST("/endpoints/bulk-delete", endpointHandler.BulkDelete)
+
+			// Directories (nested under targets)
+			protected.GET("/targets/:id/directories", directoryHandler.List)
+			protected.GET("/targets/:id/directories/export", directoryHandler.Export)
+			protected.POST("/targets/:id/directories/bulk-create", directoryHandler.BulkCreate)
+			protected.POST("/targets/:id/directories/bulk-upsert", directoryHandler.BulkUpsert)
+
+			// Directories (standalone)
+			protected.POST("/directories/bulk-delete", directoryHandler.BulkDelete)
 
 			// Engines
 			protected.POST("/engines", engineHandler.Create)

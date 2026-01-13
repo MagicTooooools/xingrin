@@ -133,7 +133,7 @@ func (s *TargetService) BulkDelete(ids []int) (int64, error) {
 
 // BatchCreate creates multiple targets at once
 func (s *TargetService) BatchCreate(req *dto.BatchCreateTargetRequest) *dto.BatchCreateTargetResponse {
-	var failedTargets []dto.FailedTarget
+	failedTargets := []dto.FailedTarget{}
 	var validTargets []model.Target
 	var validNames []string
 	seen := make(map[string]bool)

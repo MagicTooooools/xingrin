@@ -25,11 +25,11 @@ export class EndpointService {
 
   /**
    * Bulk delete endpoints
-   * POST /api/assets/endpoints/bulk-delete/
+   * POST /api/endpoints/bulk-delete/
    */
   static async bulkDelete(ids: number[]): Promise<BulkDeleteResponse> {
     const response = await api.post<BulkDeleteResponse>(
-      `/assets/endpoints/bulk-delete/`,
+      `/endpoints/bulk-delete/`,
       { ids }
     )
     return response.data

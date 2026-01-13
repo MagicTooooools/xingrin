@@ -15,11 +15,11 @@ export interface BulkDeleteResponse {
 export class DirectoryService {
   /**
    * Bulk delete directories
-   * POST /api/assets/directories/bulk-delete/
+   * POST /api/directories/bulk-delete/
    */
   static async bulkDelete(ids: number[]): Promise<BulkDeleteResponse> {
     const response = await api.post<BulkDeleteResponse>(
-      `/assets/directories/bulk-delete/`,
+      `/directories/bulk-delete/`,
       { ids }
     )
     return response.data

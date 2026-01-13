@@ -43,6 +43,11 @@ func NewPaginatedResponse[T any](data []T, total int64, page, pageSize int) *Pag
 		totalPages++
 	}
 
+	// Ensure results is empty array, not null
+	if data == nil {
+		data = []T{}
+	}
+
 	return &PaginatedResponse[T]{
 		Results:    data,
 		Total:      total,
