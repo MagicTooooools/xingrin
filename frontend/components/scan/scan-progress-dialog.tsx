@@ -40,7 +40,11 @@ interface StageDetail {
  */
 export interface ScanProgressData {
   id: number
-  targetName: string
+  target?: {
+    id: number
+    name: string
+    type: string
+  }
   engineNames: string[]
   status: string
   progress: number
@@ -225,7 +229,7 @@ export function ScanProgressDialog({
         <div className="space-y-2">
           <div className="flex items-center justify-between text-sm">
             <span className="text-muted-foreground">{t("target")}</span>
-            <span className="font-medium">{data.targetName}</span>
+            <span className="font-medium">{data.target?.name}</span>
           </div>
           <div className="flex items-start justify-between text-sm gap-4">
             <span className="text-muted-foreground shrink-0">{t("engine")}</span>
@@ -322,25 +326,25 @@ function formatDateTime(isoString?: string, locale: string = "zh"): string {
   }
 }
 
-/** Get stage result count from summary */
-function getStageResultCount(stageName: string, summary: ScanRecord["summary"]): number | undefined {
-  if (!summary) return undefined
+/** Get stage result count from cachedStats */
+function getStageResultCount(stageName: string, stats: ScanRecord["cachedStats"]): number | undefined {
+  if (!stats) return undefined
   switch (stageName) {
     case "subdomain_discovery":
     case "subdomainDiscovery":
-      return summary.subdomains
+      return stats.subdomainsCount
     case "site_scan":
     case "siteScan":
-      return summary.websites
+      return stats.websitesCount
     case "directory_scan":
     case "directoryScan":
-      return summary.directories
+      return stats.directoriesCount
     case "url_fetch":
     case "urlFetch":
-      return summary.endpoints
+      return stats.endpointsCount
     case "vuln_scan":
     case "vulnScan":
-      return summary.vulnerabilities?.total
+      return stats.vulnsTotal
     default:
       return undefined
   }
@@ -378,7 +382,7 @@ export function buildScanProgressData(scan: ScanRecord): ScanProgressData {
     
     for (const [stageName, progress] of sortedEntries) {
       const resultCount = progress.status === "completed" 
-        ? getStageResultCount(stageName, scan.summary)
+        ? getStageResultCount(stageName, scan.cachedStats)
         : undefined
       
       stages.push({
@@ -393,7 +397,7 @@ export function buildScanProgressData(scan: ScanRecord): ScanProgressData {
   
   return {
     id: scan.id,
-    targetName: scan.targetName,
+    target: scan.target,
     engineNames: scan.engineNames || [],
     status: scan.status,
     progress: scan.progress,

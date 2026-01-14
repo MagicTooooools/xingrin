@@ -3,12 +3,19 @@
 import * as React from "react"
 import type { ColumnDef } from "@tanstack/react-table"
 import { useTranslations } from "next-intl"
-import { IconSearch, IconLoader2 } from "@tabler/icons-react"
+import { IconSearch, IconLoader2, IconFilter } from "@tabler/icons-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { UnifiedDataTable } from "@/components/ui/data-table"
-import type { ScanRecord } from "@/types/scan.types"
+import type { ScanRecord, ScanStatus } from "@/types/scan.types"
 import type { PaginationInfo } from "@/types/common.types"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 interface ScanHistoryDataTableProps {
   data: ScanRecord[]
@@ -28,6 +35,8 @@ interface ScanHistoryDataTableProps {
   hideToolbar?: boolean
   hidePagination?: boolean
   pageSizeOptions?: number[]
+  statusFilter?: ScanStatus | "all"
+  onStatusFilterChange?: (status: ScanStatus | "all") => void
 }
 
 /**
@@ -52,6 +61,8 @@ export function ScanHistoryDataTable({
   hideToolbar = false,
   hidePagination = false,
   pageSizeOptions,
+  statusFilter = "all",
+  onStatusFilterChange,
 }: ScanHistoryDataTableProps) {
   const t = useTranslations("common.status")
   const tScan = useTranslations("scan.history")
@@ -75,6 +86,16 @@ export function ScanHistoryDataTable({
       handleSearchSubmit()
     }
   }
+
+  // Status options
+  const statusOptions: { value: ScanStatus | "all"; label: string }[] = [
+    { value: "all", label: tScan("allStatus") },
+    { value: "running", label: t("running") },
+    { value: "completed", label: t("completed") },
+    { value: "failed", label: t("failed") },
+    { value: "initiated", label: t("pending") },
+    { value: "cancelled", label: t("cancelled") },
+  ]
 
   return (
     <UnifiedDataTable
@@ -101,9 +122,9 @@ export function ScanHistoryDataTable({
       emptyMessage={t("noData")}
       // Auto column sizing
       enableAutoColumnSizing
-      // Custom search box
+      // Custom search box and status filter
       toolbarLeft={
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center gap-2">
           <Input
             placeholder={searchPlaceholder || tScan("searchPlaceholder")}
             value={localSearchValue}
@@ -118,6 +139,24 @@ export function ScanHistoryDataTable({
               <IconSearch className="h-4 w-4" />
             )}
           </Button>
+          {onStatusFilterChange && (
+            <Select
+              value={statusFilter}
+              onValueChange={(value) => onStatusFilterChange(value as ScanStatus | "all")}
+            >
+              <SelectTrigger size="sm" className="w-[140px]">
+                <IconFilter className="h-4 w-4 mr-2" />
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {statusOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
         </div>
       }
     />

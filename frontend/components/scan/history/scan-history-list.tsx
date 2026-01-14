@@ -6,7 +6,7 @@ import { useTranslations, useLocale } from "next-intl"
 import { ScanHistoryDataTable } from "./scan-history-data-table"
 import { createScanHistoryColumns } from "./scan-history-columns"
 import { getDateLocale } from "@/lib/date-utils"
-import type { ScanRecord } from "@/types/scan.types"
+import type { ScanRecord, ScanStatus } from "@/types/scan.types"
 import type { ColumnDef } from "@tanstack/react-table"
 import { DataTableSkeleton } from "@/components/ui/data-table-skeleton"
 import {
@@ -108,10 +108,18 @@ export function ScanHistoryList({ hideToolbar = false, targetId, pageSize: custo
   // Search state
   const [searchQuery, setSearchQuery] = useState("")
   const [isSearching, setIsSearching] = useState(false)
+  
+  // Status filter state
+  const [statusFilter, setStatusFilter] = useState<ScanStatus | "all">("all")
 
   const handleSearchChange = (value: string) => {
     setIsSearching(true)
     setSearchQuery(value)
+    setPagination((prev) => ({ ...prev, pageIndex: 0 }))
+  }
+  
+  const handleStatusFilterChange = (status: ScanStatus | "all") => {
+    setStatusFilter(status)
     setPagination((prev) => ({ ...prev, pageIndex: 0 }))
   }
   
@@ -121,6 +129,7 @@ export function ScanHistoryList({ hideToolbar = false, targetId, pageSize: custo
     pageSize: pagination.pageSize,
     search: searchQuery || undefined,
     target: targetId,
+    status: statusFilter === "all" ? undefined : statusFilter,
   })
 
   // Reset search state when request completes
@@ -195,7 +204,7 @@ export function ScanHistoryList({ hideToolbar = false, targetId, pageSize: custo
     
     try {
       await deleteMutation.mutateAsync(scanToDelete.id)
-      toast.success(tToast("deletedScanRecord", { name: scanToDelete.targetName }))
+      toast.success(tToast("deletedScanRecord", { name: scanToDelete.target?.name ?? "" }))
     } catch (error) {
       toast.error(tToast("deleteFailed"))
       console.error('Delete failed:', error)
@@ -226,7 +235,7 @@ export function ScanHistoryList({ hideToolbar = false, targetId, pageSize: custo
     
     try {
       await stopMutation.mutateAsync(scanToStop.id)
-      toast.success(tToast("stoppedScan", { name: scanToStop.targetName }))
+      toast.success(tToast("stoppedScan", { name: scanToStop.target?.name ?? "" }))
     } catch (error) {
       toast.error(tToast("stopFailed"))
       console.error('Stop scan failed:', error)
@@ -339,6 +348,8 @@ export function ScanHistoryList({ hideToolbar = false, targetId, pageSize: custo
         hideToolbar={hideToolbar}
         pageSizeOptions={pageSizeOptions}
         hidePagination={hidePagination}
+        statusFilter={statusFilter}
+        onStatusFilterChange={handleStatusFilterChange}
       />
 
       {/* Delete confirmation dialog */}
@@ -347,7 +358,7 @@ export function ScanHistoryList({ hideToolbar = false, targetId, pageSize: custo
           <AlertDialogHeader>
             <AlertDialogTitle>{tConfirm("deleteTitle")}</AlertDialogTitle>
             <AlertDialogDescription>
-              {tConfirm("deleteScanMessage", { name: scanToDelete?.targetName ?? "" })}
+              {tConfirm("deleteScanMessage", { name: scanToDelete?.target?.name ?? "" })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -376,7 +387,7 @@ export function ScanHistoryList({ hideToolbar = false, targetId, pageSize: custo
             <ul className="text-sm space-y-1">
               {selectedScans.map((scan) => (
                 <li key={scan.id} className="flex items-center justify-between">
-                  <span className="font-medium">{scan.targetName}</span>
+                  <span className="font-medium">{scan.target?.name}</span>
                   <span className="text-muted-foreground text-xs">{scan.engineNames?.join(", ") || "-"}</span>
                 </li>
               ))}
@@ -400,7 +411,7 @@ export function ScanHistoryList({ hideToolbar = false, targetId, pageSize: custo
           <AlertDialogHeader>
             <AlertDialogTitle>{tConfirm("stopScanTitle")}</AlertDialogTitle>
             <AlertDialogDescription>
-              {tConfirm("stopScanMessage", { name: scanToStop?.targetName ?? "" })}
+              {tConfirm("stopScanMessage", { name: scanToStop?.target?.name ?? "" })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

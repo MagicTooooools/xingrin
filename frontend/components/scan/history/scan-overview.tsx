@@ -206,13 +206,28 @@ export function ScanOverview({ scanId }: ScanOverviewProps) {
 
   // Use type assertion for extended properties
   const scanAny = scan as any
-  const summary = scanAny.summary || {}
-  const vulnSummary = summary.vulnerabilities || { total: 0, critical: 0, high: 0, medium: 0, low: 0 }
+  // Support both cachedStats (Go) and summary (Python) formats
+  const stats = scan.cachedStats || scanAny.summary || {}
+  const summary = {
+    subdomains: stats.subdomainsCount ?? stats.subdomains ?? 0,
+    websites: stats.websitesCount ?? stats.websites ?? 0,
+    endpoints: stats.endpointsCount ?? stats.endpoints ?? 0,
+    ips: stats.ipsCount ?? stats.ips ?? 0,
+    directories: stats.directoriesCount ?? stats.directories ?? 0,
+    screenshots: stats.screenshotsCount ?? stats.screenshots ?? 0,
+  }
+  const vulnSummary = stats.vulnerabilities || {
+    total: stats.vulnsTotal ?? 0,
+    critical: stats.vulnsCritical ?? 0,
+    high: stats.vulnsHigh ?? 0,
+    medium: stats.vulnsMedium ?? 0,
+    low: stats.vulnsLow ?? 0,
+  }
   const statusIconConfig = getStatusIcon(scan.status)
   const StatusIcon = statusIconConfig.icon
   const statusStyle = SCAN_STATUS_STYLES[scan.status] || "bg-muted text-muted-foreground"
-  const targetId = scanAny.target  // Target ID
-  const targetName = scan.targetName  // Target name
+  const targetId = scan.targetId
+  const targetName = scan.target?.name
   const startedAt = scanAny.startedAt || scan.createdAt
   const completedAt = scanAny.completedAt
 

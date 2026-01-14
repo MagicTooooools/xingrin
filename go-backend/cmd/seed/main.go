@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"math/rand"
@@ -128,12 +129,21 @@ func main() {
 		os.Exit(1)
 	}
 
+	// Create scans for targets
+	if err := createScans(db, targets, 3); err != nil {
+		fmt.Printf("❌ Failed to create scans: %v\n", err)
+		os.Exit(1)
+	}
+
 	fmt.Println("\n✅ Test data generation completed!")
 }
 
 func clearData(db *gorm.DB) error {
 	// Delete in order to respect foreign key constraints
 	tables := []string{
+		"scan_log",
+		"scan_input_target",
+		"scan",
 		"vulnerability",
 		"screenshot",
 		"host_port_mapping",
@@ -945,5 +955,127 @@ func createVulnerabilities(db *gorm.DB, targets []model.Target, vulnsPerTarget i
 	}
 
 	fmt.Printf("   ✓ Created %d vulnerabilities\n", len(vulns))
+	return nil
+}
+
+func createScans(db *gorm.DB, targets []model.Target, scansPerTarget int) error {
+	totalCount := len(targets) * scansPerTarget
+	fmt.Printf("🔍 Creating %d scans (%d per target)...\n", totalCount, scansPerTarget)
+
+	if len(targets) == 0 {
+		return nil
+	}
+
+	// Scan data templates
+	statuses := []string{"completed", "completed", "completed", "running", "failed"}
+	scanModes := []string{"full", "full", "quick"}
+	stages := []string{"subdomain_discovery", "port_scan", "web_discovery", "vulnerability_scan", ""}
+
+	engineNames := [][]string{
+		{"Default Engine"},
+		{"Fast Scanner", "Deep Scanner"},
+		{"Nuclei Engine"},
+		{"Full Recon"},
+	}
+
+	errorMessages := []string{
+		"",
+		"Connection timeout to target",
+		"Worker node unavailable",
+		"Rate limit exceeded",
+	}
+
+	// Build all scans in memory first
+	scans := make([]model.Scan, 0, totalCount)
+
+	for _, target := range targets {
+		for i := 0; i < scansPerTarget; i++ {
+			status := statuses[i%len(statuses)]
+			scanMode := scanModes[i%len(scanModes)]
+			currentStage := stages[i%len(stages)]
+
+			// Calculate progress based on status
+			var progress int
+			switch status {
+			case "completed":
+				progress = 100
+			case "running":
+				progress = 30 + rand.Intn(60)
+			case "failed":
+				progress = rand.Intn(50)
+			default:
+				progress = 0
+			}
+
+			// Engine IDs and names
+			engineIDs := pq.Int64Array{1}
+			names := engineNames[i%len(engineNames)]
+			namesJSON, _ := json.Marshal(names)
+
+			// Error message (only for failed scans)
+			var errorMsg string
+			if status == "failed" {
+				errorMsg = errorMessages[1+rand.Intn(len(errorMessages)-1)]
+			}
+
+			// Created time
+			daysAgo := i * 7 // Each scan is 7 days apart
+			createdAt := time.Now().AddDate(0, 0, -daysAgo)
+
+			// Stopped time (for completed/failed scans)
+			var stoppedAt *time.Time
+			if status == "completed" || status == "failed" {
+				t := createdAt.Add(time.Duration(30+rand.Intn(60)) * time.Minute)
+				stoppedAt = &t
+			}
+
+			// Cached stats (random values for demonstration)
+			subdomainsCount := rand.Intn(50)
+			websitesCount := rand.Intn(30)
+			endpointsCount := rand.Intn(100)
+			ipsCount := rand.Intn(20)
+			directoriesCount := rand.Intn(40)
+			screenshotsCount := rand.Intn(20)
+			vulnsCritical := rand.Intn(3)
+			vulnsHigh := rand.Intn(5)
+			vulnsMedium := rand.Intn(10)
+			vulnsLow := rand.Intn(15)
+			vulnsTotal := vulnsCritical + vulnsHigh + vulnsMedium + vulnsLow
+
+			scan := model.Scan{
+				TargetID:               target.ID,
+				EngineIDs:              engineIDs,
+				EngineNames:            namesJSON,
+				YamlConfiguration:      "# Default scan configuration\nthreads: 10\ntimeout: 30s",
+				ScanMode:               scanMode,
+				Status:                 status,
+				Progress:               progress,
+				CurrentStage:           currentStage,
+				ErrorMessage:           errorMsg,
+				CreatedAt:              createdAt,
+				StoppedAt:              stoppedAt,
+				CachedSubdomainsCount:  subdomainsCount,
+				CachedWebsitesCount:    websitesCount,
+				CachedEndpointsCount:   endpointsCount,
+				CachedIPsCount:         ipsCount,
+				CachedDirectoriesCount: directoriesCount,
+				CachedScreenshotsCount: screenshotsCount,
+				CachedVulnsTotal:       vulnsTotal,
+				CachedVulnsCritical:    vulnsCritical,
+				CachedVulnsHigh:        vulnsHigh,
+				CachedVulnsMedium:      vulnsMedium,
+				CachedVulnsLow:         vulnsLow,
+			}
+
+			scans = append(scans, scan)
+		}
+	}
+
+	// Batch insert
+	if err := db.CreateInBatches(scans, 100).Error; err != nil {
+		return err
+	}
+
+	fmt.Printf("   ✓ Created %d scans\n", len(scans))
 	return nil
 }

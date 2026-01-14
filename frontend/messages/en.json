@@ -723,6 +723,7 @@
       "duration": "Duration",
       "status": "Status",
       "searchPlaceholder": "Search target name...",
+      "allStatus": "All Status",
       "loadFailed": "Failed to load scan history",
       "retry": "Retry",
       "taskId": "Scan Task ID: {id}",
@@ -1959,6 +1960,8 @@
   "vulnerabilities": {
     "title": "Vulnerability Management",
     "description": "View and manage all vulnerabilities found by scans",
+    "severity": "Severity",
+    "source": "Source",
     "reviewStatus": {
       "all": "All",
       "pending": "Pending",
@@ -1972,8 +1975,9 @@
     "bulkUnreviewSuccess": "{count} vulnerabilities marked as pending",
     "bulkReviewError": "Failed to bulk mark as reviewed",
     "bulkUnreviewError": "Failed to bulk mark as pending",
-    "markAsReviewed": "Mark as Reviewed",
-    "markAsPending": "Mark as Pending",
+    "markAsReviewed": "Mark Reviewed",
+    "markAsPending": "Mark Pending",
+    "selected": "{count} selected",
     "tooltips": {
       "reviewed": "Reviewed",
       "pending": "Pending review"

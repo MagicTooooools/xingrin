@@ -139,6 +139,8 @@ func main() {
 	ipAddressRepo := repository.NewIPAddressRepository(db)
 	screenshotRepo := repository.NewScreenshotRepository(db)
 	vulnerabilityRepo := repository.NewVulnerabilityRepository(db)
+	scanRepo := repository.NewScanRepository(db)
+	scanLogRepo := repository.NewScanLogRepository(db)
 
 	// Create services
 	userSvc := service.NewUserService(userRepo)
@@ -153,6 +155,8 @@ func main() {
 	ipAddressSvc := service.NewIPAddressService(ipAddressRepo, targetRepo)
 	screenshotSvc := service.NewScreenshotService(screenshotRepo, targetRepo)
 	vulnerabilitySvc := service.NewVulnerabilityService(vulnerabilityRepo, targetRepo)
+	scanSvc := service.NewScanService(scanRepo, scanLogRepo, targetRepo, orgRepo)
+	scanLogSvc := service.NewScanLogService(scanLogRepo, scanRepo)
 
 	// Create handlers
 	healthHandler := handler.NewHealthHandler(db, redisClient)
@@ -169,6 +173,8 @@ func main() {
 	ipAddressHandler := handler.NewIPAddressHandler(ipAddressSvc)
 	screenshotHandler := handler.NewScreenshotHandler(screenshotSvc)
 	vulnerabilityHandler := handler.NewVulnerabilityHandler(vulnerabilitySvc)
+	scanHandler := handler.NewScanHandler(scanSvc)
+	scanLogHandler := handler.NewScanLogHandler(scanLogSvc)
 
 	// Register health routes
 	router.GET("/health", healthHandler.Check)
@@ -278,7 +284,7 @@ func main() {
 
 			// Vulnerabilities (nested under targets)
 			protected.GET("/targets/:id/vulnerabilities", vulnerabilityHandler.ListByTarget)
-			protected.POST("/targets/:id/vulnerabilities/bulk-upsert", vulnerabilityHandler.BulkUpsert)
+			protected.POST("/targets/:id/vulnerabilities/bulk-create", vulnerabilityHandler.BulkCreate)
 
 			// Vulnerabilities (standalone)
 			protected.POST("/vulnerabilities/bulk-delete", vulnerabilityHandler.BulkDelete)
@@ -302,6 +308,20 @@ func main() {
 			protected.GET("/wordlists/download", wordlistHandler.Download)
 			protected.GET("/wordlists/:id/content", wordlistHandler.GetContent)
 			protected.PUT("/wordlists/:id/content", wordlistHandler.UpdateContent)
+
+			// Scans
+			protected.GET("/scans", scanHandler.List)
+			protected.GET("/scans/statistics", scanHandler.Statistics)
+			protected.GET("/scans/:id", scanHandler.GetByID)
+			protected.DELETE("/scans/:id", scanHandler.Delete)
+			protected.POST("/scans/:id/stop", scanHandler.Stop)
+			protected.POST("/scans/initiate", scanHandler.Initiate)
+			protected.POST("/scans/quick", scanHandler.Quick)
+			protected.POST("/scans/bulk-delete", scanHandler.BulkDelete)
+
+			// Scan Logs (nested under scans)
+			protected.GET("/scans/:id/logs", scanLogHandler.List)
+			protected.POST("/scans/:id/logs", scanLogHandler.BulkCreate)
 		}
 	}
 

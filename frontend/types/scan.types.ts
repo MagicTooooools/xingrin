@@ -32,34 +32,51 @@ export interface StageProgressItem {
  */
 export type StageProgress = Record<string, StageProgressItem>
 
+/**
+ * Target brief info in scan response
+ */
+export interface ScanTargetBrief {
+  id: number
+  name: string
+  type: string
+}
+
+/**
+ * Cached statistics in scan response
+ */
+export interface ScanCachedStats {
+  subdomainsCount: number
+  websitesCount: number
+  endpointsCount: number
+  ipsCount: number
+  directoriesCount: number
+  screenshotsCount: number
+  vulnsTotal: number
+  vulnsCritical: number
+  vulnsHigh: number
+  vulnsMedium: number
+  vulnsLow: number
+}
+
 export interface ScanRecord {
   id: number
-  target?: number              // Target ID (corresponds to backend target)
-  targetName: string           // Target name (corresponds to backend targetName)
-  workerName?: string | null   // Worker node name (corresponds to backend worker_name)
-  summary: {
-    subdomains: number
-    websites: number
-    directories: number
-    endpoints: number
-    ips: number
-    vulnerabilities: {
-      total: number
-      critical: number
-      high: number
-      medium: number
-      low: number
-    }
-  }
-  engineIds: number[]          // Engine ID list (corresponds to backend engine_ids)
-  engineNames: string[]        // Engine name list (corresponds to backend engine_names)
-  createdAt: string            // Creation time (corresponds to backend createdAt)
+  targetId: number             // Target ID
+  target?: ScanTargetBrief     // Target info (nested object)
+  workerName?: string | null   // Worker node name
+  cachedStats?: ScanCachedStats // Cached statistics
+  engineIds: number[]          // Engine ID list
+  engineNames: string[]        // Engine name list
+  scanMode: string             // Scan mode
+  createdAt: string            // Creation time
+  stoppedAt?: string           // Stop time
   status: ScanStatus
-  errorMessage?: string        // Error message (corresponds to backend errorMessage, has value when failed)
+  errorMessage?: string        // Error message (has value when failed)
   progress: number             // 0-100
   currentStage?: ScanStage     // Current scan stage (only has value in running status)
   stageProgress?: StageProgress // Stage progress details
-  yamlConfiguration?: string     // YAML configuration string
+  yamlConfiguration?: string   // YAML configuration string
+  resultsDir?: string          // Results directory
+  workerId?: number            // Worker ID
 }
 
 export interface GetScansParams {

@@ -204,7 +204,8 @@ export const createScanHistoryColumns = ({
     enableHiding: false,
   },
   {
-    accessorKey: "targetName",
+    accessorKey: "target",
+    accessorFn: (row) => row.target?.name,
     size: 350,
     minSize: 100,
     meta: { title: t.columns.target },
@@ -212,8 +213,8 @@ export const createScanHistoryColumns = ({
       <DataTableColumnHeader column={column} title={t.columns.target} />
     ),
     cell: ({ row }) => {
-      const targetName = row.getValue("targetName") as string
-      const targetId = row.original.target
+      const targetName = row.original.target?.name
+      const targetId = row.original.targetId
       
       return (
         <div className="flex-1 min-w-0">
@@ -239,7 +240,8 @@ export const createScanHistoryColumns = ({
     },
   },
   {
-    accessorKey: "summary",
+    accessorKey: "cachedStats",
+    accessorFn: (row) => row.cachedStats,
     meta: { title: t.columns.summary },
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title={t.columns.summary} />
@@ -247,25 +249,13 @@ export const createScanHistoryColumns = ({
     size: 290,
     minSize: 150,
     cell: ({ row }) => {
-      const summary = (row.getValue("summary") as {
-        subdomains: number
-        websites: number
-        endpoints: number
-        ips: number
-        vulnerabilities: {
-          total: number
-          critical: number
-          high: number
-          medium: number
-          low: number
-        }
-      }) || {}
+      const stats = row.original.cachedStats || {}
 
-      const subdomains = summary?.subdomains ?? 0
-      const websites = summary?.websites ?? 0
-      const endpoints = summary?.endpoints ?? 0
-      const ips = summary?.ips ?? 0
-      const vulns = summary?.vulnerabilities?.total ?? 0
+      const subdomains = stats.subdomainsCount ?? 0
+      const websites = stats.websitesCount ?? 0
+      const endpoints = stats.endpointsCount ?? 0
+      const ips = stats.ipsCount ?? 0
+      const vulns = stats.vulnsTotal ?? 0
 
       const badges: React.ReactNode[] = []
 
@@ -368,7 +358,7 @@ export const createScanHistoryColumns = ({
               </TooltipTrigger>
               <TooltipContent side="top">
                 <p className="text-xs font-medium">
-                  {summary?.vulnerabilities?.critical ?? 0} Critical, {summary?.vulnerabilities?.high ?? 0} High, {summary?.vulnerabilities?.medium ?? 0} Medium {t.summary.vulnerabilities}
+                  {stats.vulnsCritical ?? 0} Critical, {stats.vulnsHigh ?? 0} High, {stats.vulnsMedium ?? 0} Medium {t.summary.vulnerabilities}
                 </p>
               </TooltipContent>
             </Tooltip>
@@ -578,9 +568,9 @@ export const createScanHistoryColumns = ({
   },
 ]
 
-  // Filter out targetName column if hideTargetColumn is true
+  // Filter out target column if hideTargetColumn is true
   if (hideTargetColumn) {
-    return columns.filter(col => (col as any).accessorKey !== 'targetName')
+    return columns.filter(col => (col as any).accessorKey !== 'target')
   }
 
   return columns

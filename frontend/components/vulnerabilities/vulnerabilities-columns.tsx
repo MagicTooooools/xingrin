@@ -14,6 +14,7 @@ import type { Vulnerability, VulnerabilitySeverity } from "@/types/vulnerability
 // Translation type definitions
 export interface VulnerabilityTranslations {
   columns: {
+    status?: string
     severity: string
     source: string
     vulnType: string
@@ -90,34 +91,27 @@ export function createVulnerabilityColumns({
     },
     {
       id: "reviewStatus",
-      size: 40,
-      minSize: 40,
-      maxSize: 40,
+      meta: { title: t.columns.status || "状态" },
+      size: 90,
+      minSize: 80,
+      maxSize: 100,
       enableResizing: false,
-      header: "",
+      header: t.columns.status || "状态",
       cell: ({ row }) => {
         const isReviewed = row.original.isReviewed
+        
         return (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                onClick={() => onToggleReview?.(row.original)}
-                className="p-1 hover:bg-muted rounded transition-colors"
-                disabled={!onToggleReview}
-              >
-                <span
-                  className={`inline-block w-2 h-2 rounded-full transition-colors ${
-                    isReviewed
-                      ? "bg-muted-foreground/30"
-                      : "bg-blue-500"
-                  }`}
-                />
-              </button>
-            </TooltipTrigger>
-            <TooltipContent>
-              {isReviewed ? t.tooltips.reviewed : t.tooltips.pending}
-            </TooltipContent>
-          </Tooltip>
+          <Badge
+            variant="outline"
+            className={`cursor-pointer transition-all hover:opacity-80 ${
+              isReviewed
+                ? "bg-muted/50 text-muted-foreground border-muted-foreground/20"
+                : "bg-blue-500/10 text-blue-600 border-blue-500/20 dark:text-blue-400"
+            } ${!onToggleReview ? "cursor-default" : ""}`}
+            onClick={() => onToggleReview?.(row.original)}
+          >
+            {isReviewed ? t.tooltips.reviewed : t.tooltips.pending}
+          </Badge>
         )
       },
       enableSorting: false,

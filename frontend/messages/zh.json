@@ -737,6 +737,7 @@
       "duration": "耗时",
       "status": "状态",
       "searchPlaceholder": "搜索目标名称...",
+      "allStatus": "全部状态",
       "loadFailed": "加载扫描历史失败",
       "retry": "重试",
       "taskId": "扫描任务 ID：{id}",
@@ -1973,6 +1974,8 @@
   "vulnerabilities": {
     "title": "漏洞管理",
     "description": "查看和管理所有扫描发现的漏洞",
+    "severity": "严重程度",
+    "source": "来源",
     "reviewStatus": {
       "all": "全部",
       "pending": "待审查",
@@ -1986,8 +1989,9 @@
     "bulkUnreviewSuccess": "已将 {count} 个漏洞标记为待审查",
     "bulkReviewError": "批量标记已审查失败",
     "bulkUnreviewError": "批量标记待审查失败",
-    "markAsReviewed": "标记已审查",
-    "markAsPending": "标记待审查",
+    "markAsReviewed": "标记已审",
+    "markAsPending": "标记待审",
+    "selected": "已选 {count} 项",
     "tooltips": {
       "reviewed": "已审查",
       "pending": "待审查"

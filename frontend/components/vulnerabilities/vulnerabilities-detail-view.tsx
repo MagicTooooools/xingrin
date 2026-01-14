@@ -67,6 +67,7 @@ export function VulnerabilitiesDetailView({
   // Build translation object
   const translations = useMemo(() => ({
     columns: {
+      status: tColumns("common.status"),
       severity: tColumns("vulnerability.severity"),
       source: tColumns("vulnerability.source"),
       vulnType: tColumns("vulnerability.vulnType"),
@@ -159,6 +160,7 @@ export function VulnerabilitiesDetailView({
   const pendingCount = useMemo(() => {
     return vulnerabilities.filter(v => !v.isReviewed).length
   }, [vulnerabilities])
+
 
   const formatDate = (dateString: string): string => {
     return new Date(dateString).toLocaleString(getDateLocale(locale), {
