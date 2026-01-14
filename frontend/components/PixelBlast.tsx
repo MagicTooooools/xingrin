@@ -533,21 +533,26 @@ const PixelBlast = ({
           h: renderer.domElement.height
         };
       };
-      const onPointerDown = e => {
-        const { fx, fy } = mapToPixels(e);
-        const ix = threeRef.current?.clickIx ?? 0;
-        uniforms.uClickPos.value[ix].set(fx, fy);
-        uniforms.uClickTimes.value[ix] = uniforms.uTime.value;
-        if (threeRef.current) threeRef.current.clickIx = (ix + 1) % MAX_CLICKS;
-      };
+      let lastRippleTime = 0;
+      const rippleThrottle = 150; // ms between ripples
       const onPointerMove = e => {
-        if (!touch) return;
         const { fx, fy, w, h } = mapToPixels(e);
-        touch.addTouch({ x: fx / w, y: fy / h });
+        
+        // Trigger ripple on mouse move (throttled)
+        const now = performance.now();
+        if (now - lastRippleTime > rippleThrottle) {
+          const ix = threeRef.current?.clickIx ?? 0;
+          uniforms.uClickPos.value[ix].set(fx, fy);
+          uniforms.uClickTimes.value[ix] = uniforms.uTime.value;
+          if (threeRef.current) threeRef.current.clickIx = (ix + 1) % MAX_CLICKS;
+          lastRippleTime = now;
+        }
+        
+        // Liquid touch effect
+        if (touch) {
+          touch.addTouch({ x: fx / w, y: fy / h });
+        }
       };
-      renderer.domElement.addEventListener('pointerdown', onPointerDown, {
-        passive: true
-      });
       renderer.domElement.addEventListener('pointermove', onPointerMove, {
         passive: true
       });

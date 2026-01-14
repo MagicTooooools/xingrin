@@ -75,6 +75,7 @@ export default function LoginPage() {
           patternScale={4.5}
           color="#06b6d4"
           speed={0.35}
+          enableRipples={false}
         />
       </div>
 
