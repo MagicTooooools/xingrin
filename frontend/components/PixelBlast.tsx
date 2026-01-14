@@ -168,7 +168,7 @@ float Bayer2(vec2 a) {
 #define Bayer4(a) (Bayer2(.5*(a))*0.25 + Bayer2(a))
 #define Bayer8(a) (Bayer4(.5*(a))*0.25 + Bayer2(a))
 
-#define FBM_OCTAVES     5
+#define FBM_OCTAVES     2
 #define FBM_LACUNARITY  1.25
 #define FBM_GAIN        1.0
 
@@ -561,7 +561,7 @@ const PixelBlast = ({
       const domElement = renderer.domElement;
       let raf = 0;
       let lastFrameTime = 0;
-      const targetDelta = 1000 / 30; // throttle to ~30fps
+      const targetDelta = 1000 / 10; // throttle to ~20fps
       const animate = (now?: number) => {
         const timeNow = now ?? performance.now();
         if (autoPauseOffscreen && !visibilityRef.current.visible) {
