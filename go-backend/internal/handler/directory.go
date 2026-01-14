@@ -148,12 +148,12 @@ func (h *DirectoryHandler) Export(c *gin.Context) {
 
 		contentLength := ""
 		if directory.ContentLength != nil {
-			contentLength = strconv.FormatInt(*directory.ContentLength, 10)
+			contentLength = strconv.Itoa(*directory.ContentLength)
 		}
 
 		duration := ""
 		if directory.Duration != nil {
-			duration = strconv.FormatInt(*directory.Duration, 10)
+			duration = strconv.Itoa(*directory.Duration)
 		}
 
 		return []string{

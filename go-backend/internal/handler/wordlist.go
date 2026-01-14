@@ -38,7 +38,9 @@ func (h *WordlistHandler) Create(c *gin.Context) {
 		dto.InternalError(c, "Failed to read uploaded file")
 		return
 	}
-	defer src.Close()
+	defer func() {
+		_ = src.Close() // Ignore close error in defer
+	}()
 
 	wordlist, err := h.svc.Create(name, description, file.Filename, src)
 	if err != nil {

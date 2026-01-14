@@ -4,8 +4,8 @@ import (
 	"time"
 )
 
-// HostPortMappingSnapshot represents a host-port mapping snapshot
-type HostPortMappingSnapshot struct {
+// HostPortSnapshot represents a host-port snapshot
+type HostPortSnapshot struct {
 	ID        int       `gorm:"primaryKey;autoIncrement" json:"id"`
 	ScanID    int       `gorm:"column:scan_id;not null;index:idx_hpm_snap_scan;uniqueIndex:unique_scan_host_ip_port_snapshot,priority:1" json:"scanId"`
 	Host      string    `gorm:"column:host;size:1000;not null;index:idx_hpm_snap_host;uniqueIndex:unique_scan_host_ip_port_snapshot,priority:2" json:"host"`
@@ -17,7 +17,7 @@ type HostPortMappingSnapshot struct {
 	Scan *Scan `gorm:"foreignKey:ScanID" json:"scan,omitempty"`
 }
 
-// TableName returns the table name for HostPortMappingSnapshot
-func (HostPortMappingSnapshot) TableName() string {
+// TableName returns the table name for HostPortSnapshot
+func (HostPortSnapshot) TableName() string {
 	return "host_port_mapping_snapshot"
 }

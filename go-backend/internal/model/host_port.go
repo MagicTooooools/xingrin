@@ -4,8 +4,8 @@ import (
 	"time"
 )
 
-// HostPortMapping represents a host-port mapping
-type HostPortMapping struct {
+// HostPort represents a host-port mapping
+type HostPort struct {
 	ID        int       `gorm:"primaryKey;autoIncrement" json:"id"`
 	TargetID  int       `gorm:"column:target_id;not null;index:idx_hpm_target;uniqueIndex:unique_target_host_ip_port,priority:1" json:"targetId"`
 	Host      string    `gorm:"column:host;size:1000;not null;index:idx_hpm_host;uniqueIndex:unique_target_host_ip_port,priority:2" json:"host"`
@@ -17,7 +17,7 @@ type HostPortMapping struct {
 	Target *Target `gorm:"foreignKey:TargetID" json:"target,omitempty"`
 }
 
-// TableName returns the table name for HostPortMapping
-func (HostPortMapping) TableName() string {
+// TableName returns the table name for HostPort
+func (HostPort) TableName() string {
 	return "host_port_mapping"
 }

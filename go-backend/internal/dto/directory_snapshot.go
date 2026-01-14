@@ -2,16 +2,9 @@ package dto
 
 import "time"
 
-// DirectorySnapshotItem represents a single directory snapshot data for bulk upsert
-type DirectorySnapshotItem struct {
-	URL           string `json:"url" binding:"required,url"`
-	Status        *int   `json:"status"`
-	ContentLength *int64 `json:"contentLength"`
-	Words         *int   `json:"words"`
-	Lines         *int   `json:"lines"`
-	ContentType   string `json:"contentType"`
-	Duration      *int64 `json:"duration"`
-}
+// DirectorySnapshotItem is an alias for DirectoryUpsertItem
+// Snapshot items and asset items have identical fields
+type DirectorySnapshotItem = DirectoryUpsertItem
 
 // BulkUpsertDirectorySnapshotsRequest represents bulk upsert directory snapshots request
 type BulkUpsertDirectorySnapshotsRequest struct {
@@ -37,10 +30,8 @@ type DirectorySnapshotResponse struct {
 	ScanID        int       `json:"scanId"`
 	URL           string    `json:"url"`
 	Status        *int      `json:"status"`
-	ContentLength *int64    `json:"contentLength"`
-	Words         *int      `json:"words"`
-	Lines         *int      `json:"lines"`
+	ContentLength *int      `json:"contentLength"`
 	ContentType   string    `json:"contentType"`
-	Duration      *int64    `json:"duration"`
+	Duration      *int      `json:"duration"`
 	CreatedAt     time.Time `json:"createdAt"`
 }

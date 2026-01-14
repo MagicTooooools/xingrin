@@ -50,6 +50,7 @@ export function TerminalLogin({
   const [password, setPassword] = React.useState("")
   const [lines, setLines] = React.useState<TerminalLine[]>([])
   const [cursorPosition, setCursorPosition] = React.useState(0)
+  const [isFocused, setIsFocused] = React.useState(false)
   const inputRef = React.useRef<HTMLInputElement>(null)
   const containerRef = React.useRef<HTMLDivElement>(null)
 
@@ -137,6 +138,17 @@ export function TerminalLogin({
       return
     }
 
+    // Tab - Move to next field (username -> password)
+    if (e.key === "Tab" && step === "username") {
+      e.preventDefault()
+      if (!username.trim()) return
+      addLine({ text: `> ${t.usernamePrompt}: `, type: "prompt" })
+      addLine({ text: username, type: "input" })
+      setStep("password")
+      setCursorPosition(0)
+      return
+    }
+
     // Enter - Submit
     if (e.key === "Enter") {
       if (step === "username") {
@@ -207,6 +219,10 @@ export function TerminalLogin({
     const before = displayValue.slice(0, cursorPosition)
     const after = displayValue.slice(cursorPosition)
     const cursorChar = after[0] || ""
+
+    if (!isFocused) {
+      return <span className="text-zinc-100">{displayValue}</span>
+    }
 
     return (
       <>
@@ -359,6 +375,8 @@ export function TerminalLogin({
                 onChange={handleInputChange}
                 onKeyDown={handleKeyDown}
                 onSelect={handleSelect}
+                onFocus={() => setIsFocused(true)}
+                onBlur={() => setIsFocused(false)}
                 disabled={isInputDisabled}
                 className="absolute opacity-0 pointer-events-none"
                 autoComplete={step === "username" ? "username" : "current-password"}

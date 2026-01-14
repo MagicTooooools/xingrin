@@ -109,27 +109,8 @@ func (s *WebsiteSnapshotService) SaveAndSync(scanID int, targetID int, items []d
 		return 0, 0, err
 	}
 
-	// Step 5: Sync to asset table via WebsiteService
-	// Note: WebsiteService.BulkUpsert also validates, but we already filtered
-	assetItems := make([]dto.WebsiteUpsertItem, 0, len(validItems))
-	for _, item := range validItems {
-		assetItems = append(assetItems, dto.WebsiteUpsertItem{
-			URL:             item.URL,
-			Host:            item.Host,
-			Title:           item.Title,
-			StatusCode:      item.StatusCode,
-			ContentLength:   intPtrToIntPtr(item.ContentLength),
-			Location:        item.Location,
-			Webserver:       item.Webserver,
-			ContentType:     item.ContentType,
-			Tech:            item.Tech,
-			ResponseBody:    item.ResponseBody,
-			Vhost:           item.Vhost,
-			ResponseHeaders: item.ResponseHeaders,
-		})
-	}
-
-	assetCount, err = s.websiteService.BulkUpsert(targetID, assetItems)
+	// Step 5: Sync to asset table (WebsiteSnapshotItem is an alias of WebsiteUpsertItem, no conversion needed)
+	assetCount, err = s.websiteService.BulkUpsert(targetID, validItems)
 	if err != nil {
 		// Log error but don't fail - snapshot is already saved
 		// In production, consider using a transaction or compensation logic
@@ -137,15 +118,6 @@ func (s *WebsiteSnapshotService) SaveAndSync(scanID int, targetID int, items []d
 	}
 
 	return snapshotCount, assetCount, nil
-}
-
-// intPtrToIntPtr converts *int64 to *int
-func intPtrToIntPtr(v *int64) *int {
-	if v == nil {
-		return nil
-	}
-	i := int(*v)
-	return &i
 }
 
 // ListByScan returns paginated website snapshots for a scan

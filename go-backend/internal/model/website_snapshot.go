@@ -14,7 +14,7 @@ type WebsiteSnapshot struct {
 	Host            string         `gorm:"column:host;size:253;index:idx_website_snap_host" json:"host"`
 	Title           string         `gorm:"column:title;type:text;index:idx_website_snap_title" json:"title"`
 	StatusCode      *int           `gorm:"column:status_code" json:"statusCode"`
-	ContentLength   *int64         `gorm:"column:content_length" json:"contentLength"`
+	ContentLength   *int           `gorm:"column:content_length" json:"contentLength"`
 	Location        string         `gorm:"column:location;type:text" json:"location"`
 	Webserver       string         `gorm:"column:webserver;type:text" json:"webserver"`
 	ContentType     string         `gorm:"column:content_type;type:text" json:"contentType"`

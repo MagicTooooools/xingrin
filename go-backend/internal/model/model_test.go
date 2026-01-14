@@ -33,7 +33,7 @@ func TestTableNames(t *testing.T) {
 		// Asset models
 		{Endpoint{}, "endpoint"},
 		{Directory{}, "directory"},
-		{HostPortMapping{}, "host_port_mapping"},
+		{HostPort{}, "host_port_mapping"},
 		{Vulnerability{}, "vulnerability"},
 		{Screenshot{}, "screenshot"},
 		// Snapshot models
@@ -41,7 +41,7 @@ func TestTableNames(t *testing.T) {
 		{WebsiteSnapshot{}, "website_snapshot"},
 		{EndpointSnapshot{}, "endpoint_snapshot"},
 		{DirectorySnapshot{}, "directory_snapshot"},
-		{HostPortMappingSnapshot{}, "host_port_mapping_snapshot"},
+		{HostPortSnapshot{}, "host_port_mapping_snapshot"},
 		{VulnerabilitySnapshot{}, "vulnerability_snapshot"},
 		{ScreenshotSnapshot{}, "screenshot_snapshot"},
 		// Scan-related models

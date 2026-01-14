@@ -70,8 +70,6 @@ func (s *DirectorySnapshotService) SaveAndSync(scanID int, targetID int, items [
 			URL:           item.URL,
 			Status:        item.Status,
 			ContentLength: item.ContentLength,
-			Words:         item.Words,
-			Lines:         item.Lines,
 			ContentType:   item.ContentType,
 			Duration:      item.Duration,
 		})

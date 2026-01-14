@@ -332,11 +332,9 @@ CREATE TABLE IF NOT EXISTS directory (
     target_id INTEGER NOT NULL REFERENCES target(id) ON DELETE CASCADE,
     url VARCHAR(2000) NOT NULL,
     status INTEGER,
-    content_length BIGINT,
-    words INTEGER,
-    lines INTEGER,
+    content_length INTEGER,
     content_type VARCHAR(200) NOT NULL DEFAULT '',
-    duration BIGINT,
+    duration INTEGER,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX IF NOT EXISTS idx_directory_target ON directory(target_id);
@@ -370,6 +368,7 @@ CREATE TABLE IF NOT EXISTS vulnerability (
     cvss_score DECIMAL(3,1) NOT NULL DEFAULT 0.0,
     description TEXT NOT NULL DEFAULT '',
     raw_output JSONB NOT NULL DEFAULT '{}',
+    reviewed BOOLEAN NOT NULL DEFAULT FALSE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX IF NOT EXISTS idx_vuln_target ON vulnerability(target_id);
@@ -378,6 +377,7 @@ CREATE INDEX IF NOT EXISTS idx_vuln_type ON vulnerability(vuln_type);
 CREATE INDEX IF NOT EXISTS idx_vuln_severity ON vulnerability(severity);
 CREATE INDEX IF NOT EXISTS idx_vuln_source ON vulnerability(source);
 CREATE INDEX IF NOT EXISTS idx_vuln_created_at ON vulnerability(created_at);
+CREATE INDEX IF NOT EXISTS idx_vuln_target_reviewed ON vulnerability(target_id, reviewed);
 
 -- ============================================
 -- Snapshot tables (depends on scan)
@@ -419,7 +419,7 @@ CREATE TABLE IF NOT EXISTS website_snapshot (
     host VARCHAR(253) NOT NULL DEFAULT '',
     title TEXT NOT NULL DEFAULT '',
     status_code INTEGER,
-    content_length BIGINT,
+    content_length INTEGER,
     location TEXT NOT NULL DEFAULT '',
     webserver TEXT NOT NULL DEFAULT '',
     content_type TEXT NOT NULL DEFAULT '',
@@ -471,11 +471,9 @@ CREATE TABLE IF NOT EXISTS directory_snapshot (
     scan_id INTEGER NOT NULL REFERENCES scan(id) ON DELETE CASCADE,
     url VARCHAR(2000) NOT NULL,
     status INTEGER,
-    content_length BIGINT,
-    words INTEGER,
-    lines INTEGER,
+    content_length INTEGER,
     content_type VARCHAR(200) NOT NULL DEFAULT '',
-    duration BIGINT,
+    duration INTEGER,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX IF NOT EXISTS idx_directory_snap_scan ON directory_snapshot(scan_id);
@@ -574,3 +572,22 @@ CREATE INDEX IF NOT EXISTS idx_notification_category ON notification(category);
 CREATE INDEX IF NOT EXISTS idx_notification_level ON notification(level);
 CREATE INDEX IF NOT EXISTS idx_notification_created_at ON notification(created_at);
 CREATE INDEX IF NOT EXISTS idx_notification_is_read ON notification(is_read);
+
+-- ============================================
+-- GIN Indexes for array fields
+-- ============================================
+
+-- GIN index for website.tech array
+CREATE INDEX IF NOT EXISTS idx_website_tech_gin ON website USING GIN (tech);
+
+-- GIN index for endpoint.tech array
+CREATE INDEX IF NOT EXISTS idx_endpoint_tech_gin ON endpoint USING GIN (tech);
+
+-- GIN index for endpoint.matched_gf_patterns array
+CREATE INDEX IF NOT EXISTS idx_endpoint_matched_gf_patterns_gin ON endpoint USING GIN (matched_gf_patterns);
+
+-- GIN index for scan.engine_ids array
+CREATE INDEX IF NOT EXISTS idx_scan_engine_ids_gin ON scan USING GIN (engine_ids);
+
+-- GIN index for scan.container_ids array
+CREATE INDEX IF NOT EXISTS idx_scan_container_ids_gin ON scan USING GIN (container_ids);

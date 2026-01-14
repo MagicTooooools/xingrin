@@ -34,7 +34,7 @@ func TestSaveAndSyncDataConsistency(t *testing.T) {
 				Host:            "test.com",
 				Title:           "Test Page",
 				StatusCode:      intPtr(200),
-				ContentLength:   int64Ptr(1024),
+				ContentLength:   intPtr(1024),
 				Location:        "https://test.com/redirect",
 				Webserver:       "nginx",
 				ContentType:     "text/html",
@@ -61,7 +61,7 @@ func TestSaveAndSyncDataConsistency(t *testing.T) {
 				Host:            tt.snapshot.Host,
 				Title:           tt.snapshot.Title,
 				StatusCode:      tt.snapshot.StatusCode,
-				ContentLength:   intPtrFromInt64Ptr(tt.snapshot.ContentLength),
+				ContentLength:   tt.snapshot.ContentLength,
 				Location:        tt.snapshot.Location,
 				Webserver:       tt.snapshot.Webserver,
 				ContentType:     tt.snapshot.ContentType,
@@ -102,20 +102,8 @@ func intPtr(v int) *int {
 	return &v
 }
 
-func int64Ptr(v int64) *int64 {
-	return &v
-}
-
 func boolPtr(v bool) *bool {
 	return &v
-}
-
-func intPtrFromInt64Ptr(v *int64) *int {
-	if v == nil {
-		return nil
-	}
-	i := int(*v)
-	return &i
 }
 
 func intPtrEqual(a, b *int) bool {

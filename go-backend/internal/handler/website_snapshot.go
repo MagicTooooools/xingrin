@@ -134,7 +134,7 @@ func (h *WebsiteSnapshotHandler) Export(c *gin.Context) {
 
 		contentLength := ""
 		if snapshot.ContentLength != nil {
-			contentLength = strconv.FormatInt(*snapshot.ContentLength, 10)
+			contentLength = strconv.Itoa(*snapshot.ContentLength)
 		}
 
 		vhost := ""

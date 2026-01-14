@@ -13,26 +13,26 @@ import (
 	"github.com/xingrin/go-backend/internal/service"
 )
 
-// IPAddressHandler handles IP address endpoints
-type IPAddressHandler struct {
-	svc *service.IPAddressService
+// HostPortHandler handles host-port endpoints
+type HostPortHandler struct {
+	svc *service.HostPortService
 }
 
-// NewIPAddressHandler creates a new IP address handler
-func NewIPAddressHandler(svc *service.IPAddressService) *IPAddressHandler {
-	return &IPAddressHandler{svc: svc}
+// NewHostPortHandler creates a new host-port handler
+func NewHostPortHandler(svc *service.HostPortService) *HostPortHandler {
+	return &HostPortHandler{svc: svc}
 }
 
-// List returns paginated IP addresses aggregated by IP
-// GET /api/targets/:id/ip-addresses
-func (h *IPAddressHandler) List(c *gin.Context) {
+// List returns paginated host-ports aggregated by IP
+// GET /api/targets/:id/host-ports
+func (h *HostPortHandler) List(c *gin.Context) {
 	targetID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		dto.BadRequest(c, "Invalid target ID")
 		return
 	}
 
-	var query dto.IPAddressListQuery
+	var query dto.HostPortListQuery
 	if !dto.BindQuery(c, &query) {
 		return
 	}
@@ -43,7 +43,7 @@ func (h *IPAddressHandler) List(c *gin.Context) {
 			dto.NotFound(c, "Target not found")
 			return
 		}
-		dto.InternalError(c, "Failed to list IP addresses")
+		dto.InternalError(c, "Failed to list host-ports")
 		return
 	}
 
@@ -60,10 +60,10 @@ func (h *IPAddressHandler) List(c *gin.Context) {
 	dto.Paginated(c, results, total, query.GetPage(), query.GetPageSize())
 }
 
-// Export exports IP addresses as CSV (raw format)
-// GET /api/targets/:id/ip-addresses/export
+// Export exports host-ports as CSV (raw format)
+// GET /api/targets/:id/host-ports/export
 // Query params: ips (optional, comma-separated IP list for filtering)
-func (h *IPAddressHandler) Export(c *gin.Context) {
+func (h *HostPortHandler) Export(c *gin.Context) {
 	targetID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		dto.BadRequest(c, "Invalid target ID")
@@ -91,7 +91,7 @@ func (h *IPAddressHandler) Export(c *gin.Context) {
 				dto.NotFound(c, "Target not found")
 				return
 			}
-			dto.InternalError(c, "Failed to export IP addresses")
+			dto.InternalError(c, "Failed to export host-ports")
 			return
 		}
 		rows, err = h.svc.StreamByTarget(targetID)
@@ -102,12 +102,12 @@ func (h *IPAddressHandler) Export(c *gin.Context) {
 			dto.NotFound(c, "Target not found")
 			return
 		}
-		dto.InternalError(c, "Failed to export IP addresses")
+		dto.InternalError(c, "Failed to export host-ports")
 		return
 	}
 
 	headers := []string{"ip", "host", "port", "created_at"}
-	filename := fmt.Sprintf("target-%d-ip-addresses.csv", targetID)
+	filename := fmt.Sprintf("target-%d-host-ports.csv", targetID)
 
 	mapper := func(rows *sql.Rows) ([]string, error) {
 		mapping, err := h.svc.ScanRow(rows)
@@ -128,16 +128,16 @@ func (h *IPAddressHandler) Export(c *gin.Context) {
 	}
 }
 
-// BulkUpsert creates multiple IP address mappings (ignores duplicates)
-// POST /api/targets/:id/ip-addresses/bulk-upsert
-func (h *IPAddressHandler) BulkUpsert(c *gin.Context) {
+// BulkUpsert creates multiple host-port mappings (ignores duplicates)
+// POST /api/targets/:id/host-ports/bulk-upsert
+func (h *HostPortHandler) BulkUpsert(c *gin.Context) {
 	targetID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		dto.BadRequest(c, "Invalid target ID")
 		return
 	}
 
-	var req dto.BulkUpsertIPAddressesRequest
+	var req dto.BulkUpsertHostPortsRequest
 	if !dto.BindJSON(c, &req) {
 		return
 	}
@@ -148,30 +148,30 @@ func (h *IPAddressHandler) BulkUpsert(c *gin.Context) {
 			dto.NotFound(c, "Target not found")
 			return
 		}
-		dto.InternalError(c, "Failed to upsert IP addresses")
+		dto.InternalError(c, "Failed to upsert host-ports")
 		return
 	}
 
-	dto.Success(c, dto.BulkUpsertIPAddressesResponse{
+	dto.Success(c, dto.BulkUpsertHostPortsResponse{
 		UpsertedCount: int(upsertedCount),
 	})
 }
 
-// BulkDelete deletes IP address mappings by IP list
-// POST /api/ip-addresses/bulk-delete
-func (h *IPAddressHandler) BulkDelete(c *gin.Context) {
-	var req dto.BulkDeleteIPAddressesRequest
+// BulkDelete deletes host-port mappings by IP list
+// POST /api/host-ports/bulk-delete
+func (h *HostPortHandler) BulkDelete(c *gin.Context) {
+	var req dto.BulkDeleteHostPortsRequest
 	if !dto.BindJSON(c, &req) {
 		return
 	}
 
 	deletedCount, err := h.svc.BulkDeleteByIPs(req.IPs)
 	if err != nil {
-		dto.InternalError(c, "Failed to delete IP addresses")
+		dto.InternalError(c, "Failed to delete host-ports")
 		return
 	}
 
-	dto.Success(c, dto.BulkDeleteIPAddressesResponse{
+	dto.Success(c, dto.BulkDeleteHostPortsResponse{
 		DeletedCount: deletedCount,
 	})
 }

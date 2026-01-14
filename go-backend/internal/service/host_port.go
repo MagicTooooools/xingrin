@@ -10,19 +10,19 @@ import (
 	"gorm.io/gorm"
 )
 
-// IPAddressService handles IP address business logic
-type IPAddressService struct {
-	repo       *repository.IPAddressRepository
+// HostPortService handles host-port business logic
+type HostPortService struct {
+	repo       *repository.HostPortRepository
 	targetRepo *repository.TargetRepository
 }
 
-// NewIPAddressService creates a new IP address service
-func NewIPAddressService(repo *repository.IPAddressRepository, targetRepo *repository.TargetRepository) *IPAddressService {
-	return &IPAddressService{repo: repo, targetRepo: targetRepo}
+// NewHostPortService creates a new host-port service
+func NewHostPortService(repo *repository.HostPortRepository, targetRepo *repository.TargetRepository) *HostPortService {
+	return &HostPortService{repo: repo, targetRepo: targetRepo}
 }
 
-// ListByTarget returns paginated IP addresses aggregated by IP
-func (s *IPAddressService) ListByTarget(targetID int, query *dto.IPAddressListQuery) ([]dto.IPAddressResponse, int64, error) {
+// ListByTarget returns paginated host-ports aggregated by IP
+func (s *HostPortService) ListByTarget(targetID int, query *dto.HostPortListQuery) ([]dto.HostPortResponse, int64, error) {
 	// Get IP aggregation (all IPs with their earliest created_at)
 	ipRows, total, err := s.repo.GetIPAggregation(targetID, query.Filter)
 	if err != nil {
@@ -36,7 +36,7 @@ func (s *IPAddressService) ListByTarget(targetID int, query *dto.IPAddressListQu
 	end := start + pageSize
 
 	if start >= len(ipRows) {
-		return []dto.IPAddressResponse{}, total, nil
+		return []dto.HostPortResponse{}, total, nil
 	}
 	if end > len(ipRows) {
 		end = len(ipRows)
@@ -45,14 +45,14 @@ func (s *IPAddressService) ListByTarget(targetID int, query *dto.IPAddressListQu
 	pagedIPs := ipRows[start:end]
 
 	// For each IP, get its hosts and ports
-	results := make([]dto.IPAddressResponse, 0, len(pagedIPs))
+	results := make([]dto.HostPortResponse, 0, len(pagedIPs))
 	for _, row := range pagedIPs {
 		hosts, ports, err := s.repo.GetHostsAndPortsByIP(targetID, row.IP, query.Filter)
 		if err != nil {
 			return nil, 0, err
 		}
 
-		results = append(results, dto.IPAddressResponse{
+		results = append(results, dto.HostPortResponse{
 			IP:        row.IP,
 			Hosts:     hosts,
 			Ports:     ports,
@@ -64,7 +64,7 @@ func (s *IPAddressService) ListByTarget(targetID int, query *dto.IPAddressListQu
 }
 
 // StreamByTarget returns a cursor for streaming export (raw format)
-func (s *IPAddressService) StreamByTarget(targetID int) (*sql.Rows, error) {
+func (s *HostPortService) StreamByTarget(targetID int) (*sql.Rows, error) {
 	_, err := s.targetRepo.FindByID(targetID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -76,7 +76,7 @@ func (s *IPAddressService) StreamByTarget(targetID int) (*sql.Rows, error) {
 }
 
 // StreamByTargetAndIPs returns a cursor for streaming export filtered by IPs
-func (s *IPAddressService) StreamByTargetAndIPs(targetID int, ips []string) (*sql.Rows, error) {
+func (s *HostPortService) StreamByTargetAndIPs(targetID int, ips []string) (*sql.Rows, error) {
 	_, err := s.targetRepo.FindByID(targetID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -88,7 +88,7 @@ func (s *IPAddressService) StreamByTargetAndIPs(targetID int, ips []string) (*sq
 }
 
 // CountByTarget returns the count of unique IPs for a target
-func (s *IPAddressService) CountByTarget(targetID int) (int64, error) {
+func (s *HostPortService) CountByTarget(targetID int) (int64, error) {
 	_, err := s.targetRepo.FindByID(targetID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -99,13 +99,13 @@ func (s *IPAddressService) CountByTarget(targetID int) (int64, error) {
 	return s.repo.CountByTargetID(targetID)
 }
 
-// ScanRow scans a row into HostPortMapping model
-func (s *IPAddressService) ScanRow(rows *sql.Rows) (*model.HostPortMapping, error) {
+// ScanRow scans a row into HostPort model
+func (s *HostPortService) ScanRow(rows *sql.Rows) (*model.HostPort, error) {
 	return s.repo.ScanRow(rows)
 }
 
 // BulkUpsert creates multiple mappings for a target (ignores duplicates)
-func (s *IPAddressService) BulkUpsert(targetID int, items []dto.IPAddressItem) (int64, error) {
+func (s *HostPortService) BulkUpsert(targetID int, items []dto.HostPortItem) (int64, error) {
 	_, err := s.targetRepo.FindByID(targetID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -115,9 +115,9 @@ func (s *IPAddressService) BulkUpsert(targetID int, items []dto.IPAddressItem) (
 	}
 
 	// Convert DTOs to models
-	mappings := make([]model.HostPortMapping, 0, len(items))
+	mappings := make([]model.HostPort, 0, len(items))
 	for _, item := range items {
-		mappings = append(mappings, model.HostPortMapping{
+		mappings = append(mappings, model.HostPort{
 			TargetID: targetID,
 			Host:     item.Host,
 			IP:       item.IP,
@@ -133,7 +133,7 @@ func (s *IPAddressService) BulkUpsert(targetID int, items []dto.IPAddressItem) (
 }
 
 // BulkDeleteByIPs deletes all mappings for the given IPs
-func (s *IPAddressService) BulkDeleteByIPs(ips []string) (int64, error) {
+func (s *HostPortService) BulkDeleteByIPs(ips []string) (int64, error) {
 	if len(ips) == 0 {
 		return 0, nil
 	}

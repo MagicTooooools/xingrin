@@ -2,21 +2,8 @@ package dto
 
 import "time"
 
-// WebsiteSnapshotItem represents a single website snapshot data for bulk upsert
-type WebsiteSnapshotItem struct {
-	URL             string   `json:"url" binding:"required,url"`
-	Host            string   `json:"host"`
-	Title           string   `json:"title"`
-	StatusCode      *int     `json:"statusCode"`
-	ContentLength   *int64   `json:"contentLength"`
-	Location        string   `json:"location"`
-	Webserver       string   `json:"webserver"`
-	ContentType     string   `json:"contentType"`
-	Tech            []string `json:"tech"`
-	ResponseBody    string   `json:"responseBody"`
-	Vhost           *bool    `json:"vhost"`
-	ResponseHeaders string   `json:"responseHeaders"`
-}
+// WebsiteSnapshotItem is an alias for WebsiteUpsertItem used in snapshot operations
+type WebsiteSnapshotItem = WebsiteUpsertItem
 
 // BulkUpsertWebsiteSnapshotsRequest represents bulk upsert website snapshots request
 type BulkUpsertWebsiteSnapshotsRequest struct {
@@ -44,7 +31,7 @@ type WebsiteSnapshotResponse struct {
 	Host            string    `json:"host"`
 	Title           string    `json:"title"`
 	StatusCode      *int      `json:"statusCode"`
-	ContentLength   *int64    `json:"contentLength"`
+	ContentLength   *int      `json:"contentLength"`
 	Location        string    `json:"location"`
 	Webserver       string    `json:"webserver"`
 	ContentType     string    `json:"contentType"`

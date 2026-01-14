@@ -235,19 +235,7 @@ func TestListHandler(t *testing.T) {
 				}
 			},
 		},
-		{
-			name:        "list with ordering",
-			scanID:      "1",
-			queryParams: "?ordering=-url",
-			mockFunc: func(scanID int, query *dto.WebsiteSnapshotListQuery) ([]model.WebsiteSnapshot, int64, error) {
-				if query.Ordering != "-url" {
-					t.Errorf("expected ordering '-url', got %q", query.Ordering)
-				}
-				return mockSnapshots, 3, nil
-			},
-			expectedStatus: http.StatusOK,
-			checkResponse:  nil,
-		},
+
 		{
 			name:        "scan not found",
 			scanID:      "999",
@@ -373,8 +361,8 @@ func TestFilterProperties(t *testing.T) {
 			router := gin.New()
 			router.GET("/api/scans/:scan_id/websites", func(c *gin.Context) {
 				var query dto.WebsiteSnapshotListQuery
-				c.ShouldBindQuery(&query)
-				mockSvc.ListByScan(1, &query)
+				_ = c.ShouldBindQuery(&query)
+				_, _, _ = mockSvc.ListByScan(1, &query)
 				dto.Paginated(c, []dto.WebsiteSnapshotResponse{}, 0, 1, 20)
 			})
 

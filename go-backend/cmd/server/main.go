@@ -136,7 +136,7 @@ func main() {
 	subdomainRepo := repository.NewSubdomainRepository(db)
 	endpointRepo := repository.NewEndpointRepository(db)
 	directoryRepo := repository.NewDirectoryRepository(db)
-	ipAddressRepo := repository.NewIPAddressRepository(db)
+	hostPortRepo := repository.NewHostPortRepository(db)
 	screenshotRepo := repository.NewScreenshotRepository(db)
 	vulnerabilityRepo := repository.NewVulnerabilityRepository(db)
 	scanRepo := repository.NewScanRepository(db)
@@ -145,6 +145,7 @@ func main() {
 	subdomainSnapshotRepo := repository.NewSubdomainSnapshotRepository(db)
 	endpointSnapshotRepo := repository.NewEndpointSnapshotRepository(db)
 	directorySnapshotRepo := repository.NewDirectorySnapshotRepository(db)
+	hostPortSnapshotRepo := repository.NewHostPortSnapshotRepository(db)
 
 	// Create services
 	userSvc := service.NewUserService(userRepo)
@@ -156,7 +157,7 @@ func main() {
 	subdomainSvc := service.NewSubdomainService(subdomainRepo, targetRepo)
 	endpointSvc := service.NewEndpointService(endpointRepo, targetRepo)
 	directorySvc := service.NewDirectoryService(directoryRepo, targetRepo)
-	ipAddressSvc := service.NewIPAddressService(ipAddressRepo, targetRepo)
+	hostPortSvc := service.NewHostPortService(hostPortRepo, targetRepo)
 	screenshotSvc := service.NewScreenshotService(screenshotRepo, targetRepo)
 	vulnerabilitySvc := service.NewVulnerabilityService(vulnerabilityRepo, targetRepo)
 	scanSvc := service.NewScanService(scanRepo, scanLogRepo, targetRepo, orgRepo)
@@ -165,6 +166,7 @@ func main() {
 	subdomainSnapshotSvc := service.NewSubdomainSnapshotService(subdomainSnapshotRepo, scanRepo, subdomainSvc)
 	endpointSnapshotSvc := service.NewEndpointSnapshotService(endpointSnapshotRepo, scanRepo, endpointSvc)
 	directorySnapshotSvc := service.NewDirectorySnapshotService(directorySnapshotRepo, scanRepo, directorySvc)
+	hostPortSnapshotSvc := service.NewHostPortSnapshotService(hostPortSnapshotRepo, scanRepo, hostPortSvc)
 
 	// Create handlers
 	healthHandler := handler.NewHealthHandler(db, redisClient)
@@ -178,7 +180,7 @@ func main() {
 	subdomainHandler := handler.NewSubdomainHandler(subdomainSvc)
 	endpointHandler := handler.NewEndpointHandler(endpointSvc)
 	directoryHandler := handler.NewDirectoryHandler(directorySvc)
-	ipAddressHandler := handler.NewIPAddressHandler(ipAddressSvc)
+	hostPortHandler := handler.NewHostPortHandler(hostPortSvc)
 	screenshotHandler := handler.NewScreenshotHandler(screenshotSvc)
 	vulnerabilityHandler := handler.NewVulnerabilityHandler(vulnerabilitySvc)
 	scanHandler := handler.NewScanHandler(scanSvc)
@@ -187,6 +189,7 @@ func main() {
 	subdomainSnapshotHandler := handler.NewSubdomainSnapshotHandler(subdomainSnapshotSvc)
 	endpointSnapshotHandler := handler.NewEndpointSnapshotHandler(endpointSnapshotSvc)
 	directorySnapshotHandler := handler.NewDirectorySnapshotHandler(directorySnapshotSvc)
+	hostPortSnapshotHandler := handler.NewHostPortSnapshotHandler(hostPortSnapshotSvc)
 
 	// Register health routes
 	router.GET("/health", healthHandler.Check)
@@ -273,13 +276,13 @@ func main() {
 			// Directories (standalone)
 			protected.POST("/directories/bulk-delete", directoryHandler.BulkDelete)
 
-			// IP Addresses (nested under targets)
-			protected.GET("/targets/:id/ip-addresses", ipAddressHandler.List)
-			protected.GET("/targets/:id/ip-addresses/export", ipAddressHandler.Export)
-			protected.POST("/targets/:id/ip-addresses/bulk-upsert", ipAddressHandler.BulkUpsert)
+			// Host Ports (nested under targets)
+			protected.GET("/targets/:id/host-ports", hostPortHandler.List)
+			protected.GET("/targets/:id/host-ports/export", hostPortHandler.Export)
+			protected.POST("/targets/:id/host-ports/bulk-upsert", hostPortHandler.BulkUpsert)
 
-			// IP Addresses (standalone)
-			protected.POST("/ip-addresses/bulk-delete", ipAddressHandler.BulkDelete)
+			// Host Ports (standalone)
+			protected.POST("/host-ports/bulk-delete", hostPortHandler.BulkDelete)
 
 			// Screenshots (nested under targets)
 			protected.GET("/targets/:id/screenshots", screenshotHandler.ListByTargetID)
@@ -355,6 +358,11 @@ func main() {
 			protected.POST("/scans/:id/directories/bulk-upsert", directorySnapshotHandler.BulkUpsert)
 			protected.GET("/scans/:id/directories", directorySnapshotHandler.List)
 			protected.GET("/scans/:id/directories/export", directorySnapshotHandler.Export)
+
+			// HostPort Snapshots (nested under scans)
+			protected.POST("/scans/:id/host-ports/bulk-upsert", hostPortSnapshotHandler.BulkUpsert)
+			protected.GET("/scans/:id/host-ports", hostPortSnapshotHandler.List)
+			protected.GET("/scans/:id/host-ports/export", hostPortSnapshotHandler.Export)
 		}
 	}
 

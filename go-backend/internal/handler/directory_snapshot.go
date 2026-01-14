@@ -112,7 +112,7 @@ func (h *DirectorySnapshotHandler) Export(c *gin.Context) {
 
 	headers := []string{
 		"id", "scan_id", "url", "status", "content_length",
-		"words", "lines", "content_type", "duration", "created_at",
+		"content_type", "duration", "created_at",
 	}
 	filename := fmt.Sprintf("scan-%d-directories.csv", scanID)
 
@@ -129,22 +129,12 @@ func (h *DirectorySnapshotHandler) Export(c *gin.Context) {
 
 		contentLength := ""
 		if snapshot.ContentLength != nil {
-			contentLength = strconv.FormatInt(*snapshot.ContentLength, 10)
-		}
-
-		words := ""
-		if snapshot.Words != nil {
-			words = strconv.Itoa(*snapshot.Words)
-		}
-
-		lines := ""
-		if snapshot.Lines != nil {
-			lines = strconv.Itoa(*snapshot.Lines)
+			contentLength = strconv.Itoa(*snapshot.ContentLength)
 		}
 
 		duration := ""
 		if snapshot.Duration != nil {
-			duration = strconv.FormatInt(*snapshot.Duration, 10)
+			duration = strconv.Itoa(*snapshot.Duration)
 		}
 
 		return []string{
@@ -153,8 +143,6 @@ func (h *DirectorySnapshotHandler) Export(c *gin.Context) {
 			snapshot.URL,
 			status,
 			contentLength,
-			words,
-			lines,
 			snapshot.ContentType,
 			duration,
 			snapshot.CreatedAt.Format("2006-01-02 15:04:05"),
@@ -173,8 +161,6 @@ func toDirectorySnapshotResponse(s *model.DirectorySnapshot) dto.DirectorySnapsh
 		URL:           s.URL,
 		Status:        s.Status,
 		ContentLength: s.ContentLength,
-		Words:         s.Words,
-		Lines:         s.Lines,
 		ContentType:   s.ContentType,
 		Duration:      s.Duration,
 		CreatedAt:     s.CreatedAt,

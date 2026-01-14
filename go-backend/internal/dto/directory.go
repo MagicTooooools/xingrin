@@ -14,9 +14,9 @@ type DirectoryResponse struct {
 	TargetID      int       `json:"targetId"`
 	URL           string    `json:"url"`
 	Status        *int      `json:"status"`
-	ContentLength *int64    `json:"contentLength"`
+	ContentLength *int      `json:"contentLength"`
 	ContentType   string    `json:"contentType"`
-	Duration      *int64    `json:"duration"`
+	Duration      *int      `json:"duration"`
 	CreatedAt     time.Time `json:"createdAt"`
 }
 
@@ -34,9 +34,9 @@ type BulkCreateDirectoriesResponse struct {
 type DirectoryUpsertItem struct {
 	URL           string `json:"url" binding:"required,url"`
 	Status        *int   `json:"status"`
-	ContentLength *int64 `json:"contentLength"`
+	ContentLength *int   `json:"contentLength"`
 	ContentType   string `json:"contentType"`
-	Duration      *int64 `json:"duration"`
+	Duration      *int   `json:"duration"`
 }
 
 // BulkUpsertDirectoriesRequest represents bulk upsert directories request

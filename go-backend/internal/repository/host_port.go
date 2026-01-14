@@ -11,18 +11,18 @@ import (
 	"gorm.io/gorm/clause"
 )
 
-// IPAddressRepository handles IP address (host_port_mapping) database operations
-type IPAddressRepository struct {
+// HostPortRepository handles host-port mapping (host_port_mapping) database operations
+type HostPortRepository struct {
 	db *gorm.DB
 }
 
-// NewIPAddressRepository creates a new IP address repository
-func NewIPAddressRepository(db *gorm.DB) *IPAddressRepository {
-	return &IPAddressRepository{db: db}
+// NewHostPortRepository creates a new host-port repository
+func NewHostPortRepository(db *gorm.DB) *HostPortRepository {
+	return &HostPortRepository{db: db}
 }
 
-// IPAddressFilterMapping defines field mapping for filtering
-var IPAddressFilterMapping = scope.FilterMapping{
+// HostPortFilterMapping defines field mapping for filtering
+var HostPortFilterMapping = scope.FilterMapping{
 	"host": {Column: "host"},
 	"ip":   {Column: "ip", NeedsCast: true},
 	"port": {Column: "port", IsNumeric: true},
@@ -35,12 +35,12 @@ type IPAggregationRow struct {
 }
 
 // GetIPAggregation returns IPs with their earliest created_at, ordered by created_at DESC
-func (r *IPAddressRepository) GetIPAggregation(targetID int, filter string) ([]IPAggregationRow, int64, error) {
+func (r *HostPortRepository) GetIPAggregation(targetID int, filter string) ([]IPAggregationRow, int64, error) {
 	// Build base query
-	baseQuery := r.db.Model(&model.HostPortMapping{}).Where("target_id = ?", targetID)
+	baseQuery := r.db.Model(&model.HostPort{}).Where("target_id = ?", targetID)
 
 	// Apply filter
-	baseQuery = baseQuery.Scopes(scope.WithFilter(filter, IPAddressFilterMapping))
+	baseQuery = baseQuery.Scopes(scope.WithFilter(filter, HostPortFilterMapping))
 
 	// Get distinct IPs with MIN(created_at)
 	var results []IPAggregationRow
@@ -57,12 +57,12 @@ func (r *IPAddressRepository) GetIPAggregation(targetID int, filter string) ([]I
 }
 
 // GetHostsAndPortsByIP returns hosts and ports for a specific IP
-func (r *IPAddressRepository) GetHostsAndPortsByIP(targetID int, ip string, filter string) ([]string, []int, error) {
-	baseQuery := r.db.Model(&model.HostPortMapping{}).
+func (r *HostPortRepository) GetHostsAndPortsByIP(targetID int, ip string, filter string) ([]string, []int, error) {
+	baseQuery := r.db.Model(&model.HostPort{}).
 		Where("target_id = ? AND ip = ?", targetID, ip)
 
 	// Apply filter
-	baseQuery = baseQuery.Scopes(scope.WithFilter(filter, IPAddressFilterMapping))
+	baseQuery = baseQuery.Scopes(scope.WithFilter(filter, HostPortFilterMapping))
 
 	// Get distinct host and port combinations
 	var mappings []struct {
@@ -101,34 +101,34 @@ func (r *IPAddressRepository) GetHostsAndPortsByIP(targetID int, ip string, filt
 }
 
 // StreamByTargetID returns a sql.Rows cursor for streaming export (raw format)
-func (r *IPAddressRepository) StreamByTargetID(targetID int) (*sql.Rows, error) {
-	return r.db.Model(&model.HostPortMapping{}).
+func (r *HostPortRepository) StreamByTargetID(targetID int) (*sql.Rows, error) {
+	return r.db.Model(&model.HostPort{}).
 		Where("target_id = ?", targetID).
 		Order("ip, host, port").
 		Rows()
 }
 
 // StreamByTargetIDAndIPs returns a sql.Rows cursor for streaming export filtered by IPs
-func (r *IPAddressRepository) StreamByTargetIDAndIPs(targetID int, ips []string) (*sql.Rows, error) {
-	return r.db.Model(&model.HostPortMapping{}).
+func (r *HostPortRepository) StreamByTargetIDAndIPs(targetID int, ips []string) (*sql.Rows, error) {
+	return r.db.Model(&model.HostPort{}).
 		Where("target_id = ? AND ip IN ?", targetID, ips).
 		Order("ip, host, port").
 		Rows()
 }
 
 // CountByTargetID returns the count of unique IPs for a target
-func (r *IPAddressRepository) CountByTargetID(targetID int) (int64, error) {
+func (r *HostPortRepository) CountByTargetID(targetID int) (int64, error) {
 	var count int64
-	err := r.db.Model(&model.HostPortMapping{}).
+	err := r.db.Model(&model.HostPort{}).
 		Where("target_id = ?", targetID).
 		Distinct("ip").
 		Count(&count).Error
 	return count, err
 }
 
-// ScanRow scans a single row into HostPortMapping model
-func (r *IPAddressRepository) ScanRow(rows *sql.Rows) (*model.HostPortMapping, error) {
-	var mapping model.HostPortMapping
+// ScanRow scans a single row into HostPort model
+func (r *HostPortRepository) ScanRow(rows *sql.Rows) (*model.HostPort, error) {
+	var mapping model.HostPort
 	if err := r.db.ScanRows(rows, &mapping); err != nil {
 		return nil, err
 	}
@@ -136,7 +136,7 @@ func (r *IPAddressRepository) ScanRow(rows *sql.Rows) (*model.HostPortMapping, e
 }
 
 // BulkUpsert creates multiple mappings, ignoring duplicates (ON CONFLICT DO NOTHING)
-func (r *IPAddressRepository) BulkUpsert(mappings []model.HostPortMapping) (int64, error) {
+func (r *HostPortRepository) BulkUpsert(mappings []model.HostPort) (int64, error) {
 	if len(mappings) == 0 {
 		return 0, nil
 	}
@@ -161,10 +161,10 @@ func (r *IPAddressRepository) BulkUpsert(mappings []model.HostPortMapping) (int6
 }
 
 // DeleteByIPs deletes all mappings for the given IPs
-func (r *IPAddressRepository) DeleteByIPs(ips []string) (int64, error) {
+func (r *HostPortRepository) DeleteByIPs(ips []string) (int64, error) {
 	if len(ips) == 0 {
 		return 0, nil
 	}
-	result := r.db.Where("ip IN ?", ips).Delete(&model.HostPortMapping{})
+	result := r.db.Where("ip IN ?", ips).Delete(&model.HostPort{})
 	return result.RowsAffected, result.Error
 }
