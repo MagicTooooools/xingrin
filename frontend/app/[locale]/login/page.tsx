@@ -3,30 +3,22 @@
 import React from "react"
 import { useRouter } from "next/navigation"
 import { useTranslations } from "next-intl"
-import Lottie from "lottie-react"
-import securityAnimation from "@/public/animations/Security000-Purple.json"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent } from "@/components/ui/card"
-import {
-  Field,
-  FieldGroup,
-  FieldLabel,
-} from "@/components/ui/field"
+import dynamic from "next/dynamic"
 import { Spinner } from "@/components/ui/spinner"
+import { TerminalLogin } from "@/components/ui/terminal-login"
 import { useLogin, useAuth } from "@/hooks/use-auth"
 import { useRoutePrefetch } from "@/hooks/use-route-prefetch"
+
+// Dynamic import to avoid SSR issues with WebGL
+const PixelBlast = dynamic(() => import("@/components/PixelBlast"), { ssr: false })
 
 export default function LoginPage() {
   // Preload all page components on login page
   useRoutePrefetch()
   const router = useRouter()
   const { data: auth, isLoading: authLoading } = useAuth()
-  const { mutate: login, isPending } = useLogin()
-  const t = useTranslations("auth")
-  
-  const [username, setUsername] = React.useState("")
-  const [password, setPassword] = React.useState("")
+  const { mutateAsync: login, isPending } = useLogin()
+  const t = useTranslations("auth.terminal")
 
   // If already logged in, redirect to dashboard
   React.useEffect(() => {
@@ -35,9 +27,8 @@ export default function LoginPage() {
     }
   }, [auth, router])
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    login({ username, password })
+  const handleLogin = async (username: string, password: string) => {
+    await login({ username, password })
   }
 
   // Show spinner while loading
@@ -56,70 +47,43 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="login-bg flex min-h-svh flex-col p-6 md:p-10">
-      {/* Main content area */}
-      <div className="flex-1 flex items-center justify-center">
-        <div className="w-full max-w-sm md:max-w-4xl">
-          <Card className="overflow-hidden p-0">
-            <CardContent className="grid p-0 md:grid-cols-2">
-              <form className="p-6 md:p-8" onSubmit={handleSubmit}>
-                <FieldGroup>
-                  {/* Fingerprint identifier - for FOFA/Shodan and other search engines to identify */}
-                  <meta name="generator" content="Star Patrol ASM Platform" />
-                  <div className="flex flex-col items-center gap-2 text-center">
-                    <h1 className="text-2xl font-bold">{t("title")}</h1>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {t("subtitle")}
-                    </p> 
-                  </div>
-                  <Field>
-                    <FieldLabel htmlFor="username">{t("username")}</FieldLabel>
-                    <Input
-                      id="username"
-                      type="text"
-                      placeholder={t("usernamePlaceholder")}
-                      value={username}
-                      onChange={(e) => setUsername(e.target.value)}
-                      required
-                      autoFocus
-                    />
-                  </Field>
-                  <Field>
-                    <FieldLabel htmlFor="password">{t("password")}</FieldLabel>
-                    <Input
-                      id="password"
-                      type="password"
-                      placeholder={t("passwordPlaceholder")}
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                    />
-                  </Field>
-                  <Field>
-                    <Button type="submit" className="w-full" disabled={isPending}>
-                      {isPending ? t("loggingIn") : t("login")}
-                    </Button>
-                  </Field>
-                </FieldGroup>
-              </form>
-              <div className="bg-primary/5 relative hidden md:flex md:items-center md:justify-center">
-                <div className="text-center p-4">
-                  <Lottie 
-                    animationData={securityAnimation} 
-                    loop={true}
-                    className="w-96 h-96 mx-auto"
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+    <div className="relative flex min-h-svh flex-col bg-black">
+      <div className="fixed inset-0 z-0">
+        <PixelBlast
+          style={{}}
+          pixelSize={6}
+          patternScale={4.5}
+          color="#06b6d4"
+        />
       </div>
-      
+
+      {/* Fingerprint identifier - for FOFA/Shodan and other search engines to identify */}
+      <meta name="generator" content="Star Patrol ASM Platform" />
+
+      {/* Main content area */}
+      <div className="relative z-10 flex-1 flex items-center justify-center p-6">
+        <TerminalLogin
+          onLogin={handleLogin}
+          isPending={isPending}
+          translations={{
+            title: t("title"),
+            subtitle: t("subtitle"),
+            usernamePrompt: t("usernamePrompt"),
+            passwordPrompt: t("passwordPrompt"),
+            authenticating: t("authenticating"),
+            processing: t("processing"),
+            accessGranted: t("accessGranted"),
+            welcomeMessage: t("welcomeMessage"),
+            authFailed: t("authFailed"),
+            invalidCredentials: t("invalidCredentials"),
+          }}
+        />
+      </div>
+
       {/* Version number - fixed at the bottom of the page */}
-      <div className="flex-shrink-0 text-center py-4">
+      <div className="relative z-10 flex-shrink-0 text-center py-4">
         <p className="text-xs text-muted-foreground">
-          {process.env.NEXT_PUBLIC_VERSION || 'dev'}
+          {process.env.NEXT_PUBLIC_VERSION || "dev"}
         </p>
       </div>
     </div>

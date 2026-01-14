@@ -550,6 +550,18 @@
     "loginFailed": "登录失败",
     "logoutSuccess": "已退出登录",
     "sessionExpired": "会话已过期，请重新登录",
+    "terminal": {
+      "title": "星巡攻击面管理平台",
+      "subtitle": "安全认证终端",
+      "usernamePrompt": "用户名",
+      "passwordPrompt": "密码",
+      "authenticating": "正在认证...",
+      "processing": "处理中...",
+      "accessGranted": "认证成功。",
+      "welcomeMessage": "欢迎回来，指挥官。",
+      "authFailed": "错误：认证失败。",
+      "invalidCredentials": "凭据无效，请重试。"
+    },
     "changePassword": {
       "title": "修改密码",
       "desc": "请输入当前密码和新密码",

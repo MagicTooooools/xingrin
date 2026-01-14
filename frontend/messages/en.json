@@ -536,6 +536,18 @@
     "loginFailed": "Login failed",
     "logoutSuccess": "Logged out successfully",
     "sessionExpired": "Session expired, please login again",
+    "terminal": {
+      "title": "Star Patrol ASM Platform",
+      "subtitle": "Secure Authentication Terminal",
+      "usernamePrompt": "Username",
+      "passwordPrompt": "Password",
+      "authenticating": "Authenticating...",
+      "processing": "Processing...",
+      "accessGranted": "Access granted.",
+      "welcomeMessage": "Welcome back, commander.",
+      "authFailed": "ERROR: Authentication failed.",
+      "invalidCredentials": "Invalid credentials. Please try again."
+    },
     "changePassword": {
       "title": "Change Password",
       "desc": "Enter your current password and new password",

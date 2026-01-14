@@ -272,6 +272,20 @@
   z-index: 1;
 }
 
+/* 终端光标闪烁动画 */
+@keyframes blink {
+  0%, 50% {
+    opacity: 1;
+  }
+  51%, 100% {
+    opacity: 0;
+  }
+}
+
+.animate-blink {
+  animation: blink 1s step-end infinite;
+}
+
 /* 通知铃铛摇晃动画 */
 @keyframes wiggle {
   0%, 100% {
