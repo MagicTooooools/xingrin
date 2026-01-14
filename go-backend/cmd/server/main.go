@@ -141,6 +141,10 @@ func main() {
 	vulnerabilityRepo := repository.NewVulnerabilityRepository(db)
 	scanRepo := repository.NewScanRepository(db)
 	scanLogRepo := repository.NewScanLogRepository(db)
+	websiteSnapshotRepo := repository.NewWebsiteSnapshotRepository(db)
+	subdomainSnapshotRepo := repository.NewSubdomainSnapshotRepository(db)
+	endpointSnapshotRepo := repository.NewEndpointSnapshotRepository(db)
+	directorySnapshotRepo := repository.NewDirectorySnapshotRepository(db)
 
 	// Create services
 	userSvc := service.NewUserService(userRepo)
@@ -157,6 +161,10 @@ func main() {
 	vulnerabilitySvc := service.NewVulnerabilityService(vulnerabilityRepo, targetRepo)
 	scanSvc := service.NewScanService(scanRepo, scanLogRepo, targetRepo, orgRepo)
 	scanLogSvc := service.NewScanLogService(scanLogRepo, scanRepo)
+	websiteSnapshotSvc := service.NewWebsiteSnapshotService(websiteSnapshotRepo, scanRepo, websiteSvc)
+	subdomainSnapshotSvc := service.NewSubdomainSnapshotService(subdomainSnapshotRepo, scanRepo, subdomainSvc)
+	endpointSnapshotSvc := service.NewEndpointSnapshotService(endpointSnapshotRepo, scanRepo, endpointSvc)
+	directorySnapshotSvc := service.NewDirectorySnapshotService(directorySnapshotRepo, scanRepo, directorySvc)
 
 	// Create handlers
 	healthHandler := handler.NewHealthHandler(db, redisClient)
@@ -175,6 +183,10 @@ func main() {
 	vulnerabilityHandler := handler.NewVulnerabilityHandler(vulnerabilitySvc)
 	scanHandler := handler.NewScanHandler(scanSvc)
 	scanLogHandler := handler.NewScanLogHandler(scanLogSvc)
+	websiteSnapshotHandler := handler.NewWebsiteSnapshotHandler(websiteSnapshotSvc)
+	subdomainSnapshotHandler := handler.NewSubdomainSnapshotHandler(subdomainSnapshotSvc)
+	endpointSnapshotHandler := handler.NewEndpointSnapshotHandler(endpointSnapshotSvc)
+	directorySnapshotHandler := handler.NewDirectorySnapshotHandler(directorySnapshotSvc)
 
 	// Register health routes
 	router.GET("/health", healthHandler.Check)
@@ -230,7 +242,6 @@ func main() {
 			protected.POST("/targets/:id/websites/bulk-upsert", websiteHandler.BulkUpsert)
 
 			// Websites (standalone)
-			protected.GET("/websites/:id", websiteHandler.GetByID)
 			protected.DELETE("/websites/:id", websiteHandler.Delete)
 			protected.POST("/websites/bulk-delete", websiteHandler.BulkDelete)
 
@@ -324,6 +335,26 @@ func main() {
 			// Scan Logs (nested under scans)
 			protected.GET("/scans/:id/logs", scanLogHandler.List)
 			protected.POST("/scans/:id/logs", scanLogHandler.BulkCreate)
+
+			// Website Snapshots (nested under scans)
+			protected.POST("/scans/:id/websites/bulk-upsert", websiteSnapshotHandler.BulkUpsert)
+			protected.GET("/scans/:id/websites", websiteSnapshotHandler.List)
+			protected.GET("/scans/:id/websites/export", websiteSnapshotHandler.Export)
+
+			// Subdomain Snapshots (nested under scans)
+			protected.POST("/scans/:id/subdomains/bulk-upsert", subdomainSnapshotHandler.BulkUpsert)
+			protected.GET("/scans/:id/subdomains", subdomainSnapshotHandler.List)
+			protected.GET("/scans/:id/subdomains/export", subdomainSnapshotHandler.Export)
+
+			// Endpoint Snapshots (nested under scans)
+			protected.POST("/scans/:id/endpoints/bulk-upsert", endpointSnapshotHandler.BulkUpsert)
+			protected.GET("/scans/:id/endpoints", endpointSnapshotHandler.List)
+			protected.GET("/scans/:id/endpoints/export", endpointSnapshotHandler.Export)
+
+			// Directory Snapshots (nested under scans)
+			protected.POST("/scans/:id/directories/bulk-upsert", directorySnapshotHandler.BulkUpsert)
+			protected.GET("/scans/:id/directories", directorySnapshotHandler.List)
+			protected.GET("/scans/:id/directories/export", directorySnapshotHandler.Export)
 		}
 	}
 

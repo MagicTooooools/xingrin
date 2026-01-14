@@ -556,12 +556,23 @@ const PixelBlast = ({
       renderer.domElement.addEventListener('pointermove', onPointerMove, {
         passive: true
       });
+      
+      // Store event handler for cleanup
+      const domElement = renderer.domElement;
       let raf = 0;
-      const animate = () => {
+      let lastFrameTime = 0;
+      const targetDelta = 1000 / 30; // throttle to ~30fps
+      const animate = (now?: number) => {
+        const timeNow = now ?? performance.now();
         if (autoPauseOffscreen && !visibilityRef.current.visible) {
           raf = requestAnimationFrame(animate);
           return;
         }
+        if (timeNow - lastFrameTime < targetDelta) {
+          raf = requestAnimationFrame(animate);
+          return;
+        }
+        lastFrameTime = timeNow;
         uniforms.uTime.value = timeOffset + clock.getElapsedTime() * speedRef.current;
         if (liquidEffect) liquidEffect.uniforms.get('uTime').value = uniforms.uTime.value;
         if (composer) {
@@ -593,7 +604,9 @@ const PixelBlast = ({
         timeOffset,
         composer,
         touch,
-        liquidEffect
+        liquidEffect,
+        onPointerMove,
+        domElement
       };
     } else {
       const t = threeRef.current;
@@ -620,16 +633,31 @@ const PixelBlast = ({
     }
     prevConfigRef.current = cfg;
     return () => {
-      if (threeRef.current && mustReinit) return;
       if (!threeRef.current) return;
       const t = threeRef.current;
+      
+      // Remove event listeners
+      if (t.domElement && t.onPointerMove) {
+        t.domElement.removeEventListener('pointermove', t.onPointerMove);
+      }
+      
       t.resizeObserver?.disconnect();
       cancelAnimationFrame(t.raf);
+      
+      // Dispose Three.js resources
       t.quad?.geometry.dispose();
       t.material.dispose();
       t.composer?.dispose();
+      
+      // Dispose touch texture
+      if (t.touch?.texture) {
+        t.touch.texture.dispose();
+      }
+      
       t.renderer.dispose();
-      if (t.renderer.domElement.parentElement === container) container.removeChild(t.renderer.domElement);
+      if (t.renderer.domElement.parentElement === container) {
+        container.removeChild(t.renderer.domElement);
+      }
       threeRef.current = null;
     };
   }, [

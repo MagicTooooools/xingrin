@@ -31,18 +31,6 @@ func (s *WebsiteService) ListByTarget(targetID int, query *dto.WebsiteListQuery)
 	return s.repo.FindByTargetID(targetID, query.GetPage(), query.GetPageSize(), query.Filter)
 }
 
-// GetByID returns a website by ID
-func (s *WebsiteService) GetByID(id int) (*model.Website, error) {
-	website, err := s.repo.FindByID(id)
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, ErrWebsiteNotFound
-		}
-		return nil, err
-	}
-	return website, nil
-}
-
 // BulkCreate creates multiple websites for a target
 func (s *WebsiteService) BulkCreate(targetID int, urls []string) (int, error) {
 	target, err := s.targetRepo.FindByID(targetID)

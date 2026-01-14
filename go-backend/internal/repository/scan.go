@@ -246,3 +246,18 @@ func (r *ScanRepository) HasActiveScan(targetID int) (bool, error) {
 		Count(&count).Error
 	return count > 0, err
 }
+
+// GetTargetByScanID returns the target associated with a scan
+func (r *ScanRepository) GetTargetByScanID(scanID int) (*model.Target, error) {
+	var scan model.Scan
+	err := r.db.Where("id = ? AND deleted_at IS NULL", scanID).
+		Preload("Target").
+		First(&scan).Error
+	if err != nil {
+		return nil, err
+	}
+	if scan.Target == nil {
+		return nil, gorm.ErrRecordNotFound
+	}
+	return scan.Target, nil
+}

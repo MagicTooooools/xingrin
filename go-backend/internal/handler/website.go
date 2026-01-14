@@ -57,28 +57,6 @@ func (h *WebsiteHandler) List(c *gin.Context) {
 	dto.Paginated(c, resp, total, query.GetPage(), query.GetPageSize())
 }
 
-// GetByID returns a website by ID
-// GET /api/websites/:id
-func (h *WebsiteHandler) GetByID(c *gin.Context) {
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		dto.BadRequest(c, "Invalid website ID")
-		return
-	}
-
-	website, err := h.svc.GetByID(id)
-	if err != nil {
-		if errors.Is(err, service.ErrWebsiteNotFound) {
-			dto.NotFound(c, "Website not found")
-			return
-		}
-		dto.InternalError(c, "Failed to get website")
-		return
-	}
-
-	dto.Success(c, toWebsiteResponse(website))
-}
-
 // BulkCreate creates multiple websites for a target
 // POST /api/targets/:id/websites/bulk-create
 func (h *WebsiteHandler) BulkCreate(c *gin.Context) {
