@@ -20,6 +20,11 @@ interface TerminalLoginTranslations {
   welcomeMessage: string
   authFailed: string
   invalidCredentials: string
+  shortcuts: string
+  submit: string
+  cancel: string
+  clear: string
+  startEnd: string
 }
 
 interface TerminalLine {
@@ -205,11 +210,11 @@ export function TerminalLogin({
 
     return (
       <>
-        <span className="text-foreground">{before}</span>
+        <span className="text-zinc-100">{before}</span>
         <span className="animate-blink inline-block min-w-[0.6em] bg-green-500 text-black">
           {cursorChar || "\u00A0"}
         </span>
-        <span className="text-foreground">{after.slice(1)}</span>
+        <span className="text-zinc-100">{after.slice(1)}</span>
       </>
     )
   }
@@ -219,18 +224,18 @@ export function TerminalLogin({
       ref={containerRef}
       onClick={handleContainerClick}
       className={cn(
-        "border-border bg-background/80 backdrop-blur-sm z-0 w-full max-w-2xl rounded-xl border cursor-text",
+        "border-zinc-700 bg-zinc-900/80 backdrop-blur-sm z-0 w-full max-w-2xl rounded-xl border cursor-text",
         className
       )}
     >
       {/* Terminal header */}
-      <div className="border-border flex items-center gap-x-2 border-b px-4 py-3">
+      <div className="border-zinc-700 flex items-center gap-x-2 border-b px-4 py-3">
         <div className="flex flex-row gap-x-2">
           <div className="h-3 w-3 rounded-full bg-red-500"></div>
           <div className="h-3 w-3 rounded-full bg-yellow-500"></div>
           <div className="h-3 w-3 rounded-full bg-green-500"></div>
         </div>
-        <span className="ml-2 text-xs text-muted-foreground font-mono">{t.title}</span>
+        <span className="ml-2 text-xs text-zinc-400 font-mono">{t.title}</span>
       </div>
 
       {/* Terminal content */}
@@ -247,7 +252,7 @@ export function TerminalLogin({
             triggerOnHover={true}
             triggerOnce={false}
           />
-          <div className="text-muted-foreground text-sm mt-3">
+          <div className="text-zinc-400 text-sm mt-3">
             ─────────── {t.subtitle} ───────────
           </div>
         </div>
@@ -259,8 +264,8 @@ export function TerminalLogin({
             className={cn(
               "whitespace-pre-wrap",
               line.type === "prompt" && "text-green-500",
-              line.type === "input" && "text-foreground",
-              line.type === "info" && "text-muted-foreground",
+              line.type === "input" && "text-zinc-100",
+              line.type === "info" && "text-zinc-500",
               line.type === "success" && "text-green-500",
               line.type === "error" && "text-red-500",
               line.type === "warning" && "text-yellow-500"
@@ -300,11 +305,12 @@ export function TerminalLogin({
 
         {/* Keyboard shortcuts hint */}
         {(step === "username" || step === "password") && (
-          <div className="mt-6 text-xs text-muted-foreground/50">
-            <span className="text-muted-foreground/70">Shortcuts:</span>{" "}
-            <span className="text-cyan-500/50">Ctrl+C</span> cancel{" "}
-            <span className="text-cyan-500/50">Ctrl+U</span> clear{" "}
-            <span className="text-cyan-500/50">Ctrl+A/E</span> start/end
+          <div className="mt-6 text-xs text-zinc-600">
+            <span className="text-zinc-500">{t.shortcuts}:</span>{" "}
+            <span className="text-cyan-600">Enter</span> {t.submit}{" "}
+            <span className="text-cyan-600">Ctrl+C</span> {t.cancel}{" "}
+            <span className="text-cyan-600">Ctrl+U</span> {t.clear}{" "}
+            <span className="text-cyan-600">Ctrl+A/E</span> {t.startEnd}
           </div>
         )}
       </div>

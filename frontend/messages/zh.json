@@ -560,7 +560,12 @@
       "accessGranted": "认证成功。",
       "welcomeMessage": "欢迎回来，指挥官。",
       "authFailed": "错误：认证失败。",
-      "invalidCredentials": "凭据无效，请重试。"
+      "invalidCredentials": "凭据无效，请重试。",
+      "shortcuts": "快捷键",
+      "submit": "提交",
+      "cancel": "取消",
+      "clear": "清空",
+      "startEnd": "行首/行尾"
     },
     "changePassword": {
       "title": "修改密码",

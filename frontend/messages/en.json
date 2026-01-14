@@ -546,7 +546,12 @@
       "accessGranted": "Access granted.",
       "welcomeMessage": "Welcome back, commander.",
       "authFailed": "ERROR: Authentication failed.",
-      "invalidCredentials": "Invalid credentials. Please try again."
+      "invalidCredentials": "Invalid credentials. Please try again.",
+      "shortcuts": "Shortcuts",
+      "submit": "submit",
+      "cancel": "cancel",
+      "clear": "clear",
+      "startEnd": "start/end"
     },
     "changePassword": {
       "title": "Change Password",

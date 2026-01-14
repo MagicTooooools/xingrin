@@ -50,10 +50,12 @@ export default function LoginPage() {
     <div className="relative flex min-h-svh flex-col bg-black">
       <div className="fixed inset-0 z-0">
         <PixelBlast
+          className=""
           style={{}}
-          pixelSize={6}
+          pixelSize={6.5}
           patternScale={4.5}
           color="#06b6d4"
+          speed={0.35}
         />
       </div>
 
@@ -76,6 +78,11 @@ export default function LoginPage() {
             welcomeMessage: t("welcomeMessage"),
             authFailed: t("authFailed"),
             invalidCredentials: t("invalidCredentials"),
+            shortcuts: t("shortcuts"),
+            submit: t("submit"),
+            cancel: t("cancel"),
+            clear: t("clear"),
+            startEnd: t("startEnd"),
           }}
         />
       </div>
