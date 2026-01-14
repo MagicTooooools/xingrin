@@ -135,3 +135,4 @@ HGETALL
 KEYS
 vuln_scan/input_endpoints.txt
 open-in-v0
+.shared

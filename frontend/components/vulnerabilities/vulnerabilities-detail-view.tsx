@@ -26,6 +26,8 @@ import {
   useMarkAsUnreviewed,
   useBulkMarkAsReviewed,
   useBulkMarkAsUnreviewed,
+  useVulnerabilityStats,
+  useTargetVulnerabilityStats,
 } from "@/hooks/use-vulnerabilities"
 
 interface VulnerabilitiesDetailViewProps {
@@ -156,10 +158,14 @@ export function VulnerabilitiesDetailView({
     totalPages: 1,
   }
 
-  // Calculate pending count from current data
-  const pendingCount = useMemo(() => {
-    return vulnerabilities.filter(v => !v.isReviewed).length
-  }, [vulnerabilities])
+  // Get pending count from stats API (only for global and target pages, not scan)
+  const globalStatsQuery = useVulnerabilityStats({ enabled: !scanId && !targetId })
+  const targetStatsQuery = useTargetVulnerabilityStats(targetId ?? 0, { enabled: !!targetId && !scanId })
+  
+  // Use stats API pendingCount, fallback to 0 for scan page (no review feature)
+  const pendingCount = scanId 
+    ? 0 
+    : (targetId ? targetStatsQuery.data?.pendingCount : globalStatsQuery.data?.pendingCount) ?? 0
 
 
   const formatDate = (dateString: string): string => {

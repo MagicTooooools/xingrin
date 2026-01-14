@@ -280,10 +280,12 @@ func main() {
 
 			// Vulnerabilities (global)
 			protected.GET("/assets/vulnerabilities", vulnerabilityHandler.ListAll)
+			protected.GET("/assets/vulnerabilities/stats", vulnerabilityHandler.GetStats)
 			protected.GET("/assets/vulnerabilities/:id", vulnerabilityHandler.GetByID)
 
 			// Vulnerabilities (nested under targets)
 			protected.GET("/targets/:id/vulnerabilities", vulnerabilityHandler.ListByTarget)
+			protected.GET("/targets/:id/vulnerabilities/stats", vulnerabilityHandler.GetStatsByTarget)
 			protected.POST("/targets/:id/vulnerabilities/bulk-create", vulnerabilityHandler.BulkCreate)
 
 			// Vulnerabilities (standalone)

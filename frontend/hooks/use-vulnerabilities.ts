@@ -20,6 +20,8 @@ export const vulnerabilityKeys = {
     [...vulnerabilityKeys.all, "scan", scanId, params, filter] as const,
   byTarget: (targetId: number, params: GetVulnerabilitiesParams, filter?: string) =>
     [...vulnerabilityKeys.all, "target", targetId, params, filter] as const,
+  stats: () => [...vulnerabilityKeys.all, "stats"] as const,
+  statsByTarget: (targetId: number) => [...vulnerabilityKeys.all, "stats", "target", targetId] as const,
 }
 
 /** 获取所有漏洞 */
@@ -306,5 +308,23 @@ export function useBulkMarkAsUnreviewed() {
     onError: () => {
       toast.error(t("bulkUnreviewError"))
     },
+  })
+}
+
+/** Get global vulnerability stats */
+export function useVulnerabilityStats(options?: { enabled?: boolean }) {
+  return useQuery({
+    queryKey: vulnerabilityKeys.stats(),
+    queryFn: () => VulnerabilityService.getStats(),
+    enabled: options?.enabled ?? true,
+  })
+}
+
+/** Get vulnerability stats by target ID */
+export function useTargetVulnerabilityStats(targetId: number, options?: { enabled?: boolean }) {
+  return useQuery({
+    queryKey: vulnerabilityKeys.statsByTarget(targetId),
+    queryFn: () => VulnerabilityService.getStatsByTargetId(targetId),
+    enabled: options?.enabled !== undefined ? options.enabled : !!targetId,
   })
 }
