@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
 import * as THREE from 'three';
 import { EffectComposer, EffectPass, RenderPass, Effect } from 'postprocessing';
 import './PixelBlast.css';
@@ -323,15 +323,71 @@ const PixelBlast = ({
   speed = 0.5,
   transparent = true,
   edgeFade = 0.5,
-  noiseAmount = 0
+  noiseAmount = 0,
+  respectReducedMotion = true,
+  maxPixelRatio = 2
 }) => {
   const containerRef = useRef(null);
   const visibilityRef = useRef({ visible: true });
   const speedRef = useRef(speed);
-
   const threeRef = useRef(null);
   const prevConfigRef = useRef(null);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+
+  // Limit pixel ratio for performance (lower on mobile)
+  const effectivePixelRatio = useMemo(() => {
+    if (typeof window === 'undefined') return 1;
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const dpr = window.devicePixelRatio || 1;
+    if (isMobile) return Math.min(dpr, 1.5, maxPixelRatio);
+    return Math.min(dpr, maxPixelRatio);
+  }, [maxPixelRatio]);
+
+  // Check for prefers-reduced-motion
   useEffect(() => {
+    if (!respectReducedMotion) return;
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    setPrefersReducedMotion(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, [respectReducedMotion]);
+
+  // Pause animation when page is not visible or element is offscreen
+  useEffect(() => {
+    if (!autoPauseOffscreen || prefersReducedMotion) return;
+
+    const container = containerRef.current;
+    if (!container) return;
+
+    // IntersectionObserver for offscreen detection
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        visibilityRef.current.visible = entry.isIntersecting;
+      },
+      { threshold: 0 }
+    );
+    io.observe(container);
+
+    // Page Visibility API
+    const handleVisibility = () => {
+      if (document.hidden) {
+        visibilityRef.current.visible = false;
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+
+    return () => {
+      io.disconnect();
+      document.removeEventListener('visibilitychange', handleVisibility);
+    };
+  }, [autoPauseOffscreen, prefersReducedMotion]);
+
+  // Main WebGL setup effect
+  useEffect(() => {
+    // Skip WebGL setup if user prefers reduced motion
+    if (prefersReducedMotion) return;
+
     const container = containerRef.current;
     if (!container) return;
     speedRef.current = speed;
@@ -367,7 +423,7 @@ const PixelBlast = ({
       });
       renderer.domElement.style.width = '100%';
       renderer.domElement.style.height = '100%';
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+      renderer.setPixelRatio(effectivePixelRatio);
       container.appendChild(renderer.domElement);
       if (transparent) renderer.setClearAlpha(0);
       else renderer.setClearColor(0x000000, 1);
@@ -591,8 +647,22 @@ const PixelBlast = ({
     autoPauseOffscreen,
     variant,
     color,
-    speed
+    speed,
+    prefersReducedMotion,
+    effectivePixelRatio
   ]);
+
+  // Render empty container if user prefers reduced motion
+  if (prefersReducedMotion) {
+    return (
+      <div
+        ref={containerRef}
+        className={`pixel-blast-container ${className ?? ''}`}
+        style={{ ...style, backgroundColor: 'transparent' }}
+        aria-label="PixelBlast background (disabled for reduced motion)"
+      />
+    );
+  }
 
   return (
     <div

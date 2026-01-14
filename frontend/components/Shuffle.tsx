@@ -31,6 +31,7 @@ interface ShuffleProps {
   triggerOnce?: boolean;
   respectReducedMotion?: boolean;
   triggerOnHover?: boolean;
+  autoPlay?: boolean;
 }
 
 const Shuffle: React.FC<ShuffleProps> = ({
@@ -56,7 +57,8 @@ const Shuffle: React.FC<ShuffleProps> = ({
   colorTo,
   triggerOnce = true,
   respectReducedMotion = true,
-  triggerOnHover = true
+  triggerOnHover = true,
+  autoPlay = true
 }) => {
   const ref = useRef(null);
   const [fontsLoaded, setFontsLoaded] = useState(false);
@@ -362,7 +364,9 @@ const Shuffle: React.FC<ShuffleProps> = ({
       const create = () => {
         build();
         if (scrambleCharset) randomizeScrambles();
-        play();
+        if (autoPlay) {
+          play();
+        }
         armHover();
         setReady(true);
       };
@@ -401,7 +405,8 @@ const Shuffle: React.FC<ShuffleProps> = ({
         triggerOnce,
         respectReducedMotion,
         triggerOnHover,
-        onShuffleComplete
+        onShuffleComplete,
+        autoPlay
       ],
       scope: ref
     }

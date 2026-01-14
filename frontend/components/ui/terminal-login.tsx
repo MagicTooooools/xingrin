@@ -251,68 +251,140 @@ export function TerminalLogin({
             shuffleTimes={2}
             triggerOnHover={true}
             triggerOnce={false}
+            autoPlay={false}
           />
           <div className="text-zinc-400 text-sm mt-3">
             ─────────── {t.subtitle} ───────────
           </div>
         </div>
 
-        {/* Previous lines */}
-        {lines.map((line, index) => (
-          <span
-            key={index}
-            className={cn(
-              "whitespace-pre-wrap",
-              line.type === "prompt" && "text-green-500",
-              line.type === "input" && "text-zinc-100",
-              line.type === "info" && "text-zinc-500",
-              line.type === "success" && "text-green-500",
-              line.type === "error" && "text-red-500",
-              line.type === "warning" && "text-yellow-500"
-            )}
-          >
-            {line.text}
-            {(line.type === "prompt" || line.text === "") ? "" : "\n"}
-          </span>
-        ))}
+        {/* ========== Mobile Form ========== */}
+        <div className="sm:hidden">
+          {(step === "username" || step === "password" || step === "error") && (
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault()
+                if (!username.trim() || !password.trim()) return
+                setStep("authenticating")
+                try {
+                  await onLogin(username, password)
+                  setStep("success")
+                } catch {
+                  setStep("error")
+                  setTimeout(() => {
+                    setUsername("")
+                    setPassword("")
+                    setStep("username")
+                  }, 2000)
+                }
+              }}
+              className="space-y-4"
+            >
+              <div>
+                <label className="text-green-500 text-xs mb-1 block">{t.usernamePrompt}</label>
+                <input
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  disabled={isInputDisabled}
+                  className="w-full bg-zinc-800 border border-zinc-600 rounded px-3 py-2 text-zinc-100 outline-none focus:border-green-500 font-mono text-sm"
+                  autoComplete="username"
+                />
+              </div>
+              <div>
+                <label className="text-green-500 text-xs mb-1 block">{t.passwordPrompt}</label>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  disabled={isInputDisabled}
+                  className="w-full bg-zinc-800 border border-zinc-600 rounded px-3 py-2 text-zinc-100 outline-none focus:border-green-500 font-mono text-sm"
+                  autoComplete="current-password"
+                />
+              </div>
+              {step === "error" && (
+                <p className="text-red-500 text-sm">{t.invalidCredentials}</p>
+              )}
+              <button
+                type="submit"
+                disabled={isInputDisabled}
+                className="w-full py-2 px-4 bg-green-600 hover:bg-green-500 disabled:opacity-50 text-black font-mono text-sm rounded transition-colors"
+              >
+                {t.submit}
+              </button>
+            </form>
+          )}
+          {step === "authenticating" && (
+            <div className="text-yellow-500 text-center py-4">
+              <span className="animate-pulse">{t.processing}</span>
+            </div>
+          )}
+          {step === "success" && (
+            <div className="text-green-500 text-center py-4">
+              {t.accessGranted}
+            </div>
+          )}
+        </div>
 
-        {/* Current input line */}
-        {(step === "username" || step === "password") && (
-          <div className="flex items-center">
-            <span className="text-green-500">{getCurrentPrompt()}</span>
-            {renderInputWithCursor()}
-            <input
-              ref={inputRef}
-              type={step === "password" ? "password" : "text"}
-              value={getCurrentValue()}
-              onChange={handleInputChange}
-              onKeyDown={handleKeyDown}
-              onSelect={handleSelect}
-              disabled={isInputDisabled}
-              className="absolute opacity-0 pointer-events-none"
-              autoComplete={step === "username" ? "username" : "current-password"}
-              autoFocus
-            />
-          </div>
-        )}
+        {/* ========== Desktop Terminal ========== */}
+        <div className="hidden sm:block">
+          {/* Previous lines */}
+          {lines.map((line, index) => (
+            <span
+              key={index}
+              className={cn(
+                "whitespace-pre-wrap",
+                line.type === "prompt" && "text-green-500",
+                line.type === "input" && "text-zinc-100",
+                line.type === "info" && "text-zinc-500",
+                line.type === "success" && "text-green-500",
+                line.type === "error" && "text-red-500",
+                line.type === "warning" && "text-yellow-500"
+              )}
+            >
+              {line.text}
+              {(line.type === "prompt" || line.text === "") ? "" : "\n"}
+            </span>
+          ))}
 
-        {/* Loading indicator */}
-        {step === "authenticating" && (
-          <div className="flex items-center text-yellow-500">
-            <span className="animate-pulse">{t.processing}</span>
-          </div>
-        )}
+          {/* Current input line */}
+          {(step === "username" || step === "password") && (
+            <div className="flex items-center">
+              <span className="text-green-500">{getCurrentPrompt()}</span>
+              {renderInputWithCursor()}
+              <input
+                ref={inputRef}
+                type={step === "password" ? "password" : "text"}
+                value={getCurrentValue()}
+                onChange={handleInputChange}
+                onKeyDown={handleKeyDown}
+                onSelect={handleSelect}
+                disabled={isInputDisabled}
+                className="absolute opacity-0 pointer-events-none"
+                autoComplete={step === "username" ? "username" : "current-password"}
+                autoFocus
+              />
+            </div>
+          )}
 
-        {/* Keyboard shortcuts hint */}
-        {(step === "username" || step === "password") && (
-          <div className="mt-6 text-xs text-zinc-600">
-            <span className="text-zinc-500">{t.shortcuts}:</span>{" "}
-            <span className="text-cyan-600">Enter</span> {t.submit}{" "}
-            <span className="text-cyan-600">Ctrl+C</span> {t.cancel}{" "}
-            <span className="text-cyan-600">Ctrl+U</span> {t.clear}{" "}
-            <span className="text-cyan-600">Ctrl+A/E</span> {t.startEnd}
-          </div>
-        )}
+          {/* Loading indicator */}
+          {step === "authenticating" && (
+            <div className="flex items-center text-yellow-500">
+              <span className="animate-pulse">{t.processing}</span>
+            </div>
+          )}
+
+          {/* Keyboard shortcuts hint */}
+          {(step === "username" || step === "password") && (
+            <div className="mt-6 text-xs text-zinc-600">
+              <span className="text-zinc-500">{t.shortcuts}:</span>{" "}
+              <span className="text-cyan-600">Enter</span> {t.submit}{" "}
+              <span className="text-cyan-600">Ctrl+C</span> {t.cancel}{" "}
+              <span className="text-cyan-600">Ctrl+U</span> {t.clear}{" "}
+              <span className="text-cyan-600">Ctrl+A/E</span> {t.startEnd}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )

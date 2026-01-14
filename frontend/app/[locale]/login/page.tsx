@@ -20,6 +20,25 @@ export default function LoginPage() {
   const { mutateAsync: login, isPending } = useLogin()
   const t = useTranslations("auth.terminal")
 
+  // Memoize translations object to avoid recreating on every render
+  const translations = React.useMemo(() => ({
+    title: t("title"),
+    subtitle: t("subtitle"),
+    usernamePrompt: t("usernamePrompt"),
+    passwordPrompt: t("passwordPrompt"),
+    authenticating: t("authenticating"),
+    processing: t("processing"),
+    accessGranted: t("accessGranted"),
+    welcomeMessage: t("welcomeMessage"),
+    authFailed: t("authFailed"),
+    invalidCredentials: t("invalidCredentials"),
+    shortcuts: t("shortcuts"),
+    submit: t("submit"),
+    cancel: t("cancel"),
+    clear: t("clear"),
+    startEnd: t("startEnd"),
+  }), [t])
+
   // If already logged in, redirect to dashboard
   React.useEffect(() => {
     if (auth?.authenticated) {
@@ -67,23 +86,7 @@ export default function LoginPage() {
         <TerminalLogin
           onLogin={handleLogin}
           isPending={isPending}
-          translations={{
-            title: t("title"),
-            subtitle: t("subtitle"),
-            usernamePrompt: t("usernamePrompt"),
-            passwordPrompt: t("passwordPrompt"),
-            authenticating: t("authenticating"),
-            processing: t("processing"),
-            accessGranted: t("accessGranted"),
-            welcomeMessage: t("welcomeMessage"),
-            authFailed: t("authFailed"),
-            invalidCredentials: t("invalidCredentials"),
-            shortcuts: t("shortcuts"),
-            submit: t("submit"),
-            cancel: t("cancel"),
-            clear: t("clear"),
-            startEnd: t("startEnd"),
-          }}
+          translations={translations}
         />
       </div>
 
