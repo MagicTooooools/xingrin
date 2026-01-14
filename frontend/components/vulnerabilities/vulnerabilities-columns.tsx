@@ -1,7 +1,7 @@
 "use client"
 
 import { ColumnDef } from "@tanstack/react-table"
-import { Eye } from "lucide-react"
+import { Eye, Circle, CheckCircle2 } from "lucide-react"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -92,25 +92,30 @@ export function createVulnerabilityColumns({
     {
       id: "reviewStatus",
       meta: { title: t.columns.status || "状态" },
-      size: 90,
-      minSize: 80,
-      maxSize: 100,
+      size: 100,
+      minSize: 90,
+      maxSize: 110,
       enableResizing: false,
       header: t.columns.status || "状态",
       cell: ({ row }) => {
         const isReviewed = row.original.isReviewed
-        
+        const isPending = !isReviewed
+
         return (
           <Badge
             variant="outline"
-            className={`cursor-pointer transition-all hover:opacity-80 ${
-              isReviewed
-                ? "bg-muted/50 text-muted-foreground border-muted-foreground/20"
-                : "bg-blue-500/10 text-blue-600 border-blue-500/20 dark:text-blue-400"
-            } ${!onToggleReview ? "cursor-default" : ""}`}
+            className={`transition-all gap-1.5 ${onToggleReview ? "cursor-pointer hover:ring-2 hover:ring-offset-1" : "cursor-default"} ${isPending
+              ? "bg-blue-500/10 text-blue-600 border-blue-500/30 hover:ring-blue-500/30 dark:text-blue-400 dark:border-blue-400/30"
+              : "bg-muted/50 text-muted-foreground border-muted-foreground/20 hover:ring-muted-foreground/30"
+            }`}
             onClick={() => onToggleReview?.(row.original)}
           >
-            {isReviewed ? t.tooltips.reviewed : t.tooltips.pending}
+            {isPending ? (
+              <Circle className="h-3 w-3" />
+            ) : (
+              <CheckCircle2 className="h-3 w-3" />
+            )}
+            {isPending ? t.tooltips.pending : t.tooltips.reviewed}
           </Badge>
         )
       },

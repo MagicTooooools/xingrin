@@ -1989,8 +1989,8 @@
     "bulkUnreviewSuccess": "已将 {count} 个漏洞标记为待审查",
     "bulkReviewError": "批量标记已审查失败",
     "bulkUnreviewError": "批量标记待审查失败",
-    "markAsReviewed": "标记已审",
-    "markAsPending": "标记待审",
+    "markAsReviewed": "标记为已审查",
+    "markAsPending": "标记为待审查",
     "selected": "已选 {count} 项",
     "tooltips": {
       "reviewed": "已审查",
