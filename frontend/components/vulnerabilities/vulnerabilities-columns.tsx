@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { ExpandableUrlCell } from "@/components/ui/data-table/expandable-cell"
 import { DataTableColumnHeader } from "@/components/ui/data-table/column-header"
+import { SEVERITY_STYLES } from "@/lib/severity-config"
 
 import type { Vulnerability, VulnerabilitySeverity } from "@/types/vulnerability.types"
 
@@ -54,12 +55,13 @@ export function createVulnerabilityColumns({
   t,
 }: ColumnActions): ColumnDef<Vulnerability>[] {
   // Unified vulnerability severity color configuration
+  // Color progression: cool (info) → warm (low/medium) → hot (high/critical)
   const severityConfig: Record<VulnerabilitySeverity, { className: string }> = {
-    critical: { className: "bg-[#da3633]/10 text-[#da3633] border border-[#da3633]/20 dark:text-[#f85149]" },
-    high: { className: "bg-[#d29922]/10 text-[#d29922] border border-[#d29922]/20" },
-    medium: { className: "bg-[#d4a72c]/10 text-[#d4a72c] border border-[#d4a72c]/20" },
-    low: { className: "bg-[#238636]/10 text-[#238636] border border-[#238636]/20 dark:text-[#3fb950]" },
-    info: { className: "bg-[#848d97]/10 text-[#848d97] border border-[#848d97]/20" },
+    critical: { className: SEVERITY_STYLES.critical.className },
+    high: { className: SEVERITY_STYLES.high.className },
+    medium: { className: SEVERITY_STYLES.medium.className },
+    low: { className: SEVERITY_STYLES.low.className },
+    info: { className: SEVERITY_STYLES.info.className },
   }
 
   return [

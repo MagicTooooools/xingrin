@@ -9,6 +9,7 @@ import { ExpandableCell, ExpandableMonoCell } from "@/components/ui/data-table/e
 import { ChevronDown, ChevronUp } from "lucide-react"
 import { useTranslations } from "next-intl"
 import type { FingerPrintHubFingerprint } from "@/types/fingerprint.types"
+import { getSeverityStyle } from "@/lib/severity-config"
 
 interface ColumnOptions {
   formatDate: (date: string) => string
@@ -18,15 +19,7 @@ interface ColumnOptions {
  * Severity badge with color coding (matching Vulnerabilities style)
  */
 function SeverityBadge({ severity }: { severity: string }) {
-  const severityConfig: Record<string, { className: string }> = {
-    critical: { className: "bg-[#da3633]/10 text-[#da3633] border border-[#da3633]/20 dark:text-[#f85149]" },
-    high: { className: "bg-[#d29922]/10 text-[#d29922] border border-[#d29922]/20" },
-    medium: { className: "bg-[#d4a72c]/10 text-[#d4a72c] border border-[#d4a72c]/20" },
-    low: { className: "bg-[#238636]/10 text-[#238636] border border-[#238636]/20 dark:text-[#3fb950]" },
-    info: { className: "bg-[#848d97]/10 text-[#848d97] border border-[#848d97]/20" },
-  }
-  
-  const config = severityConfig[severity?.toLowerCase()] || severityConfig.info
+  const config = getSeverityStyle(severity)
   
   return (
     <Badge className={config.className}>

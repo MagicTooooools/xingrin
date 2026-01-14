@@ -167,6 +167,10 @@ export function VulnerabilitiesDetailView({
     ? 0 
     : (targetId ? targetStatsQuery.data?.pendingCount : globalStatsQuery.data?.pendingCount) ?? 0
 
+  const reviewedCount = scanId
+    ? 0
+    : (targetId ? targetStatsQuery.data?.reviewedCount : globalStatsQuery.data?.reviewedCount) ?? 0
+
 
   const formatDate = (dateString: string): string => {
     return new Date(dateString).toLocaleString(getDateLocale(locale), {
@@ -327,6 +331,7 @@ export function VulnerabilitiesDetailView({
         reviewFilter={reviewFilter}
         onReviewFilterChange={handleReviewFilterChange}
         pendingCount={pendingCount}
+        reviewedCount={reviewedCount}
         selectedRows={selectedVulnerabilities}
         onBulkMarkAsReviewed={handleBulkMarkAsReviewed}
         onBulkMarkAsPending={handleBulkMarkAsPending}

@@ -18,6 +18,7 @@ import { cn } from "@/lib/utils"
 import { transformBackendNotification, useNotificationSSE } from "@/hooks/use-notification-sse"
 import { useMarkAllAsRead, useNotifications } from "@/hooks/use-notifications"
 import type { Notification, NotificationType, NotificationSeverity } from "@/types/notification.types"
+import { SEVERITY_CARD_STYLES, SEVERITY_ICON_BG } from "@/lib/severity-config"
 
 /**
  * Notification drawer component
@@ -199,10 +200,10 @@ export function NotificationDrawer() {
   }
 
   const severityCardClassMap: Record<NotificationSeverity, string> = {
-    critical: "border-[#da3633]/30 bg-[#da3633]/5 hover:bg-[#da3633]/10 dark:border-[#f85149]/30 dark:bg-[#f85149]/5 dark:hover:bg-[#f85149]/10",
-    high: "border-[#d29922]/30 bg-[#d29922]/5 hover:bg-[#d29922]/10 dark:border-[#d29922]/30 dark:bg-[#d29922]/5 dark:hover:bg-[#d29922]/10",
-    medium: "border-[#d4a72c]/30 bg-[#d4a72c]/5 hover:bg-[#d4a72c]/10 dark:border-[#d4a72c]/30 dark:bg-[#d4a72c]/5 dark:hover:bg-[#d4a72c]/10",
-    low: "border-[#848d97]/30 bg-[#848d97]/5 hover:bg-[#848d97]/10 dark:border-[#848d97]/30 dark:bg-[#848d97]/5 dark:hover:bg-[#848d97]/10",
+    critical: SEVERITY_CARD_STYLES.critical,
+    high: SEVERITY_CARD_STYLES.high,
+    medium: SEVERITY_CARD_STYLES.medium,
+    low: SEVERITY_CARD_STYLES.low,
   }
 
   const getNotificationCardClasses = (severity?: NotificationSeverity) => {
@@ -256,10 +257,10 @@ export function NotificationDrawer() {
       <div className="flex items-start gap-3">
         <div className={cn(
           "mt-0.5 p-1.5 rounded-full shrink-0",
-          notification.severity === 'critical' && "bg-[#da3633]/10 dark:bg-[#f85149]/10",
-          notification.severity === 'high' && "bg-[#d29922]/10",
-          notification.severity === 'medium' && "bg-[#d4a72c]/10",
-          (!notification.severity || notification.severity === 'low') && "bg-muted"
+          notification.severity === 'critical' && SEVERITY_ICON_BG.critical,
+          notification.severity === 'high' && SEVERITY_ICON_BG.high,
+          notification.severity === 'medium' && SEVERITY_ICON_BG.medium,
+          (!notification.severity || notification.severity === 'low') && SEVERITY_ICON_BG.info
         )}>
           {getNotificationIcon(notification.type, notification.severity)}
         </div>

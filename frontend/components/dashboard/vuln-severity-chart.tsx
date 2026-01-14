@@ -18,15 +18,7 @@ import {
 } from "@/components/ui/chart"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useTranslations } from "next-intl"
-
-// 漏洞严重程度使用固定语义化颜色
-const SEVERITY_COLORS = {
-  critical: "#dc2626", // 红色
-  high: "#f97316", // 橙色
-  medium: "#eab308", // 黄色
-  low: "#3b82f6", // 蓝色
-  info: "#6b7280", // 灰色
-}
+import { SEVERITY_COLORS } from "@/lib/severity-config"
 
 export function VulnSeverityChart() {
   const { data, isLoading } = useAssetStatistics()

@@ -60,6 +60,7 @@ interface VulnerabilitiesDataTableProps {
   reviewFilter?: ReviewFilter
   onReviewFilterChange?: (filter: ReviewFilter) => void
   pendingCount?: number
+  reviewedCount?: number
   selectedRows?: Vulnerability[]
   onBulkMarkAsReviewed?: () => void
   onBulkMarkAsPending?: () => void
@@ -89,6 +90,7 @@ export function VulnerabilitiesDataTable({
   reviewFilter = "all",
   onReviewFilterChange,
   pendingCount = 0,
+  reviewedCount = 0,
   selectedRows = [],
   onBulkMarkAsReviewed,
   onBulkMarkAsPending,
@@ -202,6 +204,11 @@ export function VulnerabilitiesDataTable({
             </TabsTrigger>
             <TabsTrigger value="reviewed">
               {tVuln("reviewStatus.reviewed")}
+              {reviewedCount > 0 && (
+                <Badge variant="secondary" className="ml-1.5 h-5 min-w-5 rounded-full px-1.5 text-xs">
+                  {reviewedCount}
+                </Badge>
+              )}
             </TabsTrigger>
           </TabsList>
         </Tabs>

@@ -37,13 +37,15 @@ interface SearchResultCardProps {
   onViewVulnerability?: (vuln: Vulnerability) => void
 }
 
+import { SEVERITY_STYLES } from "@/lib/severity-config"
+
 // 漏洞严重程度颜色配置
 const severityColors: Record<string, string> = {
-  critical: "bg-[#da3633]/10 text-[#da3633] border border-[#da3633]/20 dark:text-[#f85149]",
-  high: "bg-[#d29922]/10 text-[#d29922] border border-[#d29922]/20",
-  medium: "bg-[#d4a72c]/10 text-[#d4a72c] border border-[#d4a72c]/20",
-  low: "bg-[#238636]/10 text-[#238636] border border-[#238636]/20 dark:text-[#3fb950]",
-  info: "bg-[#848d97]/10 text-[#848d97] border border-[#848d97]/20",
+  critical: SEVERITY_STYLES.critical.className,
+  high: SEVERITY_STYLES.high.className,
+  medium: SEVERITY_STYLES.medium.className,
+  low: SEVERITY_STYLES.low.className,
+  info: SEVERITY_STYLES.info.className,
 }
 
 // 状态码 Badge variant

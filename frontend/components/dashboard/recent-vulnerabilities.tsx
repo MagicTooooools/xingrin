@@ -26,15 +26,7 @@ import { IconExternalLink } from "@tabler/icons-react"
 import type { VulnerabilitySeverity } from "@/types/vulnerability.types"
 import { useTranslations } from "next-intl"
 import { useLocale } from "next-intl"
-
-// Unified vulnerability severity color configuration (consistent with charts)
-const severityStyles: Record<VulnerabilitySeverity, string> = {
-  critical: "bg-[#da3633]/10 text-[#da3633] border border-[#da3633]/20 dark:text-[#f85149]",
-  high: "bg-[#d29922]/10 text-[#d29922] border border-[#d29922]/20",
-  medium: "bg-[#d4a72c]/10 text-[#d4a72c] border border-[#d4a72c]/20",
-  low: "bg-[#238636]/10 text-[#238636] border border-[#238636]/20 dark:text-[#3fb950]",
-  info: "bg-[#848d97]/10 text-[#848d97] border border-[#848d97]/20",
-}
+import { SEVERITY_STYLES } from "@/lib/severity-config"
 
 export function RecentVulnerabilities() {
   const router = useRouter()
@@ -54,11 +46,11 @@ export function RecentVulnerabilities() {
   }
 
   const severityConfig = useMemo(() => ({
-    critical: { label: tSeverity("critical"), className: severityStyles.critical },
-    high: { label: tSeverity("high"), className: severityStyles.high },
-    medium: { label: tSeverity("medium"), className: severityStyles.medium },
-    low: { label: tSeverity("low"), className: severityStyles.low },
-    info: { label: tSeverity("info"), className: severityStyles.info },
+    critical: { label: tSeverity("critical"), className: SEVERITY_STYLES.critical.className },
+    high: { label: tSeverity("high"), className: SEVERITY_STYLES.high.className },
+    medium: { label: tSeverity("medium"), className: SEVERITY_STYLES.medium.className },
+    low: { label: tSeverity("low"), className: SEVERITY_STYLES.low.className },
+    info: { label: tSeverity("info"), className: SEVERITY_STYLES.info.className },
   }), [tSeverity])
 
   const { data, isLoading } = useQuery({
