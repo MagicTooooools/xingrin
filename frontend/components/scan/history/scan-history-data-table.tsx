@@ -3,7 +3,8 @@
 import * as React from "react"
 import type { ColumnDef } from "@tanstack/react-table"
 import { useTranslations } from "next-intl"
-import { IconSearch, IconLoader2, IconFilter } from "@tabler/icons-react"
+import { IconSearch, IconLoader2 } from "@tabler/icons-react"
+import { Filter } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { UnifiedDataTable } from "@/components/ui/data-table"
@@ -144,8 +145,8 @@ export function ScanHistoryDataTable({
               value={statusFilter}
               onValueChange={(value) => onStatusFilterChange(value as ScanStatus | "all")}
             >
-              <SelectTrigger size="sm" className="w-[140px]">
-                <IconFilter className="h-4 w-4 mr-2" />
+              <SelectTrigger size="sm" className="w-auto">
+                <Filter className="h-4 w-4" />
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>

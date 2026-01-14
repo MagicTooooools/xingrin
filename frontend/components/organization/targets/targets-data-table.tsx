@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import { IconSearch, IconLoader2 } from "@tabler/icons-react"
+import { Filter } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -126,7 +127,8 @@ export function TargetsDataTable({
           </Button>
           {onTypeFilterChange && (
             <Select value={typeFilter || "all"} onValueChange={(value) => onTypeFilterChange(value === "all" ? "" : value)}>
-              <SelectTrigger size="sm" className="w-[120px]">
+              <SelectTrigger size="sm" className="w-auto">
+                <Filter className="h-4 w-4" />
                 <SelectValue placeholder={tCommon("actions.filter")} />
               </SelectTrigger>
               <SelectContent>

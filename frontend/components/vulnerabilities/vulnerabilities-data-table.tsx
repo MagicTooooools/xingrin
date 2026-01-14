@@ -3,18 +3,19 @@
 import * as React from "react"
 import type { ColumnDef } from "@tanstack/react-table"
 import { useTranslations } from "next-intl"
-import { ChevronDown, CheckCircle, Circle, X } from "lucide-react"
+import { CheckCircle, Circle, X, Filter } from "lucide-react"
 import { UnifiedDataTable } from "@/components/ui/data-table"
-import { PREDEFINED_FIELDS, type FilterField } from "@/components/common/smart-filter-input"
+import { SmartFilterInput, PREDEFINED_FIELDS, type FilterField, type ParsedFilter } from "@/components/common/smart-filter-input"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuCheckboxItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import type { Vulnerability, VulnerabilitySeverity } from "@/types/vulnerability.types"
 import type { PaginationInfo } from "@/types/common.types"
 import type { DownloadOption } from "@/types/data-table.types"
@@ -107,7 +108,7 @@ export function VulnerabilitiesDataTable({
   const tSeverity = useTranslations("severity")
   
   // Handle smart filter search
-  const handleFilterSearch = (rawQuery: string) => {
+  const handleSmartSearch = (_filters: ParsedFilter[], rawQuery: string) => {
     onFilterChange?.(rawQuery)
   }
 
@@ -129,64 +130,51 @@ export function VulnerabilitiesDataTable({
     })
   }
 
-  // Severity options for dropdown
-  const severityOptions: SeverityFilter[] = ["all", "critical", "high", "medium", "low", "info"]
+  // Severity options for Select
+  const severityOptions: { value: SeverityFilter; label: string }[] = [
+    { value: "all", label: tVuln("reviewStatus.all") },
+    { value: "critical", label: tSeverity("critical") },
+    { value: "high", label: tSeverity("high") },
+    { value: "medium", label: tSeverity("medium") },
+    { value: "low", label: tSeverity("low") },
+    { value: "info", label: tSeverity("info") },
+  ]
 
-  // Right toolbar content - bulk actions, filters and review tabs
+  // Left toolbar content - smart filter + severity select
+  const leftToolbarContent = (
+    <div className="flex items-center gap-2 flex-1">
+      <SmartFilterInput
+        fields={VULNERABILITY_FILTER_FIELDS}
+        examples={VULNERABILITY_FILTER_EXAMPLES}
+        placeholder={tActions("search")}
+        value={filterValue}
+        onSearch={handleSmartSearch}
+        className="flex-1 max-w-md"
+      />
+      {onSeverityFilterChange && (
+        <Select
+          value={severityFilter}
+          onValueChange={(value) => onSeverityFilterChange(value as SeverityFilter)}
+        >
+          <SelectTrigger size="sm" className="w-auto">
+            <Filter className="h-4 w-4" />
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {severityOptions.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      )}
+    </div>
+  )
+
+  // Right toolbar content - review tabs
   const rightToolbarContent = (
     <>
-      {/* Severity dropdown filter */}
-      {onSeverityFilterChange && (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm" className="h-8">
-              {severityFilter === "all" ? tVuln("severity") : tSeverity(severityFilter)}
-              <ChevronDown className="ml-1 h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {severityOptions.map((sev) => (
-              <DropdownMenuCheckboxItem
-                key={sev}
-                checked={severityFilter === sev}
-                onCheckedChange={() => onSeverityFilterChange(sev)}
-              >
-                {sev === "all" ? tVuln("reviewStatus.all") : tSeverity(sev)}
-              </DropdownMenuCheckboxItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      )}
-
-      {/* Source dropdown filter */}
-      {onSourceFilterChange && availableSources.length > 0 && (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm" className="h-8">
-              {sourceFilter === "all" ? tVuln("source") : sourceFilter}
-              <ChevronDown className="ml-1 h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuCheckboxItem
-              checked={sourceFilter === "all"}
-              onCheckedChange={() => onSourceFilterChange("all")}
-            >
-              {tVuln("reviewStatus.all")}
-            </DropdownMenuCheckboxItem>
-            {availableSources.map((src) => (
-              <DropdownMenuCheckboxItem
-                key={src}
-                checked={sourceFilter === src}
-                onCheckedChange={() => onSourceFilterChange(src)}
-              >
-                {src}
-              </DropdownMenuCheckboxItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      )}
-
       {/* Review filter tabs */}
       {onReviewFilterChange && (
         <Tabs value={reviewFilter} onValueChange={(v) => onReviewFilterChange(v as ReviewFilter)}>
@@ -271,12 +259,8 @@ export function VulnerabilitiesDataTable({
         setPagination={setPagination}
         paginationInfo={paginationInfo}
         onPaginationChange={onPaginationChange}
-        // Smart filter
-        searchMode="smart"
-        searchValue={filterValue}
-        onSearch={handleFilterSearch}
-        filterFields={VULNERABILITY_FILTER_FIELDS}
-        filterExamples={VULNERABILITY_FILTER_EXAMPLES}
+        // Toolbar
+        toolbarLeft={leftToolbarContent}
         // Selection
         onSelectionChange={onSelectionChange}
         // Bulk operations

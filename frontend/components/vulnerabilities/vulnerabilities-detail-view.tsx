@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from "react"
 import { useTranslations, useLocale } from "next-intl"
-import { VulnerabilitiesDataTable, type ReviewFilter } from "./vulnerabilities-data-table"
+import { VulnerabilitiesDataTable, type ReviewFilter, type SeverityFilter } from "./vulnerabilities-data-table"
 import { createVulnerabilityColumns } from "./vulnerabilities-columns"
 import { VulnerabilityDetailDialog } from "./vulnerability-detail-dialog"
 import { DataTableSkeleton } from "@/components/ui/data-table-skeleton"
@@ -52,6 +52,7 @@ export function VulnerabilitiesDetailView({
   const [detailDialogOpen, setDetailDialogOpen] = useState(false)
   const [selectedVulnerability, setSelectedVulnerability] = useState<Vulnerability | null>(null)
   const [reviewFilter, setReviewFilter] = useState<ReviewFilter>("all")
+  const [severityFilter, setSeverityFilter] = useState<SeverityFilter>("all")
 
   const [pagination, setPagination] = useState({
     pageIndex: 0,
@@ -114,13 +115,21 @@ export function VulnerabilitiesDetailView({
     setPagination((prev) => ({ ...prev, pageIndex: 0 }))
   }
 
+  const handleSeverityFilterChange = (filter: SeverityFilter) => {
+    setSeverityFilter(filter)
+    setPagination((prev) => ({ ...prev, pageIndex: 0 }))
+  }
+
   // Convert review filter to API parameter
   const isReviewedParam = reviewFilter === "all" ? undefined : reviewFilter === "reviewed"
+  // Convert severity filter to API parameter
+  const severityParam = severityFilter === "all" ? undefined : severityFilter
 
   const paginationParams = {
     page: pagination.pageIndex + 1,
     pageSize: pagination.pageSize,
     isReviewed: isReviewedParam,
+    severity: severityParam,
   }
 
   // Load by scan dimension (scan history page)
@@ -332,6 +341,8 @@ export function VulnerabilitiesDetailView({
         onReviewFilterChange={handleReviewFilterChange}
         pendingCount={pendingCount}
         reviewedCount={reviewedCount}
+        severityFilter={severityFilter}
+        onSeverityFilterChange={handleSeverityFilterChange}
         selectedRows={selectedVulnerabilities}
         onBulkMarkAsReviewed={handleBulkMarkAsReviewed}
         onBulkMarkAsPending={handleBulkMarkAsPending}
