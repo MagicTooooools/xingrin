@@ -30,7 +30,13 @@ func NewTargetService(repo *repository.TargetRepository, orgRepo *repository.Org
 
 // Create creates a new target
 func (s *TargetService) Create(req *dto.CreateTargetRequest) (*model.Target, error) {
-	exists, err := s.repo.ExistsByName(req.Name)
+	// Trim and normalize name
+	name := strings.TrimSpace(req.Name)
+	if name == "" {
+		return nil, ErrInvalidTarget
+	}
+
+	exists, err := s.repo.ExistsByName(name)
 	if err != nil {
 		return nil, err
 	}
@@ -39,13 +45,13 @@ func (s *TargetService) Create(req *dto.CreateTargetRequest) (*model.Target, err
 	}
 
 	// Auto-detect type from name
-	targetType := validator.DetectTargetType(req.Name)
+	targetType := validator.DetectTargetType(name)
 	if targetType == "" {
 		return nil, ErrInvalidTarget
 	}
 
 	target := &model.Target{
-		Name: req.Name,
+		Name: name,
 		Type: targetType,
 	}
 
@@ -116,6 +122,12 @@ func (s *TargetService) GetDetailByID(id int) (*model.Target, *dto.TargetSummary
 
 // Update updates a target
 func (s *TargetService) Update(id int, req *dto.UpdateTargetRequest) (*model.Target, error) {
+	// Trim and normalize name
+	name := strings.TrimSpace(req.Name)
+	if name == "" {
+		return nil, ErrInvalidTarget
+	}
+
 	target, err := s.repo.FindByID(id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -125,8 +137,8 @@ func (s *TargetService) Update(id int, req *dto.UpdateTargetRequest) (*model.Tar
 	}
 
 	// Check name uniqueness if changed
-	if target.Name != req.Name {
-		exists, err := s.repo.ExistsByName(req.Name, id)
+	if target.Name != name {
+		exists, err := s.repo.ExistsByName(name, id)
 		if err != nil {
 			return nil, err
 		}
@@ -136,12 +148,12 @@ func (s *TargetService) Update(id int, req *dto.UpdateTargetRequest) (*model.Tar
 	}
 
 	// Auto-detect type from name
-	targetType := validator.DetectTargetType(req.Name)
+	targetType := validator.DetectTargetType(name)
 	if targetType == "" {
 		return nil, ErrInvalidTarget
 	}
 
-	target.Name = req.Name
+	target.Name = name
 	target.Type = targetType
 
 	if err := s.repo.Update(target); err != nil {

@@ -107,3 +107,83 @@ func TestIsSubdomainMatchTarget(t *testing.T) {
 		})
 	}
 }
+
+
+func TestDetectTargetType(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected string
+	}{
+		// Valid domains
+		{"domain simple", "example.com", "domain"},
+		{"domain with subdomain", "api.example.com", "domain"},
+		{"domain with whitespace", "  example.com  ", "domain"},
+
+		// Valid IPs
+		{"ipv4", "192.168.1.1", "ip"},
+		{"ipv4 with whitespace", "  192.168.1.1  ", "ip"},
+		{"ipv6", "::1", "ip"},
+		{"ipv6 full", "2001:0db8:85a3:0000:0000:8a2e:0370:7334", "ip"},
+
+		// Valid CIDRs
+		{"cidr /8", "10.0.0.0/8", "cidr"},
+		{"cidr /24", "192.168.1.0/24", "cidr"},
+		{"cidr /32", "192.168.1.1/32", "cidr"},
+
+		// Invalid IPs (should NOT be classified as domain)
+		{"invalid ip 999", "999.999.999.999", ""},
+		{"invalid ip 256", "256.256.256.256", ""},
+		{"invalid ip partial", "192.168.1.999", ""},
+		// Note: "1.2.3.4.5" is technically a valid DNS name, so it's classified as domain
+
+		// Invalid inputs
+		{"empty", "", ""},
+		{"whitespace only", "   ", ""},
+		{"invalid format", "not-valid!", ""},
+
+		// Edge cases
+		{"ip-like but valid domain", "1-2-3-4.example.com", "domain"},
+		{"numeric domain", "1.2.3.4.5", "domain"}, // Valid DNS name with 5 parts
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := DetectTargetType(tt.input)
+			if result != tt.expected {
+				t.Errorf("DetectTargetType(%q) = %q, want %q", tt.input, result, tt.expected)
+			}
+		})
+	}
+}
+
+func TestLooksLikeIP(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected bool
+	}{
+		// IPv4-like
+		{"valid ipv4 format", "192.168.1.1", true},
+		{"invalid ipv4 values", "999.999.999.999", true},
+		{"ipv4 with extra octet", "1.2.3.4.5", false},
+
+		// IPv6-like
+		{"ipv6 short", "::1", true},
+		{"ipv6 full", "2001:db8::1", true},
+
+		// Not IP-like
+		{"domain", "example.com", false},
+		{"domain with numbers", "api123.example.com", false},
+		{"url", "https://example.com", false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := looksLikeIP(tt.input)
+			if result != tt.expected {
+				t.Errorf("looksLikeIP(%q) = %v, want %v", tt.input, result, tt.expected)
+			}
+		})
+	}
+}

@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/xingrin/go-backend/internal/dto"
+	"github.com/xingrin/go-backend/internal/repository"
 	"github.com/xingrin/go-backend/internal/service"
 )
 
@@ -231,6 +232,10 @@ func (h *OrganizationHandler) LinkTargets(c *gin.Context) {
 	if err != nil {
 		if errors.Is(err, service.ErrOrganizationNotFound) {
 			dto.NotFound(c, "Organization not found")
+			return
+		}
+		if errors.Is(err, repository.ErrTargetNotFound) {
+			dto.BadRequest(c, "One or more target IDs do not exist")
 			return
 		}
 		dto.InternalError(c, "Failed to link targets")

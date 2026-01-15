@@ -758,6 +758,7 @@
         "urls": "URLs",
         "directories": "Directories"
       },
+      "directoriesHelp": "Results from directory scanning (e.g. ffuf/dirsearch)",
       "status": {
         "completed": "Completed",
         "running": "Running",
@@ -2170,6 +2171,7 @@
         "urls": "URLs",
         "directories": "Directories"
       },
+      "directoriesHelp": "Results from directory scanning (e.g. ffuf/dirsearch)",
       "settings": {
         "loadError": "Failed to load settings",
         "blacklist": {

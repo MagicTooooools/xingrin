@@ -1,12 +1,22 @@
 package repository
 
 import (
+	"errors"
 	"strings"
 	"time"
 
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/xingrin/go-backend/internal/model"
 	"github.com/xingrin/go-backend/internal/pkg/scope"
 	"gorm.io/gorm"
+)
+
+// ErrTargetNotFound indicates one or more target IDs do not exist
+var ErrTargetNotFound = errors.New("one or more target IDs do not exist")
+
+// PostgreSQL error codes
+const (
+	pgForeignKeyViolation = "23503"
 )
 
 // OrganizationFilterMapping defines filter fields for organization
@@ -173,6 +183,7 @@ func (r *OrganizationRepository) FindTargets(organizationID int, page, pageSize 
 }
 
 // BulkAddTargets adds multiple targets to an organization (ignore duplicates)
+// Returns ErrTargetNotFound if any target ID does not exist
 func (r *OrganizationRepository) BulkAddTargets(organizationID int, targetIDs []int) error {
 	if len(targetIDs) == 0 {
 		return nil
@@ -190,7 +201,15 @@ func (r *OrganizationRepository) BulkAddTargets(organizationID int, targetIDs []
 		strings.Join(placeholders, ", ") +
 		" ON CONFLICT DO NOTHING"
 
-	return r.db.Exec(sql, values...).Error
+	err := r.db.Exec(sql, values...).Error
+	if err != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) && pgErr.Code == pgForeignKeyViolation {
+			return ErrTargetNotFound
+		}
+		return err
+	}
+	return nil
 }
 
 // UnlinkTargets removes targets from an organization

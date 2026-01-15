@@ -37,6 +37,7 @@ export function DirectoriesView({
   const [isSearching, setIsSearching] = useState(false)
 
   // Internationalization
+  const t = useTranslations("pages.targetDetail")
   const tColumns = useTranslations("columns")
   const tCommon = useTranslations("common")
   const tToast = useTranslations("toast")
@@ -307,7 +308,9 @@ export function DirectoriesView({
         onBulkAdd={targetId ? () => setBulkAddDialogOpen(true) : undefined}
       />
 
-      {/* Bulk add dialog */}
+      {/* Bulk add dialog */
+      /* ... */
+      }
       {targetId && (
         <BulkAddUrlsDialog
           targetId={targetId}

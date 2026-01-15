@@ -3,7 +3,7 @@
 import React from "react"
 import { usePathname, useParams } from "next/navigation"
 import Link from "next/link"
-import { Target, LayoutDashboard, Package, Image, ShieldAlert } from "lucide-react"
+import { Target, LayoutDashboard, Package, FolderSearch, Image, ShieldAlert } from "lucide-react"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -23,6 +23,7 @@ export default function ScanHistoryLayout({
   // Get primary navigation active tab
   const getPrimaryTab = () => {
     if (pathname.includes("/overview")) return "overview"
+    if (pathname.includes("/directories")) return "directories"
     if (pathname.includes("/screenshots")) return "screenshots"
     if (pathname.includes("/vulnerabilities")) return "vulnerabilities"
     // All asset pages fall under "assets"
@@ -30,8 +31,7 @@ export default function ScanHistoryLayout({
       pathname.includes("/websites") ||
       pathname.includes("/subdomain") ||
       pathname.includes("/ip-addresses") ||
-      pathname.includes("/endpoints") ||
-      pathname.includes("/directories")
+      pathname.includes("/endpoints")
     ) {
       return "assets"
     }
@@ -44,7 +44,6 @@ export default function ScanHistoryLayout({
     if (pathname.includes("/subdomain")) return "subdomain"
     if (pathname.includes("/ip-addresses")) return "ip-addresses"
     if (pathname.includes("/endpoints")) return "endpoints"
-    if (pathname.includes("/directories")) return "directories"
     return "websites"
   }
 
@@ -55,6 +54,7 @@ export default function ScanHistoryLayout({
   const primaryPaths = {
     overview: `${basePath}/overview/`,
     assets: `${basePath}/websites/`, // Default to websites when clicking assets
+    directories: `${basePath}/directories/`,
     screenshots: `${basePath}/screenshots/`,
     vulnerabilities: `${basePath}/vulnerabilities/`,
   }
@@ -64,7 +64,6 @@ export default function ScanHistoryLayout({
     subdomain: `${basePath}/subdomain/`,
     "ip-addresses": `${basePath}/ip-addresses/`,
     endpoints: `${basePath}/endpoints/`,
-    directories: `${basePath}/directories/`,
   }
 
   // Get counts for each tab from scan data
@@ -80,7 +79,7 @@ export default function ScanHistoryLayout({
   }
 
   // Calculate total assets count
-  const totalAssets = counts.websites + counts.subdomain + counts["ip-addresses"] + counts.endpoints + counts.directories
+  const totalAssets = counts.websites + counts.subdomain + counts["ip-addresses"] + counts.endpoints
 
   // Loading state
   if (isLoading) {
@@ -131,6 +130,17 @@ export default function ScanHistoryLayout({
                 {totalAssets > 0 && (
                   <Badge variant="secondary" className="ml-1.5 h-5 min-w-5 rounded-full px-1.5 text-xs">
                     {totalAssets}
+                  </Badge>
+                )}
+              </Link>
+            </TabsTrigger>
+            <TabsTrigger value="directories" asChild>
+              <Link href={primaryPaths.directories} className="flex items-center gap-1.5">
+                <FolderSearch className="h-4 w-4" />
+                {t("tabs.directories")}
+                {counts.directories > 0 && (
+                  <Badge variant="secondary" className="ml-1.5 h-5 min-w-5 rounded-full px-1.5 text-xs">
+                    {counts.directories}
                   </Badge>
                 )}
               </Link>
@@ -202,16 +212,6 @@ export default function ScanHistoryLayout({
                   {counts.endpoints > 0 && (
                     <Badge variant="secondary" className="ml-1.5 h-5 min-w-5 rounded-full px-1.5 text-xs">
                       {counts.endpoints}
-                    </Badge>
-                  )}
-                </Link>
-              </TabsTrigger>
-              <TabsTrigger value="directories" variant="underline" asChild>
-                <Link href={secondaryPaths.directories} className="flex items-center gap-0.5">
-                  {t("tabs.directories")}
-                  {counts.directories > 0 && (
-                    <Badge variant="secondary" className="ml-1.5 h-5 min-w-5 rounded-full px-1.5 text-xs">
-                      {counts.directories}
                     </Badge>
                   )}
                 </Link>

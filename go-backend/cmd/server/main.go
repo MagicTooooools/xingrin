@@ -146,6 +146,8 @@ func main() {
 	endpointSnapshotRepo := repository.NewEndpointSnapshotRepository(db)
 	directorySnapshotRepo := repository.NewDirectorySnapshotRepository(db)
 	hostPortSnapshotRepo := repository.NewHostPortSnapshotRepository(db)
+	screenshotSnapshotRepo := repository.NewScreenshotSnapshotRepository(db)
+	vulnerabilitySnapshotRepo := repository.NewVulnerabilitySnapshotRepository(db)
 
 	// Create services
 	userSvc := service.NewUserService(userRepo)
@@ -167,6 +169,8 @@ func main() {
 	endpointSnapshotSvc := service.NewEndpointSnapshotService(endpointSnapshotRepo, scanRepo, endpointSvc)
 	directorySnapshotSvc := service.NewDirectorySnapshotService(directorySnapshotRepo, scanRepo, directorySvc)
 	hostPortSnapshotSvc := service.NewHostPortSnapshotService(hostPortSnapshotRepo, scanRepo, hostPortSvc)
+	screenshotSnapshotSvc := service.NewScreenshotSnapshotService(screenshotSnapshotRepo, scanRepo, screenshotSvc)
+	vulnerabilitySnapshotSvc := service.NewVulnerabilitySnapshotService(vulnerabilitySnapshotRepo, scanRepo, vulnerabilitySvc)
 
 	// Create handlers
 	healthHandler := handler.NewHealthHandler(db, redisClient)
@@ -190,6 +194,8 @@ func main() {
 	endpointSnapshotHandler := handler.NewEndpointSnapshotHandler(endpointSnapshotSvc)
 	directorySnapshotHandler := handler.NewDirectorySnapshotHandler(directorySnapshotSvc)
 	hostPortSnapshotHandler := handler.NewHostPortSnapshotHandler(hostPortSnapshotSvc)
+	screenshotSnapshotHandler := handler.NewScreenshotSnapshotHandler(screenshotSnapshotSvc)
+	vulnerabilitySnapshotHandler := handler.NewVulnerabilitySnapshotHandler(vulnerabilitySnapshotSvc)
 
 	// Register health routes
 	router.GET("/health", healthHandler.Check)
@@ -205,6 +211,10 @@ func main() {
 			authGroup.POST("/login", authHandler.Login)
 			authGroup.POST("/refresh", authHandler.RefreshToken)
 		}
+
+		// Public routes (no auth) - images are loaded by browser <img> and cannot attach Authorization header
+		api.GET("/screenshots/:id/image", screenshotHandler.GetImage)
+		api.GET("/scans/:id/screenshots/:snapshotId/image", screenshotSnapshotHandler.GetImage)
 
 		// Protected routes
 		protected := api.Group("")
@@ -289,13 +299,12 @@ func main() {
 			protected.POST("/targets/:id/screenshots/bulk-upsert", screenshotHandler.BulkUpsert)
 
 			// Screenshots (standalone)
-			protected.GET("/screenshots/:id/image", screenshotHandler.GetImage)
 			protected.POST("/screenshots/bulk-delete", screenshotHandler.BulkDelete)
 
 			// Vulnerabilities (global)
-			protected.GET("/assets/vulnerabilities", vulnerabilityHandler.ListAll)
-			protected.GET("/assets/vulnerabilities/stats", vulnerabilityHandler.GetStats)
-			protected.GET("/assets/vulnerabilities/:id", vulnerabilityHandler.GetByID)
+			protected.GET("/vulnerabilities", vulnerabilityHandler.ListAll)
+			protected.GET("/vulnerabilities/stats", vulnerabilityHandler.GetStats)
+			protected.GET("/vulnerabilities/:id", vulnerabilityHandler.GetByID)
 
 			// Vulnerabilities (nested under targets)
 			protected.GET("/targets/:id/vulnerabilities", vulnerabilityHandler.ListByTarget)
@@ -363,6 +372,19 @@ func main() {
 			protected.POST("/scans/:id/host-ports/bulk-upsert", hostPortSnapshotHandler.BulkUpsert)
 			protected.GET("/scans/:id/host-ports", hostPortSnapshotHandler.List)
 			protected.GET("/scans/:id/host-ports/export", hostPortSnapshotHandler.Export)
+
+			// Screenshot Snapshots (nested under scans)
+			protected.POST("/scans/:id/screenshots/bulk-upsert", screenshotSnapshotHandler.BulkUpsert)
+			protected.GET("/scans/:id/screenshots", screenshotSnapshotHandler.List)
+
+			// Vulnerability Snapshots (nested under scans)
+			protected.POST("/scans/:id/vulnerabilities/bulk-create", vulnerabilitySnapshotHandler.BulkCreate)
+			protected.GET("/scans/:id/vulnerabilities", vulnerabilitySnapshotHandler.ListByScan)
+			protected.GET("/scans/:id/vulnerabilities/export", vulnerabilitySnapshotHandler.Export)
+
+			// Vulnerability Snapshots (standalone)
+			protected.GET("/vulnerability-snapshots", vulnerabilitySnapshotHandler.ListAll)
+			protected.GET("/vulnerability-snapshots/:id", vulnerabilitySnapshotHandler.GetByID)
 		}
 	}
 

@@ -96,10 +96,51 @@ func DetectTargetType(name string) string {
 		return TargetTypeIP
 	}
 
+	// Check if it looks like an IP but is invalid (e.g., 999.999.999.999)
+	// This prevents invalid IPs from being classified as domains
+	if looksLikeIP(name) {
+		return "" // Invalid IP format
+	}
+
 	// Check domain
 	if govalidator.IsDNSName(name) {
 		return TargetTypeDomain
 	}
 
 	return ""
+}
+
+// looksLikeIP checks if a string looks like an IP address format
+// (e.g., "999.999.999.999" or "::gggg")
+func looksLikeIP(s string) bool {
+	// Check for IPv4-like format (digits and dots only)
+	if strings.Count(s, ".") == 3 {
+		parts := strings.Split(s, ".")
+		allNumeric := true
+		for _, part := range parts {
+			if part == "" {
+				allNumeric = false
+				break
+			}
+			for _, c := range part {
+				if c < '0' || c > '9' {
+					allNumeric = false
+					break
+				}
+			}
+			if !allNumeric {
+				break
+			}
+		}
+		if allNumeric {
+			return true
+		}
+	}
+
+	// Check for IPv6-like format (contains colons)
+	if strings.Contains(s, ":") && !strings.Contains(s, "://") {
+		return true
+	}
+
+	return false
 }

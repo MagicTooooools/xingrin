@@ -772,6 +772,7 @@
         "urls": "URL",
         "directories": "目录"
       },
+      "directoriesHelp": "由目录扫描（如 ffuf/dirsearch）发现的路径结果",
       "status": {
         "completed": "已完成",
         "running": "扫描中",
@@ -2184,6 +2185,7 @@
         "urls": "URL",
         "directories": "目录"
       },
+      "directoriesHelp": "由目录扫描（如 ffuf/dirsearch）发现的路径结果",
       "settings": {
         "loadError": "加载设置失败",
         "blacklist": {
