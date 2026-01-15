@@ -44,6 +44,10 @@ func (h *WebsiteSnapshotHandler) BulkUpsert(c *gin.Context) {
 			dto.NotFound(c, "Scan not found")
 			return
 		}
+		if errors.Is(err, service.ErrTargetMismatch) {
+			dto.BadRequest(c, "targetId does not match scan's target")
+			return
+		}
 		dto.InternalError(c, "Failed to save snapshots")
 		return
 	}

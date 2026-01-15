@@ -43,6 +43,10 @@ func (h *SubdomainSnapshotHandler) BulkUpsert(c *gin.Context) {
 			dto.NotFound(c, "Scan not found")
 			return
 		}
+		if errors.Is(err, service.ErrTargetMismatch) {
+			dto.BadRequest(c, "targetId does not match scan's target")
+			return
+		}
 		if errors.Is(err, service.ErrInvalidTargetType) {
 			dto.BadRequest(c, "Target type must be domain")
 			return

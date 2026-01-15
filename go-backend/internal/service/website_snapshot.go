@@ -57,7 +57,7 @@ func (s *WebsiteSnapshotService) SaveAndSync(scanID int, targetID int, items []d
 
 	// Verify target_id matches scan's target
 	if scan.TargetID != targetID {
-		return 0, 0, errors.New("target_id does not match scan's target")
+		return 0, 0, ErrTargetMismatch
 	}
 
 	// Step 2: Get target for URL validation
