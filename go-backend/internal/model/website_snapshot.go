@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/lib/pq"
+	"gorm.io/gorm"
 )
 
 // WebsiteSnapshot represents a website snapshot
@@ -31,4 +32,12 @@ type WebsiteSnapshot struct {
 // TableName returns the table name for WebsiteSnapshot
 func (WebsiteSnapshot) TableName() string {
 	return "website_snapshot"
+}
+
+// BeforeCreate initializes default values for array fields
+func (w *WebsiteSnapshot) BeforeCreate(tx *gorm.DB) error {
+	if w.Tech == nil {
+		w.Tech = []string{}
+	}
+	return nil
 }

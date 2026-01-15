@@ -5,6 +5,7 @@ import (
 
 	"github.com/lib/pq"
 	"gorm.io/datatypes"
+	"gorm.io/gorm"
 )
 
 // Scan represents a scan job
@@ -48,6 +49,20 @@ type Scan struct {
 // TableName returns the table name for Scan
 func (Scan) TableName() string {
 	return "scan"
+}
+
+// BeforeCreate initializes default values for array/JSONB fields
+func (s *Scan) BeforeCreate(tx *gorm.DB) error {
+	if s.EngineIDs == nil {
+		s.EngineIDs = []int64{}
+	}
+	if s.ContainerIDs == nil {
+		s.ContainerIDs = []string{}
+	}
+	if s.StageProgress == nil {
+		s.StageProgress = datatypes.JSON([]byte("{}"))
+	}
+	return nil
 }
 
 // ScanStatus constants

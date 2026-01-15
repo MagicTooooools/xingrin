@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/lib/pq"
+	"gorm.io/gorm"
 )
 
 // Endpoint represents an endpoint asset
@@ -32,4 +33,15 @@ type Endpoint struct {
 // TableName returns the table name for Endpoint
 func (Endpoint) TableName() string {
 	return "endpoint"
+}
+
+// BeforeCreate initializes default values for array fields
+func (e *Endpoint) BeforeCreate(tx *gorm.DB) error {
+	if e.Tech == nil {
+		e.Tech = []string{}
+	}
+	if e.MatchedGFPatterns == nil {
+		e.MatchedGFPatterns = []string{}
+	}
+	return nil
 }

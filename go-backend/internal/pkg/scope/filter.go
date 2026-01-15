@@ -62,6 +62,7 @@ func WithFilter(filterStr string, mapping FilterMapping) func(db *gorm.DB) *gorm
 
 // WithFilterDefault returns a GORM scope for smart filtering with a default field
 // If filterStr is plain text (no operators), it will be treated as fuzzy search on defaultField
+// If filterStr looks like filter syntax but is invalid, returns a condition that matches nothing
 func WithFilterDefault(filterStr string, mapping FilterMapping, defaultField string) func(db *gorm.DB) *gorm.DB {
 	return func(db *gorm.DB) *gorm.DB {
 		if filterStr == "" || len(mapping) == 0 {
@@ -70,6 +71,11 @@ func WithFilterDefault(filterStr string, mapping FilterMapping, defaultField str
 
 		// Check if it's plain text (no filter syntax)
 		if defaultField != "" && !hasFilterSyntax(filterStr) {
+			// Check for invalid syntax patterns (e.g., field:value)
+			if looksLikeInvalidFilter(filterStr) {
+				// Return empty result for invalid syntax
+				return db.Where("1 = 0")
+			}
 			// Treat as fuzzy search on default field
 			config, ok := mapping[defaultField]
 			if ok {
@@ -79,11 +85,24 @@ func WithFilterDefault(filterStr string, mapping FilterMapping, defaultField str
 
 		groups := parseFilter(filterStr)
 		if len(groups) == 0 {
+			// Filter string provided but no valid conditions parsed
+			// This likely means invalid syntax, return empty result
+			if hasFilterSyntax(filterStr) || looksLikeInvalidFilter(filterStr) {
+				return db.Where("1 = 0")
+			}
 			return db
 		}
 
 		return buildQuery(db, groups, mapping)
 	}
+}
+
+// looksLikeInvalidFilter checks if the string looks like an invalid filter syntax
+// e.g., "field:value" instead of "field="value""
+func looksLikeInvalidFilter(s string) bool {
+	// Check for common invalid patterns like "field:value"
+	colonPattern := regexp.MustCompile(`^\w+:[^/]`)
+	return colonPattern.MatchString(s)
 }
 
 // hasFilterSyntax checks if the string contains filter syntax (field="value")

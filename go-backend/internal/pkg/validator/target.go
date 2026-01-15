@@ -66,12 +66,17 @@ func IsURLMatchTarget(urlStr, targetName, targetType string) bool {
 }
 
 // IsSubdomainMatchTarget checks if subdomain belongs to target domain
-// Returns true if subdomain equals target or ends with .target
+// Returns true if subdomain is a valid DNS name and equals target or ends with .target
 func IsSubdomainMatchTarget(subdomain, targetDomain string) bool {
 	subdomain = strings.ToLower(strings.TrimSpace(subdomain))
 	targetDomain = strings.ToLower(strings.TrimSpace(targetDomain))
 
 	if subdomain == "" || targetDomain == "" {
+		return false
+	}
+
+	// Validate DNS name format
+	if !govalidator.IsDNSName(subdomain) {
 		return false
 	}
 

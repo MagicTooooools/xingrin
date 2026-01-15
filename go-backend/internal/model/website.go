@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/lib/pq"
+	"gorm.io/gorm"
 )
 
 // Website represents a website asset
@@ -31,4 +32,12 @@ type Website struct {
 // TableName returns the table name for Website
 func (Website) TableName() string {
 	return "website"
+}
+
+// BeforeCreate initializes default values for array fields
+func (w *Website) BeforeCreate(tx *gorm.DB) error {
+	if w.Tech == nil {
+		w.Tech = []string{}
+	}
+	return nil
 }

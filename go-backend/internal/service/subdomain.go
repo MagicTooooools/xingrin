@@ -60,6 +60,7 @@ func (s *SubdomainService) BulkCreate(targetID int, names []string) (int, error)
 	// Filter valid subdomains that match target domain
 	subdomains := make([]model.Subdomain, 0, len(names))
 	for _, name := range names {
+		// Check if subdomain matches target domain (includes DNS name validation)
 		if validator.IsSubdomainMatchTarget(name, target.Name) {
 			subdomains = append(subdomains, model.Subdomain{
 				TargetID: targetID,

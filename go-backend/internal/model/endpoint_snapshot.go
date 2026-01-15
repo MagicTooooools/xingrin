@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/lib/pq"
+	"gorm.io/gorm"
 )
 
 // EndpointSnapshot represents an endpoint snapshot
@@ -32,4 +33,15 @@ type EndpointSnapshot struct {
 // TableName returns the table name for EndpointSnapshot
 func (EndpointSnapshot) TableName() string {
 	return "endpoint_snapshot"
+}
+
+// BeforeCreate initializes default values for array fields
+func (e *EndpointSnapshot) BeforeCreate(tx *gorm.DB) error {
+	if e.Tech == nil {
+		e.Tech = []string{}
+	}
+	if e.MatchedGFPatterns == nil {
+		e.MatchedGFPatterns = []string{}
+	}
+	return nil
 }

@@ -13,6 +13,7 @@ import (
 
 var (
 	ErrScanNotFoundForSnapshot = errors.New("scan not found")
+	ErrTargetMismatch          = errors.New("targetId does not match scan's target")
 )
 
 // WebsiteSnapshotService handles website snapshot business logic

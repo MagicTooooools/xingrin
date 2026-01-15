@@ -54,7 +54,7 @@ func (s *HostPortSnapshotService) SaveAndSync(scanID int, targetID int, items []
 	}
 
 	if scan.TargetID != targetID {
-		return 0, 0, errors.New("target_id does not match scan's target")
+		return 0, 0, ErrTargetMismatch
 	}
 
 	// Get target for validation

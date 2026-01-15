@@ -23,6 +23,15 @@ func NewHostPortService(repo *repository.HostPortRepository, targetRepo *reposit
 
 // ListByTarget returns paginated host-ports aggregated by IP
 func (s *HostPortService) ListByTarget(targetID int, query *dto.HostPortListQuery) ([]dto.HostPortResponse, int64, error) {
+	// Check if target exists
+	_, err := s.targetRepo.FindByID(targetID)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, 0, ErrTargetNotFound
+		}
+		return nil, 0, err
+	}
+
 	// Get IP aggregation (all IPs with their earliest created_at)
 	ipRows, total, err := s.repo.GetIPAggregation(targetID, query.Filter)
 	if err != nil {
