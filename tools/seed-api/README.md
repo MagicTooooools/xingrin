@@ -57,7 +57,7 @@ Options:
 
 ```bash
 # 1. 启动 Go 后端（另一个终端）
-cd ../../go-backend
+cd ../../server
 make run
 
 # 2. 生成小规模测试数据
@@ -234,7 +234,7 @@ pytest
 
 ```bash
 # 1. 启动 Go 后端
-cd ../../go-backend
+cd ../../server
 make run
 
 # 2. 运行测试
