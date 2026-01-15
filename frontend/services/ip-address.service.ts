@@ -9,12 +9,12 @@ export interface BulkDeleteResponse {
 export class IPAddressService {
   /**
    * Bulk delete IP addresses
-   * POST /api/ip-addresses/bulk-delete/
+   * POST /api/host-ports/bulk-delete
    * Note: IP addresses are aggregated, so we pass IP strings instead of IDs
    */
   static async bulkDelete(ips: string[]): Promise<BulkDeleteResponse> {
     const response = await api.post<BulkDeleteResponse>(
-      `/ip-addresses/bulk-delete/`,
+      `/host-ports/bulk-delete`,
       { ips }
     )
     return response.data
@@ -24,7 +24,7 @@ export class IPAddressService {
     targetId: number,
     params?: GetIPAddressesParams
   ): Promise<GetIPAddressesResponse> {
-    const response = await api.get<GetIPAddressesResponse>(`/targets/${targetId}/ip-addresses/`, {
+    const response = await api.get<GetIPAddressesResponse>(`/targets/${targetId}/host-ports`, {
       params: {
         page: params?.page || 1,
         pageSize: params?.pageSize || 10,
@@ -38,7 +38,7 @@ export class IPAddressService {
     scanId: number,
     params?: GetIPAddressesParams
   ): Promise<GetIPAddressesResponse> {
-    const response = await api.get<GetIPAddressesResponse>(`/scans/${scanId}/ip-addresses/`, {
+    const response = await api.get<GetIPAddressesResponse>(`/scans/${scanId}/host-ports`, {
       params: {
         page: params?.page || 1,
         pageSize: params?.pageSize || 10,
@@ -54,7 +54,7 @@ export class IPAddressService {
     if (ips && ips.length > 0) {
       params.ips = ips.join(',')
     }
-    const response = await api.get<Blob>(`/targets/${targetId}/ip-addresses/export/`, {
+    const response = await api.get<Blob>(`/targets/${targetId}/host-ports/export`, {
       params,
       responseType: 'blob',
     })
@@ -63,7 +63,7 @@ export class IPAddressService {
 
   /** Export all IP addresses by scan task (CSV format) */
   static async exportIPAddressesByScanId(scanId: number): Promise<Blob> {
-    const response = await api.get<Blob>(`/scans/${scanId}/ip-addresses/export/`, {
+    const response = await api.get<Blob>(`/scans/${scanId}/host-ports/export`, {
       responseType: 'blob',
     })
     return response.data

@@ -156,7 +156,12 @@ def main():
         
         # Create assets
         create_assets(client, progress, error_handler, targets, args.assets_per_target, args.batch_size)
-        
+
+        # Create scans and snapshots
+        scan_ids = create_scans(client, progress, error_handler, targets)
+        if scan_ids:
+            create_snapshots(client, progress, error_handler, targets, scan_ids, args.assets_per_target, args.batch_size)
+
         # Print summary
         progress.print_summary()
         
@@ -188,6 +193,8 @@ def clear_data(client, progress):
     
     # Delete in correct order (child tables first)
     delete_operations = [
+        ("scans", "/api/scans/bulk-delete"),
+        ("screenshots", "/api/screenshots/bulk-delete"),
         ("vulnerabilities", "/api/vulnerabilities/bulk-delete"),
         ("host ports", "/api/host-ports/bulk-delete"),
         ("directories", "/api/directories/bulk-delete"),
@@ -522,32 +529,314 @@ def create_assets(client, progress, error_handler, targets, assets_per_target, b
                 error_handler.log_error(str(e), {"targetId": target["id"], "mappings": batch})
     
     progress.finish_phase()
-    
-    # Create vulnerabilities (temporarily disabled - API not fully implemented)
-    # progress.start_phase("Creating vulnerabilities", len(targets) * assets_per_target, "🔓")
-    #
-    # for target in targets:
-    #     vulnerabilities = DataGenerator.generate_vulnerabilities(target, assets_per_target)
-    #
-    #     # Batch create
-    #     for i in range(0, len(vulnerabilities), batch_size):
-    #         batch = vulnerabilities[i:i + batch_size]
-    #
-    #         try:
-    #             error_handler.retry_with_backoff(
-    #                 client.post,
-    #                 f"/api/targets/{target['id']}/vulnerabilities/bulk-create",
-    #                 {"vulnerabilities": batch}
-    #             )
-    #
-    #             progress.add_success(len(batch))
-    #             progress.update(progress.current_count + len(batch))
-    #
-    #         except Exception as e:
-    #             progress.add_error(str(e))
-    #             error_handler.log_error(str(e), {"targetId": target["id"], "vulnerabilities": batch})
-    #
-    # progress.finish_phase()
+
+    # Create vulnerabilities
+    progress.start_phase("Creating vulnerabilities", len(targets) * assets_per_target, "🔓")
+
+    for target in targets:
+        vulnerabilities = DataGenerator.generate_vulnerabilities(target, assets_per_target)
+
+        # Batch create
+        for i in range(0, len(vulnerabilities), batch_size):
+            batch = vulnerabilities[i:i + batch_size]
+
+            try:
+                error_handler.retry_with_backoff(
+                    client.post,
+                    f"/api/targets/{target['id']}/vulnerabilities/bulk-create",
+                    {"vulnerabilities": batch}
+                )
+
+                progress.add_success(len(batch))
+                progress.update(progress.current_count + len(batch))
+
+            except Exception as e:
+                progress.add_error(str(e))
+                error_handler.log_error(
+                    str(e),
+                    {"targetId": target["id"], "vulnerabilities": batch}
+                )
+
+    progress.finish_phase()
+
+    # Create screenshots
+    progress.start_phase("Creating screenshots", len(targets) * assets_per_target, "📸")
+
+    for target in targets:
+        screenshots = DataGenerator.generate_screenshots(target, assets_per_target)
+
+        # Batch upsert
+        for i in range(0, len(screenshots), batch_size):
+            batch = screenshots[i:i + batch_size]
+
+            try:
+                error_handler.retry_with_backoff(
+                    client.post,
+                    f"/api/targets/{target['id']}/screenshots/bulk-upsert",
+                    {"screenshots": batch}
+                )
+
+                progress.add_success(len(batch))
+                progress.update(progress.current_count + len(batch))
+
+            except Exception as e:
+                progress.add_error(str(e))
+                error_handler.log_error(
+                    str(e),
+                    {"targetId": target["id"], "screenshots": batch}
+                )
+
+    progress.finish_phase()
+
+
+def create_scans(client, progress, error_handler, targets):
+    """
+    Create scans for targets.
+
+    Args:
+        client: API client
+        progress: Progress tracker
+        error_handler: Error handler
+        targets: List of target dictionaries
+
+    Returns:
+        Dict mapping target_id to scan_id
+    """
+    from data_generator import DataGenerator
+
+    progress.start_phase("Creating scans", len(targets), "🔍")
+
+    scan_ids = {}
+
+    for target in targets:
+        try:
+            scan_data = DataGenerator.generate_scan(target)
+
+            result = error_handler.retry_with_backoff(
+                client.post,
+                "/api/scans/initiate",
+                scan_data
+            )
+
+            if result.get("scans") and len(result["scans"]) > 0:
+                scan_ids[target["id"]] = result["scans"][0]["id"]
+
+            progress.add_success(1)
+            progress.update(len(scan_ids))
+
+        except Exception as e:
+            progress.add_error(str(e))
+            error_handler.log_error(str(e), {"targetId": target["id"]})
+
+    progress.finish_phase()
+    return scan_ids
+
+
+def create_snapshots(client, progress, error_handler, targets, scan_ids, assets_per_target, batch_size):
+    """
+    Create snapshot data for scans.
+
+    Args:
+        client: API client
+        progress: Progress tracker
+        error_handler: Error handler
+        targets: List of target dictionaries
+        scan_ids: Dict mapping target_id to scan_id
+        assets_per_target: Number of assets per target
+        batch_size: Batch size for bulk operations
+    """
+    from data_generator import DataGenerator
+
+    # Filter targets that have scans
+    targets_with_scans = [t for t in targets if t["id"] in scan_ids]
+
+    if not targets_with_scans:
+        return
+
+    # Create website snapshots
+    progress.start_phase("Creating website snapshots", len(targets_with_scans) * assets_per_target, "🌐")
+
+    for target in targets_with_scans:
+        scan_id = scan_ids[target["id"]]
+        websites = DataGenerator.generate_websites(target, assets_per_target)
+
+        for i in range(0, len(websites), batch_size):
+            batch = websites[i:i + batch_size]
+
+            try:
+                error_handler.retry_with_backoff(
+                    client.post,
+                    f"/api/scans/{scan_id}/websites/bulk-upsert",
+                    {"targetId": target["id"], "websites": batch}
+                )
+
+                progress.add_success(len(batch))
+                progress.update(progress.current_count + len(batch))
+
+            except Exception as e:
+                progress.add_error(str(e))
+                error_handler.log_error(str(e), {"scanId": scan_id, "websites": batch})
+
+    progress.finish_phase()
+
+    # Create subdomain snapshots (only for domain targets)
+    domain_targets = [t for t in targets_with_scans if t["type"] == "domain"]
+
+    if domain_targets:
+        progress.start_phase("Creating subdomain snapshots", len(domain_targets) * assets_per_target, "📝")
+
+        for target in domain_targets:
+            scan_id = scan_ids[target["id"]]
+            subdomains = DataGenerator.generate_subdomain_snapshots(target, assets_per_target)
+
+            if not subdomains:
+                continue
+
+            try:
+                error_handler.retry_with_backoff(
+                    client.post,
+                    f"/api/scans/{scan_id}/subdomains/bulk-upsert",
+                    {"targetId": target["id"], "subdomains": subdomains}
+                )
+
+                progress.add_success(len(subdomains))
+                progress.update(progress.current_count + len(subdomains))
+
+            except Exception as e:
+                progress.add_error(str(e))
+                error_handler.log_error(str(e), {"scanId": scan_id, "subdomains": subdomains})
+
+        progress.finish_phase()
+
+    # Create endpoint snapshots
+    progress.start_phase("Creating endpoint snapshots", len(targets_with_scans) * assets_per_target, "🔗")
+
+    for target in targets_with_scans:
+        scan_id = scan_ids[target["id"]]
+        endpoints = DataGenerator.generate_endpoints(target, assets_per_target)
+
+        for i in range(0, len(endpoints), batch_size):
+            batch = endpoints[i:i + batch_size]
+
+            try:
+                error_handler.retry_with_backoff(
+                    client.post,
+                    f"/api/scans/{scan_id}/endpoints/bulk-upsert",
+                    {"targetId": target["id"], "endpoints": batch}
+                )
+
+                progress.add_success(len(batch))
+                progress.update(progress.current_count + len(batch))
+
+            except Exception as e:
+                progress.add_error(str(e))
+                error_handler.log_error(str(e), {"scanId": scan_id, "endpoints": batch})
+
+    progress.finish_phase()
+
+    # Create directory snapshots
+    progress.start_phase("Creating directory snapshots", len(targets_with_scans) * assets_per_target, "📁")
+
+    for target in targets_with_scans:
+        scan_id = scan_ids[target["id"]]
+        directories = DataGenerator.generate_directories(target, assets_per_target)
+
+        for i in range(0, len(directories), batch_size):
+            batch = directories[i:i + batch_size]
+
+            try:
+                error_handler.retry_with_backoff(
+                    client.post,
+                    f"/api/scans/{scan_id}/directories/bulk-upsert",
+                    {"targetId": target["id"], "directories": batch}
+                )
+
+                progress.add_success(len(batch))
+                progress.update(progress.current_count + len(batch))
+
+            except Exception as e:
+                progress.add_error(str(e))
+                error_handler.log_error(str(e), {"scanId": scan_id, "directories": batch})
+
+    progress.finish_phase()
+
+    # Create host port snapshots
+    progress.start_phase("Creating host port snapshots", len(targets_with_scans) * assets_per_target, "🔌")
+
+    for target in targets_with_scans:
+        scan_id = scan_ids[target["id"]]
+        host_ports = DataGenerator.generate_host_port_snapshots(target, assets_per_target)
+
+        for i in range(0, len(host_ports), batch_size):
+            batch = host_ports[i:i + batch_size]
+
+            try:
+                error_handler.retry_with_backoff(
+                    client.post,
+                    f"/api/scans/{scan_id}/host-ports/bulk-upsert",
+                    {"targetId": target["id"], "hostPorts": batch}
+                )
+
+                progress.add_success(len(batch))
+                progress.update(progress.current_count + len(batch))
+
+            except Exception as e:
+                progress.add_error(str(e))
+                error_handler.log_error(str(e), {"scanId": scan_id, "hostPorts": batch})
+
+    progress.finish_phase()
+
+    # Create screenshot snapshots
+    progress.start_phase("Creating screenshot snapshots", len(targets_with_scans) * assets_per_target, "📸")
+
+    for target in targets_with_scans:
+        scan_id = scan_ids[target["id"]]
+        screenshots = DataGenerator.generate_screenshots(target, assets_per_target)
+
+        for i in range(0, len(screenshots), batch_size):
+            batch = screenshots[i:i + batch_size]
+
+            try:
+                error_handler.retry_with_backoff(
+                    client.post,
+                    f"/api/scans/{scan_id}/screenshots/bulk-upsert",
+                    {"targetId": target["id"], "screenshots": batch}
+                )
+
+                progress.add_success(len(batch))
+                progress.update(progress.current_count + len(batch))
+
+            except Exception as e:
+                progress.add_error(str(e))
+                error_handler.log_error(str(e), {"scanId": scan_id, "screenshots": batch})
+
+    progress.finish_phase()
+
+    # Create vulnerability snapshots
+    progress.start_phase("Creating vulnerability snapshots", len(targets_with_scans) * assets_per_target, "🔓")
+
+    for target in targets_with_scans:
+        scan_id = scan_ids[target["id"]]
+        vulnerabilities = DataGenerator.generate_vulnerability_snapshots(target, assets_per_target)
+
+        for i in range(0, len(vulnerabilities), batch_size):
+            batch = vulnerabilities[i:i + batch_size]
+
+            try:
+                error_handler.retry_with_backoff(
+                    client.post,
+                    f"/api/scans/{scan_id}/vulnerabilities/bulk-create",
+                    {"vulnerabilities": batch}
+                )
+
+                progress.add_success(len(batch))
+                progress.update(progress.current_count + len(batch))
+
+            except Exception as e:
+                progress.add_error(str(e))
+                error_handler.log_error(str(e), {"scanId": scan_id, "vulnerabilities": batch})
+
+    progress.finish_phase()
 
 
 if __name__ == "__main__":

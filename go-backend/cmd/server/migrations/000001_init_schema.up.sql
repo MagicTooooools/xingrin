@@ -591,3 +591,13 @@ CREATE INDEX IF NOT EXISTS idx_scan_engine_ids_gin ON scan USING GIN (engine_ids
 
 -- GIN index for scan.container_ids array
 CREATE INDEX IF NOT EXISTS idx_scan_container_ids_gin ON scan USING GIN (container_ids);
+
+-- ============================================
+-- Seed data
+-- ============================================
+
+-- Default admin user (password: admin)
+-- Password hash generated with bcrypt
+INSERT INTO auth_user (username, password, is_superuser, is_staff, is_active, date_joined)
+VALUES ('admin', '$2b$12$.4wL49eZfJuwVjP85Qxa7.xFb7HE3TDer4wcF9Z7c.oTOo7fExlgq', TRUE, TRUE, TRUE, CURRENT_TIMESTAMP)
+ON CONFLICT (username) DO NOTHING;
