@@ -3,7 +3,7 @@ package repository
 import (
 	"testing"
 
-	"github.com/xingrin/server/internal/model"
+	"github.com/orbit/server/internal/model"
 )
 
 // TestWebsiteSnapshotFilterMapping tests the filter mapping configuration

@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5/pgconn"
-	"github.com/xingrin/server/internal/model"
-	"github.com/xingrin/server/internal/pkg/scope"
+	"github.com/orbit/server/internal/model"
+	"github.com/orbit/server/internal/pkg/scope"
 	"gorm.io/gorm"
 )
 

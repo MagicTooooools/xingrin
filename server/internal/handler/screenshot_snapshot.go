@@ -5,8 +5,8 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/xingrin/server/internal/dto"
-	"github.com/xingrin/server/internal/service"
+	"github.com/orbit/server/internal/dto"
+	"github.com/orbit/server/internal/service"
 )
 
 // ScreenshotSnapshotHandler handles screenshot snapshot endpoints

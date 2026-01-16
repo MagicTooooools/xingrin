@@ -4,9 +4,9 @@ import (
 	"errors"
 
 	"github.com/gin-gonic/gin"
-	"github.com/xingrin/server/internal/dto"
-	"github.com/xingrin/server/internal/middleware"
-	"github.com/xingrin/server/internal/service"
+	"github.com/orbit/server/internal/dto"
+	"github.com/orbit/server/internal/middleware"
+	"github.com/orbit/server/internal/service"
 )
 
 // UserHandler handles user endpoints

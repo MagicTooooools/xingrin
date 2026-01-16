@@ -7,10 +7,10 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/xingrin/server/internal/dto"
-	"github.com/xingrin/server/internal/model"
-	"github.com/xingrin/server/internal/pkg/csv"
-	"github.com/xingrin/server/internal/service"
+	"github.com/orbit/server/internal/dto"
+	"github.com/orbit/server/internal/model"
+	"github.com/orbit/server/internal/pkg/csv"
+	"github.com/orbit/server/internal/service"
 )
 
 // DirectoryHandler handles directory endpoints

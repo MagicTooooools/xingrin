@@ -8,7 +8,7 @@ import (
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
 	"github.com/golang-migrate/migrate/v4/source/iofs"
-	"github.com/xingrin/server/internal/pkg"
+	"github.com/orbit/server/internal/pkg"
 	"go.uber.org/zap"
 )
 

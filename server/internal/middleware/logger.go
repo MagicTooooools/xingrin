@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"github.com/xingrin/server/internal/pkg"
+	"github.com/orbit/server/internal/pkg"
 	"go.uber.org/zap"
 )
 

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/xingrin/server/internal/config"
+	"github.com/orbit/server/internal/config"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/schema"

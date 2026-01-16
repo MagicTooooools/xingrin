@@ -16,12 +16,18 @@ type Config struct {
 	Log      LogConfig
 	JWT      JWTConfig
 	Storage  StorageConfig
+	Worker   WorkerConfig
 }
 
 // ServerConfig holds server-related configuration
 type ServerConfig struct {
 	Port int    `mapstructure:"SERVER_PORT"`
 	Mode string `mapstructure:"GIN_MODE"`
+}
+
+// WorkerConfig holds worker-related configuration
+type WorkerConfig struct {
+	Token string `mapstructure:"WORKER_TOKEN"`
 }
 
 // DatabaseConfig holds database-related configuration
@@ -123,6 +129,9 @@ func Load() (*Config, error) {
 	// Storage config
 	cfg.Storage.WordlistsBasePath = v.GetString("WORDLISTS_BASE_PATH")
 
+	// Worker config
+	cfg.Worker.Token = v.GetString("WORKER_TOKEN")
+
 	return cfg, nil
 }
 
@@ -137,7 +146,7 @@ func setDefaults(v *viper.Viper) {
 	v.SetDefault("DB_PORT", 5432)
 	v.SetDefault("DB_USER", "postgres")
 	v.SetDefault("DB_PASSWORD", "")
-	v.SetDefault("DB_NAME", "xingrin")
+	v.SetDefault("DB_NAME", "orbit")
 	v.SetDefault("DB_SSLMODE", "disable")
 	v.SetDefault("DB_MAX_OPEN_CONNS", 25)
 	v.SetDefault("DB_MAX_IDLE_CONNS", 5)
@@ -159,7 +168,10 @@ func setDefaults(v *viper.Viper) {
 	v.SetDefault("JWT_REFRESH_EXPIRE", "168h") // 7 days
 
 	// Storage defaults
-	v.SetDefault("WORDLISTS_BASE_PATH", "/opt/xingrin/wordlists")
+	v.SetDefault("WORDLISTS_BASE_PATH", "/opt/orbit/wordlists")
+
+	// Worker defaults
+	v.SetDefault("WORKER_TOKEN", "change-me-worker-token")
 }
 
 // DSN returns the database connection string
@@ -187,7 +199,7 @@ func GetDefaults() *Config {
 			Port:            5432,
 			User:            "postgres",
 			Password:        "",
-			Name:            "xingrin",
+			Name:            "orbit",
 			SSLMode:         "disable",
 			MaxOpenConns:    25,
 			MaxIdleConns:    5,
@@ -209,7 +221,10 @@ func GetDefaults() *Config {
 			RefreshExpire: 168 * time.Hour,
 		},
 		Storage: StorageConfig{
-			WordlistsBasePath: "/opt/xingrin/wordlists",
+			WordlistsBasePath: "/opt/orbit/wordlists",
+		},
+		Worker: WorkerConfig{
+			Token: "change-me-worker-token",
 		},
 	}
 }

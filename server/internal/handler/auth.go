@@ -2,10 +2,10 @@ package handler
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/xingrin/server/internal/auth"
-	"github.com/xingrin/server/internal/dto"
-	"github.com/xingrin/server/internal/middleware"
-	"github.com/xingrin/server/internal/model"
+	"github.com/orbit/server/internal/auth"
+	"github.com/orbit/server/internal/dto"
+	"github.com/orbit/server/internal/middleware"
+	"github.com/orbit/server/internal/model"
 	"gorm.io/gorm"
 )
 

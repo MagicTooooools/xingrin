@@ -3,7 +3,7 @@ package service
 import (
 	"testing"
 
-	"github.com/xingrin/server/internal/dto"
+	"github.com/orbit/server/internal/dto"
 )
 
 // Feature: go-snapshot-apis, Property 1: 快照和资产同步写入

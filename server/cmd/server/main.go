@@ -12,15 +12,15 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis/v8"
-	"github.com/xingrin/server/internal/auth"
-	"github.com/xingrin/server/internal/config"
-	"github.com/xingrin/server/internal/database"
-	"github.com/xingrin/server/internal/handler"
-	"github.com/xingrin/server/internal/middleware"
-	"github.com/xingrin/server/internal/pkg"
-	pkgvalidator "github.com/xingrin/server/internal/pkg/validator"
-	"github.com/xingrin/server/internal/repository"
-	"github.com/xingrin/server/internal/service"
+	"github.com/orbit/server/internal/auth"
+	"github.com/orbit/server/internal/config"
+	"github.com/orbit/server/internal/database"
+	"github.com/orbit/server/internal/handler"
+	"github.com/orbit/server/internal/middleware"
+	"github.com/orbit/server/internal/pkg"
+	pkgvalidator "github.com/orbit/server/internal/pkg/validator"
+	"github.com/orbit/server/internal/repository"
+	"github.com/orbit/server/internal/service"
 	"go.uber.org/zap"
 )
 
@@ -164,6 +164,7 @@ func main() {
 	vulnerabilitySvc := service.NewVulnerabilityService(vulnerabilityRepo, targetRepo)
 	scanSvc := service.NewScanService(scanRepo, scanLogRepo, targetRepo, orgRepo)
 	scanLogSvc := service.NewScanLogService(scanLogRepo, scanRepo)
+	scanInputSvc := service.NewScanInputService(scanRepo, subdomainRepo, websiteRepo, hostPortRepo)
 	websiteSnapshotSvc := service.NewWebsiteSnapshotService(websiteSnapshotRepo, scanRepo, websiteSvc)
 	subdomainSnapshotSvc := service.NewSubdomainSnapshotService(subdomainSnapshotRepo, scanRepo, subdomainSvc)
 	endpointSnapshotSvc := service.NewEndpointSnapshotService(endpointSnapshotRepo, scanRepo, endpointSvc)
@@ -189,6 +190,7 @@ func main() {
 	vulnerabilityHandler := handler.NewVulnerabilityHandler(vulnerabilitySvc)
 	scanHandler := handler.NewScanHandler(scanSvc)
 	scanLogHandler := handler.NewScanLogHandler(scanLogSvc)
+	scanInputHandler := handler.NewScanInputHandler(scanInputSvc)
 	websiteSnapshotHandler := handler.NewWebsiteSnapshotHandler(websiteSnapshotSvc)
 	subdomainSnapshotHandler := handler.NewSubdomainSnapshotHandler(subdomainSnapshotSvc)
 	endpointSnapshotHandler := handler.NewEndpointSnapshotHandler(endpointSnapshotSvc)
@@ -215,6 +217,18 @@ func main() {
 		// Public routes (no auth) - images are loaded by browser <img> and cannot attach Authorization header
 		api.GET("/screenshots/:id/image", screenshotHandler.GetImage)
 		api.GET("/scans/:id/screenshots/:snapshotId/image", screenshotSnapshotHandler.GetImage)
+
+		// Worker API routes (token auth)
+		workerAPI := api.Group("/worker")
+		workerAPI.Use(middleware.WorkerAuthMiddleware(cfg.Worker.Token))
+		{
+			workerAPI.GET("/scans/:id/domains", scanInputHandler.GetDomains)
+			workerAPI.GET("/scans/:id/subdomains", scanInputHandler.GetSubdomains)
+			workerAPI.GET("/scans/:id/websites", scanInputHandler.GetWebsites)
+			workerAPI.GET("/scans/:id/hosts", scanInputHandler.GetHosts)
+			workerAPI.GET("/scans/:id/provider-config", scanInputHandler.GetProviderConfig)
+			workerAPI.PATCH("/scans/:id/status", scanInputHandler.UpdateStatus)
+		}
 
 		// Protected routes
 		protected := api.Group("")

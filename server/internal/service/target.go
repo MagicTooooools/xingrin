@@ -4,10 +4,10 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/xingrin/server/internal/dto"
-	"github.com/xingrin/server/internal/model"
-	"github.com/xingrin/server/internal/pkg/validator"
-	"github.com/xingrin/server/internal/repository"
+	"github.com/orbit/server/internal/dto"
+	"github.com/orbit/server/internal/model"
+	"github.com/orbit/server/internal/pkg/validator"
+	"github.com/orbit/server/internal/repository"
 	"gorm.io/gorm"
 )
 

@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/xingrin/server/internal/auth"
+	"github.com/orbit/server/internal/auth"
 )
 
 // ContextKey for user claims
