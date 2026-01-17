@@ -41,7 +41,7 @@ export interface OrganizationTranslations {
     selectRow: string
   }
   tooltips: {
-    targetSummary: string
+    organizationDetails: string
     initiateScan: string
   }
 }
@@ -240,7 +240,7 @@ export const createOrganizationColumns = ({
               </Button>
             </TooltipTrigger>
             <TooltipContent side="top">
-              <p className="text-xs">{t.tooltips.targetSummary}</p>
+              <p className="text-xs">{t.tooltips.organizationDetails}</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>

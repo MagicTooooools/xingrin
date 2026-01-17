@@ -94,11 +94,6 @@ func (r *ScanRepository) FindAll(page, pageSize int, targetID int, status, searc
 	return scans, total, err
 }
 
-// Update updates a scan
-func (r *ScanRepository) Update(scan *model.Scan) error {
-	return r.db.Save(scan).Error
-}
-
 // SoftDelete soft deletes a scan
 func (r *ScanRepository) SoftDelete(id int) error {
 	now := time.Now()
@@ -142,20 +137,11 @@ func (r *ScanRepository) UpdateStatus(id int, status string, errorMessage ...str
 	if len(errorMessage) > 0 {
 		updates["error_message"] = errorMessage[0]
 	}
-	if status == model.ScanStatusCompleted || status == model.ScanStatusFailed || status == model.ScanStatusStopped {
+	if status == model.ScanStatusCompleted || status == model.ScanStatusFailed || status == model.ScanStatusCancelled {
 		now := time.Now()
 		updates["stopped_at"] = &now
 	}
 	return r.db.Model(&model.Scan{}).Where("id = ?", id).Updates(updates).Error
-}
-
-// UpdateProgress updates scan progress
-func (r *ScanRepository) UpdateProgress(id int, progress int, currentStage string) error {
-	return r.db.Model(&model.Scan{}).Where("id = ?", id).
-		Updates(map[string]interface{}{
-			"progress":      progress,
-			"current_stage": currentStage,
-		}).Error
 }
 
 // GetStatistics returns scan statistics
@@ -221,30 +207,6 @@ type ScanStatistics struct {
 	TotalEndpoints  int64
 	TotalWebsites   int64
 	TotalAssets     int64
-}
-
-// FindByTargetIDs finds scans by target IDs
-func (r *ScanRepository) FindByTargetIDs(targetIDs []int) ([]model.Scan, error) {
-	if len(targetIDs) == 0 {
-		return nil, nil
-	}
-
-	var scans []model.Scan
-	err := r.db.Where("target_id IN ? AND deleted_at IS NULL", targetIDs).
-		Preload("Target").
-		Order("created_at DESC").
-		Find(&scans).Error
-	return scans, err
-}
-
-// HasActiveScan checks if target has an active scan
-func (r *ScanRepository) HasActiveScan(targetID int) (bool, error) {
-	var count int64
-	err := r.db.Model(&model.Scan{}).
-		Where("target_id = ? AND deleted_at IS NULL AND status IN ?", targetID,
-			[]string{model.ScanStatusInitiated, model.ScanStatusRunning, model.ScanStatusPending}).
-		Count(&count).Error
-	return count > 0, err
 }
 
 // GetTargetByScanID returns the target associated with a scan

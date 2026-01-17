@@ -601,3 +601,25 @@ CREATE INDEX IF NOT EXISTS idx_scan_container_ids_gin ON scan USING GIN (contain
 INSERT INTO auth_user (username, password, is_superuser, is_staff, is_active, date_joined)
 VALUES ('admin', '$2b$12$.4wL49eZfJuwVjP85Qxa7.xFb7HE3TDer4wcF9Z7c.oTOo7fExlgq', TRUE, TRUE, TRUE, CURRENT_TIMESTAMP)
 ON CONFLICT (username) DO NOTHING;
+
+-- ============================================
+-- Subfinder Provider Settings (singleton)
+-- ============================================
+CREATE TABLE IF NOT EXISTS subfinder_provider_settings (
+    id INTEGER PRIMARY KEY DEFAULT 1 CHECK (id = 1),
+    providers JSONB NOT NULL DEFAULT '{}'::jsonb,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Insert default row with all providers disabled
+INSERT INTO subfinder_provider_settings (id, providers) VALUES (1, '{
+    "fofa": {"enabled": false, "email": "", "api_key": ""},
+    "hunter": {"enabled": false, "api_key": ""},
+    "shodan": {"enabled": false, "api_key": ""},
+    "censys": {"enabled": false, "api_id": "", "api_secret": ""},
+    "zoomeye": {"enabled": false, "api_key": ""},
+    "securitytrails": {"enabled": false, "api_key": ""},
+    "threatbook": {"enabled": false, "api_key": ""},
+    "quake": {"enabled": false, "api_key": ""}
+}'::jsonb) ON CONFLICT (id) DO NOTHING;

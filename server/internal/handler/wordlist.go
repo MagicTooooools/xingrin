@@ -2,6 +2,7 @@ package handler
 
 import (
 	"errors"
+	"os"
 	"path/filepath"
 	"strconv"
 
@@ -10,46 +11,215 @@ import (
 	"github.com/orbit/server/internal/service"
 )
 
-// WordlistHandler handles wordlist endpoints
+// WordlistHandler handles wordlist API requests
 type WordlistHandler struct {
 	svc *service.WordlistService
 }
 
 // NewWordlistHandler creates a new wordlist handler
 func NewWordlistHandler(svc *service.WordlistService) *WordlistHandler {
-	return &WordlistHandler{svc: svc}
+	return &WordlistHandler{
+		svc: svc,
+	}
 }
 
-// Create uploads and creates a new wordlist
-// POST /api/wordlists
+// List returns all wordlists
+// GET /api/wordlists/
+func (h *WordlistHandler) List(c *gin.Context) {
+	wordlists, err := h.svc.ListAll()
+	if err != nil {
+		dto.InternalError(c, "Failed to list wordlists")
+		return
+	}
+
+	// Initialize empty slice to return [] instead of null
+	resp := make([]dto.WordlistResponse, 0, len(wordlists))
+	for _, w := range wordlists {
+		resp = append(resp, dto.WordlistResponse{
+			ID:          w.ID,
+			Name:        w.Name,
+			Description: w.Description,
+			FilePath:    w.FilePath,
+			FileSize:    w.FileSize,
+			LineCount:   w.LineCount,
+			FileHash:    w.FileHash,
+			CreatedAt:   w.CreatedAt,
+			UpdatedAt:   w.UpdatedAt,
+		})
+	}
+
+	dto.Success(c, resp)
+}
+
+// Get returns a wordlist by ID
+// GET /api/wordlists/:id
+func (h *WordlistHandler) Get(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		dto.BadRequest(c, "Invalid wordlist ID")
+		return
+	}
+
+	wordlist, err := h.svc.GetByID(id)
+	if err != nil {
+		if errors.Is(err, service.ErrWordlistNotFound) {
+			dto.NotFound(c, "Wordlist not found")
+			return
+		}
+		dto.InternalError(c, "Failed to get wordlist")
+		return
+	}
+
+	dto.Success(c, dto.WordlistResponse{
+		ID:          wordlist.ID,
+		Name:        wordlist.Name,
+		Description: wordlist.Description,
+		FilePath:    wordlist.FilePath,
+		FileSize:    wordlist.FileSize,
+		LineCount:   wordlist.LineCount,
+		FileHash:    wordlist.FileHash,
+		CreatedAt:   wordlist.CreatedAt,
+		UpdatedAt:   wordlist.UpdatedAt,
+	})
+}
+
+// GetByName returns a wordlist by name (for worker API)
+// GET /api/worker/wordlists/:name
+func (h *WordlistHandler) GetByName(c *gin.Context) {
+	name := c.Param("name")
+	if name == "" {
+		dto.BadRequest(c, "Name is required")
+		return
+	}
+
+	wordlist, err := h.svc.GetByName(name)
+	if err != nil {
+		if errors.Is(err, service.ErrWordlistNotFound) {
+			dto.NotFound(c, "Wordlist not found")
+			return
+		}
+		dto.InternalError(c, "Failed to get wordlist")
+		return
+	}
+
+	dto.Success(c, dto.WordlistResponse{
+		ID:          wordlist.ID,
+		Name:        wordlist.Name,
+		Description: wordlist.Description,
+		FilePath:    wordlist.FilePath,
+		FileSize:    wordlist.FileSize,
+		LineCount:   wordlist.LineCount,
+		FileHash:    wordlist.FileHash,
+		CreatedAt:   wordlist.CreatedAt,
+		UpdatedAt:   wordlist.UpdatedAt,
+	})
+}
+
+// DownloadByID serves the wordlist file by ID (RESTful)
+// GET /api/wordlists/:id/download
+func (h *WordlistHandler) DownloadByID(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		dto.BadRequest(c, "Invalid wordlist ID")
+		return
+	}
+
+	wordlist, err := h.svc.GetByID(id)
+	if err != nil {
+		if errors.Is(err, service.ErrWordlistNotFound) {
+			dto.NotFound(c, "Wordlist not found")
+			return
+		}
+		dto.InternalError(c, "Failed to get wordlist")
+		return
+	}
+
+	h.serveWordlistFile(c, wordlist.Name)
+}
+
+// DownloadByName serves the wordlist file (path parameter style - RESTful)
+// GET /api/worker/wordlists/:name/download
+func (h *WordlistHandler) DownloadByName(c *gin.Context) {
+	name := c.Param("name")
+	if name == "" {
+		dto.BadRequest(c, "Name is required")
+		return
+	}
+
+	h.serveWordlistFile(c, name)
+}
+
+// serveWordlistFile is a helper to serve wordlist file by name
+func (h *WordlistHandler) serveWordlistFile(c *gin.Context, name string) {
+	filePath, err := h.svc.GetFilePath(name)
+	if err != nil {
+		if errors.Is(err, service.ErrWordlistNotFound) {
+			dto.NotFound(c, "Wordlist not found")
+			return
+		}
+		if errors.Is(err, service.ErrFileNotFound) {
+			dto.NotFound(c, "Wordlist file not found on server")
+			return
+		}
+		dto.InternalError(c, "Failed to get wordlist")
+		return
+	}
+
+	// Check if file exists
+	if _, err := os.Stat(filePath); os.IsNotExist(err) {
+		dto.NotFound(c, "Wordlist file not found on server")
+		return
+	}
+
+	// Serve file
+	c.Header("Content-Disposition", "attachment; filename="+filepath.Base(filePath))
+	c.Header("Content-Type", "application/octet-stream")
+	c.File(filePath)
+}
+
+// Create creates a new wordlist with file upload
+// POST /api/wordlists/
+// Content-Type: multipart/form-data
+// Fields: name (required), description (optional), file (required)
 func (h *WordlistHandler) Create(c *gin.Context) {
+	// Get form fields
 	name := c.PostForm("name")
+	if name == "" {
+		dto.BadRequest(c, "Name is required")
+		return
+	}
+
 	description := c.PostForm("description")
 
-	file, err := c.FormFile("file")
+	// Get uploaded file (streaming, not loaded into memory)
+	file, header, err := c.Request.FormFile("file")
 	if err != nil {
-		dto.BadRequest(c, "Missing wordlist file")
+		dto.BadRequest(c, "File is required")
 		return
 	}
+	defer func() { _ = file.Close() }()
 
-	// Open the uploaded file
-	src, err := file.Open()
+	// Create wordlist with streamed file content
+	wordlist, err := h.svc.Create(name, description, header.Filename, file)
 	if err != nil {
-		dto.InternalError(c, "Failed to read uploaded file")
-		return
-	}
-	defer func() {
-		_ = src.Close() // Ignore close error in defer
-	}()
-
-	wordlist, err := h.svc.Create(name, description, file.Filename, src)
-	if err != nil {
+		if errors.Is(err, service.ErrWordlistExists) {
+			dto.BadRequest(c, "Wordlist name already exists")
+			return
+		}
 		if errors.Is(err, service.ErrEmptyName) {
 			dto.BadRequest(c, "Wordlist name cannot be empty")
 			return
 		}
-		if errors.Is(err, service.ErrWordlistExists) {
-			dto.BadRequest(c, "Wordlist name already exists")
+		if errors.Is(err, service.ErrNameTooLong) {
+			dto.BadRequest(c, "Wordlist name too long (max 200 characters)")
+			return
+		}
+		if errors.Is(err, service.ErrInvalidName) {
+			dto.BadRequest(c, "Wordlist name contains invalid characters (newlines, tabs, etc.)")
+			return
+		}
+		if errors.Is(err, service.ErrInvalidFileType) {
+			dto.BadRequest(c, "File appears to be binary, only text files are allowed")
 			return
 		}
 		dto.InternalError(c, "Failed to create wordlist")
@@ -69,38 +239,6 @@ func (h *WordlistHandler) Create(c *gin.Context) {
 	})
 }
 
-// List returns paginated wordlists
-// GET /api/wordlists
-func (h *WordlistHandler) List(c *gin.Context) {
-	var query dto.PaginationQuery
-	if !dto.BindQuery(c, &query) {
-		return
-	}
-
-	wordlists, total, err := h.svc.List(&query)
-	if err != nil {
-		dto.InternalError(c, "Failed to list wordlists")
-		return
-	}
-
-	var resp []dto.WordlistResponse
-	for _, w := range wordlists {
-		resp = append(resp, dto.WordlistResponse{
-			ID:          w.ID,
-			Name:        w.Name,
-			Description: w.Description,
-			FilePath:    w.FilePath,
-			FileSize:    w.FileSize,
-			LineCount:   w.LineCount,
-			FileHash:    w.FileHash,
-			CreatedAt:   w.CreatedAt,
-			UpdatedAt:   w.UpdatedAt,
-		})
-	}
-
-	dto.Paginated(c, resp, total, query.GetPage(), query.GetPageSize())
-}
-
 // Delete deletes a wordlist
 // DELETE /api/wordlists/:id
 func (h *WordlistHandler) Delete(c *gin.Context) {
@@ -110,8 +248,7 @@ func (h *WordlistHandler) Delete(c *gin.Context) {
 		return
 	}
 
-	err = h.svc.Delete(id)
-	if err != nil {
+	if err := h.svc.Delete(id); err != nil {
 		if errors.Is(err, service.ErrWordlistNotFound) {
 			dto.NotFound(c, "Wordlist not found")
 			return
@@ -123,27 +260,8 @@ func (h *WordlistHandler) Delete(c *gin.Context) {
 	dto.NoContent(c)
 }
 
-// Download downloads a wordlist file by name
-// GET /api/wordlists/download?wordlist=xxx
-func (h *WordlistHandler) Download(c *gin.Context) {
-	name := c.Query("wordlist")
-	if name == "" {
-		dto.BadRequest(c, "Missing parameter: wordlist")
-		return
-	}
-
-	filePath, err := h.svc.GetFilePath(name)
-	if err != nil {
-		if errors.Is(err, service.ErrWordlistNotFound) || errors.Is(err, service.ErrFileNotFound) {
-			dto.NotFound(c, "Wordlist not found")
-			return
-		}
-		dto.InternalError(c, "Failed to get wordlist")
-		return
-	}
-
-	c.FileAttachment(filePath, filepath.Base(filePath))
-}
+// maxEditableSize is the maximum file size allowed for online editing (10MB)
+const maxEditableSize = 10 * 1024 * 1024
 
 // GetContent returns the content of a wordlist file
 // GET /api/wordlists/:id/content
@@ -151,6 +269,22 @@ func (h *WordlistHandler) GetContent(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		dto.BadRequest(c, "Invalid wordlist ID")
+		return
+	}
+
+	// Check file size first
+	wordlist, err := h.svc.GetByID(id)
+	if err != nil {
+		if errors.Is(err, service.ErrWordlistNotFound) {
+			dto.NotFound(c, "Wordlist not found")
+			return
+		}
+		dto.InternalError(c, "Failed to get wordlist")
+		return
+	}
+
+	if wordlist.FileSize > maxEditableSize {
+		dto.BadRequest(c, "File too large for online editing (max 10MB), please download and edit locally")
 		return
 	}
 
@@ -180,12 +314,34 @@ func (h *WordlistHandler) UpdateContent(c *gin.Context) {
 		return
 	}
 
+	// Check file size first
+	wordlist, err := h.svc.GetByID(id)
+	if err != nil {
+		if errors.Is(err, service.ErrWordlistNotFound) {
+			dto.NotFound(c, "Wordlist not found")
+			return
+		}
+		dto.InternalError(c, "Failed to get wordlist")
+		return
+	}
+
+	if wordlist.FileSize > maxEditableSize {
+		dto.BadRequest(c, "File too large for online editing (max 10MB), please re-upload the file")
+		return
+	}
+
 	var req dto.UpdateWordlistContentRequest
 	if !dto.BindJSON(c, &req) {
 		return
 	}
 
-	wordlist, err := h.svc.UpdateContent(id, req.Content)
+	// Also check the new content size
+	if int64(len(req.Content)) > maxEditableSize {
+		dto.BadRequest(c, "Content too large (max 10MB)")
+		return
+	}
+
+	wordlist, err = h.svc.UpdateContent(id, req.Content)
 	if err != nil {
 		if errors.Is(err, service.ErrWordlistNotFound) {
 			dto.NotFound(c, "Wordlist not found")

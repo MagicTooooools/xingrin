@@ -117,6 +117,7 @@
     "targetDetails": "Target Details",
     "viewProgress": "Click to view progress details",
     "targetSummary": "Target Summary",
+    "organizationDetails": "Organization Details",
     "initiateScan": "Initiate Scan",
     "scheduleScan": "Schedule Scan",
     "editEngine": "Edit Engine",

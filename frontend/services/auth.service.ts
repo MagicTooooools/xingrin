@@ -91,6 +91,6 @@ export async function changePassword(data: ChangePasswordRequest): Promise<Chang
     await mockDelay()
     return { message: 'Password changed successfully' }
   }
-  const res = await api.post<ChangePasswordResponse>('/auth/change-password/', data)
+  const res = await api.put<ChangePasswordResponse>('/users/me/password/', data)
   return res.data
 }

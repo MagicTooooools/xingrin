@@ -56,13 +56,26 @@ func (r *DirectoryRepository) BulkCreate(directories []model.Directory) (int, er
 		return 0, nil
 	}
 
-	// Use ON CONFLICT DO NOTHING to ignore duplicates (url + target_id unique)
-	result := r.db.Clauses(clause.OnConflict{DoNothing: true}).Create(&directories)
-	if result.Error != nil {
-		return 0, result.Error
+	var totalAffected int
+
+	// Process in batches to avoid SQL statement size limits
+	batchSize := 500
+	for i := 0; i < len(directories); i += batchSize {
+		end := i + batchSize
+		if end > len(directories) {
+			end = len(directories)
+		}
+		batch := directories[i:end]
+
+		// Use ON CONFLICT DO NOTHING to ignore duplicates (url + target_id unique)
+		result := r.db.Clauses(clause.OnConflict{DoNothing: true}).Create(&batch)
+		if result.Error != nil {
+			return totalAffected, result.Error
+		}
+		totalAffected += int(result.RowsAffected)
 	}
 
-	return int(result.RowsAffected), nil
+	return totalAffected, nil
 }
 
 // BulkDelete deletes multiple directories by IDs

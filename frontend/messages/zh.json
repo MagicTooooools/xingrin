@@ -11,16 +11,16 @@
       "url": "URL"
     },
     "scanHistory": {
-      "target": "Target",
-      "summary": "Summary",
-      "engineName": "Engine Name",
-      "workerName": "Worker Node",
-      "progress": "Progress",
-      "subdomains": "Subdomains",
-      "websites": "Websites",
-      "ipAddresses": "IP Addresses",
-      "endpoints": "Endpoints",
-      "vulnerabilities": "Vulnerabilities"
+      "target": "目标",
+      "summary": "摘要",
+      "engineName": "引擎名称",
+      "workerName": "扫描节点",
+      "progress": "进度",
+      "subdomains": "子域名",
+      "websites": "站点",
+      "ipAddresses": "IP 地址",
+      "endpoints": "URL",
+      "vulnerabilities": "漏洞"
     },
     "vulnerability": {
       "severity": "严重程度",
@@ -85,16 +85,16 @@
       "createdAt": "创建时间"
     },
     "engine": {
-      "engineName": "Engine Name",
-      "subdomainDiscovery": "Subdomain Discovery",
-      "portScan": "Port Scan",
-      "siteScan": "Site Scan",
-      "directoryScan": "Directory Scan",
-      "urlFetch": "URL Fetch",
+      "engineName": "引擎名称",
+      "subdomainDiscovery": "子域名发现",
+      "portScan": "端口扫描",
+      "siteScan": "站点扫描",
+      "directoryScan": "目录扫描",
+      "urlFetch": "URL 抓取",
       "osint": "OSINT",
-      "vulnerabilityScan": "Vulnerability Scan",
-      "wafDetection": "WAF Detection",
-      "screenshot": "Screenshot"
+      "vulnerabilityScan": "漏洞扫描",
+      "wafDetection": "WAF 检测",
+      "screenshot": "截图"
     },
     "scheduledScan": {
       "taskName": "任务名称",
@@ -107,30 +107,31 @@
       "lastRun": "上次执行"
     },
     "fingerprint": {
-      "name": "Name",
-      "cats": "Categories",
-      "rules": "Rules",
-      "implies": "Implies",
-      "website": "Website",
+      "name": "名称",
+      "cats": "分类",
+      "rules": "规则",
+      "implies": "依赖",
+      "website": "官网",
       "cpe": "CPE",
-      "created": "Created",
-      "logic": "Logic",
-      "ruleDetails": "Rule Details",
+      "created": "创建时间",
+      "logic": "逻辑",
+      "ruleDetails": "规则详情",
       "cms": "CMS",
-      "method": "Method",
-      "keyword": "Keyword",
-      "type": "Type",
-      "important": "Important"
+      "method": "方法",
+      "keyword": "关键字",
+      "type": "类型",
+      "important": "重要"
     },
     "command": {
-      "tool": "Tool",
-      "commandTemplate": "Command Template"
+      "tool": "工具",
+      "commandTemplate": "命令模板"
     }
   },
   "tooltips": {
     "targetDetails": "目标详情",
     "viewProgress": "点击查看进度详情",
     "targetSummary": "目标摘要",
+    "organizationDetails": "组织详情",
     "initiateScan": "发起扫描",
     "scheduleScan": "计划扫描",
     "editEngine": "编辑引擎",

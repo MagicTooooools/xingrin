@@ -11,10 +11,9 @@ import (
 )
 
 var (
-	ErrScanNotFound        = errors.New("scan not found")
-	ErrScanCannotStop      = errors.New("scan cannot be stopped in current status")
-	ErrNoTargetsForScan    = errors.New("no targets provided for scan")
-	ErrTargetHasActiveScan = errors.New("target already has an active scan")
+	ErrScanNotFound     = errors.New("scan not found")
+	ErrScanCannotStop   = errors.New("scan cannot be stopped in current status")
+	ErrNoTargetsForScan = errors.New("no targets provided for scan")
 )
 
 // ScanService handles scan business logic
@@ -109,12 +108,12 @@ func (s *ScanService) Stop(id int) (int, error) {
 	}
 
 	// Check if scan can be stopped
-	if scan.Status != model.ScanStatusRunning && scan.Status != model.ScanStatusInitiated {
+	if scan.Status != model.ScanStatusRunning && scan.Status != model.ScanStatusPending && scan.Status != model.ScanStatusScheduled {
 		return 0, ErrScanCannotStop
 	}
 
-	// Update status to stopped
-	if err := s.repo.UpdateStatus(id, model.ScanStatusStopped); err != nil {
+	// Update status to cancelled
+	if err := s.repo.UpdateStatus(id, model.ScanStatusCancelled); err != nil {
 		return 0, err
 	}
 

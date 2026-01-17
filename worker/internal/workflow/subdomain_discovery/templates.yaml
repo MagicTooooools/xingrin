@@ -1,0 +1,57 @@
+# yaml-language-server: $schema=../../activity/templates.schema.json
+# Command templates for subdomain discovery workflow
+#
+# Standard Placeholders (kebab-case for multi-word):
+#   Input:
+#     {domain}          - Target domain name
+#     {input-file}      - Input file path
+#     {wordlist}        - Dictionary file path
+#     {resolvers}       - DNS resolvers file path
+#   Output:
+#     {output-file}     - Output file path
+#   Config:
+#     {provider-config} - API provider config file path
+#   Parameters:
+#     {threads}         - Thread/concurrency count
+#     {timeout}         - Timeout in seconds
+#     {rate-limit}      - Rate limit (requests per second)
+#     {wildcard-tests}  - Wildcard detection test count
+#     {wildcard-batch}  - Wildcard batch size
+
+subfinder:
+  base: "subfinder -d {domain} -all -o '{output-file}' -v"
+  optional:
+    threads: "-t {threads}"
+    provider-config: "-pc '{provider-config}'"
+    timeout: "-timeout {timeout}"
+
+sublist3r:
+  base: "python3 '/usr/local/share/Sublist3r/sublist3r.py' -d {domain} -o '{output-file}'"
+  optional:
+    threads: "-t {threads}"
+
+assetfinder:
+  base: "assetfinder --subs-only {domain} > '{output-file}'"
+  optional: {}
+
+subdomain-bruteforce:
+  base: "puredns bruteforce '{wordlist}' {domain} -r '{resolvers}' --write '{output-file}' --quiet"
+  optional:
+    threads: "-t {threads}"
+    rate-limit: "--rate-limit {rate-limit}"
+    wildcard-tests: "--wildcard-tests {wildcard-tests}"
+    wildcard-batch: "--wildcard-batch {wildcard-batch}"
+
+subdomain-resolve:
+  base: "puredns resolve '{input-file}' -r '{resolvers}' --write '{output-file}' --wildcard-tests 50 --wildcard-batch 1000000 --quiet"
+  optional:
+    threads: "-t {threads}"
+    rate-limit: "--rate-limit {rate-limit}"
+    wildcard-tests: "--wildcard-tests {wildcard-tests}"
+    wildcard-batch: "--wildcard-batch {wildcard-batch}"
+
+subdomain-permutation-resolve:
+  base: "cat '{input-file}' | dnsgen - | puredns resolve -r '{resolvers}' --write '{output-file}' --wildcard-tests 50 --wildcard-batch 1000000 --quiet"
+  optional:
+    threads: "-t {threads}"
+    rate-limit: "--rate-limit {rate-limit}"

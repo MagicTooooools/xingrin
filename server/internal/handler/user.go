@@ -78,8 +78,8 @@ func (h *UserHandler) List(c *gin.Context) {
 	dto.Paginated(c, resp, total, query.GetPage(), query.GetPageSize())
 }
 
-// UpdatePassword updates user password
-// PUT /api/users/:id/password
+// UpdatePassword updates current user's password
+// PUT /api/users/me/password
 func (h *UserHandler) UpdatePassword(c *gin.Context) {
 	// Get current user from context
 	claims, ok := middleware.GetUserClaims(c)

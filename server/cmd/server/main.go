@@ -141,6 +141,7 @@ func main() {
 	vulnerabilityRepo := repository.NewVulnerabilityRepository(db)
 	scanRepo := repository.NewScanRepository(db)
 	scanLogRepo := repository.NewScanLogRepository(db)
+	subfinderProviderSettingsRepo := repository.NewSubfinderProviderSettingsRepository(db)
 	websiteSnapshotRepo := repository.NewWebsiteSnapshotRepository(db)
 	subdomainSnapshotRepo := repository.NewSubdomainSnapshotRepository(db)
 	endpointSnapshotRepo := repository.NewEndpointSnapshotRepository(db)
@@ -164,7 +165,8 @@ func main() {
 	vulnerabilitySvc := service.NewVulnerabilityService(vulnerabilityRepo, targetRepo)
 	scanSvc := service.NewScanService(scanRepo, scanLogRepo, targetRepo, orgRepo)
 	scanLogSvc := service.NewScanLogService(scanLogRepo, scanRepo)
-	scanInputSvc := service.NewScanInputService(scanRepo, subdomainRepo, websiteRepo, hostPortRepo)
+	workerSvc := service.NewWorkerService(scanRepo, subfinderProviderSettingsRepo)
+	agentSvc := service.NewAgentService(scanRepo)
 	websiteSnapshotSvc := service.NewWebsiteSnapshotService(websiteSnapshotRepo, scanRepo, websiteSvc)
 	subdomainSnapshotSvc := service.NewSubdomainSnapshotService(subdomainSnapshotRepo, scanRepo, subdomainSvc)
 	endpointSnapshotSvc := service.NewEndpointSnapshotService(endpointSnapshotRepo, scanRepo, endpointSvc)
@@ -190,7 +192,8 @@ func main() {
 	vulnerabilityHandler := handler.NewVulnerabilityHandler(vulnerabilitySvc)
 	scanHandler := handler.NewScanHandler(scanSvc)
 	scanLogHandler := handler.NewScanLogHandler(scanLogSvc)
-	scanInputHandler := handler.NewScanInputHandler(scanInputSvc)
+	workerHandler := handler.NewWorkerHandler(workerSvc)
+	agentHandler := handler.NewAgentHandler(agentSvc)
 	websiteSnapshotHandler := handler.NewWebsiteSnapshotHandler(websiteSnapshotSvc)
 	subdomainSnapshotHandler := handler.NewSubdomainSnapshotHandler(subdomainSnapshotSvc)
 	endpointSnapshotHandler := handler.NewEndpointSnapshotHandler(endpointSnapshotSvc)
@@ -218,16 +221,25 @@ func main() {
 		api.GET("/screenshots/:id/image", screenshotHandler.GetImage)
 		api.GET("/scans/:id/screenshots/:snapshotId/image", screenshotSnapshotHandler.GetImage)
 
-		// Worker API routes (token auth)
+		// Worker API routes (token auth) - for Worker to fetch scan data and save results
 		workerAPI := api.Group("/worker")
 		workerAPI.Use(middleware.WorkerAuthMiddleware(cfg.Worker.Token))
 		{
-			workerAPI.GET("/scans/:id/domains", scanInputHandler.GetDomains)
-			workerAPI.GET("/scans/:id/subdomains", scanInputHandler.GetSubdomains)
-			workerAPI.GET("/scans/:id/websites", scanInputHandler.GetWebsites)
-			workerAPI.GET("/scans/:id/hosts", scanInputHandler.GetHosts)
-			workerAPI.GET("/scans/:id/provider-config", scanInputHandler.GetProviderConfig)
-			workerAPI.PATCH("/scans/:id/status", scanInputHandler.UpdateStatus)
+			workerAPI.GET("/scans/:id/target-name", workerHandler.GetTargetName)
+			workerAPI.GET("/scans/:id/provider-config", workerHandler.GetProviderConfig)
+			workerAPI.GET("/wordlists/:name", wordlistHandler.GetByName)
+			workerAPI.GET("/wordlists/:name/download", wordlistHandler.DownloadByName)
+			// Batch upsert endpoints - reuse existing handlers
+			workerAPI.POST("/scans/:id/subdomains/bulk-upsert", subdomainSnapshotHandler.BulkUpsert)
+			workerAPI.POST("/scans/:id/websites/bulk-upsert", websiteSnapshotHandler.BulkUpsert)
+			workerAPI.POST("/scans/:id/endpoints/bulk-upsert", endpointSnapshotHandler.BulkUpsert)
+		}
+
+		// Agent API routes (token auth) - for Agent to manage scan status
+		agentAPI := api.Group("/agent")
+		agentAPI.Use(middleware.WorkerAuthMiddleware(cfg.Worker.Token))
+		{
+			agentAPI.PATCH("/scans/:id/status", agentHandler.UpdateStatus)
 		}
 
 		// Protected routes
@@ -240,7 +252,7 @@ func main() {
 			// Users
 			protected.POST("/users", userHandler.Create)
 			protected.GET("/users", userHandler.List)
-			protected.PUT("/users/password", userHandler.UpdatePassword)
+			protected.PUT("/users/me/password", userHandler.UpdatePassword)
 
 			// Organizations
 			protected.POST("/organizations", orgHandler.Create)
@@ -255,7 +267,7 @@ func main() {
 
 			// Targets
 			protected.POST("/targets", targetHandler.Create)
-			protected.POST("/targets/batch_create", targetHandler.BatchCreate)
+			protected.POST("/targets/bulk-create", targetHandler.BatchCreate)
 			protected.POST("/targets/bulk-delete", targetHandler.BulkDelete)
 			protected.GET("/targets", targetHandler.List)
 			protected.GET("/targets/:id", targetHandler.GetByID)
@@ -343,19 +355,19 @@ func main() {
 			// Wordlists
 			protected.POST("/wordlists", wordlistHandler.Create)
 			protected.GET("/wordlists", wordlistHandler.List)
+			protected.GET("/wordlists/:id", wordlistHandler.Get)
+			protected.GET("/wordlists/:id/download", wordlistHandler.DownloadByID)
 			protected.DELETE("/wordlists/:id", wordlistHandler.Delete)
-			protected.GET("/wordlists/download", wordlistHandler.Download)
 			protected.GET("/wordlists/:id/content", wordlistHandler.GetContent)
 			protected.PUT("/wordlists/:id/content", wordlistHandler.UpdateContent)
 
 			// Scans
 			protected.GET("/scans", scanHandler.List)
+			protected.POST("/scans", scanHandler.Create)
 			protected.GET("/scans/statistics", scanHandler.Statistics)
 			protected.GET("/scans/:id", scanHandler.GetByID)
 			protected.DELETE("/scans/:id", scanHandler.Delete)
 			protected.POST("/scans/:id/stop", scanHandler.Stop)
-			protected.POST("/scans/initiate", scanHandler.Initiate)
-			protected.POST("/scans/quick", scanHandler.Quick)
 			protected.POST("/scans/bulk-delete", scanHandler.BulkDelete)
 
 			// Scan Logs (nested under scans)

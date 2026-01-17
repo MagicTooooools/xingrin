@@ -58,7 +58,7 @@ type ScanDetailResponse struct {
 	StageProgress     map[string]interface{} `json:"stageProgress,omitempty"`
 }
 
-// InitiateScanRequest represents initiate scan request
+// InitiateScanRequest represents initiate scan request (deprecated, use CreateScanRequest)
 type InitiateScanRequest struct {
 	OrganizationID *int     `json:"organizationId" binding:"omitempty"`
 	TargetID       *int     `json:"targetId" binding:"omitempty"`
@@ -67,12 +67,30 @@ type InitiateScanRequest struct {
 	Configuration  string   `json:"configuration" binding:"required"`
 }
 
-// QuickScanRequest represents quick scan request
+// QuickScanRequest represents quick scan request (deprecated, use CreateScanRequest)
 type QuickScanRequest struct {
 	Targets       []QuickScanTarget `json:"targets" binding:"required,min=1"`
 	EngineIDs     []int             `json:"engineIds"`
 	EngineNames   []string          `json:"engineNames"`
 	Configuration string            `json:"configuration" binding:"required"`
+}
+
+// CreateScanRequest represents unified scan creation request
+// POST /api/scans
+type CreateScanRequest struct {
+	// Mode: "normal" (default) or "quick"
+	Mode string `json:"mode" binding:"omitempty,oneof=normal quick"`
+
+	// For mode=normal: target ID (required)
+	TargetID int `json:"targetId" binding:"omitempty"`
+
+	// For mode=quick: raw targets (required)
+	Targets []string `json:"targets" binding:"omitempty"`
+
+	// Common fields
+	EngineIDs     []int  `json:"engineIds" binding:"omitempty"`
+	EngineNames   []string `json:"engineNames" binding:"omitempty"`
+	Configuration string `json:"configuration" binding:"omitempty"`
 }
 
 // QuickScanTarget represents a target in quick scan

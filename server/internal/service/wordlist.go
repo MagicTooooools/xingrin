@@ -17,10 +17,19 @@ import (
 )
 
 var (
-	ErrWordlistNotFound = errors.New("wordlist not found")
-	ErrWordlistExists   = errors.New("wordlist name already exists")
-	ErrEmptyName        = errors.New("wordlist name cannot be empty")
-	ErrFileNotFound     = errors.New("wordlist file not found")
+	ErrWordlistNotFound    = errors.New("wordlist not found")
+	ErrWordlistExists      = errors.New("wordlist name already exists")
+	ErrEmptyName           = errors.New("wordlist name cannot be empty")
+	ErrNameTooLong         = errors.New("wordlist name too long (max 200 characters)")
+	ErrInvalidName         = errors.New("wordlist name contains invalid characters")
+	ErrFileNotFound        = errors.New("wordlist file not found")
+	ErrInvalidFileType     = errors.New("file appears to be binary, only text files are allowed")
+)
+
+const (
+	maxNameLength        = 200
+	maxDescriptionLength = 200
+	binaryCheckSize      = 8192 // Check first 8KB for binary content
 )
 
 // WordlistService handles wordlist business logic
@@ -42,6 +51,20 @@ func (s *WordlistService) Create(name, description, filename string, fileContent
 	name = strings.TrimSpace(name)
 	if name == "" {
 		return nil, ErrEmptyName
+	}
+	if len(name) > maxNameLength {
+		return nil, ErrNameTooLong
+	}
+	// Reject names with control characters (newlines, tabs, etc.)
+	if containsControlChars(name) {
+		return nil, ErrInvalidName
+	}
+
+	// Truncate description if too long, also sanitize control chars
+	description = strings.TrimSpace(description)
+	description = removeControlChars(description)
+	if len(description) > maxDescriptionLength {
+		description = description[:maxDescriptionLength]
 	}
 
 	exists, err := s.repo.ExistsByName(name)
@@ -66,15 +89,21 @@ func (s *WordlistService) Create(name, description, filename string, fileContent
 	if err != nil {
 		return nil, err
 	}
-	defer file.Close()
+	defer func() { _ = file.Close() }()
 
 	hasher := sha256.New()
 	writer := io.MultiWriter(file, hasher)
 
 	written, err := io.Copy(writer, fileContent)
 	if err != nil {
-		os.Remove(fullPath) // Cleanup on error
+		_ = os.Remove(fullPath) // Cleanup on error
 		return nil, err
+	}
+
+	// Check if file is binary (contains null bytes in first 8KB)
+	if isBinaryFile(fullPath) {
+		_ = os.Remove(fullPath) // Cleanup
+		return nil, ErrInvalidFileType
 	}
 
 	fileHash := hex.EncodeToString(hasher.Sum(nil))
@@ -95,7 +124,7 @@ func (s *WordlistService) Create(name, description, filename string, fileContent
 	}
 
 	if err := s.repo.Create(wordlist); err != nil {
-		os.Remove(fullPath) // Cleanup on error
+		_ = os.Remove(fullPath) // Cleanup on error
 		return nil, err
 	}
 
@@ -107,6 +136,21 @@ func (s *WordlistService) List(query *dto.PaginationQuery) ([]model.Wordlist, in
 	return s.repo.FindAll(query.GetPage(), query.GetPageSize())
 }
 
+// ListAll returns all wordlists without pagination
+func (s *WordlistService) ListAll() ([]model.Wordlist, error) {
+	wordlists, err := s.repo.List()
+	if err != nil {
+		return nil, err
+	}
+
+	// Check and update file stats for each wordlist
+	for i := range wordlists {
+		s.checkAndUpdateFileStats(&wordlists[i])
+	}
+
+	return wordlists, nil
+}
+
 // GetByID returns a wordlist by ID
 func (s *WordlistService) GetByID(id int) (*model.Wordlist, error) {
 	wordlist, err := s.repo.FindByID(id)
@@ -116,6 +160,10 @@ func (s *WordlistService) GetByID(id int) (*model.Wordlist, error) {
 		}
 		return nil, err
 	}
+
+	// Check if file was modified externally
+	s.checkAndUpdateFileStats(wordlist)
+
 	return wordlist, nil
 }
 
@@ -133,6 +181,10 @@ func (s *WordlistService) GetByName(name string) (*model.Wordlist, error) {
 		}
 		return nil, err
 	}
+
+	// Check if file was modified externally
+	s.checkAndUpdateFileStats(wordlist)
+
 	return wordlist, nil
 }
 
@@ -148,7 +200,7 @@ func (s *WordlistService) Delete(id int) error {
 
 	// Delete file (best effort)
 	if wordlist.FilePath != "" {
-		os.Remove(wordlist.FilePath)
+		_ = os.Remove(wordlist.FilePath)
 	}
 
 	return s.repo.Delete(id)
@@ -262,7 +314,7 @@ func countLines(filepath string) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	defer file.Close()
+	defer func() { _ = file.Close() }()
 
 	scanner := bufio.NewScanner(file)
 	count := 0
@@ -276,4 +328,91 @@ func countLines(filepath string) (int, error) {
 func fileExists(path string) bool {
 	_, err := os.Stat(path)
 	return err == nil
+}
+
+// containsControlChars checks if string contains control characters (newlines, tabs, etc.)
+func containsControlChars(s string) bool {
+	for _, r := range s {
+		if r < 32 && r != ' ' { // ASCII control characters except space
+			return true
+		}
+	}
+	return false
+}
+
+// removeControlChars removes control characters from string
+func removeControlChars(s string) string {
+	return strings.Map(func(r rune) rune {
+		if r < 32 && r != ' ' {
+			return -1 // Remove the character
+		}
+		return r
+	}, s)
+}
+
+// isBinaryFile checks if file contains binary content (null bytes in first 8KB)
+func isBinaryFile(path string) bool {
+	file, err := os.Open(path)
+	if err != nil {
+		return false
+	}
+	defer func() { _ = file.Close() }()
+
+	buf := make([]byte, binaryCheckSize)
+	n, err := file.Read(buf)
+	if err != nil && err != io.EOF {
+		return false
+	}
+
+	// Check for null bytes (common indicator of binary files)
+	for i := 0; i < n; i++ {
+		if buf[i] == 0 {
+			return true
+		}
+	}
+	return false
+}
+
+// checkAndUpdateFileStats checks if file was modified externally and updates stats if needed
+// Uses mtime + size for quick detection, only recalculates hash when change detected
+func (s *WordlistService) checkAndUpdateFileStats(wordlist *model.Wordlist) {
+	if wordlist.FilePath == "" {
+		return
+	}
+
+	fileInfo, err := os.Stat(wordlist.FilePath)
+	if err != nil {
+		return // File doesn't exist or can't be accessed
+	}
+
+	// Quick check: compare size and mtime
+	fileModTime := fileInfo.ModTime()
+	if fileInfo.Size() == wordlist.FileSize && !fileModTime.After(wordlist.UpdatedAt) {
+		return // No change detected
+	}
+
+	// File was modified, recalculate stats
+	file, err := os.Open(wordlist.FilePath)
+	if err != nil {
+		return
+	}
+	defer func() { _ = file.Close() }()
+
+	// Calculate new hash
+	hasher := sha256.New()
+	if _, err := io.Copy(hasher, file); err != nil {
+		return
+	}
+	newHash := hex.EncodeToString(hasher.Sum(nil))
+
+	// Count lines
+	lineCount, _ := countLines(wordlist.FilePath)
+
+	// Update record
+	wordlist.FileSize = fileInfo.Size()
+	wordlist.FileHash = newHash
+	wordlist.LineCount = lineCount
+
+	// Save to database (best effort, don't fail the request)
+	_ = s.repo.Update(wordlist)
 }

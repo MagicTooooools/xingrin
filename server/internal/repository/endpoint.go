@@ -69,13 +69,26 @@ func (r *EndpointRepository) BulkCreate(endpoints []model.Endpoint) (int, error)
 		return 0, nil
 	}
 
-	// Use ON CONFLICT DO NOTHING to ignore duplicates (url + target_id unique)
-	result := r.db.Clauses(clause.OnConflict{DoNothing: true}).Create(&endpoints)
-	if result.Error != nil {
-		return 0, result.Error
+	var totalAffected int
+
+	// Process in batches to avoid SQL statement size limits
+	batchSize := 500
+	for i := 0; i < len(endpoints); i += batchSize {
+		end := i + batchSize
+		if end > len(endpoints) {
+			end = len(endpoints)
+		}
+		batch := endpoints[i:end]
+
+		// Use ON CONFLICT DO NOTHING to ignore duplicates (url + target_id unique)
+		result := r.db.Clauses(clause.OnConflict{DoNothing: true}).Create(&batch)
+		if result.Error != nil {
+			return totalAffected, result.Error
+		}
+		totalAffected += int(result.RowsAffected)
 	}
 
-	return int(result.RowsAffected), nil
+	return totalAffected, nil
 }
 
 // Delete deletes an endpoint by ID

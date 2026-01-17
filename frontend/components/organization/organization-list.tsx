@@ -78,7 +78,7 @@ export function OrganizationList() {
       selectRow: tCommon("actions.selectRow"),
     },
     tooltips: {
-      targetSummary: tTooltips("targetSummary"),
+      organizationDetails: tTooltips("organizationDetails"),
       initiateScan: tTooltips("initiateScan"),
     },
   }), [tColumns, tCommon, tTooltips])

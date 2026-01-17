@@ -86,7 +86,7 @@ export async function batchDeleteTargets(
 export async function batchCreateTargets(
   data: BatchCreateTargetsRequest
 ): Promise<BatchCreateTargetsResponse> {
-  const response = await api.post<BatchCreateTargetsResponse>('/targets/batch_create/', data)
+  const response = await api.post<BatchCreateTargetsResponse>('/targets/bulk-create/', data)
   // Handle 204 No Content response - return default success response
   if (response.status === 204 || !response.data) {
     return {

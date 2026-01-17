@@ -66,13 +66,14 @@ func (s *Scan) BeforeCreate(tx *gorm.DB) error {
 }
 
 // ScanStatus constants
+// Status flow: pending → scheduled → running → completed/failed/cancelled
 const (
-	ScanStatusInitiated = "initiated"
-	ScanStatusRunning   = "running"
-	ScanStatusCompleted = "completed"
-	ScanStatusFailed    = "failed"
-	ScanStatusStopped   = "stopped"
-	ScanStatusPending   = "pending"
+	ScanStatusPending   = "pending"   // Waiting for scheduling (user initiated, waiting for Agent assignment)
+	ScanStatusScheduled = "scheduled" // Assigned to Agent, waiting for execution
+	ScanStatusRunning   = "running"   // Currently executing
+	ScanStatusCompleted = "completed" // Successfully completed
+	ScanStatusFailed    = "failed"    // Execution failed
+	ScanStatusCancelled = "cancelled" // Cancelled (by user or system)
 )
 
 // ScanMode constants

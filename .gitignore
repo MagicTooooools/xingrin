@@ -90,6 +90,10 @@ backend/go.work.sum
 # Go 依赖管理
 backend/vendor/
 
+# Go Server 环境变量
+server/.env
+server/.env.local
+
 # ============================
 # IDE 和编辑器相关
 # ============================

@@ -32,7 +32,8 @@ func (r *SubdomainSnapshotRepository) BulkCreate(snapshots []model.SubdomainSnap
 
 	var totalAffected int64
 
-	batchSize := 100
+	// Process in batches to avoid SQL statement size limits
+	batchSize := 500
 	for i := 0; i < len(snapshots); i += batchSize {
 		end := i + batchSize
 		if end > len(snapshots) {

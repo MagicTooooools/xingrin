@@ -38,8 +38,8 @@ func (r *WebsiteSnapshotRepository) BulkCreate(snapshots []model.WebsiteSnapshot
 
 	var totalAffected int64
 
-	// Process in batches to avoid parameter limits
-	batchSize := 100
+	// Process in batches to avoid SQL statement size limits
+	batchSize := 500
 	for i := 0; i < len(snapshots); i += batchSize {
 		end := i + batchSize
 		if end > len(snapshots) {

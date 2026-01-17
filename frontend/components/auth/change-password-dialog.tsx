@@ -40,8 +40,8 @@ export function ChangePasswordDialog({ open, onOpenChange }: ChangePasswordDialo
       return
     }
     
-    if (newPassword.length < 4) {
-      setError(t("passwordTooShort", { min: 4 }))
+    if (newPassword.length < 6) {
+      setError(t("passwordTooShort", { min: 6 }))
       return
     }
     

@@ -151,16 +151,49 @@ func (h *ScanHandler) Stop(c *gin.Context) {
 	})
 }
 
-// Initiate starts a new scan
-// POST /api/scans/initiate
-func (h *ScanHandler) Initiate(c *gin.Context) {
-	// TODO: Implement when worker integration is ready
-	dto.Error(c, http.StatusNotImplemented, "NOT_IMPLEMENTED", "Scan initiation is not yet implemented")
-}
+// Create starts a new scan
+// POST /api/scans
+//
+// Request body:
+//
+//	{
+//	  "mode": "normal" | "quick",     // scan mode (default: "normal")
+//	  "targetId": 123,                // required for mode=normal
+//	  "targets": ["example.com"],     // required for mode=quick (raw targets)
+//	  "engineIds": [1, 2],            // engine IDs to run
+//	  "config": {}                    // optional scan configuration
+//	}
+func (h *ScanHandler) Create(c *gin.Context) {
+	var req dto.CreateScanRequest
+	if !dto.BindJSON(c, &req) {
+		return
+	}
 
-// Quick starts a quick scan with raw targets
-// POST /api/scans/quick
-func (h *ScanHandler) Quick(c *gin.Context) {
-	// TODO: Implement when worker integration is ready
-	dto.Error(c, http.StatusNotImplemented, "NOT_IMPLEMENTED", "Quick scan is not yet implemented")
+	// Default mode is "normal"
+	if req.Mode == "" {
+		req.Mode = "normal"
+	}
+
+	switch req.Mode {
+	case "normal":
+		// Normal scan: requires targetId
+		if req.TargetID == 0 {
+			dto.BadRequest(c, "targetId is required for normal mode")
+			return
+		}
+		// TODO: Implement when worker integration is ready
+		dto.Error(c, http.StatusNotImplemented, "NOT_IMPLEMENTED", "Normal scan is not yet implemented")
+
+	case "quick":
+		// Quick scan: requires targets list
+		if len(req.Targets) == 0 {
+			dto.BadRequest(c, "targets is required for quick mode")
+			return
+		}
+		// TODO: Implement when worker integration is ready
+		dto.Error(c, http.StatusNotImplemented, "NOT_IMPLEMENTED", "Quick scan is not yet implemented")
+
+	default:
+		dto.BadRequest(c, "Invalid mode, must be 'normal' or 'quick'")
+	}
 }

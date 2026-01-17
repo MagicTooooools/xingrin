@@ -351,7 +351,11 @@ export const getErrorMessage = (error: unknown): string => {
   // Type guard: Check if it's an error object
   const err = error as {
     code?: string;
-    response?: { data?: { message?: string; error?: string; detail?: string } };
+    response?: { data?: { 
+      message?: string; 
+      error?: string | { code?: string; message?: string; details?: Array<{ field?: string; message?: string }> }; 
+      detail?: string 
+    } };
     message?: string
   }
 
@@ -361,8 +365,19 @@ export const getErrorMessage = (error: unknown): string => {
   }
 
   // Backend returned error message (supports multiple formats)
-  if (err.response?.data?.error) {
-    return err.response.data.error;
+  const errorData = err.response?.data?.error;
+  if (errorData) {
+    // New format: { error: { code, message, details } }
+    if (typeof errorData === 'object') {
+      // If has validation details, return first detail message
+      if (errorData.details && errorData.details.length > 0) {
+        const detail = errorData.details[0];
+        return detail.message || errorData.message || 'Validation error';
+      }
+      return errorData.message || 'Unknown error';
+    }
+    // Old format: { error: "string" }
+    return errorData;
   }
   if (err.response?.data?.message) {
     return err.response.data.message;

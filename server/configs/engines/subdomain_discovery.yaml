@@ -1,0 +1,42 @@
+# Subdomain Discovery Engine Configuration
+#
+# Parameters use kebab-case (e.g., rate-limit, timeout)
+# timeout: timeout in seconds (default: 86400 = 24 hours)
+
+# Stage 1: Passive Collection (parallel execution)
+# Each tool needs "enabled: true" to run
+passive-tools:
+  subfinder:
+    enabled: true
+    timeout: 3600  # 1 hour
+    # threads: 10
+
+  sublist3r:
+    enabled: true
+    timeout: 3600
+
+  assetfinder:
+    enabled: true
+    timeout: 3600
+
+# Stage 2: Dictionary Bruteforce (optional)
+# Stage-level "enabled" controls whether this stage runs
+bruteforce:
+  enabled: false
+  subdomain-bruteforce:
+    timeout: 86400  # 24 hours
+    wordlist-name: subdomains-top1million-110000.txt
+
+# Stage 3: Permutation + Resolve (optional)
+# Requires output from previous stages
+permutation:
+  enabled: true
+  subdomain-permutation-resolve:
+    timeout: 86400
+
+# Stage 4: DNS Resolution Validation (optional)
+# Requires output from previous stages
+resolve:
+  enabled: true
+  subdomain-resolve:
+    timeout: 86400

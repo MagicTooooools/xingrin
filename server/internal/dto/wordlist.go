@@ -2,6 +2,11 @@ package dto
 
 import "time"
 
+// UpdateWordlistContentRequest represents update wordlist content request
+type UpdateWordlistContentRequest struct {
+	Content string `json:"content" binding:"required"`
+}
+
 // WordlistResponse represents wordlist response
 type WordlistResponse struct {
 	ID          int       `json:"id"`
@@ -13,11 +18,6 @@ type WordlistResponse struct {
 	FileHash    string    `json:"fileHash"`
 	CreatedAt   time.Time `json:"createdAt"`
 	UpdatedAt   time.Time `json:"updatedAt"`
-}
-
-// UpdateWordlistContentRequest represents update wordlist content request
-type UpdateWordlistContentRequest struct {
-	Content string `json:"content" binding:"required"`
 }
 
 // WordlistContentResponse represents wordlist content response
