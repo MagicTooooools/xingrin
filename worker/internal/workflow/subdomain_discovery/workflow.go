@@ -1,10 +1,12 @@
 package subdomain_discovery
 
 import (
+	"bufio"
 	"context"
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/orbit/worker/internal/activity"
 	"github.com/orbit/worker/internal/pkg"
@@ -24,19 +26,15 @@ func init() {
 
 // Workflow implements the subdomain discovery scan workflow
 type Workflow struct {
-	runner         *activity.Runner
-	commandBuilder *activity.CommandBuilder
-	parser         *Parser
-	workDir        string
+	runner  *activity.Runner
+	workDir string
 }
 
 // New creates a new subdomain discovery workflow
 func New(workDir string) *Workflow {
 	return &Workflow{
-		runner:         activity.NewRunner(workDir),
-		commandBuilder: activity.NewCommandBuilder(),
-		parser:         NewParser(),
-		workDir:        workDir,
+		runner:  activity.NewRunner(workDir),
+		workDir: workDir,
 	}
 }
 
@@ -84,7 +82,7 @@ func (w *Workflow) SaveResults(ctx context.Context, client server.ServerClient, 
 	sender := server.NewBatchSender(ctx, client, params.ScanID, params.TargetID, "subdomain", 5000)
 
 	// Stream and deduplicate from files
-	subdomainCh, errCh := w.parser.StreamAndDeduplicate(files)
+	subdomainCh, errCh := w.streamAndDeduplicate(files)
 
 	// Send subdomains in batches
 	for subdomain := range subdomainCh {
@@ -195,4 +193,65 @@ func (w *Workflow) setupProviderConfig(ctx context.Context, params *workflow.Par
 	}
 	pkg.Logger.Info("Provider config written", zap.String("path", configPath))
 	return configPath, nil
+}
+
+// streamAndDeduplicate streams unique subdomains from multiple files.
+// Returns a channel that yields deduplicated subdomains one by one.
+// The channel is closed when all files are processed or an error occurs.
+func (w *Workflow) streamAndDeduplicate(filePaths []string) (<-chan string, <-chan error) {
+	out := make(chan string, 1000) // buffered for better throughput
+	errCh := make(chan error, 1)
+	seen := make(map[string]struct{}, 500000) // pre-allocate for large datasets
+
+	go func() {
+		defer close(out)
+		defer close(errCh)
+
+		// Recover from panic and send error to channel
+		defer func() {
+			if r := recover(); r != nil {
+				pkg.Logger.Error("Panic in streamAndDeduplicate", zap.Any("panic", r))
+				errCh <- fmt.Errorf("panic in stream processing: %v", r)
+			}
+		}()
+
+		for _, path := range filePaths {
+			if err := w.streamFile(path, seen, out); err != nil {
+				pkg.Logger.Error("Error streaming file", zap.String("path", path), zap.Error(err))
+				errCh <- err
+				return
+			}
+		}
+	}()
+
+	return out, errCh
+}
+
+// streamFile reads a single file and sends unique subdomains to the channel
+// Note: Files are already validated by mergeFiles, so we skip validation for performance
+func (w *Workflow) streamFile(filePath string, seen map[string]struct{}, out chan<- string) error {
+	file, err := os.Open(filePath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil
+		}
+		return err
+	}
+	defer func() { _ = file.Close() }()
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		line := strings.TrimSpace(scanner.Text())
+		if line == "" {
+			continue
+		}
+
+		lower := strings.ToLower(line)
+		if _, exists := seen[lower]; !exists {
+			seen[lower] = struct{}{}
+			out <- line
+		}
+	}
+
+	return scanner.Err()
 }
