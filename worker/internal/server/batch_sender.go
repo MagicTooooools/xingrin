@@ -1,6 +1,8 @@
 package server
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"sync"
 
@@ -11,7 +13,8 @@ import (
 // BatchSender handles batched sending of scan results to Server.
 // It accumulates items and sends them in batches to reduce HTTP overhead.
 type BatchSender struct {
-	client    *Client
+	ctx       context.Context
+	client    ServerClient
 	scanID    int
 	targetID  int
 	dataType  string // "subdomain", "website", "endpoint", "port"
@@ -24,11 +27,12 @@ type BatchSender struct {
 }
 
 // NewBatchSender creates a new batch sender
-func NewBatchSender(client *Client, scanID, targetID int, dataType string, batchSize int) *BatchSender {
+func NewBatchSender(ctx context.Context, client ServerClient, scanID, targetID int, dataType string, batchSize int) *BatchSender {
 	if batchSize <= 0 {
 		batchSize = 1000 // default batch size
 	}
 	return &BatchSender{
+		ctx:       ctx,
 		client:    client,
 		scanID:    scanID,
 		targetID:  targetID,
@@ -39,7 +43,15 @@ func NewBatchSender(client *Client, scanID, targetID int, dataType string, batch
 }
 
 // Add adds an item to the batch. Automatically sends when batch is full.
+// Returns context.Canceled or context.DeadlineExceeded if context is done.
 func (s *BatchSender) Add(item any) error {
+	// Check context before processing
+	select {
+	case <-s.ctx.Done():
+		return s.ctx.Err()
+	default:
+	}
+
 	s.mu.Lock()
 	s.batch = append(s.batch, item)
 	shouldSend := len(s.batch) >= s.batchSize
@@ -72,6 +84,13 @@ func (s *BatchSender) Stats() (items, batches int) {
 
 // sendBatch sends the current batch to the server
 func (s *BatchSender) sendBatch() error {
+	// Check context before sending
+	select {
+	case <-s.ctx.Done():
+		return s.ctx.Err()
+	default:
+	}
+
 	s.mu.Lock()
 	if len(s.batch) == 0 {
 		s.mu.Unlock()
@@ -84,43 +103,21 @@ func (s *BatchSender) sendBatch() error {
 	s.batch = s.batch[:0] // reset slice but keep capacity
 	s.mu.Unlock()
 
-	// Build URL and body based on data type (RESTful style)
-	var url string
-	var body map[string]any
-
-	switch s.dataType {
-	case "subdomain":
-		url = fmt.Sprintf("%s/api/worker/scans/%d/subdomains/bulk-upsert", s.client.baseURL, s.scanID)
-		body = map[string]any{
-			"targetId":   s.targetID,
-			"subdomains": toSend,
+	if err := s.client.PostBatch(s.ctx, s.scanID, s.targetID, s.dataType, toSend); err != nil {
+		// Check if it's a non-retryable error (4xx)
+		var httpErr *HTTPError
+		if errors.As(err, &httpErr) && !httpErr.IsRetryable() {
+			pkg.Logger.Error("Non-retryable error sending batch (data validation issue)",
+				zap.String("type", s.dataType),
+				zap.Int("count", len(toSend)),
+				zap.Int("statusCode", httpErr.StatusCode),
+				zap.String("response", httpErr.Body))
+		} else {
+			pkg.Logger.Error("Failed to send batch after retries",
+				zap.String("type", s.dataType),
+				zap.Int("count", len(toSend)),
+				zap.Error(err))
 		}
-	case "website":
-		url = fmt.Sprintf("%s/api/worker/scans/%d/websites/bulk-upsert", s.client.baseURL, s.scanID)
-		body = map[string]any{
-			"targetId": s.targetID,
-			"websites": toSend,
-		}
-	case "endpoint":
-		url = fmt.Sprintf("%s/api/worker/scans/%d/endpoints/bulk-upsert", s.client.baseURL, s.scanID)
-		body = map[string]any{
-			"targetId":  s.targetID,
-			"endpoints": toSend,
-		}
-	default:
-		// Generic fallback
-		url = fmt.Sprintf("%s/api/worker/scans/%d/%ss/bulk-upsert", s.client.baseURL, s.scanID, s.dataType)
-		body = map[string]any{
-			"targetId": s.targetID,
-			"items":    toSend,
-		}
-	}
-
-	if err := s.client.postWithRetry(url, body); err != nil {
-		pkg.Logger.Error("Failed to send batch",
-			zap.String("type", s.dataType),
-			zap.Int("count", len(toSend)),
-			zap.Error(err))
 		return fmt.Errorf("failed to send %s batch: %w", s.dataType, err)
 	}
 

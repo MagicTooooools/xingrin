@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -12,6 +13,40 @@ import (
 	"github.com/orbit/worker/internal/pkg"
 	"go.uber.org/zap"
 )
+
+// HTTPError represents an HTTP error with status code
+type HTTPError struct {
+	StatusCode int
+	Body       string
+}
+
+func (e *HTTPError) Error() string {
+	return fmt.Sprintf("HTTP %d: %s", e.StatusCode, e.Body)
+}
+
+// IsRetryable returns true if the error should be retried
+func (e *HTTPError) IsRetryable() bool {
+	// 4xx errors (client errors) should not be retried
+	// 5xx errors (server errors) should be retried
+	return e.StatusCode >= 500
+}
+
+// isRetryableError checks if an error should be retried
+func isRetryableError(err error) bool {
+	if err == nil {
+		return false
+	}
+
+	// Check if it's an HTTPError
+	var httpErr *HTTPError
+	if errors.As(err, &httpErr) {
+		return httpErr.IsRetryable()
+	}
+
+	// Network errors (connection refused, timeout, etc.) should be retried
+	// These are typically wrapped in url.Error or net.Error
+	return true
+}
 
 // Client handles all HTTP communication with Server
 // Implements Provider, ResultSaver, and StatusUpdater interfaces
@@ -28,7 +63,7 @@ func NewClient(baseURL, token string) *Client {
 		baseURL: baseURL,
 		token:   token,
 		httpClient: &http.Client{
-			Timeout: 5 * time.Minute,
+			Timeout: 15 * time.Minute,
 		},
 		maxRetries: 3,
 	}
@@ -60,39 +95,67 @@ func (c *Client) doWithRetry(ctx context.Context, method, url string, body any) 
 		default:
 		}
 
+		// Exponential backoff for retries (but not on first attempt)
 		if i > 0 {
-			// Use select to allow cancellation during sleep
+			backoff := time.Duration(1<<uint(i)) * time.Second
+			pkg.Logger.Info("Retrying after backoff",
+				zap.String("url", url),
+				zap.Int("attempt", i+1),
+				zap.Duration("backoff", backoff))
+
 			select {
 			case <-ctx.Done():
 				return ctx.Err()
-			case <-time.After(time.Duration(1<<i) * time.Second):
+			case <-time.After(backoff):
 			}
 		}
 
-		if err := c.doRequest(ctx, method, url, body); err == nil {
+		err := c.doRequest(ctx, method, url, body)
+		if err == nil {
+			if i > 0 {
+				pkg.Logger.Info("Request succeeded after retry",
+					zap.String("url", url),
+					zap.Int("attempts", i+1))
+			}
 			return nil
-		} else {
-			lastErr = err
-			pkg.Logger.Warn("API call failed, retrying",
-				zap.String("url", url),
-				zap.Int("attempt", i+1),
-				zap.Error(err))
 		}
+
+		lastErr = err
+
+		// Check if error is retryable
+		if !isRetryableError(err) {
+			pkg.Logger.Error("Non-retryable error, aborting",
+				zap.String("url", url),
+				zap.Error(err))
+			return err
+		}
+
+		// Log retryable error
+		pkg.Logger.Warn("Retryable error occurred",
+			zap.String("url", url),
+			zap.Int("attempt", i+1),
+			zap.Int("maxRetries", c.maxRetries),
+			zap.Error(err))
 	}
 
-	pkg.Logger.Error("All retries failed", zap.String("url", url), zap.Error(lastErr))
-	return lastErr
+	pkg.Logger.Error("All retries exhausted",
+		zap.String("url", url),
+		zap.Int("attempts", c.maxRetries),
+		zap.Error(lastErr))
+	return fmt.Errorf("max retries exceeded: %w", lastErr)
 }
 
 func (c *Client) doRequest(ctx context.Context, method, url string, body any) error {
 	jsonBody, err := json.Marshal(body)
 	if err != nil {
-		return fmt.Errorf("failed to marshal request body: %w", err)
+		// JSON marshal error is not retryable (data problem)
+		return &HTTPError{StatusCode: 0, Body: fmt.Sprintf("marshal error: %v", err)}
 	}
 
 	req, err := http.NewRequestWithContext(ctx, method, url, bytes.NewBuffer(jsonBody))
 	if err != nil {
-		return fmt.Errorf("failed to create request: %w", err)
+		// Request creation error is not retryable
+		return &HTTPError{StatusCode: 0, Body: fmt.Sprintf("request creation error: %v", err)}
 	}
 
 	req.Header.Set("Content-Type", "application/json")
@@ -100,13 +163,17 @@ func (c *Client) doRequest(ctx context.Context, method, url string, body any) er
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
-		return fmt.Errorf("request failed: %w", err)
+		// Network errors are retryable (connection issues, timeout, etc.)
+		return fmt.Errorf("network error: %w", err)
 	}
 	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode >= 400 {
 		respBody, _ := io.ReadAll(resp.Body)
-		return fmt.Errorf("API error: status=%d, body=%s", resp.StatusCode, string(respBody))
+		return &HTTPError{
+			StatusCode: resp.StatusCode,
+			Body:       string(respBody),
+		}
 	}
 
 	return nil

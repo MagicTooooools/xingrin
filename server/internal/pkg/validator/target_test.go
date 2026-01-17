@@ -62,7 +62,7 @@ func TestIsURLMatchTarget(t *testing.T) {
 	}
 }
 
-func TestIsSubdomainMatchTarget(t *testing.T) {
+func TestIsSubdomainOfTarget(t *testing.T) {
 	tests := []struct {
 		name         string
 		subdomain    string
@@ -99,9 +99,9 @@ func TestIsSubdomainMatchTarget(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := IsSubdomainMatchTarget(tt.subdomain, tt.targetDomain)
+			result := IsSubdomainOfTarget(tt.subdomain, tt.targetDomain)
 			if result != tt.expected {
-				t.Errorf("IsSubdomainMatchTarget(%q, %q) = %v, want %v",
+				t.Errorf("IsSubdomainOfTarget(%q, %q) = %v, want %v",
 					tt.subdomain, tt.targetDomain, result, tt.expected)
 			}
 		})

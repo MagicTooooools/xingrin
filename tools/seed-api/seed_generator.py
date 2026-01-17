@@ -303,7 +303,7 @@ def create_targets(client, progress, error_handler, count):
         try:
             result = error_handler.retry_with_backoff(
                 client.post,
-                "/api/targets/batch_create",
+                "/api/targets/bulk-create",
                 {"targets": batch}
             )
             

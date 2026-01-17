@@ -1,6 +1,7 @@
 package workflow
 
 import (
+	"context"
 	"time"
 
 	"github.com/orbit/worker/internal/server"
@@ -35,5 +36,5 @@ type Metrics struct {
 type Workflow interface {
 	Name() string
 	Execute(params *Params) (*Output, error)
-	SaveResults(client *server.Client, params *Params, output *Output) error
+	SaveResults(ctx context.Context, client server.ServerClient, params *Params, output *Output) error
 }

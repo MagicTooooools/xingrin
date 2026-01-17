@@ -71,7 +71,7 @@ func (s *SubdomainSnapshotService) SaveAndSync(scanID int, targetID int, items [
 	validNames := make([]string, 0, len(items))
 
 	for _, item := range items {
-		if validator.IsSubdomainMatchTarget(item.Name, target.Name) {
+		if validator.IsSubdomainOfTarget(item.Name, target.Name) {
 			snapshots = append(snapshots, model.SubdomainSnapshot{
 				ScanID: scanID,
 				Name:   item.Name,
