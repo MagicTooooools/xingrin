@@ -2172,7 +2172,7 @@
         "urls": "URLs",
         "directories": "Directories"
       },
-      "directoriesHelp": "Results from directory scanning (e.g. ffuf/dirsearch)",
+      "directoriesHelp": "Results discovered during the directory scanning phase",
       "settings": {
         "loadError": "Failed to load settings",
         "blacklist": {

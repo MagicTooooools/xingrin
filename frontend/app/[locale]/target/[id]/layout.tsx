@@ -3,10 +3,16 @@
 import React from "react"
 import { usePathname, useParams } from "next/navigation"
 import Link from "next/link"
-import { Target, LayoutDashboard, Package, FolderSearch, Image, ShieldAlert, Settings } from "lucide-react"
+import { Target, LayoutDashboard, Package, FolderSearch, Image, ShieldAlert, Settings, HelpCircle } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import { useTarget } from "@/hooks/use-targets"
 import { useTranslations } from "next-intl"
 
@@ -160,67 +166,82 @@ export default function TargetLayout({
       </div>
 
       {/* Primary navigation */}
-      <div className="px-4 lg:px-6">
-        <Tabs value={getPrimaryTab()}>
-          <TabsList>
-            <TabsTrigger value="overview" asChild>
-              <Link href={primaryPaths.overview} className="flex items-center gap-1.5">
-                <LayoutDashboard className="h-4 w-4" />
-                {t("tabs.overview")}
-              </Link>
-            </TabsTrigger>
-            <TabsTrigger value="assets" asChild>
-              <Link href={primaryPaths.assets} className="flex items-center gap-1.5">
-                <Package className="h-4 w-4" />
-                {t("tabs.assets")}
-                {totalAssets > 0 && (
-                  <Badge variant="secondary" className="ml-1.5 h-5 min-w-5 rounded-full px-1.5 text-xs">
-                    {totalAssets}
-                  </Badge>
-                )}
-              </Link>
-            </TabsTrigger>
-            <TabsTrigger value="directories" asChild>
-              <Link href={primaryPaths.directories} className="flex items-center gap-1.5">
-                <FolderSearch className="h-4 w-4" />
-                {t("tabs.directories")}
-                {counts.directories > 0 && (
-                  <Badge variant="secondary" className="ml-1.5 h-5 min-w-5 rounded-full px-1.5 text-xs">
-                    {counts.directories}
-                  </Badge>
-                )}
-              </Link>
-            </TabsTrigger>
-            <TabsTrigger value="screenshots" asChild>
-              <Link href={primaryPaths.screenshots} className="flex items-center gap-1.5">
-                <Image className="h-4 w-4" />
-                {t("tabs.screenshots")}
-                {counts.screenshots > 0 && (
-                  <Badge variant="secondary" className="ml-1.5 h-5 min-w-5 rounded-full px-1.5 text-xs">
-                    {counts.screenshots}
-                  </Badge>
-                )}
-              </Link>
-            </TabsTrigger>
-            <TabsTrigger value="vulnerabilities" asChild>
-              <Link href={primaryPaths.vulnerabilities} className="flex items-center gap-1.5">
-                <ShieldAlert className="h-4 w-4" />
-                {t("tabs.vulnerabilities")}
-                {counts.vulnerabilities > 0 && (
-                  <Badge variant="secondary" className="ml-1.5 h-5 min-w-5 rounded-full px-1.5 text-xs">
-                    {counts.vulnerabilities}
-                  </Badge>
-                )}
-              </Link>
-            </TabsTrigger>
-            <TabsTrigger value="settings" asChild>
-              <Link href={primaryPaths.settings} className="flex items-center gap-1.5">
-                <Settings className="h-4 w-4" />
-                {t("tabs.settings")}
-              </Link>
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
+      <div className="flex items-center justify-between px-4 lg:px-6">
+        <div className="flex items-center gap-3">
+          <Tabs value={getPrimaryTab()}>
+            <TabsList>
+              <TabsTrigger value="overview" asChild>
+                <Link href={primaryPaths.overview} className="flex items-center gap-1.5">
+                  <LayoutDashboard className="h-4 w-4" />
+                  {t("tabs.overview")}
+                </Link>
+              </TabsTrigger>
+              <TabsTrigger value="assets" asChild>
+                <Link href={primaryPaths.assets} className="flex items-center gap-1.5">
+                  <Package className="h-4 w-4" />
+                  {t("tabs.assets")}
+                  {totalAssets > 0 && (
+                    <Badge variant="secondary" className="ml-1.5 h-5 min-w-5 rounded-full px-1.5 text-xs">
+                      {totalAssets}
+                    </Badge>
+                  )}
+                </Link>
+              </TabsTrigger>
+              <TabsTrigger value="directories" asChild>
+                <Link href={primaryPaths.directories} className="flex items-center gap-1.5">
+                  <FolderSearch className="h-4 w-4" />
+                  {t("tabs.directories")}
+                  {counts.directories > 0 && (
+                    <Badge variant="secondary" className="ml-1.5 h-5 min-w-5 rounded-full px-1.5 text-xs">
+                      {counts.directories}
+                    </Badge>
+                  )}
+                </Link>
+              </TabsTrigger>
+              <TabsTrigger value="screenshots" asChild>
+                <Link href={primaryPaths.screenshots} className="flex items-center gap-1.5">
+                  <Image className="h-4 w-4" />
+                  {t("tabs.screenshots")}
+                  {counts.screenshots > 0 && (
+                    <Badge variant="secondary" className="ml-1.5 h-5 min-w-5 rounded-full px-1.5 text-xs">
+                      {counts.screenshots}
+                    </Badge>
+                  )}
+                </Link>
+              </TabsTrigger>
+              <TabsTrigger value="vulnerabilities" asChild>
+                <Link href={primaryPaths.vulnerabilities} className="flex items-center gap-1.5">
+                  <ShieldAlert className="h-4 w-4" />
+                  {t("tabs.vulnerabilities")}
+                  {counts.vulnerabilities > 0 && (
+                    <Badge variant="secondary" className="ml-1.5 h-5 min-w-5 rounded-full px-1.5 text-xs">
+                      {counts.vulnerabilities}
+                    </Badge>
+                  )}
+                </Link>
+              </TabsTrigger>
+              <TabsTrigger value="settings" asChild>
+                <Link href={primaryPaths.settings} className="flex items-center gap-1.5">
+                  <Settings className="h-4 w-4" />
+                  {t("tabs.settings")}
+                </Link>
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+
+          {getPrimaryTab() === "directories" && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
+                </TooltipTrigger>
+                <TooltipContent side="right" className="max-w-sm">
+                  {t("directoriesHelp")}
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
+        </div>
       </div>
 
       {/* Secondary navigation (only for assets) */}

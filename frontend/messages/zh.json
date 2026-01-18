@@ -2186,7 +2186,7 @@
         "urls": "URL",
         "directories": "目录"
       },
-      "directoriesHelp": "由目录扫描（如 ffuf/dirsearch）发现的路径结果",
+      "directoriesHelp": "由目录扫描阶段发现的结果",
       "settings": {
         "loadError": "加载设置失败",
         "blacklist": {
