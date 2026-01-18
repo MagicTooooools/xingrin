@@ -17,7 +17,7 @@ const SUBDOMAIN_FILTER_FIELDS: FilterField[] = [
 // Subdomain page filter examples
 const SUBDOMAIN_FILTER_EXAMPLES = [
   'name="api.example.com"',
-  'name="*.test.com"',
+  'name=".test.com"',
 ]
 
 // Component props type definition

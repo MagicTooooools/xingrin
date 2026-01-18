@@ -18,7 +18,7 @@ const IP_ADDRESS_FILTER_FIELDS: FilterField[] = [
 
 // IP address page filter examples
 const IP_ADDRESS_FILTER_EXAMPLES = [
-  'ip="192.168.1.*" && port="80"',
+  'ip="192.168.1." && port="80"',
   'port="443" || port="8443"',
   'host="api.example.com" && port!="22"',
 ]
