@@ -129,6 +129,8 @@ export function DashboardDataTable() {
         },
         tooltips: {
           vulnDetails: t('tooltips.vulnDetails'),
+          reviewed: t('tooltips.reviewed'),
+          pending: t('tooltips.pending'),
         },
         severity: {
           critical: t('severity.critical'),

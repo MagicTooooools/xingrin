@@ -21,6 +21,7 @@ export const mockVulnerabilities: Vulnerability[] = [
       cwe: 'CWE-79',
     },
     createdAt: '2024-12-28T10:30:00Z',
+    isReviewed: false,
   },
   {
     id: 2,
@@ -48,6 +49,7 @@ export const mockVulnerabilities: Vulnerability[] = [
       },
     },
     createdAt: '2024-12-28T10:45:00Z',
+    isReviewed: true,
   },
   {
     id: 3,
@@ -66,6 +68,7 @@ export const mockVulnerabilities: Vulnerability[] = [
       payload: '<img src=x onerror=alert(1)>',
     },
     createdAt: '2024-12-27T14:20:00Z',
+    isReviewed: false,
   },
   {
     id: 4,
@@ -88,6 +91,7 @@ export const mockVulnerabilities: Vulnerability[] = [
       },
     },
     createdAt: '2024-12-27T15:00:00Z',
+    isReviewed: true,
   },
   {
     id: 5,
@@ -110,6 +114,7 @@ export const mockVulnerabilities: Vulnerability[] = [
       },
     },
     createdAt: '2024-12-26T09:30:00Z',
+    isReviewed: false,
   },
   {
     id: 6,
@@ -132,6 +137,7 @@ export const mockVulnerabilities: Vulnerability[] = [
       },
     },
     createdAt: '2024-12-25T11:15:00Z',
+    isReviewed: true,
   },
   {
     id: 7,
@@ -157,6 +163,7 @@ export const mockVulnerabilities: Vulnerability[] = [
       },
     },
     createdAt: '2024-12-21T12:00:00Z',
+    isReviewed: false,
   },
   {
     id: 8,
@@ -178,6 +185,7 @@ export const mockVulnerabilities: Vulnerability[] = [
       },
     },
     createdAt: '2024-12-28T10:00:00Z',
+    isReviewed: true,
   },
   {
     id: 9,
@@ -199,6 +207,7 @@ export const mockVulnerabilities: Vulnerability[] = [
       },
     },
     createdAt: '2024-12-27T14:00:00Z',
+    isReviewed: true,
   },
   {
     id: 10,
@@ -221,6 +230,7 @@ export const mockVulnerabilities: Vulnerability[] = [
       },
     },
     createdAt: '2024-12-26T10:00:00Z',
+    isReviewed: false,
   },
 ]
 

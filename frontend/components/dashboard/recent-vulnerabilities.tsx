@@ -23,6 +23,7 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import { IconExternalLink } from "@tabler/icons-react"
+import { Circle, CheckCircle2 } from "lucide-react"
 import type { VulnerabilitySeverity } from "@/types/vulnerability.types"
 import { useTranslations } from "next-intl"
 import { useLocale } from "next-intl"
@@ -33,6 +34,7 @@ export function RecentVulnerabilities() {
   const t = useTranslations("dashboard.recentVulns")
   const tSeverity = useTranslations("severity")
   const tColumns = useTranslations("columns")
+  const tTooltips = useTranslations("tooltips")
   const locale = useLocale()
   
   const formatTime = (dateStr: string) => {
@@ -92,6 +94,7 @@ export function RecentVulnerabilities() {
               <TableHeader>
                 <TableRow>
                   <TableHead>{tColumns("common.status")}</TableHead>
+                  <TableHead>{tColumns("vulnerability.severity")}</TableHead>
                   <TableHead>{tColumns("vulnerability.source")}</TableHead>
                   <TableHead>{tColumns("common.type")}</TableHead>
                   <TableHead>{tColumns("common.url")}</TableHead>
@@ -99,31 +102,52 @@ export function RecentVulnerabilities() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {vulnerabilities.map((vuln: any) => (
-                  <TableRow 
-                    key={vuln.id}
-                    className="cursor-pointer hover:bg-muted/50"
-                    onClick={() => router.push(`/vulnerabilities/?id=${vuln.id}`)}
-                  >
-                    <TableCell>
-                      <Badge className={severityConfig[vuln.severity as VulnerabilitySeverity]?.className}>
-                        {severityConfig[vuln.severity as VulnerabilitySeverity]?.label ?? vuln.severity}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline">{vuln.source}</Badge>
-                    </TableCell>
-                    <TableCell className="font-medium max-w-[120px] truncate">
-                      {vuln.vulnType}
-                    </TableCell>
-                    <TableCell className="text-muted-foreground text-xs max-w-[200px] truncate">
-                      {vuln.url}
-                    </TableCell>
-                    <TableCell className="text-muted-foreground text-xs whitespace-nowrap">
-                      {formatTime(vuln.createdAt)}
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {vulnerabilities.map((vuln: any) => {
+                  const isReviewed = vuln.isReviewed
+                  const isPending = !isReviewed
+
+                  return (
+                    <TableRow
+                      key={vuln.id}
+                      className="cursor-pointer hover:bg-muted/50"
+                      onClick={() => router.push(`/vulnerabilities/?id=${vuln.id}`)}
+                    >
+                      <TableCell>
+                        <Badge
+                          variant="outline"
+                          className={`transition-all gap-1.5 cursor-default ${isPending
+                            ? "bg-blue-500/10 text-blue-600 border-blue-500/30 dark:text-blue-400 dark:border-blue-400/30"
+                            : "bg-muted/50 text-muted-foreground border-muted-foreground/20"
+                          }`}
+                        >
+                          {isPending ? (
+                            <Circle className="h-3 w-3" />
+                          ) : (
+                            <CheckCircle2 className="h-3 w-3" />
+                          )}
+                          {isPending ? tTooltips("pending") : tTooltips("reviewed")}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge className={severityConfig[vuln.severity as VulnerabilitySeverity]?.className}>
+                          {severityConfig[vuln.severity as VulnerabilitySeverity]?.label ?? vuln.severity}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline">{vuln.source}</Badge>
+                      </TableCell>
+                      <TableCell className="font-medium max-w-[120px] truncate">
+                        {vuln.vulnType}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground text-xs max-w-[200px] truncate">
+                        {vuln.url}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground text-xs whitespace-nowrap">
+                        {formatTime(vuln.createdAt)}
+                      </TableCell>
+                    </TableRow>
+                  )
+                })}
               </TableBody>
             </Table>
           </div>
