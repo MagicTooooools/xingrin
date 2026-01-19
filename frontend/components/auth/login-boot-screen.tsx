@@ -17,15 +17,26 @@ const BOOT_LINES: BootLine[] = [
   { text: "> ready.", className: "text-green-500" },
 ]
 
+const SUCCESS_LINES: BootLine[] = [
+  { text: "> authentication successful", className: "text-green-500" },
+  { text: "> loading user profile...", className: "text-zinc-200" },
+  { text: "> initializing dashboard...", className: "text-zinc-200" },
+  { text: "> preparing workspace...", className: "text-yellow-500" },
+  { text: "> access granted.", className: "text-green-500" },
+]
+
 // Keep the log animation snappy so it can complete within the 0.6s splash.
 const STEP_DELAYS_MS = [70, 90, 110, 130, 150]
 
 const GLITCH_MS = 600
 
-export function LoginBootScreen({ className }: { className?: string }) {
+export function LoginBootScreen({ className, success = false }: { className?: string; success?: boolean }) {
   const [visible, setVisible] = React.useState(0)
   const [entered, setEntered] = React.useState(false)
   const [glitchOn, setGlitchOn] = React.useState(true)
+
+  // 根据 success 状态选择显示的行
+  const displayLines = success ? SUCCESS_LINES : BOOT_LINES
 
   React.useEffect(() => {
     const raf = requestAnimationFrame(() => setEntered(true))
@@ -44,7 +55,7 @@ export function LoginBootScreen({ className }: { className?: string }) {
     const timers: Array<ReturnType<typeof setTimeout>> = []
     let acc = 0
 
-    for (let i = 0; i < BOOT_LINES.length; i++) {
+    for (let i = 0; i < displayLines.length; i++) {
       acc += STEP_DELAYS_MS[i] ?? 160
       timers.push(
         setTimeout(() => {
@@ -56,9 +67,9 @@ export function LoginBootScreen({ className }: { className?: string }) {
     return () => {
       timers.forEach(clearTimeout)
     }
-  }, [])
+  }, [displayLines])
 
-  const progress = Math.round((Math.min(visible, BOOT_LINES.length) / BOOT_LINES.length) * 100)
+  const progress = Math.round((Math.min(visible, displayLines.length) / displayLines.length) * 100)
 
   return (
     <div className={cn("relative flex min-h-svh flex-col bg-black", glitchOn && "orbit-splash-glitch", className)}>
@@ -101,7 +112,7 @@ export function LoginBootScreen({ className }: { className?: string }) {
             </div>
 
             <div className="space-y-1">
-              {BOOT_LINES.slice(0, visible).map((line, idx) => (
+              {displayLines.slice(0, visible).map((line, idx) => (
                 <div key={idx} className={cn("whitespace-pre-wrap", line.className)}>
                   {line.text}
                 </div>

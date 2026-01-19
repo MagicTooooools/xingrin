@@ -14,6 +14,8 @@ const PixelBlast = dynamic(() => import("@/components/PixelBlast"), { ssr: false
 
 const BOOT_SPLASH_MS = 600
 const BOOT_FADE_MS = 200
+const LOGIN_SUCCESS_DELAY_MS = 1200 // 登录成功后显示启动屏幕的时间
+const LOGIN_SUCCESS_FADE_MS = 500 // 登录成功后淡出的时间
 
 type BootOverlayPhase = "entering" | "visible" | "leaving" | "hidden"
 
@@ -28,6 +30,8 @@ export default function LoginPage() {
   // Always show a short splash on entering the login page.
   const [bootMinDone, setBootMinDone] = React.useState(false)
   const [bootPhase, setBootPhase] = React.useState<BootOverlayPhase>("entering")
+  const [loginSuccess, setLoginSuccess] = React.useState(false) // 跟踪登录成功状态
+  const [showSuccessSplash, setShowSuccessSplash] = React.useState(false) // 是否显示登录成功的启动屏幕
 
   React.useEffect(() => {
     setBootMinDone(false)
@@ -79,22 +83,31 @@ export default function LoginPage() {
     startEnd: t("startEnd"),
   }), [t])
 
-  // If already logged in, redirect to dashboard (after the splash, so you can see it).
+  // If already logged in, show success splash then redirect to dashboard
   React.useEffect(() => {
     if (!bootMinDone) return
     if (authLoading) return
-    if (auth?.authenticated) {
-      router.push("/dashboard/")
+    if (auth?.authenticated && !showSuccessSplash) {
+      // 登录成功，显示成功启动屏幕
+      setShowSuccessSplash(true)
+      setLoginSuccess(true)
+
+      // 延迟后开始淡出并跳转
+      const successTimer = setTimeout(() => {
+        router.push("/dashboard/")
+      }, LOGIN_SUCCESS_DELAY_MS + LOGIN_SUCCESS_FADE_MS)
+
+      return () => clearTimeout(successTimer)
     }
-  }, [auth?.authenticated, authLoading, bootMinDone, router])
+  }, [auth?.authenticated, authLoading, bootMinDone, router, showSuccessSplash])
 
   const handleLogin = async (username: string, password: string) => {
     await login({ username, password })
   }
 
   // While authenticated, keep showing the splash until redirect happens.
-  if (auth?.authenticated) {
-    return <LoginBootScreen />
+  if (auth?.authenticated && showSuccessSplash) {
+    return <LoginBootScreen success={loginSuccess} />
   }
 
   const loginVisible = bootPhase === "leaving" || bootPhase === "hidden"

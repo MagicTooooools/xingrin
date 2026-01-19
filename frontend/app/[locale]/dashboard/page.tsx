@@ -1,7 +1,10 @@
+"use client"
+
 import { DashboardStatCards } from "@/components/dashboard/dashboard-stat-cards"
 import { AssetTrendChart } from "@/components/dashboard/asset-trend-chart"
 import { VulnSeverityChart } from "@/components/dashboard/vuln-severity-chart"
 import { DashboardDataTable } from "@/components/dashboard/dashboard-data-table"
+import { useEffect, useState } from "react"
 
 /**
  * Dashboard page component
@@ -9,9 +12,21 @@ import { DashboardDataTable } from "@/components/dashboard/dashboard-data-table"
  * Layout structure has been moved to the root layout component
  */
 export default function Page() {
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    // 触发淡入动画
+    const timer = setTimeout(() => setMounted(true), 50)
+    return () => clearTimeout(timer)
+  }, [])
+
   return (
     // Content area containing cards, charts and data tables
-    <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
+    <div
+      className={`flex flex-col gap-4 py-4 md:gap-6 md:py-6 transition-opacity duration-500 ${
+        mounted ? "opacity-100" : "opacity-0"
+      }`}
+    >
       {/* Top statistics cards */}
       <DashboardStatCards />
 
