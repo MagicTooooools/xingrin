@@ -2,6 +2,7 @@
  * Targets Hooks - 目标管理相关 hooks
  */
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query'
+import { useCallback, useMemo } from 'react'
 import { useToastMessages } from '@/lib/toast-helpers'
 import { getErrorCode } from '@/lib/response-parser'
 import {
@@ -66,42 +67,45 @@ export function useTargets(
     actualType = type
   }
 
+  // Memoize the select function to avoid unnecessary re-computations
+  const selectFn = useCallback((response: any) => {
+    // 如果指定了 organizationId，过滤结果
+    if (actualOrgId) {
+      const filteredResults = response.results.filter((target: any) =>
+        target.organizations?.some((org: any) => org.id === actualOrgId)
+      )
+      return {
+        ...response,
+        results: filteredResults,
+        total: filteredResults.length,
+        // 为兼容性添加额外字段
+        count: filteredResults.length,  // 兼容字段
+        targets: filteredResults,
+        page: actualPage,
+        pageSize: actualPageSize,
+        totalPages: Math.ceil(filteredResults.length / actualPageSize),
+      }
+    }
+
+    // 否则直接返回原始响应，并添加兼容字段
+    return {
+      ...response,
+      targets: response.results,
+      // 后端返回 total，不是 count
+      count: response.total,  // 兼容字段，使用 total 值
+      // 保持原有字段
+      total: response.total,
+      page: response.page,
+      pageSize: response.pageSize,
+      totalPages: response.totalPages,
+    }
+  }, [actualOrgId, actualPage, actualPageSize])
+
   return useQuery({
     queryKey: ['targets', { page: actualPage, pageSize: actualPageSize, organizationId: actualOrgId, filter: actualFilter, type: actualType }],
     queryFn: () => getTargets(actualPage, actualPageSize, actualFilter, actualType),
     enabled,
-    select: (response) => {
-      // 如果指定了 organizationId，过滤结果
-      if (actualOrgId) {
-        const filteredResults = response.results.filter(target => 
-          target.organizations?.some(org => org.id === actualOrgId)
-        )
-        return {
-          ...response,
-          results: filteredResults,
-          total: filteredResults.length,
-          // 为兼容性添加额外字段
-          count: filteredResults.length,  // 兼容字段
-          targets: filteredResults,
-          page: actualPage,
-          pageSize: actualPageSize,
-          totalPages: Math.ceil(filteredResults.length / actualPageSize),
-        }
-      }
-      
-      // 否则直接返回原始响应，并添加兼容字段
-      return {
-        ...response,
-        targets: response.results,
-        // 后端返回 total，不是 count
-        count: response.total,  // 兼容字段，使用 total 值
-        // 保持原有字段
-        total: response.total,
-        page: response.page,
-        pageSize: response.pageSize,
-        totalPages: response.totalPages,
-      }
-    },
+    select: selectFn,
     placeholderData: keepPreviousData,
   })
 }

@@ -103,18 +103,23 @@ export function DeployTerminalDialog({
     
     // Show connection prompt
     terminal.writeln(`\x1b[90m${tTerminal("connecting")}\x1b[0m`)
-    
-    // Listen for window resize
-    const handleResize = () => fitAddon.fit()
-    window.addEventListener('resize', handleResize)
-    
+
     // Auto-connect WebSocket
     connectWs()
-    
+  }, [worker])
+
+  // Manage window resize listener separately for proper cleanup
+  useEffect(() => {
+    const fitAddon = fitAddonRef.current
+    if (!fitAddon) return
+
+    const handleResize = () => fitAddon.fit()
+    window.addEventListener('resize', handleResize)
+
     return () => {
       window.removeEventListener('resize', handleResize)
     }
-  }, [worker])
+  }, [fitAddonRef.current])
 
   // Connect WebSocket
   const connectWs = useCallback(() => {

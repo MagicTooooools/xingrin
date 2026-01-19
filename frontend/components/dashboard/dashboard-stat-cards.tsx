@@ -1,5 +1,6 @@
 "use client"
 
+import { memo } from "react"
 import { useAssetStatistics } from "@/hooks/use-dashboard"
 import { Card, CardAction, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -8,7 +9,7 @@ import { IconTarget, IconStack2, IconBug, IconPlayerPlay, IconTrendingUp, IconTr
 import { useTranslations } from "next-intl"
 import { useLocale } from "next-intl"
 
-function TrendBadge({ change }: { change: number }) {
+const TrendBadge = memo(function TrendBadge({ change }: { change: number }) {
   if (change === 0) return null
   
   const isPositive = change > 0
@@ -24,9 +25,9 @@ function TrendBadge({ change }: { change: number }) {
       {isPositive ? '+' : ''}{change}
     </Badge>
   )
-}
+})
 
-function StatCard({
+const StatCard = memo(function StatCard({
   title,
   value,
   change,
@@ -66,7 +67,7 @@ function StatCard({
       </CardFooter>
     </Card>
   )
-}
+})
 
 function formatUpdateTime(dateStr: string | null, locale: string, noDataText: string) {
   if (!dateStr) return noDataText

@@ -94,7 +94,7 @@ export function AssetTrendChart() {
   } satisfies ChartConfig), [t])
   
   // Visible series state (show all by default)
-  const [visibleSeries, setVisibleSeries] = useState<Set<SeriesKey>>(new Set(ALL_SERIES))
+  const [visibleSeries, setVisibleSeries] = useState<Set<SeriesKey>>(() => new Set(ALL_SERIES))
   
   // Currently hovered line
   const [hoveredLine, setHoveredLine] = useState<SeriesKey | null>(null)
@@ -136,10 +136,13 @@ export function AssetTrendChart() {
   }
 
   // Get latest data (use latest value from raw data)
-  const latest = rawData && rawData.length > 0 ? rawData[rawData.length - 1] : null
-  
+  const latest = useMemo(() =>
+    rawData && rawData.length > 0 ? rawData[rawData.length - 1] : null,
+    [rawData]
+  )
+
   // Display data: show hovered data when hovering, otherwise show latest data
-  const displayData = activeData || latest
+  const displayData = useMemo(() => activeData || latest, [activeData, latest])
 
   return (
     <Card>

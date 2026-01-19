@@ -38,7 +38,12 @@ const websiteService = {
     requestedIds: number[]
     cascadeDeleted: Record<string, number>
   }> => {
-    const response = await api.post('/websites/bulk-delete/', { ids })
+    const response = await api.post<{
+      message: string
+      deletedCount: number
+      requestedIds: number[]
+      cascadeDeleted: Record<string, number>
+    }>('/websites/bulk-delete/', { ids })
     return response.data
   },
 
@@ -54,7 +59,17 @@ const websiteService = {
       phase2: string
     }
   }> => {
-    const response = await api.delete(`/websites/${websiteId}/`)
+    const response = await api.delete<{
+      message: string
+      websiteId: number
+      websiteUrl: string
+      deletedCount: number
+      deletedWebSites: string[]
+      detail: {
+        phase1: string
+        phase2: string
+      }
+    }>(`/websites/${websiteId}/`)
     return response.data
   },
 }

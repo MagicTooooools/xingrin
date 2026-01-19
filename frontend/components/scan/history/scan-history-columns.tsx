@@ -249,13 +249,11 @@ export const createScanHistoryColumns = ({
     size: 290,
     minSize: 150,
     cell: ({ row }) => {
-      const stats = row.original.cachedStats || {}
-
-      const subdomains = stats.subdomainsCount ?? 0
-      const websites = stats.websitesCount ?? 0
-      const endpoints = stats.endpointsCount ?? 0
-      const ips = stats.ipsCount ?? 0
-      const vulns = stats.vulnsTotal ?? 0
+      const subdomains = row.original.cachedStats?.subdomainsCount ?? 0
+      const websites = row.original.cachedStats?.websitesCount ?? 0
+      const endpoints = row.original.cachedStats?.endpointsCount ?? 0
+      const ips = row.original.cachedStats?.ipsCount ?? 0
+      const vulns = row.original.cachedStats?.vulnsTotal ?? 0
 
       const badges: React.ReactNode[] = []
 
@@ -358,7 +356,7 @@ export const createScanHistoryColumns = ({
               </TooltipTrigger>
               <TooltipContent side="top">
                 <p className="text-xs font-medium">
-                  {stats.vulnsCritical ?? 0} Critical, {stats.vulnsHigh ?? 0} High, {stats.vulnsMedium ?? 0} Medium {t.summary.vulnerabilities}
+                  {row.original.cachedStats?.vulnsCritical ?? 0} Critical, {row.original.cachedStats?.vulnsHigh ?? 0} High, {row.original.cachedStats?.vulnsMedium ?? 0} Medium {t.summary.vulnerabilities}
                 </p>
               </TooltipContent>
             </Tooltip>

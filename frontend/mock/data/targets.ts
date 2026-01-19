@@ -119,6 +119,8 @@ export const mockTargetDetails: Record<number, TargetDetail> = {
       websites: 89,
       endpoints: 2341,
       ips: 45,
+      directories: 67,
+      screenshots: 34,
       vulnerabilities: {
         total: 23,
         critical: 1,
@@ -135,6 +137,8 @@ export const mockTargetDetails: Record<number, TargetDetail> = {
       websites: 45,
       endpoints: 892,
       ips: 23,
+      directories: 32,
+      screenshots: 18,
       vulnerabilities: {
         total: 12,
         critical: 0,
@@ -191,6 +195,8 @@ export function getMockTargetById(id: number): TargetDetail | undefined {
         websites: Math.floor(Math.random() * 50) + 5,
         endpoints: Math.floor(Math.random() * 1000) + 100,
         ips: Math.floor(Math.random() * 30) + 5,
+        directories: Math.floor(Math.random() * 50) + 10,
+        screenshots: Math.floor(Math.random() * 30) + 5,
         vulnerabilities: {
           total: Math.floor(Math.random() * 20) + 1,
           critical: Math.floor(Math.random() * 2),

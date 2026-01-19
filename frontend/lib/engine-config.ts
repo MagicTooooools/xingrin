@@ -68,19 +68,23 @@ export function getEngineIcon(capabilities: string[]): LucideIcon {
  */
 export function parseEngineCapabilities(configuration: string): string[] {
   if (!configuration) return []
-  
+
   try {
     const capabilities: string[] = []
-    const lines = configuration.split('\n')
-    
-    Object.keys(CAPABILITY_CONFIG).forEach((key) => {
-      // Match top-level YAML key: starts with the key name followed by colon
-      // Must be at the beginning of a line (no leading whitespace)
-      const pattern = new RegExp(`^${key}\\s*:`, 'm')
+
+    // Pre-compile RegExp patterns for each capability to avoid recreation in loop
+    const patterns = Object.keys(CAPABILITY_CONFIG).map(key => ({
+      key,
+      pattern: new RegExp(`^${key}\\s*:`, 'm')
+    }))
+
+    // Test each pattern against the configuration
+    for (const { key, pattern } of patterns) {
       if (pattern.test(configuration)) {
         capabilities.push(key)
       }
-    })
+    }
+
     return capabilities
   } catch {
     return []

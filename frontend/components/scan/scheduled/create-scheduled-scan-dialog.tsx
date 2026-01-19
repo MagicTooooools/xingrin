@@ -123,11 +123,11 @@ export function CreateScheduledScanDialog({
   // Only fetch data when dialog is open (avoid unnecessary requests on page load)
   const { data: organizationsData, isFetching: isOrgFetching } = useOrganizations({
     pageSize: 20,
-    search: orgSearch || undefined
+    filter: orgSearch || undefined
   }, { enabled: open })
   const { data: targetsData, isFetching: isTargetFetching } = useTargets({
     pageSize: 20,
-    search: targetSearch || undefined
+    filter: targetSearch || undefined
   }, { enabled: open })
 
   const hasPreset = !!(presetOrganizationId || presetTargetId)

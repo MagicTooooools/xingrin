@@ -22,12 +22,30 @@ export type ColorThemeId = typeof COLOR_THEMES[number]['id']
 
 const STORAGE_KEY = 'color-theme'
 
+// Cache for localStorage reads to avoid expensive I/O operations
+let themeCache: ColorThemeId | null = null
+
 /**
- * 获取当前颜色主题
+ * 获取当前颜色主题（带缓存和错误处理）
  */
 function getStoredTheme(): ColorThemeId {
   if (typeof window === 'undefined') return 'vercel-dark'
-  return (localStorage.getItem(STORAGE_KEY) as ColorThemeId) || 'vercel-dark'
+
+  // Check cache first
+  if (themeCache !== null) {
+    return themeCache
+  }
+
+  // Read from localStorage with error handling
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY) as ColorThemeId
+    const theme = stored || 'vercel-dark'
+    themeCache = theme
+    return theme
+  } catch {
+    // localStorage throws in incognito mode or when disabled
+    return 'vercel-dark'
+  }
 }
 
 /**
@@ -61,7 +79,14 @@ export function useColorTheme() {
   // 切换主题
   const setTheme = useCallback((newTheme: ColorThemeId) => {
     setThemeState(newTheme)
-    localStorage.setItem(STORAGE_KEY, newTheme)
+    // Save to localStorage with error handling
+    try {
+      localStorage.setItem(STORAGE_KEY, newTheme)
+      // Update cache
+      themeCache = newTheme
+    } catch {
+      // localStorage throws when quota exceeded or disabled
+    }
     applyThemeAttribute(newTheme)
     // 同步 next-themes 亮暗模式
     const themeConfig = COLOR_THEMES.find(t => t.id === newTheme)

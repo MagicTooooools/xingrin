@@ -2,6 +2,7 @@
 
 import React, { useState } from "react"
 import Link from "next/link"
+import dynamic from "next/dynamic"
 import { useTranslations, useLocale } from "next-intl"
 import {
   Globe,
@@ -25,11 +26,69 @@ import { Button } from "@/components/ui/button"
 import { useTarget } from "@/hooks/use-targets"
 import { useScheduledScans } from "@/hooks/use-scheduled-scans"
 import { ScanHistoryList } from "@/components/scan/history/scan-history-list"
-import { InitiateScanDialog } from "@/components/scan/initiate-scan-dialog"
 import { getDateLocale } from "@/lib/date-utils"
+
+// Dynamic import for InitiateScanDialog (only loaded when dialog is opened)
+const InitiateScanDialog = dynamic(() => import('@/components/scan/initiate-scan-dialog').then(m => ({ default: m.InitiateScanDialog })), {
+  ssr: false
+})
 
 interface TargetOverviewProps {
   targetId: number
+}
+
+/**
+ * Format date helper function
+ */
+function formatDate(dateString: string | undefined, locale: string): string {
+  if (!dateString) return "-"
+  return new Date(dateString).toLocaleString(locale === 'zh' ? 'zh-CN' : 'en-US', {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  })
+}
+
+/**
+ * Format short date for scheduled scans
+ */
+function formatShortDate(
+  dateString: string | undefined,
+  locale: string,
+  todayText: string,
+  tomorrowText: string
+): string {
+  if (!dateString) return "-"
+  const date = new Date(dateString)
+  const now = new Date()
+  const tomorrow = new Date(now)
+  tomorrow.setDate(tomorrow.getDate() + 1)
+
+  const localeStr = locale === 'zh' ? 'zh-CN' : 'en-US'
+
+  // Check if it's today
+  if (date.toDateString() === now.toDateString()) {
+    return todayText + " " + date.toLocaleTimeString(localeStr, {
+      hour: "2-digit",
+      minute: "2-digit",
+    })
+  }
+  // Check if it's tomorrow
+  if (date.toDateString() === tomorrow.toDateString()) {
+    return tomorrowText + " " + date.toLocaleTimeString(localeStr, {
+      hour: "2-digit",
+      minute: "2-digit",
+    })
+  }
+  // Otherwise show date
+  return date.toLocaleString(localeStr, {
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  })
 }
 
 /**
@@ -43,70 +102,26 @@ export function TargetOverview({ targetId }: TargetOverviewProps) {
   const [scanDialogOpen, setScanDialogOpen] = useState(false)
 
   const { data: target, isLoading, error } = useTarget(targetId)
-  const { data: scheduledScansData, isLoading: isLoadingScans } = useScheduledScans({ 
-    targetId, 
-    pageSize: 5 
+  const { data: scheduledScansData, isLoading: isLoadingScans } = useScheduledScans({
+    targetId,
+    pageSize: 5
   })
 
-  const scheduledScans = scheduledScansData?.results || []
-  const totalScheduledScans = scheduledScansData?.total || 0
-  const enabledScans = scheduledScans.filter(s => s.isEnabled)
+  // Memoize derived values to avoid unnecessary recalculations
+  const scheduledScans = React.useMemo(() => scheduledScansData?.results || [], [scheduledScansData?.results])
+  const totalScheduledScans = React.useMemo(() => scheduledScansData?.total || 0, [scheduledScansData?.total])
+  const enabledScans = React.useMemo(() => scheduledScans.filter(s => s.isEnabled), [scheduledScans])
 
-  // Format date helper
-  const formatDate = (dateString: string | undefined): string => {
-    if (!dateString) return "-"
-    return new Date(dateString).toLocaleString(getDateLocale(locale), {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    })
-  }
-
-  // Format short date for scheduled scans
-  const formatShortDate = (dateString: string | undefined): string => {
-    if (!dateString) return "-"
-    const date = new Date(dateString)
-    const now = new Date()
-    const tomorrow = new Date(now)
-    tomorrow.setDate(tomorrow.getDate() + 1)
-    
-    // Check if it's today
-    if (date.toDateString() === now.toDateString()) {
-      return t("scheduledScans.today") + " " + date.toLocaleTimeString(getDateLocale(locale), {
-        hour: "2-digit",
-        minute: "2-digit",
-      })
-    }
-    // Check if it's tomorrow
-    if (date.toDateString() === tomorrow.toDateString()) {
-      return t("scheduledScans.tomorrow") + " " + date.toLocaleTimeString(getDateLocale(locale), {
-        hour: "2-digit",
-        minute: "2-digit",
-      })
-    }
-    // Otherwise show date
-    return date.toLocaleString(getDateLocale(locale), {
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    })
-  }
-
-  // Get next execution time from enabled scans
-  const getNextExecution = () => {
+  // Get next execution time from enabled scans (memoized)
+  const nextExecution = React.useMemo(() => {
     const enabledWithNextRun = enabledScans.filter(s => s.nextRunTime)
     if (enabledWithNextRun.length === 0) return null
-    
-    const sorted = enabledWithNextRun.sort((a, b) => 
+
+    const sorted = enabledWithNextRun.toSorted((a, b) =>
       new Date(a.nextRunTime!).getTime() - new Date(b.nextRunTime!).getTime()
     )
     return sorted[0]
-  }
-
-  const nextExecution = getNextExecution()
+  }, [enabledScans])
 
   if (isLoading) {
     return (
@@ -138,41 +153,49 @@ export function TargetOverview({ targetId }: TargetOverviewProps) {
     )
   }
 
-  const summary = (target as any).summary || {}
-  const vulnSummary = summary.vulnerabilities || { total: 0, critical: 0, high: 0, medium: 0, low: 0 }
+  // Memoize summary and vulnerability data to avoid unnecessary recalculations
+  const summary = React.useMemo(() => (target as any).summary || {}, [target])
+  const vulnSummary = React.useMemo(
+    () => summary.vulnerabilities || { total: 0, critical: 0, high: 0, medium: 0, low: 0 },
+    [summary]
+  )
 
-  const assetCards = [
-    {
-      title: t("cards.websites"),
-      value: summary.websites || 0,
-      icon: Globe,
-      href: `/target/${targetId}/websites/`,
-    },
-    {
-      title: t("cards.subdomains"),
-      value: summary.subdomains || 0,
-      icon: Network,
-      href: `/target/${targetId}/subdomain/`,
-    },
-    {
-      title: t("cards.ips"),
-      value: summary.ips || 0,
-      icon: Server,
-      href: `/target/${targetId}/ip-addresses/`,
-    },
-    {
-      title: t("cards.urls"),
-      value: summary.endpoints || 0,
-      icon: Link2,
-      href: `/target/${targetId}/endpoints/`,
-    },
-    {
-      title: t("cards.directories"),
-      value: summary.directories || 0,
-      icon: FolderOpen,
-      href: `/target/${targetId}/directories/`,
-    },
-  ]
+  // Memoize asset cards array to avoid recreation on every render
+  const assetCards = React.useMemo(
+    () => [
+      {
+        title: t("cards.websites"),
+        value: summary.websites || 0,
+        icon: Globe,
+        href: `/target/${targetId}/websites/`,
+      },
+      {
+        title: t("cards.subdomains"),
+        value: summary.subdomains || 0,
+        icon: Network,
+        href: `/target/${targetId}/subdomain/`,
+      },
+      {
+        title: t("cards.ips"),
+        value: summary.ips || 0,
+        icon: Server,
+        href: `/target/${targetId}/ip-addresses/`,
+      },
+      {
+        title: t("cards.urls"),
+        value: summary.endpoints || 0,
+        icon: Link2,
+        href: `/target/${targetId}/endpoints/`,
+      },
+      {
+        title: t("cards.directories"),
+        value: summary.directories || 0,
+        icon: FolderOpen,
+        href: `/target/${targetId}/directories/`,
+      },
+    ],
+    [summary, targetId, t]
+  )
 
   return (
     <div className="space-y-6">
@@ -181,11 +204,11 @@ export function TargetOverview({ targetId }: TargetOverviewProps) {
         <div className="flex items-center gap-4 text-sm text-muted-foreground">
           <div className="flex items-center gap-1.5">
             <Calendar className="h-4 w-4" />
-            <span>{t("createdAt")}: {formatDate(target.createdAt)}</span>
+            <span>{t("createdAt")}: {formatDate(target.createdAt, locale)}</span>
           </div>
           <div className="flex items-center gap-1.5">
             <Clock className="h-4 w-4" />
-            <span>{t("lastScanned")}: {formatDate(target.lastScannedAt)}</span>
+            <span>{t("lastScanned")}: {formatDate(target.lastScannedAt, locale)}</span>
           </div>
         </div>
         <Button onClick={() => setScanDialogOpen(true)}>
@@ -264,7 +287,14 @@ export function TargetOverview({ targetId }: TargetOverviewProps) {
                 {nextExecution && (
                   <div className="text-sm">
                     <span className="text-muted-foreground">{t("scheduledScans.nextRun")}: </span>
-                    <span className="font-medium">{formatShortDate(nextExecution.nextRunTime)}</span>
+                    <span className="font-medium">
+                      {formatShortDate(
+                        nextExecution.nextRunTime,
+                        locale,
+                        t("scheduledScans.today"),
+                        t("scheduledScans.tomorrow")
+                      )}
+                    </span>
                   </div>
                 )}
 

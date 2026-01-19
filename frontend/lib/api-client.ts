@@ -32,6 +32,9 @@ let failedQueue: Array<{
   reject: (error: unknown) => void;
 }> = [];
 
+// Cache for localStorage reads to avoid expensive I/O operations
+const storageCache = new Map<string, string | null>();
+
 /**
  * Process the queue of failed requests after token refresh
  */
@@ -47,36 +50,83 @@ const processQueue = (error: unknown, token: string | null = null) => {
 };
 
 /**
- * Token management utilities
+ * Token management utilities with caching and error handling
  */
 export const tokenManager = {
   getAccessToken: (): string | null => {
     if (typeof window === 'undefined') return null;
-    return localStorage.getItem(ACCESS_TOKEN_KEY);
+
+    // Check cache first
+    if (storageCache.has(ACCESS_TOKEN_KEY)) {
+      return storageCache.get(ACCESS_TOKEN_KEY)!;
+    }
+
+    // Read from localStorage with error handling
+    try {
+      const token = localStorage.getItem(ACCESS_TOKEN_KEY);
+      storageCache.set(ACCESS_TOKEN_KEY, token);
+      return token;
+    } catch {
+      // localStorage throws in incognito mode or when disabled
+      return null;
+    }
   },
-  
+
   getRefreshToken: (): string | null => {
     if (typeof window === 'undefined') return null;
-    return localStorage.getItem(REFRESH_TOKEN_KEY);
+
+    // Check cache first
+    if (storageCache.has(REFRESH_TOKEN_KEY)) {
+      return storageCache.get(REFRESH_TOKEN_KEY)!;
+    }
+
+    // Read from localStorage with error handling
+    try {
+      const token = localStorage.getItem(REFRESH_TOKEN_KEY);
+      storageCache.set(REFRESH_TOKEN_KEY, token);
+      return token;
+    } catch {
+      // localStorage throws in incognito mode or when disabled
+      return null;
+    }
   },
-  
+
   setTokens: (accessToken: string, refreshToken: string): void => {
     if (typeof window === 'undefined') return;
-    localStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
-    localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
+    try {
+      localStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
+      localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
+      // Update cache
+      storageCache.set(ACCESS_TOKEN_KEY, accessToken);
+      storageCache.set(REFRESH_TOKEN_KEY, refreshToken);
+    } catch {
+      // localStorage throws when quota exceeded or disabled
+    }
   },
 
   setAccessToken: (accessToken: string): void => {
     if (typeof window === 'undefined') return;
-    localStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
+    try {
+      localStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
+      // Update cache
+      storageCache.set(ACCESS_TOKEN_KEY, accessToken);
+    } catch {
+      // localStorage throws when quota exceeded or disabled
+    }
   },
-  
+
   clearTokens: (): void => {
     if (typeof window === 'undefined') return;
-    localStorage.removeItem(ACCESS_TOKEN_KEY);
-    localStorage.removeItem(REFRESH_TOKEN_KEY);
+    try {
+      localStorage.removeItem(ACCESS_TOKEN_KEY);
+      localStorage.removeItem(REFRESH_TOKEN_KEY);
+      // Clear cache
+      storageCache.clear();
+    } catch {
+      // localStorage throws when disabled
+    }
   },
-  
+
   hasTokens: (): boolean => {
     return !!tokenManager.getAccessToken();
   }

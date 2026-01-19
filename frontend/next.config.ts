@@ -19,6 +19,28 @@ const nextConfig: NextConfig = {
   // Allow LAN IP access to dev server (eliminate CORS warnings)
   allowedDevOrigins: ['192.168.*.*', '10.*.*.*', '172.16.*.*'],
 
+  // Optimize package imports to reduce bundle size and improve performance
+  experimental: {
+    optimizePackageImports: [
+      '@tabler/icons-react',
+      'lucide-react',
+      '@radix-ui/react-select',
+      '@radix-ui/react-dialog',
+      '@radix-ui/react-dropdown-menu',
+      '@radix-ui/react-tooltip',
+      '@radix-ui/react-hover-card',
+      '@radix-ui/react-tabs',
+      '@radix-ui/react-avatar',
+      '@radix-ui/react-checkbox',
+      '@radix-ui/react-switch',
+      '@radix-ui/react-radio-group',
+      '@radix-ui/react-toggle',
+      '@radix-ui/react-toggle-group',
+      '@radix-ui/react-separator',
+      '@radix-ui/react-collapsible',
+    ],
+  },
+
   async rewrites() {
     // Skip rewrites on Vercel when using mock data
     if (isVercel) {

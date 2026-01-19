@@ -290,7 +290,7 @@ export function BulkAddUrlsDialog({
                         value: validationResult.firstMismatch.url.length > 50 
                           ? validationResult.firstMismatch.url.substring(0, 50) + '...'
                           : validationResult.firstMismatch.url,
-                        target: targetName,
+                        target: targetName || '',
                       })}
                     </div>
                   )}

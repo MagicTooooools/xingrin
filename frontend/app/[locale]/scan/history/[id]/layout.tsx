@@ -67,15 +67,15 @@ export default function ScanHistoryLayout({
   }
 
   // Get counts for each tab from scan data
-  const summary = scanData?.summary as any
+  const stats = scanData?.cachedStats
   const counts = {
-    subdomain: summary?.subdomains || 0,
-    endpoints: summary?.endpoints || 0,
-    websites: summary?.websites || 0,
-    directories: summary?.directories || 0,
-    screenshots: summary?.screenshots || 0,
-    vulnerabilities: summary?.vulnerabilities?.total || 0,
-    "ip-addresses": summary?.ips || 0,
+    subdomain: stats?.subdomainsCount || 0,
+    endpoints: stats?.endpointsCount || 0,
+    websites: stats?.websitesCount || 0,
+    directories: stats?.directoriesCount || 0,
+    screenshots: stats?.screenshotsCount || 0,
+    vulnerabilities: stats?.vulnsTotal || 0,
+    "ip-addresses": stats?.ipsCount || 0,
   }
 
   // Calculate total assets count
