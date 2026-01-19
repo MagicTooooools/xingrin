@@ -97,17 +97,21 @@ export function LoginBootScreen({ className, success = false }: { className?: st
             <div className="mb-6 text-center">
               <div
                 className={cn(
-                  "text-cyan-500 text-3xl sm:text-4xl !font-bold tracking-wide",
+                  "text-3xl sm:text-4xl !font-bold tracking-wide",
+                  "bg-gradient-to-r from-[#FF10F0] via-[#B026FF] to-[#FF10F0] bg-clip-text text-transparent",
                   glitchOn && "orbit-glitch-text"
                 )}
                 data-text="ORBIT"
+                style={{
+                  filter: "drop-shadow(0 0 20px rgba(255, 16, 240, 0.5)) drop-shadow(0 0 40px rgba(176, 38, 255, 0.3))"
+                }}
               >
                 ORBIT
               </div>
               <div className="mt-3 flex items-center gap-3 text-zinc-400 text-xs">
-                <span className="h-px flex-1 bg-zinc-700" />
+                <span className="h-px flex-1 bg-gradient-to-r from-transparent via-[#B026FF] to-transparent" />
                 <span className="whitespace-nowrap">system bootstrap</span>
-                <span className="h-px flex-1 bg-zinc-700" />
+                <span className="h-px flex-1 bg-gradient-to-r from-transparent via-[#B026FF] to-transparent" />
               </div>
             </div>
 
@@ -128,8 +132,11 @@ export function LoginBootScreen({ className, success = false }: { className?: st
             <div className="mt-6">
               <div className="h-1.5 w-full rounded bg-zinc-800 overflow-hidden">
                 <div
-                  className="h-full bg-cyan-500"
-                  style={{ width: `${progress}%` }}
+                  className="h-full bg-gradient-to-r from-[#FF10F0] to-[#B026FF]"
+                  style={{
+                    width: `${progress}%`,
+                    boxShadow: "0 0 10px rgba(255, 16, 240, 0.5), 0 0 20px rgba(176, 38, 255, 0.3)"
+                  }}
                 />
               </div>
               <div className="mt-2 text-xs text-zinc-500">

@@ -7,6 +7,106 @@ import { cn } from "@/lib/utils"
 // Dynamic import to avoid SSR issues with GSAP
 const Shuffle = dynamic(() => import("@/components/Shuffle"), { ssr: false })
 
+type BootLine = {
+  text: string
+  className?: string
+}
+
+// Boot log animation timing (similar to LoginBootScreen)
+const AUTH_STEP_DELAYS_MS = [120, 160, 200, 240]
+const GLITCH_MS = 600
+
+function AuthBootLog({
+  authenticatingLabel,
+  processingLabel,
+  done = false,
+  className,
+}: {
+  authenticatingLabel: string
+  processingLabel: string
+  done?: boolean
+  className?: string
+}) {
+  const [visible, setVisible] = React.useState(0)
+  const [glitchOn, setGlitchOn] = React.useState(true)
+
+  const authLines = React.useMemo<BootLine[]>(
+    () => [
+      { text: `> ${authenticatingLabel}`, className: "text-yellow-500" },
+      { text: "> initializing secure channel...", className: "text-zinc-200" },
+      { text: "> validating credentials...", className: "text-zinc-200" },
+      { text: "> checking session...", className: "text-yellow-500" },
+    ],
+    [authenticatingLabel]
+  )
+
+  React.useEffect(() => {
+    setGlitchOn(true)
+    const timer = setTimeout(() => setGlitchOn(false), GLITCH_MS)
+    return () => clearTimeout(timer)
+  }, [])
+
+  React.useEffect(() => {
+    setVisible(0)
+
+    const timers: Array<ReturnType<typeof setTimeout>> = []
+    let acc = 0
+
+    for (let i = 0; i < authLines.length; i++) {
+      acc += AUTH_STEP_DELAYS_MS[i] ?? 220
+      timers.push(
+        setTimeout(() => {
+          setVisible((prev) => Math.max(prev, i + 1))
+        }, acc)
+      )
+    }
+
+    return () => {
+      timers.forEach(clearTimeout)
+    }
+  }, [authLines])
+
+  // When the login flow completes, force the log to finish and jump progress to 100%.
+  React.useEffect(() => {
+    if (!done) return
+    setVisible(authLines.length)
+  }, [authLines.length, done])
+
+  const rawProgress = Math.round((Math.min(visible, authLines.length) / authLines.length) * 100)
+  const progress = done ? 100 : Math.min(rawProgress, 99)
+
+  return (
+    <div className={cn(glitchOn && "orbit-splash-glitch", className)}>
+      <div className="space-y-1">
+        {authLines.slice(0, visible).map((line, idx) => (
+          <div key={idx} className={cn("whitespace-pre-wrap", line.className)}>
+            {line.text}
+          </div>
+        ))}
+
+        {/* Cursor */}
+        <div className="text-green-500">
+          <span className="inline-block h-4 w-2 align-middle bg-green-500 animate-pulse" />
+        </div>
+      </div>
+
+      {/* Progress bar */}
+      <div className="mt-6">
+        <div className="h-1.5 w-full rounded bg-zinc-800 overflow-hidden">
+          <div
+            className="h-full bg-gradient-to-r from-[#FF10F0] to-[#B026FF]"
+            style={{
+              width: `${progress}%`,
+              boxShadow: "0 0 10px rgba(255, 16, 240, 0.5), 0 0 20px rgba(176, 38, 255, 0.3)",
+            }}
+          />
+        </div>
+        <div className="mt-2 text-xs text-zinc-500">{processingLabel}</div>
+      </div>
+    </div>
+  )
+}
+
 type LoginStep = "username" | "password" | "authenticating" | "success" | "error"
 
 interface TerminalLoginTranslations {
@@ -34,6 +134,7 @@ interface TerminalLine {
 
 interface TerminalLoginProps {
   onLogin: (username: string, password: string) => Promise<void>
+  authDone?: boolean
   isPending?: boolean
   className?: string
   translations: TerminalLoginTranslations
@@ -41,6 +142,7 @@ interface TerminalLoginProps {
 
 export function TerminalLogin({
   onLogin,
+  authDone = false,
   isPending = false,
   className,
   translations: t,
@@ -162,14 +264,13 @@ export function TerminalLogin({
         addLine({ text: `> ${t.passwordPrompt}: `, type: "prompt" })
         addLine({ text: "*".repeat(password.length), type: "input" })
         addLine({ text: "", type: "info" })
-        addLine({ text: `> ${t.authenticating}`, type: "warning" })
         setStep("authenticating")
 
         try {
           await onLogin(username, password)
           addLine({ text: `> ${t.accessGranted}`, type: "success" })
           addLine({ text: `> ${t.welcomeMessage}`, type: "success" })
-          setStep("success")
+          // Keep showing the authenticating progress bar until navigation happens.
         } catch {
           addLine({ text: `> ${t.authFailed}`, type: "error" })
           addLine({ text: `> ${t.invalidCredentials}`, type: "error" })
@@ -286,7 +387,7 @@ export function TerminalLogin({
                 setStep("authenticating")
                 try {
                   await onLogin(username, password)
-                  setStep("success")
+                  // Keep showing the authenticating progress bar until navigation happens.
                 } catch {
                   setStep("error")
                   setTimeout(() => {
@@ -333,8 +434,8 @@ export function TerminalLogin({
             </form>
           )}
           {step === "authenticating" && (
-            <div className="text-yellow-500 text-center py-4">
-              <span className="animate-pulse">{t.processing}</span>
+            <div className="py-4">
+              <AuthBootLog authenticatingLabel={t.authenticating} processingLabel={t.processing} done={authDone} />
             </div>
           )}
           {step === "success" && (
@@ -389,8 +490,8 @@ export function TerminalLogin({
 
           {/* Loading indicator */}
           {step === "authenticating" && (
-            <div className="flex items-center text-yellow-500">
-              <span className="animate-pulse">{t.processing}</span>
+            <div className="mt-2">
+              <AuthBootLog authenticatingLabel={t.authenticating} processingLabel={t.processing} done={authDone} />
             </div>
           )}
 

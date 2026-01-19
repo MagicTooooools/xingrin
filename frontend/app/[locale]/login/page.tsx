@@ -3,19 +3,22 @@
 import React from "react"
 import { useRouter } from "next/navigation"
 import { useTranslations } from "next-intl"
+import { useQueryClient } from "@tanstack/react-query"
 import dynamic from "next/dynamic"
 import { LoginBootScreen } from "@/components/auth/login-boot-screen"
 import { TerminalLogin } from "@/components/ui/terminal-login"
 import { useLogin, useAuth } from "@/hooks/use-auth"
+import { vulnerabilityKeys } from "@/hooks/use-vulnerabilities"
 import { useRoutePrefetch } from "@/hooks/use-route-prefetch"
+import { getAssetStatistics, getStatisticsHistory } from "@/services/dashboard.service"
+import { getScans } from "@/services/scan.service"
+import { VulnerabilityService } from "@/services/vulnerability.service"
 
 // Dynamic import to avoid SSR issues with WebGL
 const PixelBlast = dynamic(() => import("@/components/PixelBlast"), { ssr: false })
 
 const BOOT_SPLASH_MS = 600
 const BOOT_FADE_MS = 200
-const LOGIN_SUCCESS_DELAY_MS = 1200 // 登录成功后显示启动屏幕的时间
-const LOGIN_SUCCESS_FADE_MS = 500 // 登录成功后淡出的时间
 
 type BootOverlayPhase = "entering" | "visible" | "leaving" | "hidden"
 
@@ -23,15 +26,22 @@ export default function LoginPage() {
   // Preload all page components on login page
   useRoutePrefetch()
   const router = useRouter()
+  const queryClient = useQueryClient()
   const { data: auth, isLoading: authLoading } = useAuth()
   const { mutateAsync: login, isPending } = useLogin()
   const t = useTranslations("auth.terminal")
 
+  const loginStartedRef = React.useRef(false)
+  const [loginReady, setLoginReady] = React.useState(false)
+
+  const [pixelFirstFrame, setPixelFirstFrame] = React.useState(false)
+  const handlePixelFirstFrame = React.useCallback(() => {
+    setPixelFirstFrame(true)
+  }, [])
+
   // Always show a short splash on entering the login page.
   const [bootMinDone, setBootMinDone] = React.useState(false)
   const [bootPhase, setBootPhase] = React.useState<BootOverlayPhase>("entering")
-  const [loginSuccess, setLoginSuccess] = React.useState(false) // 跟踪登录成功状态
-  const [showSuccessSplash, setShowSuccessSplash] = React.useState(false) // 是否显示登录成功的启动屏幕
 
   React.useEffect(() => {
     setBootMinDone(false)
@@ -46,6 +56,7 @@ export default function LoginPage() {
     }
   }, [])
 
+
   // Start hiding the splash after the minimum time AND auth check completes.
   // Note: don't schedule the fade-out timer in the same effect where we set `bootPhase`,
   // otherwise the effect cleanup will cancel the timer when `bootPhase` changes.
@@ -53,9 +64,10 @@ export default function LoginPage() {
     if (bootPhase !== "visible") return
     if (!bootMinDone) return
     if (authLoading) return
+    if (!pixelFirstFrame) return
 
     setBootPhase("leaving")
-  }, [authLoading, bootMinDone, bootPhase])
+  }, [authLoading, bootMinDone, bootPhase, pixelFirstFrame])
 
   React.useEffect(() => {
     if (bootPhase !== "leaving") return
@@ -83,31 +95,91 @@ export default function LoginPage() {
     startEnd: t("startEnd"),
   }), [t])
 
-  // If already logged in, show success splash then redirect to dashboard
+  // If already logged in, warm up the dashboard, then redirect.
   React.useEffect(() => {
-    if (!bootMinDone) return
     if (authLoading) return
-    if (auth?.authenticated && !showSuccessSplash) {
-      // 登录成功，显示成功启动屏幕
-      setShowSuccessSplash(true)
-      setLoginSuccess(true)
+    if (!auth?.authenticated) return
+    if (loginStartedRef.current) return
 
-      // 延迟后开始淡出并跳转
-      const successTimer = setTimeout(() => {
-        router.push("/dashboard/")
-      }, LOGIN_SUCCESS_DELAY_MS + LOGIN_SUCCESS_FADE_MS)
+    let cancelled = false
 
-      return () => clearTimeout(successTimer)
+    void (async () => {
+      const scansParams = { page: 1, pageSize: 10 }
+      const vulnsParams = { page: 1, pageSize: 10 }
+
+      await Promise.allSettled([
+        queryClient.prefetchQuery({
+          queryKey: ["asset", "statistics"],
+          queryFn: getAssetStatistics,
+        }),
+        queryClient.prefetchQuery({
+          queryKey: ["asset", "statistics", "history", 7],
+          queryFn: () => getStatisticsHistory(7),
+        }),
+        queryClient.prefetchQuery({
+          queryKey: ["scans", scansParams],
+          queryFn: () => getScans(scansParams),
+        }),
+        queryClient.prefetchQuery({
+          queryKey: vulnerabilityKeys.list(vulnsParams),
+          queryFn: () => VulnerabilityService.getAllVulnerabilities(vulnsParams),
+        }),
+      ])
+
+      if (cancelled) return
+      router.replace("/dashboard/")
+    })()
+
+    return () => {
+      cancelled = true
     }
-  }, [auth?.authenticated, authLoading, bootMinDone, router, showSuccessSplash])
+  }, [auth?.authenticated, authLoading, queryClient, router])
+
+  React.useEffect(() => {
+    if (!loginReady) return
+    router.replace("/dashboard/")
+  }, [loginReady, router])
 
   const handleLogin = async (username: string, password: string) => {
-    await login({ username, password })
-  }
+    loginStartedRef.current = true
+    setLoginReady(false)
 
-  // While authenticated, keep showing the splash until redirect happens.
-  if (auth?.authenticated && showSuccessSplash) {
-    return <LoginBootScreen success={loginSuccess} />
+    // Start downloading the dashboard bundle ASAP.
+    router.prefetch("/dashboard/")
+
+    const loginRes = await login({ username, password })
+
+    // Warm up critical dashboard data before navigating, so the user doesn't see
+    // a second loading phase immediately after leaving the terminal.
+    const scansParams = { page: 1, pageSize: 10 }
+    const vulnsParams = { page: 1, pageSize: 10 }
+
+    await Promise.allSettled([
+      queryClient.prefetchQuery({
+        queryKey: ["asset", "statistics"],
+        queryFn: getAssetStatistics,
+      }),
+      queryClient.prefetchQuery({
+        queryKey: ["asset", "statistics", "history", 7],
+        queryFn: () => getStatisticsHistory(7),
+      }),
+      queryClient.prefetchQuery({
+        queryKey: ["scans", scansParams],
+        queryFn: () => getScans(scansParams),
+      }),
+      queryClient.prefetchQuery({
+        queryKey: vulnerabilityKeys.list(vulnsParams),
+        queryFn: () => VulnerabilityService.getAllVulnerabilities(vulnsParams),
+      }),
+    ])
+
+    // Prime auth cache so AuthLayout doesn't flash a full-screen loading state.
+    queryClient.setQueryData(["auth", "me"], {
+      authenticated: true,
+      user: loginRes.user,
+    })
+
+    setLoginReady(true)
   }
 
   const loginVisible = bootPhase === "leaving" || bootPhase === "hidden"
@@ -116,11 +188,12 @@ export default function LoginPage() {
     <div className="relative flex min-h-svh flex-col bg-black">
       <div className={`fixed inset-0 z-0 transition-opacity duration-300 ${loginVisible ? "opacity-100" : "opacity-0"}`}>
         <PixelBlast
+          onFirstFrame={handlePixelFirstFrame}
           className=""
           style={{}}
           pixelSize={6.5}
           patternScale={4.5}
-          color="#06b6d4"
+          color="#FF10F0"
           speed={0.35}
           enableRipples={false}
         />
@@ -137,6 +210,7 @@ export default function LoginPage() {
       >
         <TerminalLogin
           onLogin={handleLogin}
+          authDone={loginReady}
           isPending={isPending}
           translations={translations}
         />

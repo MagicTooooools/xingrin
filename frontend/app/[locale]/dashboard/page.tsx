@@ -23,8 +23,8 @@ export default function Page() {
   return (
     // Content area containing cards, charts and data tables
     <div
-      className={`flex flex-col gap-4 py-4 md:gap-6 md:py-6 transition-opacity duration-500 ${
-        mounted ? "opacity-100" : "opacity-0"
+      className={`flex flex-col gap-4 py-4 md:gap-6 md:py-6 transition-[opacity,filter] duration-500 will-change-[opacity,filter] ${
+        mounted ? "opacity-100 blur-0" : "opacity-0 blur-sm"
       }`}
     >
       {/* Top statistics cards */}
