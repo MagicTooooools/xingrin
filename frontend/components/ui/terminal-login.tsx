@@ -240,7 +240,7 @@ export function TerminalLogin({
       ref={containerRef}
       onClick={handleContainerClick}
       className={cn(
-        "border-zinc-700 bg-zinc-900/80 backdrop-blur-sm z-0 w-full max-w-2xl rounded-xl border cursor-text",
+        "border-zinc-700 bg-zinc-900/80 backdrop-blur-sm z-0 w-full max-w-xl rounded-xl border cursor-text",
         className
       )}
     >
@@ -259,7 +259,7 @@ export function TerminalLogin({
         {/* Shuffle Title Banner */}
         <div className="mb-6 text-center">
           <Shuffle
-            text="STAR PATROL"
+            text="ORBIT"
             className="!text-4xl sm:!text-5xl md:!text-6xl !font-bold text-cyan-500"
             shuffleDirection="up"
             duration={0.5}
@@ -269,8 +269,10 @@ export function TerminalLogin({
             triggerOnce={false}
             autoPlay={false}
           />
-          <div className="text-zinc-400 text-sm mt-3">
-            ─────────── {t.subtitle} ───────────
+          <div className="mt-3 flex items-center gap-3 text-zinc-400 text-sm">
+            <span className="h-px flex-1 bg-zinc-700" />
+            <span className="whitespace-nowrap">{t.subtitle}</span>
+            <span className="h-px flex-1 bg-zinc-700" />
           </div>
         </div>
 

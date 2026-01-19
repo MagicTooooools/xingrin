@@ -382,3 +382,189 @@
 .animate-border-flow {
   animation: border-flow 2s linear infinite;
 }
+
+/* 登录页 - Glitch Reveal（全屏开场） */
+@keyframes orbit-splash-jitter {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+    filter: none;
+  }
+  10% {
+    transform: translate3d(-1px, 0, 0);
+  }
+  20% {
+    transform: translate3d(1px, -0.5px, 0);
+    filter: hue-rotate(6deg);
+  }
+  30% {
+    transform: translate3d(-0.5px, 0.5px, 0);
+  }
+  45% {
+    transform: translate3d(0.5px, 0, 0);
+    filter: hue-rotate(-6deg);
+  }
+  60% {
+    transform: translate3d(0, -0.5px, 0);
+  }
+  75% {
+    transform: translate3d(0.5px, 0.5px, 0);
+  }
+}
+
+@keyframes orbit-splash-noise {
+  0% {
+    transform: translate3d(-2%, -2%, 0);
+    opacity: 0.22;
+  }
+  25% {
+    transform: translate3d(2%, -1%, 0);
+    opacity: 0.28;
+  }
+  50% {
+    transform: translate3d(-1%, 2%, 0);
+    opacity: 0.24;
+  }
+  75% {
+    transform: translate3d(1%, 1%, 0);
+    opacity: 0.30;
+  }
+  100% {
+    transform: translate3d(-2%, -2%, 0);
+    opacity: 0.22;
+  }
+}
+
+@keyframes orbit-splash-sweep {
+  0% {
+    transform: translate3d(0, -120%, 0);
+    opacity: 0;
+  }
+  18% {
+    opacity: 0.35;
+  }
+  100% {
+    transform: translate3d(0, 120%, 0);
+    opacity: 0;
+  }
+}
+
+@keyframes orbit-glitch-clip {
+  0% {
+    clip-path: inset(0 0 0 0);
+    transform: translate3d(0, 0, 0);
+  }
+  16% {
+    clip-path: inset(12% 0 72% 0);
+    transform: translate3d(-2px, 0, 0);
+  }
+  32% {
+    clip-path: inset(54% 0 18% 0);
+    transform: translate3d(2px, 0, 0);
+  }
+  48% {
+    clip-path: inset(78% 0 6% 0);
+    transform: translate3d(-1px, 0, 0);
+  }
+  64% {
+    clip-path: inset(30% 0 48% 0);
+    transform: translate3d(1px, 0, 0);
+  }
+  80% {
+    clip-path: inset(6% 0 86% 0);
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    clip-path: inset(0 0 0 0);
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.orbit-splash-glitch {
+  isolation: isolate;
+  animation: orbit-splash-jitter 0.6s steps(2, end) infinite;
+}
+
+.orbit-splash-glitch::before {
+  content: "";
+  position: absolute;
+  inset: -20%;
+  pointer-events: none;
+  z-index: 20;
+  mix-blend-mode: screen;
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      rgba(255, 255, 255, 0.08) 0px,
+      rgba(255, 255, 255, 0.08) 1px,
+      transparent 1px,
+      transparent 4px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      rgba(34, 211, 238, 0.10) 0px,
+      rgba(34, 211, 238, 0.10) 1px,
+      transparent 1px,
+      transparent 84px
+    ),
+    repeating-linear-gradient(
+      45deg,
+      rgba(167, 139, 250, 0.05) 0px,
+      rgba(167, 139, 250, 0.05) 1px,
+      transparent 1px,
+      transparent 9px
+    );
+  animation: orbit-splash-noise 0.6s steps(2, end) infinite;
+}
+
+.orbit-splash-glitch::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 20;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(34, 211, 238, 0.14) 50%,
+    transparent 100%
+  );
+  opacity: 0;
+  animation: orbit-splash-sweep 0.6s ease-out both;
+}
+
+.orbit-glitch-text {
+  position: relative;
+  display: inline-block;
+  text-shadow: 0 0 16px rgba(34, 211, 238, 0.18);
+}
+
+.orbit-glitch-text::before,
+.orbit-glitch-text::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.orbit-glitch-text::before {
+  color: rgba(34, 211, 238, 0.85);
+  transform: translate3d(-1px, 0, 0);
+  animation: orbit-glitch-clip 0.6s steps(2, end) infinite;
+}
+
+.orbit-glitch-text::after {
+  color: rgba(167, 139, 250, 0.65);
+  transform: translate3d(1px, 0, 0);
+  animation: orbit-glitch-clip 0.6s steps(2, end) infinite reverse;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .orbit-splash-glitch,
+  .orbit-splash-glitch::before,
+  .orbit-splash-glitch::after,
+  .orbit-glitch-text::before,
+  .orbit-glitch-text::after {
+    animation: none !important;
+  }
+}

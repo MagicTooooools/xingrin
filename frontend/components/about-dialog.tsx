@@ -76,7 +76,7 @@ export function AboutDialog({ children }: AboutDialogProps) {
             <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 mb-3">
               <IconRadar className="h-8 w-8 text-primary" />
             </div>
-            <h2 className="text-xl font-semibold">Star Patrol</h2>
+            <h2 className="text-xl font-semibold">{t('productName')}</h2>
             <p className="text-sm text-muted-foreground">{t('description')}</p>
           </div>
 
@@ -153,25 +153,25 @@ export function AboutDialog({ children }: AboutDialogProps) {
           {/* Links */}
           <div className="grid grid-cols-2 gap-2">
             <Button variant="ghost" size="sm" className="justify-start" asChild>
-              <a href="https://github.com/yyhuni/star-patrol" target="_blank" rel="noopener noreferrer">
+              <a href="https://github.com/yyhuni/xingrin" target="_blank" rel="noopener noreferrer">
                 <IconBrandGithub className="h-4 w-4 mr-2" />
                 GitHub
               </a>
             </Button>
             <Button variant="ghost" size="sm" className="justify-start" asChild>
-              <a href="https://github.com/yyhuni/star-patrol/releases" target="_blank" rel="noopener noreferrer">
+              <a href="https://github.com/yyhuni/xingrin/releases" target="_blank" rel="noopener noreferrer">
                 <IconFileText className="h-4 w-4 mr-2" />
                 {t('changelog')}
               </a>
             </Button>
             <Button variant="ghost" size="sm" className="justify-start" asChild>
-              <a href="https://github.com/yyhuni/star-patrol/issues" target="_blank" rel="noopener noreferrer">
+              <a href="https://github.com/yyhuni/xingrin/issues" target="_blank" rel="noopener noreferrer">
                 <IconMessageReport className="h-4 w-4 mr-2" />
                 {t('feedback')}
               </a>
             </Button>
             <Button variant="ghost" size="sm" className="justify-start" asChild>
-              <a href="https://github.com/yyhuni/star-patrol#readme" target="_blank" rel="noopener noreferrer">
+              <a href="https://github.com/yyhuni/xingrin#readme" target="_blank" rel="noopener noreferrer">
                 <IconBook className="h-4 w-4 mr-2" />
                 {t('docs')}
               </a>
@@ -180,7 +180,7 @@ export function AboutDialog({ children }: AboutDialogProps) {
 
           {/* Footer */}
           <p className="text-center text-xs text-muted-foreground">
-            © 2026 Star Patrol · MIT License
+            © 2026 {t('productName')} · GPL-3.0
           </p>
         </div>
       </DialogContent>

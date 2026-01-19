@@ -179,8 +179,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               className="data-[slot=sidebar-menu-button]:!p-1.5"
             >
               <Link href="/">
-                <IconRadar className="!size-5" />
-                <span className="text-base font-semibold">Star Patrol</span>
+                <IconRadar className="!size-5 text-primary" />
+                <span className="text-base font-semibold">{t('appName')}</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
