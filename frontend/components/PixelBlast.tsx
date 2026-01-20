@@ -510,6 +510,7 @@ const PixelBlast = ({
         scene.add(quad);
         const clock = new THREE.Clock();
         const setSize = () => {
+          if (!renderer) return;
           const w = (container as HTMLDivElement).clientWidth || 1;
           const h = (container as HTMLDivElement).clientHeight || 1;
           renderer.setSize(w, h, false);
@@ -567,8 +568,9 @@ const PixelBlast = ({
           if (composer && composer.passes.length > 0) composer.passes.forEach(p => (p.renderToScreen = false));
           composer.addPass(noisePass);
         }
-        if (composer) composer.setSize(renderer.domElement.width, renderer.domElement.height);
+        if (composer && renderer) composer.setSize(renderer.domElement.width, renderer.domElement.height);
         const mapToPixels = (e: MouseEvent | PointerEvent) => {
+          if (!renderer) return { fx: 0, fy: 0, w: 0, h: 0 };
           const rect = renderer.domElement.getBoundingClientRect();
           const scaleX = renderer.domElement.width / rect.width;
           const scaleY = renderer.domElement.height / rect.height;
@@ -636,7 +638,7 @@ const PixelBlast = ({
                 });
             });
             composer.render();
-          } else renderer.render(scene, camera);
+          } else if (renderer) renderer.render(scene, camera);
 
           if (!firstFrameFiredRef.current) {
             firstFrameFiredRef.current = true;
