@@ -245,6 +245,12 @@
     /* Chrome, Safari and Opera */
   }
 
+  /* 性能优化：长列表渲染优化 - content-visibility */
+  .tree-node-item {
+    content-visibility: auto;
+    contain-intrinsic-size: 0 36px;
+  }
+
 }
 
 /* 登录页背景 - 使用主题色适配亮暗模式 */
@@ -381,6 +387,22 @@
 
 .animate-border-flow {
   animation: border-flow 2s linear infinite;
+}
+
+/* Dashboard 淡入动画 - 纯 CSS 实现，避免 hydration mismatch */
+@keyframes dashboard-fade-in {
+  from {
+    opacity: 0;
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+  }
+}
+
+.animate-dashboard-fade-in {
+  animation: dashboard-fade-in 500ms ease-out forwards;
 }
 
 /* 登录页 - Glitch Reveal（全屏开场） - 增强版赛博朋克风格 */

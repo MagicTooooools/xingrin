@@ -39,6 +39,31 @@ export default function LoginPage() {
     setPixelFirstFrame(true)
   }, [])
 
+  // 提取预加载逻辑为可复用函数
+  const prefetchDashboardData = React.useCallback(async () => {
+    const scansParams = { page: 1, pageSize: 10 }
+    const vulnsParams = { page: 1, pageSize: 10 }
+
+    return Promise.allSettled([
+      queryClient.prefetchQuery({
+        queryKey: ["asset", "statistics"],
+        queryFn: getAssetStatistics,
+      }),
+      queryClient.prefetchQuery({
+        queryKey: ["asset", "statistics", "history", 7],
+        queryFn: () => getStatisticsHistory(7),
+      }),
+      queryClient.prefetchQuery({
+        queryKey: ["scans", scansParams],
+        queryFn: () => getScans(scansParams),
+      }),
+      queryClient.prefetchQuery({
+        queryKey: vulnerabilityKeys.list(vulnsParams),
+        queryFn: () => VulnerabilityService.getAllVulnerabilities(vulnsParams),
+      }),
+    ])
+  }, [queryClient])
+
   // Always show a short splash on entering the login page.
   const [bootMinDone, setBootMinDone] = React.useState(false)
   const [bootPhase, setBootPhase] = React.useState<BootOverlayPhase>("entering")
@@ -104,27 +129,7 @@ export default function LoginPage() {
     let cancelled = false
 
     void (async () => {
-      const scansParams = { page: 1, pageSize: 10 }
-      const vulnsParams = { page: 1, pageSize: 10 }
-
-      await Promise.allSettled([
-        queryClient.prefetchQuery({
-          queryKey: ["asset", "statistics"],
-          queryFn: getAssetStatistics,
-        }),
-        queryClient.prefetchQuery({
-          queryKey: ["asset", "statistics", "history", 7],
-          queryFn: () => getStatisticsHistory(7),
-        }),
-        queryClient.prefetchQuery({
-          queryKey: ["scans", scansParams],
-          queryFn: () => getScans(scansParams),
-        }),
-        queryClient.prefetchQuery({
-          queryKey: vulnerabilityKeys.list(vulnsParams),
-          queryFn: () => VulnerabilityService.getAllVulnerabilities(vulnsParams),
-        }),
-      ])
+      await prefetchDashboardData()
 
       if (cancelled) return
       router.replace("/dashboard/")
@@ -133,7 +138,7 @@ export default function LoginPage() {
     return () => {
       cancelled = true
     }
-  }, [auth?.authenticated, authLoading, queryClient, router])
+  }, [auth?.authenticated, authLoading, prefetchDashboardData, router])
 
   React.useEffect(() => {
     if (!loginReady) return
@@ -144,34 +149,14 @@ export default function LoginPage() {
     loginStartedRef.current = true
     setLoginReady(false)
 
-    // Start downloading the dashboard bundle ASAP.
-    router.prefetch("/dashboard/")
-
-    const loginRes = await login({ username, password })
-
-    // Warm up critical dashboard data before navigating, so the user doesn't see
-    // a second loading phase immediately after leaving the terminal.
-    const scansParams = { page: 1, pageSize: 10 }
-    const vulnsParams = { page: 1, pageSize: 10 }
-
-    await Promise.allSettled([
-      queryClient.prefetchQuery({
-        queryKey: ["asset", "statistics"],
-        queryFn: getAssetStatistics,
-      }),
-      queryClient.prefetchQuery({
-        queryKey: ["asset", "statistics", "history", 7],
-        queryFn: () => getStatisticsHistory(7),
-      }),
-      queryClient.prefetchQuery({
-        queryKey: ["scans", scansParams],
-        queryFn: () => getScans(scansParams),
-      }),
-      queryClient.prefetchQuery({
-        queryKey: vulnerabilityKeys.list(vulnsParams),
-        queryFn: () => VulnerabilityService.getAllVulnerabilities(vulnsParams),
-      }),
+    // 并行执行独立操作：登录验证 + 预加载 dashboard bundle
+    const [loginRes] = await Promise.all([
+      login({ username, password }),
+      router.prefetch("/dashboard/"),
     ])
+
+    // 预加载 dashboard 数据
+    await prefetchDashboardData()
 
     // Prime auth cache so AuthLayout doesn't flash a full-screen loading state.
     queryClient.setQueryData(["auth", "me"], {
