@@ -310,6 +310,7 @@
     }
   },
   "navigation": {
+    "appName": "Orbit",
     "mainFeatures": "Main Features",
     "dashboard": "Dashboard",
     "search": "Search",
@@ -520,11 +521,11 @@
     "pattern": "Invalid format"
   },
   "auth": {
-    "title": "Star Patrol",
+    "title": "Orbit",
     "subtitle": "Automated Asset Discovery & Vulnerability Scanning Platform",
     "login": "Login",
-    "pageTitle": "Login - Star Patrol | Attack Surface Management",
-    "pageDescription": "Star Patrol - Attack Surface Management (ASM) Platform, providing automated asset discovery and vulnerability scanning",
+    "pageTitle": "Login - Orbit | Attack Surface Management",
+    "pageDescription": "Orbit - Attack Surface Management (ASM) Platform, providing automated asset discovery and vulnerability scanning",
     "loggingIn": "Logging in...",
     "logout": "Logout",
     "username": "Username",
@@ -538,7 +539,7 @@
     "logoutSuccess": "Logged out successfully",
     "sessionExpired": "Session expired, please login again",
     "terminal": {
-      "title": "Star Patrol ASM Platform",
+      "title": "Orbit ASM Platform",
       "subtitle": "Secure Authentication Terminal",
       "usernamePrompt": "Username",
       "passwordPrompt": "Password",
@@ -2301,10 +2302,10 @@
     }
   },
   "metadata": {
-    "title": "Star Patrol - Attack Surface Management Platform | ASM",
-    "description": "Star Patrol - Attack Surface Management (ASM) platform, providing automated asset discovery, vulnerability scanning, subdomain enumeration, port scanning, and more. Supports distributed scanning, Nuclei integration, and scheduled tasks.",
+    "title": "Orbit - Attack Surface Management Platform | ASM",
+    "description": "Orbit - Attack Surface Management (ASM) platform, providing automated asset discovery, vulnerability scanning, subdomain enumeration, port scanning, and more. Supports distributed scanning, Nuclei integration, and scheduled tasks.",
     "keywords": "ASM, Attack Surface Management, Vulnerability Scanning, Asset Discovery, Bug Bounty, Penetration Testing, Nuclei, Subdomain Enumeration, Security Tools, EASM, Security",
-    "ogTitle": "Star Patrol - Attack Surface Management Platform",
+    "ogTitle": "Orbit - Attack Surface Management Platform",
     "ogDescription": "Attack Surface Management (ASM) platform providing automated asset discovery and vulnerability scanning"
   },
   "bulkAdd": {
@@ -2375,7 +2376,8 @@
     "rateLimited": "Too many requests, please try again later"
   },
   "about": {
-    "title": "About Star Patrol",
+    "title": "About Orbit",
+    "productName": "Orbit",
     "description": "Attack Surface Management Platform",
     "currentVersion": "Current Version",
     "latestVersion": "Latest Version",

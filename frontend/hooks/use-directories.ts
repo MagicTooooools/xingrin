@@ -38,7 +38,12 @@ const directoryService = {
     requestedIds: number[]
     cascadeDeleted: Record<string, number>
   }> => {
-    const response = await api.post('/directories/bulk-delete/', { ids })
+    const response = await api.post<{
+      message: string
+      deletedCount: number
+      requestedIds: number[]
+      cascadeDeleted: Record<string, number>
+    }>('/directories/bulk-delete/', { ids })
     return response.data
   },
 
@@ -54,7 +59,17 @@ const directoryService = {
       phase2: string
     }
   }> => {
-    const response = await api.delete(`/directories/${directoryId}/`)
+    const response = await api.delete<{
+      message: string
+      directoryId: number
+      directoryUrl: string
+      deletedCount: number
+      deletedDirectories: string[]
+      detail: {
+        phase1: string
+        phase2: string
+      }
+    }>(`/directories/${directoryId}/`)
     return response.data
   },
 }

@@ -39,7 +39,7 @@ const VULNERABILITY_FILTER_EXAMPLES = [
   'type="xss" || type="sqli"',
   'severity="critical" || severity="high"',
   'source="nuclei" && severity="high"',
-  'type="xss" && url="/api/*"',
+  'type="xss" && url="/api/"',
 ]
 
 

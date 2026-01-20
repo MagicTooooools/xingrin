@@ -2,13 +2,13 @@ import type { SystemLogResponse, LogFilesResponse, LogFile } from '@/types/syste
 
 export const mockLogFiles: LogFile[] = [
   {
-    filename: 'star-patrol.log',
+    filename: 'orbit.log',
     category: 'system',
     size: 1234567,
     modifiedAt: '2024-12-28T10:00:00Z',
   },
   {
-    filename: 'star-patrol-error.log',
+    filename: 'orbit-error.log',
     category: 'error',
     size: 45678,
     modifiedAt: '2024-12-28T09:30:00Z',
@@ -80,7 +80,7 @@ export function getMockSystemLogs(params?: {
   file?: string
   lines?: number
 }): SystemLogResponse {
-  const filename = params?.file || 'star-patrol.log'
+  const filename = params?.file || 'orbit.log'
   const lines = params?.lines || 100
 
   let content: string

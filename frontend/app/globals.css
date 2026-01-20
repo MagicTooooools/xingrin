@@ -245,6 +245,12 @@
     /* Chrome, Safari and Opera */
   }
 
+  /* 性能优化：长列表渲染优化 - content-visibility */
+  .tree-node-item {
+    content-visibility: auto;
+    contain-intrinsic-size: 0 36px;
+  }
+
 }
 
 /* 登录页背景 - 使用主题色适配亮暗模式 */
@@ -381,4 +387,206 @@
 
 .animate-border-flow {
   animation: border-flow 2s linear infinite;
+}
+
+/* Dashboard 淡入动画 - 纯 CSS 实现，避免 hydration mismatch */
+@keyframes dashboard-fade-in {
+  from {
+    opacity: 0;
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+  }
+}
+
+.animate-dashboard-fade-in {
+  animation: dashboard-fade-in 500ms ease-out forwards;
+}
+
+/* 登录页 - Glitch Reveal（全屏开场） - 增强版赛博朋克风格 */
+@keyframes orbit-splash-jitter {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+    filter: none;
+  }
+  10% {
+    transform: translate3d(-2px, 0, 0);
+  }
+  20% {
+    transform: translate3d(2px, -1px, 0);
+    filter: hue-rotate(10deg);
+  }
+  30% {
+    transform: translate3d(-1px, 1px, 0);
+  }
+  45% {
+    transform: translate3d(1px, 0, 0);
+    filter: hue-rotate(-10deg);
+  }
+  60% {
+    transform: translate3d(0, -1px, 0);
+  }
+  75% {
+    transform: translate3d(1px, 1px, 0);
+  }
+}
+
+@keyframes orbit-splash-noise {
+  0% {
+    transform: translate3d(-2%, -2%, 0);
+    opacity: 0.22;
+  }
+  25% {
+    transform: translate3d(2%, -1%, 0);
+    opacity: 0.28;
+  }
+  50% {
+    transform: translate3d(-1%, 2%, 0);
+    opacity: 0.24;
+  }
+  75% {
+    transform: translate3d(1%, 1%, 0);
+    opacity: 0.30;
+  }
+  100% {
+    transform: translate3d(-2%, -2%, 0);
+    opacity: 0.22;
+  }
+}
+
+@keyframes orbit-splash-sweep {
+  0% {
+    transform: translate3d(0, -120%, 0);
+    opacity: 0;
+  }
+  18% {
+    opacity: 0.35;
+  }
+  100% {
+    transform: translate3d(0, 120%, 0);
+    opacity: 0;
+  }
+}
+
+@keyframes orbit-glitch-clip {
+  0% {
+    clip-path: inset(0 0 0 0);
+    transform: translate3d(0, 0, 0);
+  }
+  16% {
+    clip-path: inset(12% 0 72% 0);
+    transform: translate3d(-2px, 0, 0);
+  }
+  32% {
+    clip-path: inset(54% 0 18% 0);
+    transform: translate3d(2px, 0, 0);
+  }
+  48% {
+    clip-path: inset(78% 0 6% 0);
+    transform: translate3d(-1px, 0, 0);
+  }
+  64% {
+    clip-path: inset(30% 0 48% 0);
+    transform: translate3d(1px, 0, 0);
+  }
+  80% {
+    clip-path: inset(6% 0 86% 0);
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    clip-path: inset(0 0 0 0);
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.orbit-splash-glitch {
+  isolation: isolate;
+  animation: orbit-splash-jitter 0.5s steps(2, end) infinite;
+}
+
+.orbit-splash-glitch::before {
+  content: "";
+  position: absolute;
+  inset: -20%;
+  pointer-events: none;
+  z-index: 20;
+  mix-blend-mode: screen;
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      rgba(255, 255, 255, 0.08) 0px,
+      rgba(255, 255, 255, 0.08) 1px,
+      transparent 1px,
+      transparent 4px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      rgba(255, 16, 240, 0.15) 0px,
+      rgba(255, 16, 240, 0.15) 1px,
+      transparent 1px,
+      transparent 84px
+    ),
+    repeating-linear-gradient(
+      45deg,
+      rgba(176, 38, 255, 0.08) 0px,
+      rgba(176, 38, 255, 0.08) 1px,
+      transparent 1px,
+      transparent 9px
+    );
+  animation: orbit-splash-noise 0.5s steps(2, end) infinite;
+}
+
+.orbit-splash-glitch::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 20;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(255, 16, 240, 0.18) 50%,
+    transparent 100%
+  );
+  opacity: 0;
+  animation: orbit-splash-sweep 0.5s ease-out both;
+}
+
+.orbit-glitch-text {
+  position: relative;
+  display: inline-block;
+  text-shadow: 0 0 20px rgba(255, 16, 240, 0.4), 0 0 40px rgba(255, 16, 240, 0.2);
+}
+
+.orbit-glitch-text::before,
+.orbit-glitch-text::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.orbit-glitch-text::before {
+  color: rgba(255, 16, 240, 0.85);
+  transform: translate3d(-2px, 0, 0);
+  animation: orbit-glitch-clip 0.5s steps(2, end) infinite;
+}
+
+.orbit-glitch-text::after {
+  color: rgba(176, 38, 255, 0.75);
+  transform: translate3d(2px, 0, 0);
+  animation: orbit-glitch-clip 0.5s steps(2, end) infinite reverse;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .orbit-splash-glitch,
+  .orbit-splash-glitch::before,
+  .orbit-splash-glitch::after,
+  .orbit-glitch-text::before,
+  .orbit-glitch-text::after {
+    animation: none !important;
+  }
 }

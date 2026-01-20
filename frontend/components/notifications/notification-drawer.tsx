@@ -72,10 +72,50 @@ function getTimeGroup(dateStr?: string): 'today' | 'yesterday' | 'earlier' {
   const now = new Date()
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
   const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000)
-  
+
   if (date >= today) return 'today'
   if (date >= yesterday) return 'yesterday'
   return 'earlier'
+}
+
+/** Severity icon class mapping */
+const SEVERITY_ICON_CLASS_MAP: Record<NotificationSeverity, string> = {
+  critical: "text-[#da3633] dark:text-[#f85149]",
+  high: "text-[#d29922]",
+  medium: "text-[#d4a72c]",
+  low: "text-[#848d97]",
+}
+
+/** Severity card class mapping */
+const SEVERITY_CARD_CLASS_MAP: Record<NotificationSeverity, string> = {
+  critical: SEVERITY_CARD_STYLES.critical,
+  high: SEVERITY_CARD_STYLES.high,
+  medium: SEVERITY_CARD_STYLES.medium,
+  low: SEVERITY_CARD_STYLES.low,
+}
+
+/** Get notification icon based on type and severity */
+function getNotificationIcon(type: NotificationType, severity?: NotificationSeverity) {
+  const severityClass = severity ? SEVERITY_ICON_CLASS_MAP[severity] : "text-gray-500"
+
+  if (type === "vulnerability") {
+    return <AlertTriangle className={cn("h-5 w-5", severityClass)} />
+  }
+  if (type === "scan") {
+    return <Activity className={cn("h-5 w-5", severityClass)} />
+  }
+  if (type === "asset") {
+    return <Server className={cn("h-5 w-5", severityClass)} />
+  }
+  return <Info className={cn("h-5 w-5", severityClass)} />
+}
+
+/** Get notification card classes based on severity */
+function getNotificationCardClasses(severity?: NotificationSeverity) {
+  if (!severity) {
+    return "border-border bg-card hover:bg-accent/50"
+  }
+  return cn("border-border", SEVERITY_CARD_CLASS_MAP[severity] ?? "")
 }
 
 export function NotificationDrawer() {
@@ -95,20 +135,20 @@ export function NotificationDrawer() {
     { value: 'system', label: t("filters.system"), icon: <Info className="h-3 w-3" /> },
   ]
 
-  // Category title mapping
-  const categoryTitleMap: Record<NotificationType, string> = {
+  // Category title mapping (memoized to avoid recreation)
+  const categoryTitleMap = React.useMemo<Record<NotificationType, string>>(() => ({
     scan: t("categories.scan"),
     vulnerability: t("categories.vulnerability"),
     asset: t("categories.asset"),
     system: t("categories.system"),
-  }
+  }), [t])
 
-  // Time group labels
-  const timeGroupLabels = {
+  // Time group labels (memoized to avoid recreation)
+  const timeGroupLabels = React.useMemo(() => ({
     today: t("timeGroups.today"),
     yesterday: t("timeGroups.yesterday"),
     earlier: t("timeGroups.earlier"),
-  }
+  }), [t])
 
   // SSE real-time notifications
   const { notifications: sseNotifications, isConnected, markNotificationsAsRead } = useNotificationSSE()
@@ -140,7 +180,7 @@ export function NotificationDrawer() {
       }
     }
 
-    return merged.sort((a, b) => {
+    return merged.toSorted((a, b) => {
       const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0
       const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0
       return bTime - aTime
@@ -176,43 +216,6 @@ export function NotificationDrawer() {
     return allNotifications.filter(n => n.type === activeFilter)
   }, [allNotifications, activeFilter])
 
-  // Get notification icon
-  const severityIconClassMap: Record<NotificationSeverity, string> = {
-    critical: "text-[#da3633] dark:text-[#f85149]",
-    high: "text-[#d29922]",
-    medium: "text-[#d4a72c]",
-    low: "text-[#848d97]",
-  }
-
-  const getNotificationIcon = (type: NotificationType, severity?: NotificationSeverity) => {
-    const severityClass = severity ? severityIconClassMap[severity] : "text-gray-500"
-
-    if (type === "vulnerability") {
-      return <AlertTriangle className={cn("h-5 w-5", severityClass)} />
-    }
-    if (type === "scan") {
-      return <Activity className={cn("h-5 w-5", severityClass)} />
-    }
-    if (type === "asset") {
-      return <Server className={cn("h-5 w-5", severityClass)} />
-    }
-    return <Info className={cn("h-5 w-5", severityClass)} />
-  }
-
-  const severityCardClassMap: Record<NotificationSeverity, string> = {
-    critical: SEVERITY_CARD_STYLES.critical,
-    high: SEVERITY_CARD_STYLES.high,
-    medium: SEVERITY_CARD_STYLES.medium,
-    low: SEVERITY_CARD_STYLES.low,
-  }
-
-  const getNotificationCardClasses = (severity?: NotificationSeverity) => {
-    if (!severity) {
-      return "border-border bg-card hover:bg-accent/50"
-    }
-    return cn("border-border", severityCardClassMap[severity] ?? "")
-  }
-
   const handleMarkAll = React.useCallback(() => {
     if (allNotifications.length === 0 || isMarkingAll) return
     markAllAsRead(undefined, {
@@ -241,8 +244,8 @@ export function NotificationDrawer() {
     return groups
   }, [filteredNotifications])
 
-  // Render single notification card
-  const renderNotificationCard = (notification: Notification) => (
+  // Render single notification card (memoized to avoid recreation)
+  const renderNotificationCard = React.useCallback((notification: Notification) => (
     <div
       key={notification.id}
       className={cn(
@@ -285,12 +288,12 @@ export function NotificationDrawer() {
         </div>
       </div>
     </div>
-  )
+  ), [categoryTitleMap])
 
-  // Render notification list (with time grouping)
-  const renderNotificationList = () => {
+  // Render notification list (with time grouping, memoized to avoid recreation)
+  const renderNotificationList = React.useCallback(() => {
     const hasAny = filteredNotifications.length > 0
-    
+
     if (!hasAny) {
       return (
         <div className="flex flex-col items-center justify-center h-40 text-muted-foreground">
@@ -305,7 +308,7 @@ export function NotificationDrawer() {
         {(['today', 'yesterday', 'earlier'] as const).map(group => {
           const items = groupedNotifications[group]
           if (items.length === 0) return null
-          
+
           return (
             <div key={group}>
               <h3 className="sticky top-0 z-10 text-xs font-medium text-muted-foreground mb-2 px-1 py-1 backdrop-blur bg-background/90">
@@ -319,7 +322,7 @@ export function NotificationDrawer() {
         })}
       </div>
     )
-  }
+  }, [filteredNotifications, groupedNotifications, timeGroupLabels, renderNotificationCard, t])
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>

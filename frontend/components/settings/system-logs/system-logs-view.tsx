@@ -12,7 +12,7 @@ import { useSystemLogs, useLogFiles } from "@/hooks/use-system-logs"
 import { LogToolbar, type LogLevel } from "./log-toolbar"
 import { AnsiLogViewer } from "./ansi-log-viewer"
 
-const DEFAULT_FILE = "star-patrol.log"
+const DEFAULT_FILE = "orbit.log"
 const DEFAULT_LINES = 500
 
 export function SystemLogsView() {

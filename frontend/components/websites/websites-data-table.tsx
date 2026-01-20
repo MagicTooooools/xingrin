@@ -23,7 +23,7 @@ const WEBSITE_FILTER_FIELDS: FilterField[] = [
 const WEBSITE_FILTER_EXAMPLES = [
   'host="api.example.com" && status="200"',
   'title="Login" || title="Admin"',
-  'url="/api/*" && status!="404"',
+  'url="/api/" && status!="404"',
   'tech="nginx" || tech="apache"',
 ]
 

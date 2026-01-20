@@ -1,7 +1,8 @@
 "use client"
 
-import React, { useState } from "react"
+import React from "react"
 import Link from "next/link"
+import dynamic from "next/dynamic"
 import { useTranslations, useLocale } from "next-intl"
 import {
   Globe,
@@ -35,10 +36,14 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useScan } from "@/hooks/use-scans"
 import { useScanLogs } from "@/hooks/use-scan-logs"
 import { ScanLogList } from "@/components/scan/scan-log-list"
-import { YamlEditor } from "@/components/ui/yaml-editor"
-import { getDateLocale } from "@/lib/date-utils"
 import { cn } from "@/lib/utils"
 import type { StageStatus } from "@/types/scan.types"
+
+// Dynamic import for YamlEditor (only loaded when config tab is active)
+const YamlEditor = dynamic(() => import('@/components/ui/yaml-editor').then(m => ({ default: m.YamlEditor })), {
+  loading: () => <div className="flex items-center justify-center h-full text-muted-foreground text-sm">加载编辑器中...</div>,
+  ssr: false
+})
 
 interface ScanOverviewProps {
   scanId: number
@@ -93,6 +98,70 @@ const STAGE_STATUS_PRIORITY: Record<StageStatus, number> = {
   cancelled: 4,
 }
 
+// Status style configuration (consistent with scan-history-columns)
+const SCAN_STATUS_STYLES: Record<string, string> = {
+  running: "bg-[#d29922]/10 text-[#d29922] border-[#d29922]/20",
+  cancelled: "bg-[#848d97]/10 text-[#848d97] border-[#848d97]/20",
+  completed: "bg-[#238636]/10 text-[#238636] border-[#238636]/20 dark:text-[#3fb950]",
+  failed: "bg-[#da3633]/10 text-[#da3633] border-[#da3633]/20 dark:text-[#f85149]",
+  initiated: "bg-[#d29922]/10 text-[#d29922] border-[#d29922]/20",
+  pending: "bg-[#d29922]/10 text-[#d29922] border-[#d29922]/20",
+}
+
+/**
+ * Format date helper function
+ */
+function formatDate(dateString: string | undefined, locale: string): string {
+  if (!dateString) return "-"
+  const localeStr = locale === 'zh' ? 'zh-CN' : 'en-US'
+  return new Date(dateString).toLocaleString(localeStr, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  })
+}
+
+/**
+ * Calculate duration between two dates
+ */
+function formatDuration(startedAt: string | undefined, completedAt: string | undefined): string {
+  if (!startedAt) return "-"
+  const start = new Date(startedAt)
+  const end = completedAt ? new Date(completedAt) : new Date()
+  const diffMs = end.getTime() - start.getTime()
+  const diffMins = Math.floor(diffMs / 60000)
+  const diffHours = Math.floor(diffMins / 60)
+  const remainingMins = diffMins % 60
+
+  if (diffHours > 0) {
+    return `${diffHours}h ${remainingMins}m`
+  }
+  return `${diffMins}m`
+}
+
+/**
+ * Get status icon configuration
+ */
+function getStatusIcon(status: string) {
+  switch (status) {
+    case "completed":
+      return { icon: CheckCircle2, animate: false }
+    case "running":
+      return { icon: Loader2, animate: true }
+    case "failed":
+      return { icon: XCircle, animate: false }
+    case "cancelled":
+      return { icon: XCircle, animate: false }
+    case "pending":
+    case "initiated":
+      return { icon: Loader2, animate: true }
+    default:
+      return { icon: Clock, animate: false }
+  }
+}
+
 export function ScanOverview({ scanId }: ScanOverviewProps) {
   const t = useTranslations("scan.history.overview")
   const tStatus = useTranslations("scan.history.status")
@@ -100,79 +169,25 @@ export function ScanOverview({ scanId }: ScanOverviewProps) {
   const locale = useLocale()
 
   const { data: scan, isLoading, error } = useScan(scanId)
-  
-  // Check if scan is running (for log polling)
-  const isRunning = scan?.status === 'running' || scan?.status === 'initiated'
-  
+
+  // Memoize isRunning to avoid unnecessary recalculations
+  const isRunning = React.useMemo(
+    () => scan?.status === 'running' || scan?.status === 'initiated',
+    [scan?.status]
+  )
+
   // Auto-refresh state (default: on when running)
-  const [autoRefresh, setAutoRefresh] = useState(true)
-  
+  const [autoRefresh, setAutoRefresh] = React.useState(true)
+
   // Tab state for logs/config
-  const [activeTab, setActiveTab] = useState<'logs' | 'config'>('logs')
-  
+  const [activeTab, setActiveTab] = React.useState<'logs' | 'config'>('logs')
+
   // Logs hook
   const { logs, loading: logsLoading } = useScanLogs({
     scanId,
     enabled: !!scan,
     pollingInterval: isRunning && autoRefresh ? 3000 : 0,
   })
-
-  // Format date helper
-  const formatDate = (dateString: string | undefined): string => {
-    if (!dateString) return "-"
-    return new Date(dateString).toLocaleString(getDateLocale(locale), {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    })
-  }
-
-  // Calculate duration
-  const formatDuration = (startedAt: string | undefined, completedAt: string | undefined): string => {
-    if (!startedAt) return "-"
-    const start = new Date(startedAt)
-    const end = completedAt ? new Date(completedAt) : new Date()
-    const diffMs = end.getTime() - start.getTime()
-    const diffMins = Math.floor(diffMs / 60000)
-    const diffHours = Math.floor(diffMins / 60)
-    const remainingMins = diffMins % 60
-
-    if (diffHours > 0) {
-      return `${diffHours}h ${remainingMins}m`
-    }
-    return `${diffMins}m`
-  }
-
-  // Status style configuration (consistent with scan-history-columns)
-  const SCAN_STATUS_STYLES: Record<string, string> = {
-    running: "bg-[#d29922]/10 text-[#d29922] border-[#d29922]/20",
-    cancelled: "bg-[#848d97]/10 text-[#848d97] border-[#848d97]/20",
-    completed: "bg-[#238636]/10 text-[#238636] border-[#238636]/20 dark:text-[#3fb950]",
-    failed: "bg-[#da3633]/10 text-[#da3633] border-[#da3633]/20 dark:text-[#f85149]",
-    initiated: "bg-[#d29922]/10 text-[#d29922] border-[#d29922]/20",
-    pending: "bg-[#d29922]/10 text-[#d29922] border-[#d29922]/20",
-  }
-
-  // Get status icon
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case "completed":
-        return { icon: CheckCircle2, animate: false }
-      case "running":
-        return { icon: Loader2, animate: true }
-      case "failed":
-        return { icon: XCircle, animate: false }
-      case "cancelled":
-        return { icon: XCircle, animate: false }
-      case "pending":
-      case "initiated":
-        return { icon: Loader2, animate: true }
-      default:
-        return { icon: Clock, animate: false }
-    }
-  }
 
   if (isLoading) {
     return (
@@ -204,65 +219,78 @@ export function ScanOverview({ scanId }: ScanOverviewProps) {
     )
   }
 
-  // Use type assertion for extended properties
-  const scanAny = scan as any
-  // Support both cachedStats (Go) and summary (Python) formats
-  const stats = scan.cachedStats || scanAny.summary || {}
-  const summary = {
-    subdomains: stats.subdomainsCount ?? stats.subdomains ?? 0,
-    websites: stats.websitesCount ?? stats.websites ?? 0,
-    endpoints: stats.endpointsCount ?? stats.endpoints ?? 0,
-    ips: stats.ipsCount ?? stats.ips ?? 0,
-    directories: stats.directoriesCount ?? stats.directories ?? 0,
-    screenshots: stats.screenshotsCount ?? stats.screenshots ?? 0,
-  }
-  const vulnSummary = stats.vulnerabilities || {
-    total: stats.vulnsTotal ?? 0,
-    critical: stats.vulnsCritical ?? 0,
-    high: stats.vulnsHigh ?? 0,
-    medium: stats.vulnsMedium ?? 0,
-    low: stats.vulnsLow ?? 0,
-  }
-  const statusIconConfig = getStatusIcon(scan.status)
+  // Memoize derived values to avoid unnecessary recalculations
+  const summary = React.useMemo(() => {
+    const scanAny = scan as any
+    const stats = scan.cachedStats || scanAny.summary || {}
+    return {
+      subdomains: stats.subdomainsCount ?? stats.subdomains ?? 0,
+      websites: stats.websitesCount ?? stats.websites ?? 0,
+      endpoints: stats.endpointsCount ?? stats.endpoints ?? 0,
+      ips: stats.ipsCount ?? stats.ips ?? 0,
+      directories: stats.directoriesCount ?? stats.directories ?? 0,
+      screenshots: stats.screenshotsCount ?? stats.screenshots ?? 0,
+    }
+  }, [scan])
+
+  const vulnSummary = React.useMemo(() => {
+    const scanAny = scan as any
+    const stats = scan.cachedStats || scanAny.summary || {}
+    return stats.vulnerabilities || {
+      total: stats.vulnsTotal ?? 0,
+      critical: stats.vulnsCritical ?? 0,
+      high: stats.vulnsHigh ?? 0,
+      medium: stats.vulnsMedium ?? 0,
+      low: stats.vulnsLow ?? 0,
+    }
+  }, [scan])
+
+  const statusIconConfig = React.useMemo(() => getStatusIcon(scan.status), [scan.status])
   const StatusIcon = statusIconConfig.icon
   const statusStyle = SCAN_STATUS_STYLES[scan.status] || "bg-muted text-muted-foreground"
   const targetId = scan.targetId
   const targetName = scan.target?.name
-  const startedAt = scanAny.startedAt || scan.createdAt
-  const completedAt = scanAny.completedAt
+  const startedAt = React.useMemo(() => {
+    const scanAny = scan as any
+    return scanAny.startedAt || scan.createdAt
+  }, [scan])
+  const completedAt = React.useMemo(() => (scan as any).completedAt, [scan])
 
-  const assetCards = [
-    {
-      title: t("cards.websites"),
-      value: summary.websites || 0,
-      icon: Globe,
-      href: `/scan/history/${scanId}/websites/`,
-    },
-    {
-      title: t("cards.subdomains"),
-      value: summary.subdomains || 0,
-      icon: Network,
-      href: `/scan/history/${scanId}/subdomain/`,
-    },
-    {
-      title: t("cards.ips"),
-      value: summary.ips || 0,
-      icon: Server,
-      href: `/scan/history/${scanId}/ip-addresses/`,
-    },
-    {
-      title: t("cards.urls"),
-      value: summary.endpoints || 0,
-      icon: Link2,
-      href: `/scan/history/${scanId}/endpoints/`,
-    },
-    {
-      title: t("cards.directories"),
-      value: summary.directories || 0,
-      icon: FolderOpen,
-      href: `/scan/history/${scanId}/directories/`,
-    },
-  ]
+  const assetCards = React.useMemo(
+    () => [
+      {
+        title: t("cards.websites"),
+        value: summary.websites || 0,
+        icon: Globe,
+        href: `/scan/history/${scanId}/websites/`,
+      },
+      {
+        title: t("cards.subdomains"),
+        value: summary.subdomains || 0,
+        icon: Network,
+        href: `/scan/history/${scanId}/subdomain/`,
+      },
+      {
+        title: t("cards.ips"),
+        value: summary.ips || 0,
+        icon: Server,
+        href: `/scan/history/${scanId}/ip-addresses/`,
+      },
+      {
+        title: t("cards.urls"),
+        value: summary.endpoints || 0,
+        icon: Link2,
+        href: `/scan/history/${scanId}/endpoints/`,
+      },
+      {
+        title: t("cards.directories"),
+        value: summary.directories || 0,
+        icon: FolderOpen,
+        href: `/scan/history/${scanId}/directories/`,
+      },
+    ],
+    [summary, scanId, t]
+  )
 
   return (
     <div className="flex flex-col gap-6 flex-1 min-h-0">
@@ -282,7 +310,7 @@ export function ScanOverview({ scanId }: ScanOverviewProps) {
           {/* Started at */}
           <div className="flex items-center gap-1.5">
             <Calendar className="h-4 w-4" />
-            <span>{t("startedAt")}: {formatDate(startedAt)}</span>
+            <span>{t("startedAt")}: {formatDate(startedAt, locale)}</span>
           </div>
           {/* Duration */}
           <div className="flex items-center gap-1.5">
@@ -350,7 +378,7 @@ export function ScanOverview({ scanId }: ScanOverviewProps) {
               {scan.stageProgress && Object.keys(scan.stageProgress).length > 0 ? (
                 <div className="space-y-1 flex-1 min-h-0 overflow-y-auto pr-1">
                   {Object.entries(scan.stageProgress)
-                    .sort(([, a], [, b]) => {
+                    .toSorted(([, a], [, b]) => {
                       const progressA = a as any
                       const progressB = b as any
                       const priorityA = STAGE_STATUS_PRIORITY[progressA.status as StageStatus] ?? 99

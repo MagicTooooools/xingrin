@@ -7,7 +7,10 @@ export interface Directory {
   url: string
   status: number | null
   contentLength: number | null  // Backend returns contentLength
+  words: number | null
+  lines: number | null
   contentType: string
+  duration: number | null
   websiteUrl: string  // Backend returns websiteUrl
   createdAt: string  // Backend returns createdAt
 }

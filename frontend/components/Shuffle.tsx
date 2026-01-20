@@ -17,7 +17,7 @@ interface ShuffleProps {
   ease?: string;
   threshold?: number;
   rootMargin?: string;
-  tag?: keyof JSX.IntrinsicElements;
+  tag?: keyof React.JSX.IntrinsicElements;
   textAlign?: 'left' | 'center' | 'right';
   onShuffleComplete?: () => void;
   shuffleTimes?: number;
@@ -60,15 +60,15 @@ const Shuffle: React.FC<ShuffleProps> = ({
   triggerOnHover = true,
   autoPlay = true
 }) => {
-  const ref = useRef(null);
+  const ref = useRef<HTMLElement | null>(null);
   const [fontsLoaded, setFontsLoaded] = useState(false);
   const [ready, setReady] = useState(false);
 
-  const splitRef = useRef(null);
-  const wrappersRef = useRef([]);
-  const tlRef = useRef(null);
+  const splitRef = useRef<any>(null);
+  const wrappersRef = useRef<any[]>([]);
+  const tlRef = useRef<gsap.core.Timeline | null>(null);
   const playingRef = useRef(false);
-  const hoverHandlerRef = useRef(null);
+  const hoverHandlerRef = useRef<((e: MouseEvent) => void) | null>(null);
 
   useEffect(() => {
     if ('fonts' in document) {
@@ -144,9 +144,9 @@ const Shuffle: React.FC<ShuffleProps> = ({
         wrappersRef.current = [];
 
         const rolls = Math.max(1, Math.floor(shuffleTimes));
-        const rand = set => set.charAt(Math.floor(Math.random() * set.length)) || '';
+        const rand = (set: string) => set.charAt(Math.floor(Math.random() * set.length)) || '';
 
-        chars.forEach(ch => {
+        chars.forEach((ch: any) => {
           const parent = ch.parentElement;
           if (!parent) return;
 
@@ -250,7 +250,7 @@ const Shuffle: React.FC<ShuffleProps> = ({
         wrappersRef.current.forEach(w => {
           const strip = w.firstElementChild;
           if (!strip) return;
-          const kids = Array.from(strip.children);
+          const kids = Array.from(strip.children) as Element[];
           for (let i = 1; i < kids.length - 1; i++) {
             kids[i].textContent = scrambleCharset.charAt(Math.floor(Math.random() * scrambleCharset.length));
           }
@@ -300,17 +300,17 @@ const Shuffle: React.FC<ShuffleProps> = ({
           }
         });
 
-        const addTween = (targets, at) => {
-          const vars = {
+        const addTween = (targets: any, at: any) => {
+          const vars: any = {
             duration,
             ease,
             force3D: true,
             stagger: animationMode === 'evenodd' ? stagger : 0
           };
           if (isVertical) {
-            vars.y = (i, t) => parseFloat(t.getAttribute('data-final-y') || '0');
+            vars.y = (i: number, t: any) => parseFloat(t.getAttribute('data-final-y') || '0');
           } else {
-            vars.x = (i, t) => parseFloat(t.getAttribute('data-final-x') || '0');
+            vars.x = (i: number, t: any) => parseFloat(t.getAttribute('data-final-x') || '0');
           }
 
           tl.to(targets, vars, at);
@@ -330,7 +330,7 @@ const Shuffle: React.FC<ShuffleProps> = ({
         } else {
           strips.forEach(strip => {
             const d = Math.random() * maxDelay;
-            const vars = {
+            const vars: any = {
               duration,
               ease,
               force3D: true

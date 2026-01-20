@@ -28,18 +28,13 @@ export function useAuth() {
  * User login
  */
 export function useLogin() {
-  const queryClient = useQueryClient()
-  const router = useRouter()
   const toastMessages = useToastMessages()
 
   return useMutation({
     mutationFn: (data: LoginRequest) => login(data),
-    onSuccess: async () => {
-      // Wait for auth query to refresh before redirecting
-      await queryClient.invalidateQueries({ queryKey: ['auth', 'me'] })
-      await queryClient.refetchQueries({ queryKey: ['auth', 'me'] })
+    onSuccess: () => {
+      // Navigation and data prefetch are handled by the login page.
       toastMessages.success('toast.auth.login.success')
-      router.push('/dashboard/')
     },
     onError: (error: any) => {
       const errorCode = getErrorCode(error.response?.data)

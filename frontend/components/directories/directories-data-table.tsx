@@ -18,7 +18,7 @@ const DIRECTORY_FILTER_FIELDS: FilterField[] = [
 // Directory page filter examples
 const DIRECTORY_FILTER_EXAMPLES = [
   'url="/admin" && status="200"',
-  'url="/api/*" || url="/config/*"',
+  'url="/api/" || url="/config/"',
   'status="200" && url!="/index.html"',
 ]
 

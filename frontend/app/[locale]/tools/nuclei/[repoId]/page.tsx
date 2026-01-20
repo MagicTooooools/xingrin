@@ -1,9 +1,19 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
-import Editor from "@monaco-editor/react"
+import dynamic from "next/dynamic"
 import Link from "next/link"
 import { useParams } from "next/navigation"
+
+// Dynamic import Monaco Editor to reduce bundle size (~2MB)
+const Editor = dynamic(() => import("@monaco-editor/react"), {
+  ssr: false,
+  loading: () => (
+    <div className="flex items-center justify-center h-full">
+      <div className="text-sm text-muted-foreground">Loading editor...</div>
+    </div>
+  ),
+})
 import {
   ChevronDown,
   ChevronRight,
@@ -160,7 +170,7 @@ export default function NucleiRepoDetailPage() {
     } else {
       setEditorValue("")
     }
-  }, [templateContent?.path])
+  }, [templateContent])
 
   const toggleFolder = (path: string) => {
     setExpandedPaths((prev) =>
@@ -248,7 +258,7 @@ export default function NucleiRepoDetailPage() {
                         }
                       }}
                       className={cn(
-                        "flex w-full items-center gap-1.5 rounded-md px-2 py-1.5 text-left text-sm transition-colors",
+                        "tree-node-item flex w-full items-center gap-1.5 rounded-md px-2 py-1.5 text-left text-sm transition-colors",
                         isFolder && "font-medium",
                         isActive
                           ? "bg-primary/10 text-primary"

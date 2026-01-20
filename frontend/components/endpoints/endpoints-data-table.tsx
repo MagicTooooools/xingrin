@@ -20,7 +20,7 @@ const ENDPOINT_FILTER_FIELDS: FilterField[] = [
 
 // Endpoint page filter examples
 const ENDPOINT_FILTER_EXAMPLES = [
-  'url="/api/*" && status="200"',
+  'url="/api/" && status="200"',
   'host="api.example.com" || host="admin.example.com"',
   'title="Dashboard" && status!="404"',
   'tech="php" || tech="wordpress"',

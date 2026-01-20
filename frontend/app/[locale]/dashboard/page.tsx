@@ -11,7 +11,7 @@ import { DashboardDataTable } from "@/components/dashboard/dashboard-data-table"
 export default function Page() {
   return (
     // Content area containing cards, charts and data tables
-    <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
+    <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6 animate-dashboard-fade-in">
       {/* Top statistics cards */}
       <DashboardStatCards />
 

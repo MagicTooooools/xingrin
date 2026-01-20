@@ -188,6 +188,9 @@ function StageRow({ stage, t }: { stage: StageDetail; t: (key: string) => string
   )
 }
 
+/** Dialog width constant */
+const DIALOG_WIDTH = 'sm:max-w-[600px] sm:min-w-[550px]'
+
 /**
  * Scan progress dialog
  */
@@ -199,9 +202,12 @@ export function ScanProgressDialog({
   const t = useTranslations("scan.progress")
   const locale = useLocale()
   const [activeTab, setActiveTab] = useState<'stages' | 'logs'>('stages')
-  
-  // 判断扫描是否正在运行（用于控制轮询）
-  const isRunning = data?.status === 'running' || data?.status === 'initiated'
+
+  // Memoize isRunning to avoid unnecessary recalculations
+  const isRunning = React.useMemo(
+    () => data?.status === 'running' || data?.status === 'initiated',
+    [data?.status]
+  )
   
   // 日志轮询 Hook
   const { logs, loading: logsLoading } = useScanLogs({
@@ -212,12 +218,9 @@ export function ScanProgressDialog({
   
   if (!data) return null
 
-  // 固定宽度，切换 Tab 时不变化
-  const dialogWidth = 'sm:max-w-[600px] sm:min-w-[550px]'
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className={cn(dialogWidth, "transition-all duration-200")}>
+      <DialogContent className={cn(DIALOG_WIDTH, "transition-all duration-200")}>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <ScanStatusIcon status={data.status} />
@@ -371,7 +374,7 @@ export function buildScanProgressData(scan: ScanRecord): ScanProgressData {
   if (scan.stageProgress) {
     // Sort by status priority first, then by order
     const sortedEntries = Object.entries(scan.stageProgress)
-      .sort(([, a], [, b]) => {
+      .toSorted(([, a], [, b]) => {
         const priorityA = STATUS_PRIORITY[a.status] ?? 99
         const priorityB = STATUS_PRIORITY[b.status] ?? 99
         if (priorityA !== priorityB) {

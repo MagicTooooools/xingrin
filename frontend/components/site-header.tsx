@@ -42,7 +42,7 @@ export function SiteHeader() {
           {/* GitHub link button, hidden on small screens */}
           <Button variant="ghost" asChild size="sm" className="hidden sm:flex">
             <a
-              href="https://github.com/yyhuni/star-patrol"
+              href="https://github.com/yyhuni/xingrin"
               rel="noopener noreferrer" // Security attribute, prevents new window from accessing original window
               target="_blank" // Open in new tab
               className="dark:text-foreground" // Text color in dark mode
