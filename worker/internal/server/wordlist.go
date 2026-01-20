@@ -38,7 +38,7 @@ func (c *Client) DownloadWordlist(ctx context.Context, wordlistName, destPath st
 		zap.String("name", wordlistName),
 		zap.String("dest", destPath))
 
-	resp, err := c.get(ctx, url)
+	resp, err := c.getDownload(ctx, url)
 	if err != nil {
 		return fmt.Errorf("failed to download wordlist: %w", err)
 	}
@@ -64,7 +64,7 @@ func (c *Client) DownloadWordlist(ctx context.Context, wordlistName, destPath st
 	if err != nil {
 		return fmt.Errorf("failed to create temporary wordlist file: %w", err)
 	}
-	defer func() { 
+	defer func() {
 		_ = out.Close()
 		_ = os.Remove(tempPath) // Clean up temp file on error
 	}()

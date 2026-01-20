@@ -33,7 +33,7 @@ This file provides guidance to WARP (warp.dev) when working with code in this re
 
 ### Go worker (scan executor in `worker/`)
 - `cd worker`
-- `make run` / `make build` / `make test`
+- `./scripts/dev.sh run` / `./scripts/dev.sh build` / `./scripts/dev.sh test`
 - Single test: `go test ./internal/... -run TestName`
 
 ### Django backend (production server in `backend/`)

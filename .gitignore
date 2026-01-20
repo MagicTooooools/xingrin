@@ -123,7 +123,6 @@ docker/nginx/ssl/*.crt
 # ============================
 *.log
 logs/
-results/
 
 # 开发脚本运行时文件（进程 ID 和启动日志）
 backend/scripts/dev/.pids/

@@ -51,10 +51,11 @@ func isRetryableError(err error) bool {
 // Client handles all HTTP communication with Server
 // Implements Provider, ResultSaver, and StatusUpdater interfaces
 type Client struct {
-	baseURL    string
-	token      string
-	httpClient *http.Client
-	maxRetries int
+	baseURL        string
+	token          string
+	httpClient     *http.Client
+	downloadClient *http.Client
+	maxRetries     int
 }
 
 // NewClient creates a new server client
@@ -63,7 +64,10 @@ func NewClient(baseURL, token string) *Client {
 		baseURL: baseURL,
 		token:   token,
 		httpClient: &http.Client{
-			Timeout: 15 * time.Minute,
+			Timeout: 5 * time.Minute,
+		},
+		downloadClient: &http.Client{
+			Timeout: 60 * time.Minute,
 		},
 		maxRetries: 3,
 	}
@@ -79,6 +83,15 @@ func (c *Client) get(ctx context.Context, url string) (*http.Response, error) {
 	req.Header.Set("X-Worker-Token", c.token)
 	req.Header.Set("Accept", "application/json")
 	return c.httpClient.Do(req)
+}
+
+func (c *Client) getDownload(ctx context.Context, url string) (*http.Response, error) {
+	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+	req.Header.Set("X-Worker-Token", c.token)
+	return c.downloadClient.Do(req)
 }
 
 func (c *Client) postWithRetry(ctx context.Context, url string, body any) error {

@@ -17,14 +17,38 @@ func (w *Workflow) runBruteforceStage(ctx *workflowContext) stageResult {
 		return stageResult{}
 	}
 
+	// Get tools configuration
+	toolsConfig, ok := stageConfig["tools"].(map[string]any)
+	if !ok {
+		pkg.Logger.Debug("No tools configured in bruteforce stage")
+		return stageResult{}
+	}
+
 	// Get tool-specific config
-	toolConfig, _ := stageConfig[toolSubdomainBruteforce].(map[string]any)
+	toolConfig, _ := toolsConfig[toolSubdomainBruteforce].(map[string]any)
+	normalizedConfig, err := normalizeToolConfig(toolSubdomainBruteforce, toolConfig)
+	if err != nil {
+		pkg.Logger.Error("Failed to normalize bruteforce config", zap.Error(err))
+		return stageResult{failed: []string{stageBruteforce + " (invalid config)"}}
+	}
 
 	// Get wordlist name from config (required, no default)
-	wordlistName := getStringValue(toolConfig, "wordlist-name", "")
+	wordlistName := getStringValue(normalizedConfig, "subdomain-wordlist-name-runtime", "")
 	if wordlistName == "" {
-		pkg.Logger.Error("Bruteforce stage requires wordlist-name in config")
-		return stageResult{failed: []string{stageBruteforce + " (missing wordlist-name in config)"}}
+		pkg.Logger.Error("Bruteforce stage requires subdomain-wordlist-name in config")
+		return stageResult{failed: []string{stageBruteforce + " (missing subdomain-wordlist-name in config)"}}
+	}
+
+	wordlistBasePath := getStringValue(normalizedConfig, "subdomain-wordlist-base-path-runtime", "")
+	if wordlistBasePath == "" {
+		pkg.Logger.Error("Bruteforce stage requires subdomain-wordlist-base-path in config")
+		return stageResult{failed: []string{stageBruteforce + " (missing subdomain-wordlist-base-path in config)"}}
+	}
+
+	resolversPath := getStringValue(normalizedConfig, "resolvers-path-cli", "")
+	if resolversPath == "" {
+		pkg.Logger.Error("Bruteforce stage requires resolvers-path in config")
+		return stageResult{failed: []string{stageBruteforce + " (missing resolvers-path in config)"}}
 	}
 
 	// Ensure wordlist exists locally (download from server if needed)
@@ -39,7 +63,7 @@ func (w *Workflow) runBruteforceStage(ctx *workflowContext) stageResult {
 	var commands []activity.Command
 
 	for _, domain := range ctx.domains {
-		cmd := w.createBruteforceCommand(ctx, domain, toolConfig, wordlistPath)
+		cmd := w.createBruteforceCommand(ctx, domain, normalizedConfig, wordlistPath, resolversPath)
 		if cmd != nil {
 			commands = append(commands, *cmd)
 		}
@@ -53,20 +77,20 @@ func (w *Workflow) runBruteforceStage(ctx *workflowContext) stageResult {
 	pkg.Logger.Info("Running bruteforce stage",
 		zap.Int("domains", len(commands)),
 		zap.String("wordlist", wordlistPath))
-	results := w.runner.RunParallel(ctx.ctx, commands)
-	return processResults(results)
+
+	return processResults(w.runStageCommands(ctx, stageBruteforce, commands))
 }
 
 // createBruteforceCommand creates a bruteforce command for a domain
-func (w *Workflow) createBruteforceCommand(ctx *workflowContext, domain string, toolConfig map[string]any, wordlistPath string) *activity.Command {
+func (w *Workflow) createBruteforceCommand(ctx *workflowContext, domain string, toolConfig map[string]any, wordlistPath, resolversPath string) *activity.Command {
 	outputFile := filepath.Join(ctx.workDir, fmt.Sprintf("bruteforce_%s.txt", sanitizeFilename(domain)))
 	logFile := filepath.Join(ctx.workDir, fmt.Sprintf("bruteforce_%s.log", sanitizeFilename(domain)))
 
-	params := map[string]string{
-		"domain":      domain,
-		"output-file": outputFile,
-		"wordlist":    wordlistPath,
-		"resolvers":   resolversPath,
+	params := map[string]any{
+		"Domain":     domain,
+		"OutputFile": outputFile,
+		"Wordlist":   wordlistPath,
+		"Resolvers":  resolversPath,
 	}
 
 	cmdStr, err := buildCommand(toolSubdomainBruteforce, params, toolConfig)
@@ -76,8 +100,13 @@ func (w *Workflow) createBruteforceCommand(ctx *workflowContext, domain string, 
 			zap.Error(err))
 		return nil
 	}
-
-	timeout := getTimeout(toolConfig)
+	timeout, err := getTimeout(toolConfig)
+	if err != nil {
+		pkg.Logger.Error("Failed to get timeout",
+			zap.String("domain", domain),
+			zap.Error(err))
+		return nil
+	}
 
 	return &activity.Command{
 		Name:       fmt.Sprintf("bruteforce_%s", sanitizeFilename(domain)),

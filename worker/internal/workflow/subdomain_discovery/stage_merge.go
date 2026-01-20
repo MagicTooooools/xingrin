@@ -15,14 +15,6 @@ import (
 	"go.uber.org/zap"
 )
 
-const (
-	wildcardSampleTimeout = 2 * time.Hour // 2 hours for sampling
-	wildcardTests         = 50             // puredns wildcard tests count
-	wildcardBatch         = 1000000        // puredns wildcard batch size
-	sampleMultiplier      = 100            // sample size = original count × 100
-	expansionThreshold    = 50             // threshold = original count × 50
-)
-
 // wildcardCheckResult holds the result of wildcard detection
 type wildcardCheckResult struct {
 	isWildcard     bool
@@ -30,6 +22,65 @@ type wildcardCheckResult struct {
 	sampleCount    int
 	expansionRatio float64
 	reason         string
+}
+
+type wildcardSettings struct {
+	sampleTimeout      time.Duration
+	tests              int
+	batch              int
+	sampleMultiplier   int
+	expansionThreshold int
+	resolversPath      string
+}
+
+func buildWildcardSettings(toolName string, config map[string]any, resolversPath string) (wildcardSettings, error) {
+	sampleTimeoutSeconds, err := getIntValue(config, "wildcard-sample-timeout-runtime")
+	if err != nil {
+		return wildcardSettings{}, err
+	}
+	if sampleTimeoutSeconds <= 0 {
+		return wildcardSettings{}, fmt.Errorf("wildcard-sample-timeout must be > 0")
+	}
+	tests, err := getIntValue(config, "wildcard-tests-cli")
+	if err != nil {
+		return wildcardSettings{}, err
+	}
+	if tests <= 0 {
+		return wildcardSettings{}, fmt.Errorf("wildcard-tests must be > 0")
+	}
+	batch, err := getIntValue(config, "wildcard-batch-cli")
+	if err != nil {
+		return wildcardSettings{}, err
+	}
+	if batch <= 0 {
+		return wildcardSettings{}, fmt.Errorf("wildcard-batch must be > 0")
+	}
+	sampleMultiplier, err := getIntValue(config, "wildcard-sample-multiplier-runtime")
+	if err != nil {
+		return wildcardSettings{}, err
+	}
+	if sampleMultiplier <= 0 {
+		return wildcardSettings{}, fmt.Errorf("wildcard-sample-multiplier must be > 0")
+	}
+	expansionThreshold, err := getIntValue(config, "wildcard-expansion-threshold-runtime")
+	if err != nil {
+		return wildcardSettings{}, err
+	}
+	if expansionThreshold <= 0 {
+		return wildcardSettings{}, fmt.Errorf("wildcard-expansion-threshold must be > 0")
+	}
+	if resolversPath == "" {
+		return wildcardSettings{}, fmt.Errorf("resolvers-path is required")
+	}
+
+	return wildcardSettings{
+		sampleTimeout:      time.Duration(sampleTimeoutSeconds) * time.Second,
+		tests:              tests,
+		batch:              batch,
+		sampleMultiplier:   sampleMultiplier,
+		expansionThreshold: expansionThreshold,
+		resolversPath:      resolversPath,
+	}, nil
 }
 
 // runMergeStage merges input files and runs a processing tool (resolve or permutation)
@@ -40,8 +91,28 @@ func (w *Workflow) runMergeStage(ctx *workflowContext, inputFiles []string, stag
 		return stageResult{}
 	}
 
+	// Get tools configuration
+	toolsConfig, ok := stageConfig["tools"].(map[string]any)
+	if !ok {
+		pkg.Logger.Debug("No tools configured in stage", zap.String("stage", stageName))
+		return stageResult{}
+	}
+
 	// Get tool-specific config
-	toolConfig, _ := stageConfig[toolName].(map[string]any)
+	toolConfig, _ := toolsConfig[toolName].(map[string]any)
+	normalizedConfig, err := normalizeToolConfig(toolName, toolConfig)
+	if err != nil {
+		pkg.Logger.Error("Failed to normalize tool config",
+			zap.String("tool", toolName),
+			zap.Error(err))
+		return stageResult{failed: []string{stageName}}
+	}
+	resolversPath := getStringValue(normalizedConfig, "resolvers-path-cli", "")
+	if resolversPath == "" {
+		pkg.Logger.Error("Resolvers path is required in config",
+			zap.String("stage", stageName))
+		return stageResult{failed: []string{stageName}}
+	}
 
 	// Merge all input files into one
 	mergedFile := filepath.Join(ctx.workDir, fmt.Sprintf("%s_input.txt", stageName))
@@ -54,7 +125,13 @@ func (w *Workflow) runMergeStage(ctx *workflowContext, inputFiles []string, stag
 
 	// For permutation stage, check for wildcard domains first
 	if stageName == stagePermutation {
-		checkResult := w.checkWildcard(ctx.ctx, mergedFile, ctx.workDir)
+		settings, err := buildWildcardSettings(toolName, normalizedConfig, resolversPath)
+		if err != nil {
+			pkg.Logger.Error("Failed to load wildcard settings",
+				zap.Error(err))
+			return stageResult{failed: []string{stageName}}
+		}
+		checkResult := w.checkWildcard(ctx.ctx, mergedFile, ctx.workDir, settings)
 		if checkResult.isWildcard {
 			pkg.Logger.Warn("Skipping permutation stage due to wildcard detection",
 				zap.String("reason", checkResult.reason),
@@ -71,13 +148,13 @@ func (w *Workflow) runMergeStage(ctx *workflowContext, inputFiles []string, stag
 	outputFile := filepath.Join(ctx.workDir, fmt.Sprintf("%s_output.txt", stageName))
 	logFile := filepath.Join(ctx.workDir, fmt.Sprintf("%s.log", stageName))
 
-	params := map[string]string{
-		"input-file":  mergedFile,
-		"output-file": outputFile,
-		"resolvers":   resolversPath,
+	params := map[string]any{
+		"InputFile":  mergedFile,
+		"OutputFile": outputFile,
+		"Resolvers":  resolversPath,
 	}
 
-	cmdStr, err := buildCommand(toolName, params, toolConfig)
+	cmdStr, err := buildCommand(toolName, params, normalizedConfig)
 	if err != nil {
 		pkg.Logger.Error("Failed to build command",
 			zap.String("stage", stageName),
@@ -86,7 +163,13 @@ func (w *Workflow) runMergeStage(ctx *workflowContext, inputFiles []string, stag
 		return stageResult{failed: []string{stageName}}
 	}
 
-	timeout := getTimeout(toolConfig)
+	timeout, err := getTimeout(normalizedConfig)
+	if err != nil {
+		pkg.Logger.Error("Failed to get timeout",
+			zap.String("stage", stageName),
+			zap.Error(err))
+		return stageResult{failed: []string{stageName}}
+	}
 
 	cmd := activity.Command{
 		Name:       stageName,
@@ -101,8 +184,7 @@ func (w *Workflow) runMergeStage(ctx *workflowContext, inputFiles []string, stag
 		zap.Int("inputFiles", len(inputFiles)),
 		zap.Duration("timeout", timeout))
 
-	results := w.runner.RunParallel(ctx.ctx, []activity.Command{cmd})
-	return processResults(results)
+	return processResults(w.runStageCommands(ctx, stageName, []activity.Command{cmd}))
 }
 
 // mergeFiles reads all input files, deduplicates entries, and writes to outputFile
@@ -162,7 +244,7 @@ func (w *Workflow) streamMergeFile(filePath string, seen map[string]struct{}, wr
 
 // checkWildcard performs wildcard detection before permutation stage
 // Returns true if wildcard is detected (should skip permutation)
-func (w *Workflow) checkWildcard(ctx context.Context, inputFile, workDir string) wildcardCheckResult {
+func (w *Workflow) checkWildcard(ctx context.Context, inputFile, workDir string, settings wildcardSettings) wildcardCheckResult {
 	originalCount := countFileLines(inputFile)
 	if originalCount == 0 {
 		return wildcardCheckResult{
@@ -170,16 +252,15 @@ func (w *Workflow) checkWildcard(ctx context.Context, inputFile, workDir string)
 			reason:     "empty input file",
 		}
 	}
-
-	sampleSize := originalCount * sampleMultiplier
-	maxAllowed := originalCount * expansionThreshold
+	sampleSize := originalCount * settings.sampleMultiplier
+	maxAllowed := originalCount * settings.expansionThreshold
 	sampleOutput := filepath.Join(workDir, "wildcard_sample.txt")
 	logFile := filepath.Join(workDir, "wildcard_detection.log")
 
 	// Build sampling command: dnsgen | head | puredns resolve
 	sampleCmd := fmt.Sprintf(
 		"cat '%s' | dnsgen - | head -n %d | puredns resolve -r '%s' --write '%s' --wildcard-tests %d --wildcard-batch %d --quiet",
-		inputFile, sampleSize, resolversPath, sampleOutput, wildcardTests, wildcardBatch,
+		inputFile, sampleSize, settings.resolversPath, sampleOutput, settings.tests, settings.batch,
 	)
 
 	pkg.Logger.Info("Wildcard detection: sampling",
@@ -193,7 +274,7 @@ func (w *Workflow) checkWildcard(ctx context.Context, inputFile, workDir string)
 		Command:    sampleCmd,
 		OutputFile: sampleOutput,
 		LogFile:    logFile,
-		Timeout:    wildcardSampleTimeout,
+		Timeout:    settings.sampleTimeout,
 	})
 
 	// Handle execution errors
@@ -231,7 +312,7 @@ func (w *Workflow) checkWildcard(ctx context.Context, inputFile, workDir string)
 			originalCount:  originalCount,
 			sampleCount:    sampleCount,
 			expansionRatio: ratio,
-			reason:         fmt.Sprintf("expansion ratio %.1fx exceeds threshold %dx", ratio, expansionThreshold),
+			reason:         fmt.Sprintf("expansion ratio %.1fx exceeds threshold %dx", ratio, settings.expansionThreshold),
 		}
 	}
 

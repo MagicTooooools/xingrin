@@ -1,0 +1,45 @@
+name: Check Generated Files
+
+on:
+  workflow_call:  # 只在被其他 workflow 调用时运行
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: 1.21
+
+      - name: Generate files for all workflows
+        working-directory: worker
+        run: make generate
+
+      - name: Check for differences
+        run: |
+          if ! git diff --exit-code; then
+            echo "❌ Generated files are out of date!"
+            echo "Please run: cd worker && make generate"
+            echo ""
+            echo "Changed files:"
+            git status --porcelain
+            echo ""
+            echo "Diff:"
+            git diff
+            exit 1
+          fi
+          echo "✅ Generated files are up to date"
+
+      - name: Run metadata consistency tests
+        working-directory: worker
+        run: make test-metadata
+
+      - name: Run all tests
+        working-directory: worker
+        run: make test

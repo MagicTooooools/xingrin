@@ -1,7 +1,7 @@
 package activity
 
 import (
-	"bufio"
+	"bytes"
 	"context"
 	"fmt"
 	"io"
@@ -9,14 +9,13 @@ import (
 	"os/exec"
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
 	"sync"
 	"syscall"
 	"time"
 
 	"github.com/orbit/worker/internal/pkg"
-	"github.com/shirou/gopsutil/v3/cpu"
-	"github.com/shirou/gopsutil/v3/mem"
 	"go.uber.org/zap"
 )
 
@@ -26,25 +25,24 @@ var ansiRegex = regexp.MustCompile(`\x1b\[[0-9;]*[a-zA-Z]`)
 // controlCharReplacer removes control characters in a single pass
 var controlCharReplacer = strings.NewReplacer(
 	"\x00", "", // NUL
-	"\r", "",   // CR
-	"\b", "",   // Backspace
-	"\f", "",   // Form feed
-	"\v", "",   // Vertical tab
+	"\r", "", // CR
+	"\b", "", // Backspace
+	"\f", "", // Form feed
+	"\v", "", // Vertical tab
 )
 
 const (
 	DefaultDirPerm  = 0755
 	ExitCodeTimeout = -1
-	ExitCodeError   = -1
+	ExitCodeError   = -2
 
-	// System load thresholds
-	DefaultCPUThreshold = 90.0              // CPU usage percentage
-	DefaultMemThreshold = 80.0              // Memory usage percentage
-	LoadCheckInterval   = 180 * time.Second // 3 minutes between checks
-	CommandStartupDelay = 5 * time.Second   // Initial delay before first check
+	// Runner concurrency control (external command processes)
+	// Enforced per worker container/workflow instance.
+	EnvMaxCmdConcurrency     = "WORKER_MAX_CMD_CONCURRENCY"
+	DefaultMaxCmdConcurrency = 2
 
 	// Scanner buffer sizes
-	ScannerInitBufSize = 64 * 1024  // 64KB initial buffer
+	ScannerInitBufSize = 64 * 1024   // 64KB initial buffer
 	ScannerMaxBufSize  = 1024 * 1024 // 1MB max buffer for long lines
 )
 
@@ -70,11 +68,49 @@ type Command struct {
 // Runner executes activities (external tools)
 type Runner struct {
 	workDir string
+	sem     chan struct{}
 }
 
 // NewRunner creates a new activity runner
 func NewRunner(workDir string) *Runner {
-	return &Runner{workDir: workDir}
+	maxConc := getMaxCmdConcurrency()
+	return &Runner{
+		workDir: workDir,
+		sem:     make(chan struct{}, maxConc),
+	}
+}
+
+func getMaxCmdConcurrency() int {
+	v := os.Getenv(EnvMaxCmdConcurrency)
+	if v == "" {
+		return DefaultMaxCmdConcurrency
+	}
+
+	n, err := strconv.Atoi(v)
+	if err != nil || n < 1 {
+		if pkg.Logger != nil {
+			pkg.Logger.Warn("Invalid max command concurrency; using default",
+				zap.String("env", EnvMaxCmdConcurrency),
+				zap.String("value", v),
+				zap.Int("default", DefaultMaxCmdConcurrency))
+		}
+		return DefaultMaxCmdConcurrency
+	}
+
+	return n
+}
+
+func (r *Runner) acquire(ctx context.Context) error {
+	select {
+	case r.sem <- struct{}{}:
+		return nil
+	case <-ctx.Done():
+		return ctx.Err()
+	}
+}
+
+func (r *Runner) release() {
+	<-r.sem
 }
 
 // killProcessGroup terminates the entire process group
@@ -101,62 +137,6 @@ func killProcessGroup(cmd *exec.Cmd) {
 	}
 }
 
-// waitForSystemLoad blocks until system CPU and memory usage are below thresholds.
-// This prevents OOM when starting multiple concurrent commands.
-func waitForSystemLoad(ctx context.Context) {
-	// Initial delay to let previous commands consume resources
-	select {
-	case <-ctx.Done():
-		return
-	case <-time.After(CommandStartupDelay):
-	}
-
-	for {
-		cpu, mem, err := getSystemLoad()
-		if err != nil {
-			pkg.Logger.Debug("Failed to get system load, skipping check", zap.Error(err))
-			return
-		}
-
-		if cpu < DefaultCPUThreshold && mem < DefaultMemThreshold {
-			return
-		}
-
-		pkg.Logger.Info("System load high, waiting before starting command",
-			zap.Float64("cpu", cpu),
-			zap.Float64("cpuThreshold", DefaultCPUThreshold),
-			zap.Float64("mem", mem),
-			zap.Float64("memThreshold", DefaultMemThreshold))
-
-		select {
-		case <-ctx.Done():
-			return
-		case <-time.After(LoadCheckInterval):
-		}
-	}
-}
-
-// getSystemLoad returns current CPU and memory usage percentages using gopsutil.
-// Correctly handles container cgroup limits.
-func getSystemLoad() (cpuPercent, memPercent float64, err error) {
-	// Get CPU usage (0 interval means since last call, false means aggregate all CPUs)
-	cpuPercents, err := cpu.Percent(0, false)
-	if err != nil {
-		return 0, 0, fmt.Errorf("failed to get CPU usage: %w", err)
-	}
-	if len(cpuPercents) == 0 {
-		return 0, 0, fmt.Errorf("no CPU data available")
-	}
-
-	// Get memory usage
-	memInfo, err := mem.VirtualMemory()
-	if err != nil {
-		return 0, 0, fmt.Errorf("failed to get memory usage: %w", err)
-	}
-
-	return cpuPercents[0], memInfo.UsedPercent, nil
-}
-
 // Run executes a single activity with streaming output
 func (r *Runner) Run(ctx context.Context, cmd Command) *Result {
 	start := time.Now()
@@ -171,14 +151,19 @@ func (r *Runner) Run(ctx context.Context, cmd Command) *Result {
 		result.ExitCode = ExitCodeError
 		return result
 	}
-
-	// Wait for system load to be acceptable before starting
-	waitForSystemLoad(ctx)
-	if ctx.Err() != nil {
-		result.Error = fmt.Errorf("context cancelled while waiting for system load: %w", ctx.Err())
+	if cmd.Timeout <= 0 {
+		result.Error = fmt.Errorf("invalid timeout %v: must be > 0", cmd.Timeout)
 		result.ExitCode = ExitCodeError
 		return result
 	}
+
+	// Limit external command process concurrency per worker container.
+	if err := r.acquire(ctx); err != nil {
+		result.Error = fmt.Errorf("context cancelled while waiting for command slot: %w", err)
+		result.ExitCode = ExitCodeError
+		return result
+	}
+	defer r.release()
 
 	execCtx, cancel := context.WithTimeout(ctx, cmd.Timeout)
 	defer cancel()
@@ -300,6 +285,30 @@ func (r *Runner) RunParallel(ctx context.Context, commands []Command) []*Result 
 	return results
 }
 
+// RunSequential executes multiple activities sequentially (one after another)
+func (r *Runner) RunSequential(ctx context.Context, commands []Command) []*Result {
+	if len(commands) == 0 {
+		return nil
+	}
+
+	results := make([]*Result, len(commands))
+
+	for i, cmd := range commands {
+		if ctx.Err() != nil {
+			results[i] = &Result{
+				Name:     cmd.Name,
+				ExitCode: ExitCodeError,
+				Error:    fmt.Errorf("context cancelled: %w", ctx.Err()),
+			}
+			continue
+		}
+
+		results[i] = r.Run(ctx, cmd)
+	}
+
+	return results
+}
+
 func (r *Runner) prepareLogFile(cmd Command) *os.File {
 	if cmd.LogFile == "" {
 		return nil
@@ -326,33 +335,83 @@ func (r *Runner) prepareLogFile(cmd Command) *os.File {
 
 func (r *Runner) streamOutput(wg *sync.WaitGroup, reader io.Reader, logFile *os.File, activityName, streamName string) {
 	defer wg.Done()
+	const readChunkSize = 8 * 1024
+	buf := make([]byte, readChunkSize)
+	lineBuf := make([]byte, 0, ScannerInitBufSize)
+	truncated := false
+	discarding := false
 
-	scanner := bufio.NewScanner(reader)
-	scanner.Buffer(make([]byte, ScannerInitBufSize), ScannerMaxBufSize)
-
-	for scanner.Scan() {
-		line := cleanLine(scanner.Text())
-		if line == "" {
-			continue
+	flushLine := func() {
+		if len(lineBuf) == 0 && !truncated {
+			return
 		}
-
-		// Write to log file
-		if logFile != nil {
-			_, _ = fmt.Fprintln(logFile, line)
+		line := cleanLine(string(lineBuf))
+		if line != "" {
+			if logFile != nil {
+				_, _ = fmt.Fprintln(logFile, line)
+			}
+			pkg.Logger.Debug("Activity output",
+				zap.String("activity", activityName),
+				zap.String("stream", streamName),
+				zap.String("line", line))
 		}
-
-		// Log debug output (optional, can be removed for less verbose logs)
-		pkg.Logger.Debug("Activity output",
-			zap.String("activity", activityName),
-			zap.String("stream", streamName),
-			zap.String("line", line))
+		if truncated {
+			pkg.Logger.Warn("Activity output line truncated",
+				zap.String("activity", activityName),
+				zap.String("stream", streamName),
+				zap.Int("maxBytes", ScannerMaxBufSize))
+		}
+		lineBuf = lineBuf[:0]
+		truncated = false
+		discarding = false
 	}
 
-	if err := scanner.Err(); err != nil {
-		pkg.Logger.Warn("Error reading output stream",
-			zap.String("activity", activityName),
-			zap.String("stream", streamName),
-			zap.Error(err))
+	appendChunk := func(chunk []byte) {
+		if len(chunk) == 0 || discarding {
+			return
+		}
+		if len(lineBuf)+len(chunk) <= ScannerMaxBufSize {
+			lineBuf = append(lineBuf, chunk...)
+			return
+		}
+		remain := ScannerMaxBufSize - len(lineBuf)
+		if remain > 0 {
+			lineBuf = append(lineBuf, chunk[:remain]...)
+		}
+		truncated = true
+		discarding = true
+	}
+
+	for {
+		n, err := reader.Read(buf)
+		if n > 0 {
+			data := buf[:n]
+			for len(data) > 0 {
+				i := bytes.IndexAny(data, "\r\n")
+				if i == -1 {
+					appendChunk(data)
+					break
+				}
+
+				appendChunk(data[:i])
+				delim := data[i]
+				data = data[i+1:]
+				if delim == '\r' && len(data) > 0 && data[0] == '\n' {
+					data = data[1:]
+				}
+				flushLine()
+			}
+		}
+		if err != nil {
+			if err != io.EOF {
+				pkg.Logger.Warn("Error reading output stream",
+					zap.String("activity", activityName),
+					zap.String("stream", streamName),
+					zap.Error(err))
+			}
+			flushLine()
+			return
+		}
 	}
 }
 

@@ -19,8 +19,13 @@ permissions:
   contents: write
 
 jobs:
+  # 在构建前检查生成文件
+  check:
+    uses: ./.github/workflows/check-generated-files.yml
+
   # AMD64 构建（原生 x64 runner）
   build-amd64:
+    needs: check  # 依赖检查通过
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -96,6 +101,7 @@ jobs:
 
   # ARM64 构建（原生 ARM64 runner）
   build-arm64:
+    needs: check  # 依赖检查通过
     runs-on: ubuntu-22.04-arm
     strategy:
       matrix:

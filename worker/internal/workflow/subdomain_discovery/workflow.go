@@ -1,16 +1,15 @@
 package subdomain_discovery
 
 import (
-	"bufio"
 	"context"
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/orbit/worker/internal/activity"
 	"github.com/orbit/worker/internal/pkg"
 	"github.com/orbit/worker/internal/pkg/validator"
+	"github.com/orbit/worker/internal/results"
 	"github.com/orbit/worker/internal/server"
 	"github.com/orbit/worker/internal/workflow"
 	"go.uber.org/zap"
@@ -26,15 +25,35 @@ func init() {
 
 // Workflow implements the subdomain discovery scan workflow
 type Workflow struct {
-	runner  *activity.Runner
-	workDir string
+	runner        *activity.Runner
+	workDir       string
+	stageMetadata map[string]workflow.StageMetadata
 }
 
 // New creates a new subdomain discovery workflow
 func New(workDir string) *Workflow {
+	// Load metadata from templates.yaml
+	metadata, err := loader.GetMetadata()
+	if err != nil {
+		pkg.Logger.Error("Failed to load workflow metadata", zap.Error(err))
+		// Continue with empty metadata map - will use default parallel behavior
+		return &Workflow{
+			runner:        activity.NewRunner(workDir),
+			workDir:       workDir,
+			stageMetadata: make(map[string]workflow.StageMetadata),
+		}
+	}
+
+	// Build stage metadata map for quick lookup
+	stageMap := make(map[string]workflow.StageMetadata)
+	for _, stage := range metadata.Stages {
+		stageMap[stage.ID] = stage
+	}
+
 	return &Workflow{
-		runner:  activity.NewRunner(workDir),
-		workDir: workDir,
+		runner:        activity.NewRunner(workDir),
+		workDir:       workDir,
+		stageMetadata: stageMap,
 	}
 }
 
@@ -78,17 +97,13 @@ func (w *Workflow) SaveResults(ctx context.Context, client server.ServerClient, 
 		return nil
 	}
 
-	// Create batch sender with context
-	sender := server.NewBatchSender(ctx, client, params.ScanID, params.TargetID, "subdomain", 5000)
-
 	// Stream and deduplicate from files
-	subdomainCh, errCh := w.streamAndDeduplicate(files)
+	subdomainCh, errCh := results.ParseSubdomains(files)
 
 	// Send subdomains in batches
-	for subdomain := range subdomainCh {
-		if err := sender.Add(map[string]string{"name": subdomain}); err != nil {
-			return err
-		}
+	items, batches, err := results.WriteSubdomains(ctx, client, params.ScanID, params.TargetID, subdomainCh)
+	if err != nil {
+		return err
 	}
 
 	// Check for streaming errors
@@ -100,13 +115,7 @@ func (w *Workflow) SaveResults(ctx context.Context, client server.ServerClient, 
 	default:
 	}
 
-	// Flush remaining items
-	if err := sender.Flush(); err != nil {
-		return err
-	}
-
 	// Update metrics
-	items, batches := sender.Stats()
 	output.Metrics.ProcessedCount = items
 	pkg.Logger.Info("Results saved",
 		zap.Int("subdomains", items),
@@ -118,8 +127,8 @@ func (w *Workflow) SaveResults(ctx context.Context, client server.ServerClient, 
 // initialize validates params and prepares the workflow context
 func (w *Workflow) initialize(params *workflow.Params) (*workflowContext, error) {
 	// Config can be either nested under workflow name or flat
-	// Try nested first: { "subdomain_discovery": { "passive-tools": ... } }
-	// Then flat: { "passive-tools": ... }
+	// Try nested first: { "subdomain_discovery": { "recon-tools": ... } }
+	// Then flat: { "recon-tools": ... }
 	flowConfig := getConfigPath(params.ScanConfig, Name)
 	if flowConfig == nil {
 		// Use flat config directly
@@ -127,6 +136,9 @@ func (w *Workflow) initialize(params *workflow.Params) (*workflowContext, error)
 	}
 	if flowConfig == nil {
 		return nil, fmt.Errorf("missing %s config", Name)
+	}
+	if err := validateExplicitConfig(flowConfig); err != nil {
+		return nil, err
 	}
 
 	workDir := filepath.Join(params.WorkDir, Name)
@@ -193,65 +205,4 @@ func (w *Workflow) setupProviderConfig(ctx context.Context, params *workflow.Par
 	}
 	pkg.Logger.Info("Provider config written", zap.String("path", configPath))
 	return configPath, nil
-}
-
-// streamAndDeduplicate streams unique subdomains from multiple files.
-// Returns a channel that yields deduplicated subdomains one by one.
-// The channel is closed when all files are processed or an error occurs.
-func (w *Workflow) streamAndDeduplicate(filePaths []string) (<-chan string, <-chan error) {
-	out := make(chan string, 1000) // buffered for better throughput
-	errCh := make(chan error, 1)
-	seen := make(map[string]struct{}, 500000) // pre-allocate for large datasets
-
-	go func() {
-		defer close(out)
-		defer close(errCh)
-
-		// Recover from panic and send error to channel
-		defer func() {
-			if r := recover(); r != nil {
-				pkg.Logger.Error("Panic in streamAndDeduplicate", zap.Any("panic", r))
-				errCh <- fmt.Errorf("panic in stream processing: %v", r)
-			}
-		}()
-
-		for _, path := range filePaths {
-			if err := w.streamFile(path, seen, out); err != nil {
-				pkg.Logger.Error("Error streaming file", zap.String("path", path), zap.Error(err))
-				errCh <- err
-				return
-			}
-		}
-	}()
-
-	return out, errCh
-}
-
-// streamFile reads a single file and sends unique subdomains to the channel
-// Note: Files are already validated by mergeFiles, so we skip validation for performance
-func (w *Workflow) streamFile(filePath string, seen map[string]struct{}, out chan<- string) error {
-	file, err := os.Open(filePath)
-	if err != nil {
-		if os.IsNotExist(err) {
-			return nil
-		}
-		return err
-	}
-	defer func() { _ = file.Close() }()
-
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		line := strings.TrimSpace(scanner.Text())
-		if line == "" {
-			continue
-		}
-
-		lower := strings.ToLower(line)
-		if _, exists := seen[lower]; !exists {
-			seen[lower] = struct{}{}
-			out <- line
-		}
-	}
-
-	return scanner.Err()
 }

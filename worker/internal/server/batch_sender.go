@@ -97,10 +97,10 @@ func (s *BatchSender) sendBatch() error {
 		return nil
 	}
 
-	// Copy batch and clear
+	// Copy batch and clear so new items can be queued while sending
 	toSend := make([]any, len(s.batch))
 	copy(toSend, s.batch)
-	s.batch = s.batch[:0] // reset slice but keep capacity
+	s.batch = s.batch[:0]
 	s.mu.Unlock()
 
 	if err := s.client.PostBatch(s.ctx, s.scanID, s.targetID, s.dataType, toSend); err != nil {
@@ -118,6 +118,11 @@ func (s *BatchSender) sendBatch() error {
 				zap.Int("count", len(toSend)),
 				zap.Error(err))
 		}
+		// Re-queue batch for retry on next Flush/send, preserving new items
+		s.mu.Lock()
+		s.batch = append(toSend, s.batch...)
+		s.mu.Unlock()
+
 		return fmt.Errorf("failed to send %s batch: %w", s.dataType, err)
 	}
 

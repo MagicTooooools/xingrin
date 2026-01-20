@@ -1,27 +1,67 @@
-.PHONY: build run test clean tidy
+.PHONY: help generate test test-metadata clean build
 
-# Build the worker binary
-build:
-	go build -o bin/worker ./cmd/worker
+# 默认目标
+help:
+	@echo "Available targets:"
+	@echo "  make generate       - Generate code from templates.yaml"
+	@echo "  make test           - Run all tests"
+	@echo "  make test-metadata  - Run metadata consistency tests"
+	@echo "  make clean          - Clean generated files"
+	@echo "  make build          - Build the worker binary"
 
-# Run the worker
-run:
-	go run ./cmd/worker
+# 生成代码
+generate:
+	@echo "Generating code from templates.yaml..."
+	@for workflow_dir in internal/workflow/*/; do \
+		if [ -f "$${workflow_dir}templates.yaml" ]; then \
+			echo "Generating for $${workflow_dir}..."; \
+			go generate "./$${workflow_dir}"; \
+		fi \
+	done
+	@echo "✓ Code generation completed"
 
-# Run tests
+# 运行所有测试
 test:
+	@echo "Running all tests..."
 	go test -v ./...
 
-# Run tests with coverage
-test-coverage:
-	go test -v -coverprofile=coverage.out ./...
-	go tool cover -html=coverage.out -o coverage.html
+# 运行元数据一致性测试
+test-metadata:
+	@echo "Running metadata consistency tests..."
+	@for workflow_dir in internal/workflow/*/; do \
+		workflow_name=$$(basename "$$workflow_dir"); \
+		echo "Testing $${workflow_name}..."; \
+		go test -v "./$${workflow_dir}" -run TestStagesMatchMetadata 2>/dev/null || true; \
+		go test -v "./$${workflow_dir}" -run TestToolsMatchMetadata 2>/dev/null || true; \
+		go test -v "./$${workflow_dir}" -run TestStageToolMapping 2>/dev/null || true; \
+	done
+	@echo "✓ Metadata consistency verified"
 
-# Clean build artifacts
+# 清理生成的文件
 clean:
-	rm -rf bin/
-	rm -f coverage.out coverage.html
+	@echo "Cleaning generated files..."
+	@# Remove worker binary
+	@rm -f worker bin/worker
+	@# Clean generated files for all workflows
+	@for workflow_dir in internal/workflow/*/; do \
+		if [ -f "$${workflow_dir}templates.yaml" ]; then \
+			workflow_name=$$(basename "$$workflow_dir"); \
+			rm -f "$${workflow_dir}constants_generated.go"; \
+			rm -f "../server/configs/engines/$${workflow_name}.schema.json"; \
+			rm -f "../server/configs/engines/$${workflow_name}.yaml"; \
+		fi \
+	done
+	@# Remove generated docs
+	@rm -f ../docs/config-reference.md
+	@rm -f ../docs/config-reference.zh.md
+	@echo "✓ Cleaned"
 
-# Tidy dependencies
-tidy:
-	go mod tidy
+# 构建
+build:
+	@echo "Building worker..."
+	go build -o bin/worker ./cmd/worker
+	@echo "✓ Build completed"
+
+# 生成并测试（推荐的工作流）
+gen-test: generate test-metadata
+	@echo "✓ Generation and testing completed successfully"

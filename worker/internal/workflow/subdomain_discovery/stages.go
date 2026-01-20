@@ -2,43 +2,13 @@ package subdomain_discovery
 
 import (
 	"context"
-	"os"
 
 	"github.com/orbit/worker/internal/activity"
 	"github.com/orbit/worker/internal/server"
 )
 
-const (
-	// Stage names (kebab-case to match YAML config)
-	stagePassive     = "passive-tools"
-	stageBruteforce  = "bruteforce"
-	stagePermutation = "permutation"
-	stageResolve     = "resolve"
-
-	// Tool names (kebab-case to match templates.yaml)
-	toolSubfinder            = "subfinder"
-	toolSublist3r            = "sublist3r"
-	toolAssetfinder          = "assetfinder"
-	toolSubdomainBruteforce  = "subdomain-bruteforce"
-	toolSubdomainPermutation = "subdomain-permutation-resolve"
-	toolSubdomainResolve     = "subdomain-resolve"
-)
-
-var (
-	// Configurable paths with defaults
-	resolversPath    = envOrDefault("RESOLVERS_PATH", "/opt/orbit/wordlists/resolvers.txt")
-	wordlistBasePath = envOrDefault("WORDLIST_BASE_PATH", "/opt/orbit/wordlists")
-)
-
-var passiveTools = []string{toolSubfinder, toolSublist3r, toolAssetfinder}
-
-// envOrDefault returns environment variable value or default (package-level init)
-func envOrDefault(key, defaultValue string) string {
-	if value := os.Getenv(key); value != "" {
-		return value
-	}
-	return defaultValue
-}
+// reconTools lists all reconnaissance tools (references auto-generated constants)
+var reconTools = []string{toolSubfinder, toolSublist3r, toolAssetfinder}
 
 // workflowContext holds shared context for stage execution
 type workflowContext struct {
@@ -68,8 +38,8 @@ func (sr *stageResult) merge(other stageResult) {
 func (w *Workflow) runAllStages(ctx *workflowContext) stageResult {
 	var allResults stageResult
 
-	// Stage 1: Passive collection (always runs if configured)
-	allResults.merge(w.runPassiveStage(ctx))
+	// Stage 1: Reconnaissance (always runs if configured)
+	allResults.merge(w.runReconStage(ctx))
 
 	// Stage 2: Bruteforce (optional)
 	if isStageEnabled(ctx.config, stageBruteforce) {
@@ -78,7 +48,7 @@ func (w *Workflow) runAllStages(ctx *workflowContext) stageResult {
 
 	// Stage 3: Permutation (optional, requires previous output)
 	if isStageEnabled(ctx.config, stagePermutation) && len(allResults.files) > 0 {
-		allResults.merge(w.runMergeStage(ctx, allResults.files, stagePermutation, toolSubdomainPermutation))
+		allResults.merge(w.runMergeStage(ctx, allResults.files, stagePermutation, toolSubdomainPermutationResolve))
 	}
 
 	// Stage 4: Resolve (optional, requires previous output)
@@ -88,8 +58,6 @@ func (w *Workflow) runAllStages(ctx *workflowContext) stageResult {
 
 	return allResults
 }
-
-
 
 // processResults converts activity results to stageResult
 func processResults(results []*activity.Result) stageResult {
