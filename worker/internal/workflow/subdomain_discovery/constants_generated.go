@@ -5,18 +5,18 @@ package subdomain_discovery
 
 // Stage name constants (auto-generated from templates.yaml)
 const (
-	stageRecon       = "recon"
-	stageBruteforce  = "bruteforce"
+	stageRecon = "recon"
+	stageBruteforce = "bruteforce"
 	stagePermutation = "permutation"
-	stageResolve     = "resolve"
+	stageResolve = "resolve"
 )
 
 // Tool name constants (auto-generated from templates.yaml)
 const (
-	toolSubfinder                   = "subfinder"
-	toolSublist3r                   = "sublist3r"
-	toolAssetfinder                 = "assetfinder"
-	toolSubdomainBruteforce         = "subdomain-bruteforce"
-	toolSubdomainResolve            = "subdomain-resolve"
+	toolSublist3r = "sublist3r"
+	toolAssetfinder = "assetfinder"
+	toolSubdomainBruteforce = "subdomain-bruteforce"
+	toolSubdomainResolve = "subdomain-resolve"
 	toolSubdomainPermutationResolve = "subdomain-permutation-resolve"
+	toolSubfinder = "subfinder"
 )
