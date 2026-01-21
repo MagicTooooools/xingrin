@@ -96,7 +96,7 @@ func (b *CommandBuilder) mergeParameters(
 
 // buildCommandTemplate builds the complete command template string
 func (b *CommandBuilder) buildCommandTemplate(tmpl CommandTemplate, data map[string]any) string {
-	cmd := tmpl.BaseCommand
+	cmd := strings.TrimSpace(tmpl.BaseCommand)
 
 	// Only add flags for parameters that have values
 	for _, param := range tmpl.CLIParams {

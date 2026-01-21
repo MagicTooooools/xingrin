@@ -47,8 +47,8 @@ clean:
 		if [ -f "$${workflow_dir}templates.yaml" ]; then \
 			workflow_name=$$(basename "$$workflow_dir"); \
 			rm -f "$${workflow_dir}constants_generated.go"; \
-			rm -f "../server/configs/engines/$${workflow_name}.schema.json"; \
-			rm -f "../server/configs/engines/$${workflow_name}.yaml"; \
+			rm -f "../server/internal/engineschema/$${workflow_name}.schema.json"; \
+			rm -f "../server/internal/engineschema/$${workflow_name}.yaml"; \
 		fi \
 	done
 	@# Remove generated docs

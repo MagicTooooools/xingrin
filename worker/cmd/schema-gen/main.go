@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"sort"
+	"strings"
 
 	"github.com/orbit/worker/internal/activity"
 	"github.com/orbit/worker/internal/workflow"
@@ -14,9 +15,16 @@ import (
 
 // JSONSchema represents a JSON Schema Draft 7 structure
 type JSONSchema struct {
-	Schema               string                     `json:"$schema"`
-	Title                string                     `json:"title,omitempty"`
-	Description          string                     `json:"description,omitempty"`
+	Schema string `json:"$schema"`
+	ID     string `json:"$id,omitempty"`
+
+	Title       string `json:"title,omitempty"`
+	Description string `json:"description,omitempty"`
+
+	// Engine identity (custom schema annotations)
+	Engine        string `json:"x-engine,omitempty"`
+	EngineVersion string `json:"x-engine-version,omitempty"`
+
 	Type                 string                     `json:"type"`
 	Properties           map[string]*PropertySchema `json:"properties,omitempty"`
 	Required             []string                   `json:"required,omitempty"`
@@ -25,12 +33,25 @@ type JSONSchema struct {
 }
 
 // PropertySchema represents a property in JSON Schema
+//
+// Note: We intentionally model only the subset of JSON Schema Draft 7 features
+// we need for config validation.
 type PropertySchema struct {
 	Type        string                     `json:"type,omitempty"`
 	Description string                     `json:"description,omitempty"`
 	Default     interface{}                `json:"default,omitempty"`
+	Const       interface{}                `json:"const,omitempty"`
 	Properties  map[string]*PropertySchema `json:"properties,omitempty"`
 	Required    []string                   `json:"required,omitempty"`
+
+	// Object strictness
+	AdditionalProperties *bool `json:"additionalProperties,omitempty"`
+
+	// Conditional validation (Draft 7)
+	If   *PropertySchema `json:"if,omitempty"`
+	Then *PropertySchema `json:"then,omitempty"`
+	Else *PropertySchema `json:"else,omitempty"`
+
 	// Tool metadata extension fields
 	Stage   string `json:"x-stage,omitempty"`
 	Warning string `json:"x-warning,omitempty"`
@@ -87,9 +108,14 @@ func main() {
 
 func generateSchema(templateFile TemplateFile) *JSONSchema {
 	schema := &JSONSchema{
-		Schema:               "http://json-schema.org/draft-07/schema#",
-		Title:                templateFile.Metadata.DisplayName,
-		Description:          templateFile.Metadata.Description,
+		Schema:      "http://json-schema.org/draft-07/schema#",
+		ID:          schemaID(templateFile.Metadata.Name, templateFile.Metadata.Version),
+		Title:       templateFile.Metadata.DisplayName,
+		Description: templateFile.Metadata.Description,
+
+		Engine:        templateFile.Metadata.Name,
+		EngineVersion: templateFile.Metadata.Version,
+
 		Type:                 "object",
 		Properties:           make(map[string]*PropertySchema),
 		AdditionalProperties: false,
@@ -114,6 +140,8 @@ func generateSchema(templateFile TemplateFile) *JSONSchema {
 			Type:       "object",
 			Properties: make(map[string]*PropertySchema),
 		}
+		// Stage config should be strict: only {enabled, tools}
+		stageSchema.AdditionalProperties = boolPtr(false)
 
 		stageSchema.Properties["enabled"] = &PropertySchema{
 			Type:        "boolean",
@@ -124,6 +152,8 @@ func generateSchema(templateFile TemplateFile) *JSONSchema {
 			Type:       "object",
 			Properties: make(map[string]*PropertySchema),
 		}
+		// Tools object should be strict: only known tool keys for this stage
+		toolsSchema.AdditionalProperties = boolPtr(false)
 
 		tools := toolsByStage[stage.ID]
 		if len(tools) > 0 {
@@ -141,10 +171,15 @@ func generateSchema(templateFile TemplateFile) *JSONSchema {
 				Warning:     tool.Metadata.Warning,
 			}
 
+			// Tool config should be strict: only {enabled, <known param keys>}
+			toolSchema.AdditionalProperties = boolPtr(false)
+
 			toolSchema.Properties["enabled"] = &PropertySchema{
 				Type:        "boolean",
 				Description: "Whether to enable this tool",
 			}
+			// Explicit config: tool.enabled must always be present (even when false)
+			toolSchema.Required = []string{"enabled"}
 
 			var requiredParams []string
 			for _, param := range append(append([]activity.Parameter{}, tool.RuntimeParams...), tool.CLIParams...) {
@@ -168,8 +203,20 @@ func generateSchema(templateFile TemplateFile) *JSONSchema {
 				}
 			}
 
+			// Conditional required params: only required when enabled=true.
+			// This matches worker runtime behavior (disabled tools do not need full params).
 			if len(requiredParams) > 0 {
-				toolSchema.Required = requiredParams
+				toolSchema.If = &PropertySchema{
+					Type: "object",
+					Properties: map[string]*PropertySchema{
+						"enabled": {Const: true},
+					},
+					Required: []string{"enabled"},
+				}
+				toolSchema.Then = &PropertySchema{
+					Type:     "object",
+					Required: requiredParams,
+				}
 			}
 
 			toolsSchema.Properties[toolName] = toolSchema
@@ -193,3 +240,17 @@ func generateSchema(templateFile TemplateFile) *JSONSchema {
 
 	return schema
 }
+
+func schemaID(name, version string) string {
+	name = strings.TrimSpace(name)
+	version = strings.TrimSpace(version)
+	if name == "" {
+		return ""
+	}
+	if version == "" {
+		return "orbit://schemas/engines/" + name
+	}
+	return "orbit://schemas/engines/" + name + "/" + version
+}
+
+func boolPtr(v bool) *bool { return &v }

@@ -78,38 +78,42 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # 建立 python 软链接
 RUN ln -s /usr/bin/python3 /usr/bin/python
 
+# 目录约定：
+# - /opt/orbit          仅存放数据（会被宿主机挂载覆盖）
+# - /opt/orbit-tools    仅存放工具（来自镜像，不应被挂载覆盖）
+RUN mkdir -p \
+    /opt/orbit/wordlists \
+    /opt/orbit/workspace \
+    /opt/orbit-tools/bin \
+    /opt/orbit-tools/share \
+    /opt/orbit-tools/pipx
+
+# 复制 resolvers.txt（DNS 服务器列表，内容固定）
+COPY resources/resolvers.txt /opt/orbit/wordlists/resolvers.txt
+
+# pipx：将 Python 工具安装到项目私有工具目录，避免落到 /root/.local/bin
+ENV PIPX_HOME=/opt/orbit-tools/pipx
+ENV PIPX_BIN_DIR=/opt/orbit-tools/bin
+ENV PATH=/opt/orbit-tools/bin:$PATH
+
 # 安装 Python 扫描工具
-ENV PATH="/root/.local/bin:$PATH"
 RUN pipx install uro && \
     pipx install waymore && \
     pipx install dnsgen
 
-# 安装 Sublist3r
-RUN git clone https://github.com/aboul3la/Sublist3r.git /opt/orbit/tools/Sublist3r && \
-    pip3 install --no-cache-dir -r /opt/orbit/tools/Sublist3r/requirements.txt --break-system-packages
+# 安装 Sublist3r（目录型工具，放到 /opt/orbit-tools/share）
+RUN git clone https://github.com/aboul3la/Sublist3r.git /opt/orbit-tools/share/Sublist3r && \
+    pip3 install --no-cache-dir -r /opt/orbit-tools/share/Sublist3r/requirements.txt --break-system-packages
 
-# 创建工具目录
-RUN mkdir -p /opt/orbit/bin /opt/orbit/wordlists
-
-# 复制 resolvers.txt（DNS 服务器列表，内容固定）
-COPY resources/resolvers.txt /opt/orbit/wordlists/
-
-# 从 tools-builder 复制 Go 扫描工具
-COPY --from=tools-builder /go/bin/* /opt/orbit/bin/
-COPY --from=tools-builder /usr/local/bin/massdns /opt/orbit/bin/
+# 从 tools-builder 复制 Go 扫描工具（统一放到 /opt/orbit-tools/bin）
+COPY --from=tools-builder /go/bin/* /opt/orbit-tools/bin/
+COPY --from=tools-builder /usr/local/bin/massdns /opt/orbit-tools/bin/massdns
 
 # 从 worker-builder 复制 Go Worker
 COPY --from=worker-builder /worker /usr/local/bin/worker
 
-# 创建非 root 用户
-RUN useradd -m -s /bin/bash -u 1000 worker && \
-    chown -R worker:worker /opt/orbit
-
-# 设置 PATH（Go 工具优先）
-ENV PATH=/opt/orbit/bin:/root/.local/bin:$PATH
-
-# 切换到非 root 用户
-USER worker
-
-# 默认命令
+# 默认以 root 运行（最省心）：
+# - 避免宿主机挂载目录权限不一致导致的写入失败
+# - 扫描工具（如 masscan）在某些场景下需要更高权限
+# 如需最小权限运行，可改为非 root 用户并按需添加 capability。
 CMD ["worker"]

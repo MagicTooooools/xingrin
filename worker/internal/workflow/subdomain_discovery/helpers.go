@@ -2,13 +2,16 @@ package subdomain_discovery
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"os"
 	"regexp"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/orbit/worker/internal/activity"
+	"github.com/santhosh-tekuri/jsonschema/v5"
 )
 
 // normalizeToolConfig maps external config_schema.key values to internal parameter names.
@@ -31,70 +34,62 @@ func buildCommand(toolName string, params map[string]any, config map[string]any)
 	return builder.Build(tmpl, params, config)
 }
 
-// validateExplicitConfig ensures stage/tool enabled flags are explicitly set in config.
+var (
+	schemaOnce sync.Once
+	schema     *jsonschema.Schema
+	schemaErr  error
+)
+
+func getConfigSchema() (*jsonschema.Schema, error) {
+	schemaOnce.Do(func() {
+		b, err := templatesFS.ReadFile("schema_generated.json")
+		if err != nil {
+			schemaErr = fmt.Errorf("read embedded schema: %w", err)
+			return
+		}
+
+		compiler := jsonschema.NewCompiler()
+		// Use an in-memory resource name so no file system access is required.
+		if err := compiler.AddResource("schema.json", strings.NewReader(string(b))); err != nil {
+			schemaErr = fmt.Errorf("add schema resource: %w", err)
+			return
+		}
+		s, err := compiler.Compile("schema.json")
+		if err != nil {
+			schemaErr = fmt.Errorf("compile schema: %w", err)
+			return
+		}
+		schema = s
+	})
+
+	return schema, schemaErr
+}
+
+// validateExplicitConfig validates the workflow config using the generated JSON schema.
+// This keeps the runtime validation aligned with templates.yaml (single source of truth).
 func validateExplicitConfig(config map[string]any) error {
 	if config == nil {
 		return fmt.Errorf("config is required")
 	}
 
-	metadata, err := loader.GetMetadata()
-	if err != nil {
-		return err
-	}
-	templates, err := loader.Load()
+	s, err := getConfigSchema()
 	if err != nil {
 		return err
 	}
 
-	toolsByStage := make(map[string][]string)
-	for toolName, tmpl := range templates {
-		stage := tmpl.Metadata.Stage
-		toolsByStage[stage] = append(toolsByStage[stage], toolName)
+	// Convert YAML-decoded types (e.g., int) into JSON-native types (e.g., float64)
+	// to match JSON Schema validators' expectations.
+	raw, err := json.Marshal(config)
+	if err != nil {
+		return fmt.Errorf("marshal config: %w", err)
+	}
+	var v any
+	if err := json.Unmarshal(raw, &v); err != nil {
+		return fmt.Errorf("unmarshal config as json: %w", err)
 	}
 
-	for _, stage := range metadata.Stages {
-		stageConfigRaw, ok := config[stage.ID]
-		if !ok {
-			return fmt.Errorf("stage %s config is required", stage.ID)
-		}
-		stageConfig, ok := stageConfigRaw.(map[string]any)
-		if !ok {
-			return fmt.Errorf("stage %s config must be map", stage.ID)
-		}
-		enabledRaw, ok := stageConfig["enabled"]
-		if !ok {
-			return fmt.Errorf("stage %s.enabled is required", stage.ID)
-		}
-		if _, ok := enabledRaw.(bool); !ok {
-			return fmt.Errorf("stage %s.enabled must be boolean", stage.ID)
-		}
-
-		toolsConfigRaw, ok := stageConfig["tools"]
-		if !ok {
-			return fmt.Errorf("stage %s.tools is required", stage.ID)
-		}
-		toolsConfig, ok := toolsConfigRaw.(map[string]any)
-		if !ok {
-			return fmt.Errorf("stage %s.tools must be map", stage.ID)
-		}
-
-		for _, toolName := range toolsByStage[stage.ID] {
-			toolConfigRaw, ok := toolsConfig[toolName]
-			if !ok {
-				return fmt.Errorf("tool %s config is required", toolName)
-			}
-			toolConfig, ok := toolConfigRaw.(map[string]any)
-			if !ok {
-				return fmt.Errorf("tool %s config must be map", toolName)
-			}
-			enabledRaw, ok := toolConfig["enabled"]
-			if !ok {
-				return fmt.Errorf("tool %s.enabled is required", toolName)
-			}
-			if _, ok := enabledRaw.(bool); !ok {
-				return fmt.Errorf("tool %s.enabled must be boolean", toolName)
-			}
-		}
+	if err := s.Validate(v); err != nil {
+		return fmt.Errorf("invalid config: %w", err)
 	}
 
 	return nil

@@ -26,9 +26,20 @@ func TestValidateExplicitConfig_AllStagesAndToolsPresent(t *testing.T) {
 		stageRecon: map[string]any{
 			"enabled": true,
 			"tools": map[string]any{
-				toolSubfinder:   map[string]any{"enabled": true},
-				toolSublist3r:   map[string]any{"enabled": true},
-				toolAssetfinder: map[string]any{"enabled": true},
+				toolSubfinder: map[string]any{
+					"enabled":         true,
+					"timeout-runtime": 3600,
+					"threads-cli":     10,
+				},
+				toolSublist3r: map[string]any{
+					"enabled":         true,
+					"timeout-runtime": 3600,
+					"threads-cli":     10,
+				},
+				toolAssetfinder: map[string]any{
+					"enabled":         true,
+					"timeout-runtime": 3600,
+				},
 			},
 		},
 		stageBruteforce: map[string]any{

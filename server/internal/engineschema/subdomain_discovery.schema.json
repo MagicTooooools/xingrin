@@ -1,7 +1,10 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "orbit://schemas/engines/subdomain_discovery/1.0.0",
   "title": "Subdomain Discovery",
   "description": "Discover all subdomains of target domains through reconnaissance, dictionary bruteforce, and permutation",
+  "x-engine": "subdomain_discovery",
+  "x-engine-version": "1.0.0",
   "type": "object",
   "properties": {
     "bruteforce": {
@@ -48,25 +51,45 @@
                 }
               },
               "required": [
-                "timeout-runtime",
-                "subdomain-wordlist-name-runtime",
-                "threads-cli",
-                "rate-limit-cli",
-                "wildcard-tests-cli",
-                "wildcard-batch-cli"
+                "enabled"
               ],
+              "additionalProperties": false,
+              "if": {
+                "type": "object",
+                "properties": {
+                  "enabled": {
+                    "const": true
+                  }
+                },
+                "required": [
+                  "enabled"
+                ]
+              },
+              "then": {
+                "type": "object",
+                "required": [
+                  "timeout-runtime",
+                  "subdomain-wordlist-name-runtime",
+                  "threads-cli",
+                  "rate-limit-cli",
+                  "wildcard-tests-cli",
+                  "wildcard-batch-cli"
+                ]
+              },
               "x-stage": "bruteforce"
             }
           },
           "required": [
             "subdomain-bruteforce"
-          ]
+          ],
+          "additionalProperties": false
         }
       },
       "required": [
         "enabled",
         "tools"
-      ]
+      ],
+      "additionalProperties": false
     },
     "permutation": {
       "type": "object",
@@ -120,27 +143,47 @@
                 }
               },
               "required": [
-                "timeout-runtime",
-                "wildcard-sample-timeout-runtime",
-                "wildcard-sample-multiplier-runtime",
-                "wildcard-expansion-threshold-runtime",
-                "threads-cli",
-                "rate-limit-cli",
-                "wildcard-tests-cli",
-                "wildcard-batch-cli"
+                "enabled"
               ],
+              "additionalProperties": false,
+              "if": {
+                "type": "object",
+                "properties": {
+                  "enabled": {
+                    "const": true
+                  }
+                },
+                "required": [
+                  "enabled"
+                ]
+              },
+              "then": {
+                "type": "object",
+                "required": [
+                  "timeout-runtime",
+                  "wildcard-sample-timeout-runtime",
+                  "wildcard-sample-multiplier-runtime",
+                  "wildcard-expansion-threshold-runtime",
+                  "threads-cli",
+                  "rate-limit-cli",
+                  "wildcard-tests-cli",
+                  "wildcard-batch-cli"
+                ]
+              },
               "x-stage": "permutation"
             }
           },
           "required": [
             "subdomain-permutation-resolve"
-          ]
+          ],
+          "additionalProperties": false
         }
       },
       "required": [
         "enabled",
         "tools"
-      ]
+      ],
+      "additionalProperties": false
     },
     "recon": {
       "type": "object",
@@ -166,8 +209,26 @@
                 }
               },
               "required": [
-                "timeout-runtime"
+                "enabled"
               ],
+              "additionalProperties": false,
+              "if": {
+                "type": "object",
+                "properties": {
+                  "enabled": {
+                    "const": true
+                  }
+                },
+                "required": [
+                  "enabled"
+                ]
+              },
+              "then": {
+                "type": "object",
+                "required": [
+                  "timeout-runtime"
+                ]
+              },
               "x-stage": "recon"
             },
             "subfinder": {
@@ -188,9 +249,27 @@
                 }
               },
               "required": [
-                "timeout-runtime",
-                "threads-cli"
+                "enabled"
               ],
+              "additionalProperties": false,
+              "if": {
+                "type": "object",
+                "properties": {
+                  "enabled": {
+                    "const": true
+                  }
+                },
+                "required": [
+                  "enabled"
+                ]
+              },
+              "then": {
+                "type": "object",
+                "required": [
+                  "timeout-runtime",
+                  "threads-cli"
+                ]
+              },
               "x-stage": "recon"
             },
             "sublist3r": {
@@ -211,9 +290,27 @@
                 }
               },
               "required": [
-                "timeout-runtime",
-                "threads-cli"
+                "enabled"
               ],
+              "additionalProperties": false,
+              "if": {
+                "type": "object",
+                "properties": {
+                  "enabled": {
+                    "const": true
+                  }
+                },
+                "required": [
+                  "enabled"
+                ]
+              },
+              "then": {
+                "type": "object",
+                "required": [
+                  "timeout-runtime",
+                  "threads-cli"
+                ]
+              },
               "x-stage": "recon"
             }
           },
@@ -221,13 +318,15 @@
             "assetfinder",
             "subfinder",
             "sublist3r"
-          ]
+          ],
+          "additionalProperties": false
         }
       },
       "required": [
         "enabled",
         "tools"
-      ]
+      ],
+      "additionalProperties": false
     },
     "resolve": {
       "type": "object",
@@ -261,22 +360,42 @@
                 }
               },
               "required": [
-                "timeout-runtime",
-                "threads-cli",
-                "rate-limit-cli"
+                "enabled"
               ],
+              "additionalProperties": false,
+              "if": {
+                "type": "object",
+                "properties": {
+                  "enabled": {
+                    "const": true
+                  }
+                },
+                "required": [
+                  "enabled"
+                ]
+              },
+              "then": {
+                "type": "object",
+                "required": [
+                  "timeout-runtime",
+                  "threads-cli",
+                  "rate-limit-cli"
+                ]
+              },
               "x-stage": "resolve"
             }
           },
           "required": [
             "subdomain-resolve"
-          ]
+          ],
+          "additionalProperties": false
         }
       },
       "required": [
         "enabled",
         "tools"
-      ]
+      ],
+      "additionalProperties": false
     }
   },
   "required": [
