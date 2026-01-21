@@ -432,7 +432,7 @@ func TestCommandGeneration_Sublist3r(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.Contains(t, cmd, "python3")
-	assert.Contains(t, cmd, "Sublist3r/sublist3r.py")
+	assert.Contains(t, cmd, "/opt/orbit-tools/share/Sublist3r/sublist3r.py")
 	assert.Contains(t, cmd, "-d example.com")
 	assert.Contains(t, cmd, "-o \"/tmp/output.txt\"")
 	assert.Contains(t, cmd, "-t 10")

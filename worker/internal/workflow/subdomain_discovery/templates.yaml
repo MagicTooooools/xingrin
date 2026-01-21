@@ -129,7 +129,7 @@ tools:
       description: Collect subdomains using multiple search engines
       stage: recon
 
-    base_command: python3 '/usr/local/share/Sublist3r/sublist3r.py' -d {{.Domain}} -o {{quote .OutputFile}}
+    base_command: python3 '/opt/orbit-tools/share/Sublist3r/sublist3r.py' -d {{.Domain}} -o {{quote .OutputFile}}
     runtime_params:
       - semantic_id: timeout-runtime
         var: Timeout

@@ -1,5 +1,5 @@
-# Go 后端开发环境依赖
-# 启动: docker compose -f docker-compose.dev.yml up -d
+# Go 后端开发环境
+# 启动: docker compose -f docker-compose.dev.yml up -d --build
 # 停止: docker compose -f docker-compose.dev.yml down
 
 services:
@@ -30,6 +30,44 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - 8888:8888
+    environment:
+      # Server
+      SERVER_PORT: 8888
+      GIN_MODE: debug
+
+      # Database
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_NAME: orbit
+      DB_SSLMODE: disable
+
+      # Redis
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+
+      # Storage
+      WORDLISTS_BASE_PATH: /opt/orbit/wordlists
+
+      # Auth
+      WORKER_TOKEN: change-me-worker-token
+      JWT_SECRET: change-me-in-production-use-a-long-random-string
+    volumes:
+      - /opt/orbit:/opt/orbit
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
 volumes:
   postgres_data:

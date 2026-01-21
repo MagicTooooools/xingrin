@@ -1,3 +1,8 @@
+# LEGACY NOTICE
+#
+# This Dockerfile builds the *legacy* Python executor image from the old stack.
+# For the Go Worker image (new architecture), use: worker/Dockerfile
+#
 # 第一阶段：使用 Go 官方镜像编译工具
 FROM golang:1.24 AS go-builder
 
