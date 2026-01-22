@@ -232,7 +232,7 @@ export function DashboardDataTable() {
           cancelled: t('common.status.cancelled'),
           completed: t('common.status.completed'),
           failed: t('common.status.failed'),
-          initiated: t('common.status.pending'),
+          pending: t('common.status.pending'),
           running: t('common.status.running'),
         },
         summary: {

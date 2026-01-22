@@ -181,7 +181,7 @@ export const mockScans: ScanRecord[] = [
     engineNames: ['Subdomain Discovery', 'Web Crawling'],
     scanMode: 'full',
     createdAt: '2024-12-29T10:30:00Z',
-    status: 'initiated',
+    status: 'pending',
     progress: 0,
   },
   {

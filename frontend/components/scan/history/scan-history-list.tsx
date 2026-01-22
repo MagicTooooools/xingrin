@@ -83,7 +83,7 @@ export function ScanHistoryList({ hideToolbar = false, targetId, pageSize: custo
       cancelled: tCommon("status.cancelled"),
       completed: tCommon("status.completed"),
       failed: tCommon("status.failed"),
-      initiated: tCommon("status.pending"),
+      pending: tCommon("status.pending"),
       running: tCommon("status.running"),
     },
     summary: {

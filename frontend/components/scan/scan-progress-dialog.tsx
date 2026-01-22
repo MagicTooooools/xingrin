@@ -94,7 +94,7 @@ function ScanStatusIcon({ status }: { status: string }) {
       return <IconCircleX className="h-5 w-5 text-[#848d97]" />
     case "failed":
       return <IconCircleX className="h-5 w-5 text-[#da3633] dark:text-[#f85149]" />
-    case "initiated":
+    case "pending":
       return <PulsingDot className="text-[#d29922]" />
     default:
       return <PulsingDot className="text-muted-foreground" />

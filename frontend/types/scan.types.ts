@@ -2,7 +2,7 @@
  * Scan task status enum
  * Consistent with backend ScanStatus
  */
-export type ScanStatus = "cancelled" | "completed" | "failed" | "initiated" | "running"
+export type ScanStatus = "pending" | "running" | "completed" | "failed" | "cancelled"
 
 /**
  * Scan stage (dynamic, from engine_config key)

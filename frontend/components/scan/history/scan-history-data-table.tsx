@@ -94,7 +94,7 @@ export function ScanHistoryDataTable({
     { value: "running", label: t("running") },
     { value: "completed", label: t("completed") },
     { value: "failed", label: t("failed") },
-    { value: "initiated", label: t("pending") },
+    { value: "pending", label: t("pending") },
     { value: "cancelled", label: t("cancelled") },
   ]
 

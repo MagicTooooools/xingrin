@@ -104,7 +104,6 @@ const SCAN_STATUS_STYLES: Record<string, string> = {
   cancelled: "bg-[#848d97]/10 text-[#848d97] border-[#848d97]/20",
   completed: "bg-[#238636]/10 text-[#238636] border-[#238636]/20 dark:text-[#3fb950]",
   failed: "bg-[#da3633]/10 text-[#da3633] border-[#da3633]/20 dark:text-[#f85149]",
-  initiated: "bg-[#d29922]/10 text-[#d29922] border-[#d29922]/20",
   pending: "bg-[#d29922]/10 text-[#d29922] border-[#d29922]/20",
 }
 
@@ -155,7 +154,6 @@ function getStatusIcon(status: string) {
     case "cancelled":
       return { icon: XCircle, animate: false }
     case "pending":
-    case "initiated":
       return { icon: Loader2, animate: true }
     default:
       return { icon: Clock, animate: false }
@@ -172,7 +170,7 @@ export function ScanOverview({ scanId }: ScanOverviewProps) {
 
   // Memoize isRunning to avoid unnecessary recalculations
   const isRunning = React.useMemo(
-    () => scan?.status === 'running' || scan?.status === 'initiated',
+    () => scan?.status === 'running' || scan?.status === 'pending',
     [scan?.status]
   )
 

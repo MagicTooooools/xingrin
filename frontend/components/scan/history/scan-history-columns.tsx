@@ -65,7 +65,7 @@ export interface ScanHistoryTranslations {
     cancelled: string
     completed: string
     failed: string
-    initiated: string
+    pending: string
     running: string
   }
   summary: {
@@ -109,7 +109,7 @@ function StatusBadge({
       variant: "outline",
       className: "bg-[#da3633]/10 text-[#da3633] border-[#da3633]/20 hover:bg-[#da3633]/20 dark:text-[#f85149] transition-colors",
     },
-    initiated: {
+    pending: {
       icon: IconClock,
       variant: "outline",
       className: "bg-[#d29922]/10 text-[#d29922] border-[#d29922]/20 hover:bg-[#d29922]/20 transition-colors",
@@ -126,7 +126,7 @@ function StatusBadge({
 
   const badge = (
     <Badge variant={variant} className={className}>
-      {(status === "running" || status === "initiated") ? (
+      {(status === "running" || status === "pending") ? (
         <span className="relative flex h-2 w-2">
           <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-current opacity-75" />
           <span className="relative inline-flex h-2 w-2 rounded-full bg-current" />
@@ -490,7 +490,7 @@ export const createScanHistoryColumns = ({
                 status === "failed" ? "bg-[#da3633]" : 
                 status === "running" ? "bg-[#d29922] progress-striped" : 
                 status === "cancelled" ? "bg-[#848d97]" :
-                status === "initiated" ? "bg-[#d29922] progress-striped" :
+                status === "pending" ? "bg-[#d29922] progress-striped" :
                 "bg-muted-foreground/80"
               }`}
               style={{ width: `${displayProgress}%` }}
@@ -512,7 +512,7 @@ export const createScanHistoryColumns = ({
     enableResizing: false,
     cell: ({ row }) => {
       const scan = row.original
-      const canStop = scan.status === 'running' || scan.status === 'initiated'
+      const canStop = scan.status === 'running' || scan.status === 'pending'
       
       return (
         <div className="flex items-center gap-1">
