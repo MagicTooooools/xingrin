@@ -1,0 +1,300 @@
+openapi: 3.0.3
+info:
+  title: Agent Management API
+  description: HTTP API for managing Agents (for Web UI / Admin)
+  version: 1.0.0
+
+servers:
+  - url: https://{server}/api
+    description: Server API endpoint
+
+security:
+  - BearerAuth: []
+
+paths:
+  /agents:
+    post:
+      summary: Create a new Agent
+      description: Creates a new Agent record and generates an API Key
+      operationId: createAgent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAgentRequest'
+      responses:
+        '201':
+          description: Agent created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateAgentResponse'
+        '400':
+          description: Invalid request
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    get:
+      summary: List all Agents
+      description: Returns a paginated list of all Agents
+      operationId: listAgents
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [pending, online, offline]
+      responses:
+        '200':
+          description: List of Agents
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /agents/{id}:
+    get:
+      summary: Get Agent by ID
+      operationId: getAgent
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Agent details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentResponse'
+        '404':
+          description: Agent not found
+
+    delete:
+      summary: Delete Agent
+      operationId: deleteAgent
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Agent deleted
+        '404':
+          description: Agent not found
+
+  /agents/{id}/config:
+    put:
+      summary: Update Agent configuration
+      description: Update scheduling configuration (maxTasks, thresholds)
+      operationId: updateAgentConfig
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateAgentConfigRequest'
+      responses:
+        '200':
+          description: Configuration updated
+        '404':
+          description: Agent not found
+
+  /agents/{id}/regenerate-key:
+    post:
+      summary: Regenerate Agent API Key
+      description: Generates a new API Key for the Agent (old key becomes invalid)
+      operationId: regenerateAgentKey
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: New API Key generated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  apiKey:
+                    type: string
+        '404':
+          description: Agent not found
+
+  /agents/install.sh:
+    get:
+      summary: Get installation script
+      description: |
+        Returns a bash script for one-click Agent installation.
+        The script embeds `SERVER_URL` derived by:
+        1) `PUBLIC_URL` config if set; otherwise
+        2) the request URL (Host/Proto/Port).
+      operationId: getInstallScript
+      parameters:
+        - name: key
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Agent API Key (embedded in script)
+      responses:
+        '200':
+          description: Installation script
+          content:
+            text/plain:
+              schema:
+                type: string
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    CreateAgentRequest:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          description: User-defined name for the Agent
+          example: "vps-us-east-1"
+
+    CreateAgentResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: "vps-us-east-1"
+        apiKey:
+          type: string
+          description: Generated API Key (only shown once)
+          example: "agent_abc123def456..."
+        status:
+          type: string
+          enum: [pending]
+          example: "pending"
+        installCommand:
+          type: string
+          description: One-click install command
+          example: "curl -sSL https://server/api/agents/install.sh?key=agent_abc123 | bash"
+        installScriptUrl:
+          type: string
+          description: URL to download install script
+          example: "https://server/api/agents/install.sh?key=agent_abc123"
+        createdAt:
+          type: string
+          format: date-time
+
+    AgentResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        status:
+          type: string
+          enum: [pending, online, offline]
+        hostname:
+          type: string
+        ipAddress:
+          type: string
+        version:
+          type: string
+        maxTasks:
+          type: integer
+        cpuThreshold:
+          type: integer
+        memThreshold:
+          type: integer
+        diskThreshold:
+          type: integer
+        connectedAt:
+          type: string
+          format: date-time
+        lastHeartbeat:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+
+    AgentListResponse:
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/AgentResponse'
+        total:
+          type: integer
+        page:
+          type: integer
+        pageSize:
+          type: integer
+
+    UpdateAgentConfigRequest:
+      type: object
+      properties:
+        maxTasks:
+          type: integer
+          minimum: 1
+          maximum: 20
+        cpuThreshold:
+          type: integer
+          minimum: 1
+          maximum: 100
+        memThreshold:
+          type: integer
+          minimum: 1
+          maximum: 100
+        diskThreshold:
+          type: integer
+          minimum: 1
+          maximum: 100
+
+  responses:
+    Unauthorized:
+      description: Authentication required
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+          example:
+            error: "Authorization header required"
