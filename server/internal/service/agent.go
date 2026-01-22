@@ -15,10 +15,10 @@ var (
 
 // validTransitions defines allowed status transitions
 // key: current status, value: allowed next statuses
+// Status flow: pending → running → completed/failed/cancelled
 var validTransitions = map[string][]string{
-	model.ScanStatusPending:   {model.ScanStatusScheduled, model.ScanStatusCancelled},
-	model.ScanStatusScheduled: {model.ScanStatusRunning, model.ScanStatusCancelled},
-	model.ScanStatusRunning:   {model.ScanStatusCompleted, model.ScanStatusFailed, model.ScanStatusCancelled},
+	model.ScanStatusPending: {model.ScanStatusRunning, model.ScanStatusCancelled},
+	model.ScanStatusRunning: {model.ScanStatusCompleted, model.ScanStatusFailed, model.ScanStatusCancelled},
 	// Terminal states: no transitions allowed
 	model.ScanStatusCompleted: {},
 	model.ScanStatusFailed:    {},

@@ -1,50 +1,165 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+<!--
+同步影响报告:
+版本: 0.0.0 → 1.0.0
+理由: 为 Orbit 项目创建初始宪法
+修改的原则: 无（初始创建）
+新增部分:
+  - 核心原则（5 个原则）
+  - 开发标准
+  - 质量门禁
+  - 治理规则
+模板状态:
+  - plan-template.md: ✅ 已包含宪法检查部分
+  - spec-template.md: ✅ 无需修改
+  - tasks-template.md: ⚠ 待验证
+后续待办: 无
+-->
 
-## Core Principles
+# Orbit 项目宪法
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+## 核心原则
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+### 一、简单性优先
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+**每个功能都从最简单可行的实现开始。**
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+- 必须每个组件使用单一语言（后端用 Go，前端用 TypeScript）
+- 必须最小化外部依赖 - 优先使用标准库
+- 必须避免过度工程 - 只实现当前需要的，而非可能需要的
+- 必须使用标准模式 - REST API、WebSocket、SQL - 不使用奇特架构
+- 应该拒绝无法用具体需求证明合理性的复杂度
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+**理由**: 复杂性是安全性、可维护性和开发速度的敌人。简单的系统更容易理解、测试和保护。
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+### 二、清晰的架构边界
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+**组件必须有明确定义的职责和接口。**
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+- 必须保持层级之间的清晰分离（Agent / Server / Worker）
+- 必须尽可能设计无状态组件 - 状态属于数据库
+- 必须确保操作幂等性 - 重试必须是安全的
+- 必须定义组件之间的显式契约（API 规范、消息协议）
+- 应该避免紧耦合 - 组件仅通过定义的接口通信
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+**理由**: 清晰的边界使独立开发、测试和部署成为可能。它们防止级联故障，使系统更容易推理。
 
-## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
+### 三、安全设计
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+**安全不是可选的，也无法事后补救。**
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+- 必须在系统边界验证所有外部输入（用户输入、API 请求）
+- 必须使用参数化查询 - 禁止 SQL/命令的字符串拼接
+- 必须为所有敏感操作实现认证和授权
+- 必须加密传输中的敏感数据（TLS/WSS）和适当的静态数据
+- 必须记录安全事件（认证失败、授权拒绝）
+- 应该遵循 OWASP Top 10 Web 应用指南
+- 应该在合并高风险变更前进行安全审查
+
+**理由**: 攻击面管理平台的安全漏洞是不可接受的。我们必须言行一致。
+
+### 四、测试驱动质量
+
+**没有测试的代码从第一天起就是遗留代码。**
+
+- 必须为所有业务逻辑和关键路径编写测试
+- 必须确保集成测试覆盖组件交互
+- 必须验证边缘情况和错误条件
+- 应该为新功能争取 >80% 的代码覆盖率
+- 应该为 API 边界使用契约测试
+- 测试必须快速（完整套件 <5 分钟）且确定性
+
+**理由**: 测试是可执行的文档和安全网。它们使自信的重构成为可能，并防止回归。
+
+### 五、运维卓越
+
+**系统必须可观测、可调试、可恢复。**
+
+- 必须实现结构化日志，使用适当的级别（debug/info/warn/error）
+- 必须为所有服务暴露健康检查端点
+- 必须设计优雅降级 - 部分故障不应级联
+- 必须为瞬态故障实现指数退避的重试逻辑
+- 必须记录部署流程和回滚计划
+- 应该暴露监控指标（任务队列深度、成功率、延迟）
+
+**理由**: 生产问题不可避免。我们必须能够快速检测、诊断和恢复。
+
+## 开发标准
+
+### 代码质量
+
+- 必须通过代码检查和格式化检查（gofmt、golangci-lint）
+- 必须有清晰、自文档化的代码 - 注释解释"为什么"，而非"是什么"
+- 必须使用有意义的命名 - 除循环计数器外不使用单字母变量
+- 应该保持函数小巧（<50 行）并专注于单一职责
+- 应该避免过早优化 - 先测量再优化
+
+### 版本控制
+
+- 必须使用语义化版本（MAJOR.MINOR.PATCH）
+- 必须遵循约定式提交格式编写清晰的提交消息
+- 必须保持提交原子性 - 每次提交一个逻辑变更
+- 必须在适用时在提交中引用问题/工单号
+- 应该在合并到主分支前压缩功能分支提交
+
+### 文档
+
+- 必须记录所有公共 API（OpenAPI/Swagger 规范）
+- 必须维护包含设置说明的最新 README
+- 必须为重要决策记录架构决策记录（ADR）
+- 应该在 API 文档中包含示例
+- 应该将文档放在代码附近（内联文档、同位置 markdown）
+
+## 质量门禁
+
+### 实施前
+
+- [ ] 功能规范已批准（spec.md 完成）
+- [ ] 实施计划已审查（plan.md 完成）
+- [ ] 宪法合规性已验证（无违规或已证明合理）
+- [ ] 依赖和风险已识别
+
+### 合并前
+
+- [ ] 所有测试通过（单元、集成、契约）
+- [ ] 至少一位维护者批准代码审查
+- [ ] 代码检查和格式化检查通过
+- [ ] 文档已更新（API 规范、README、ADR）
+- [ ] 未引入安全漏洞（静态分析、依赖扫描）
+
+### 部署前
+
+- [ ] 预发布环境验证完成
+- [ ] 性能基准在可接受范围内
+- [ ] 回滚计划已记录并测试
+- [ ] 监控和告警已配置
+
+## 治理规则
+
+### 宪法权威
+
+本宪法在项目范围内是**不可协商的**。所有代码、设计和决策都必须遵守这些原则。
+
+### 修订流程
+
+1. 通过 GitHub issue 提出修订建议并说明理由
+2. 与团队讨论并收集反馈（至少 3 天）
+3. 需要项目维护者批准（多数票）
+4. 使用新版本号更新宪法（语义化版本）
+5. 更新所有依赖的模板和文档
+6. 向所有贡献者宣布变更
+
+### 合规审查
+
+- 所有拉取请求必须验证宪法合规性
+- 违规必须以书面形式证明合理性（plan.md 中的复杂度跟踪部分）
+- 未证明合理的违规必须被拒绝
+- 重复违规触发架构审查
+
+### 复杂度预算
+
+- 最多 3 个后端服务（当前：Server、Agent、Worker）
+- 每个服务最多 5 个外部依赖（不包括标准库）
+- 每个功能最多 3 个数据库表（除非数据模型需要更多）
+- 超出预算需要书面证明合理性并获得批准
+
+**版本**: 1.0.0 | **批准日期**: 2026-01-22 | **最后修订**: 2026-01-22

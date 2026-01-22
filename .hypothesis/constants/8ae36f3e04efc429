@@ -1,0 +1,4 @@
+# file: /Users/yangyang/Desktop/xingrin/backend/apps/asset/repositories/asset/directory_repository.py
+# hypothesis_version: 6.150.0
+
+[1000, '-created_at', 'content_length', 'content_type', 'created_at', 'duration', 'lines', 'status', 'target', 'url', 'words']

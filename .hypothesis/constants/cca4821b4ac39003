@@ -1,0 +1,4 @@
+# file: /Users/yangyang/Desktop/xingrin/backend/apps/common/models/blacklist.py
+# hypothesis_version: 6.150.0
+
+[255, 500, '-created_at', 'CIDR范围', 'IP地址', 'Target规则', 'blacklist_rule', 'blacklist_rules', 'cidr', 'domain', 'global', 'ip', 'keyword', 'pattern', 'rule_type', 'scope', 'target', 'targets.Target', '作用域：global 或 target', '全局规则', '关键词', '域名', '规则描述']

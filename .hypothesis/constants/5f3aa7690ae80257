@@ -1,0 +1,4 @@
+# file: /Users/yangyang/Desktop/xingrin/backend/config/logging_config.py
+# hypothesis_version: 6.150.0
+
+[100, 1024, '%Y-%m-%d %H:%M:%S', '()', 'CRITICAL', 'DEBUG', 'ERROR', 'INFO', 'LOG_DIR', 'LOG_LEVEL', 'WARNING', 'apps.asset', 'apps.common', 'apps.engine', 'apps.scan', 'apps.targets', 'apscheduler', 'asyncio', 'backupCount', 'class', 'colored', 'console', 'cyan', 'datefmt', 'django', 'django.db.backends', 'django.request', 'django.server', 'encoding', 'error_file', 'ext://sys.stdout', 'file', 'filename', 'format', 'formatter', 'formatters', 'graphviz', 'graphviz._tools', 'green', 'handlers', 'httpcore', 'httpcore.connection', 'httpcore.http11', 'httpx', 'json', 'level', 'log_colors', 'loggers', 'maxBytes', 'performance', 'performance.log', 'performance_file', 'prefect', 'propagate', 'red', 'red,bg_white', 'root', 'standard', 'stream', 'urllib3', 'utf-8', 'version', 'websockets', 'websockets.client', 'xingrin.log', 'xingrin_error.log', 'yellow']

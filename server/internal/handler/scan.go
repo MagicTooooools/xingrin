@@ -181,8 +181,22 @@ func (h *ScanHandler) Create(c *gin.Context) {
 			dto.BadRequest(c, "targetId is required for normal mode")
 			return
 		}
-		// TODO: Implement when worker integration is ready
-		dto.Error(c, http.StatusNotImplemented, "NOT_IMPLEMENTED", "Normal scan is not yet implemented")
+
+		scan, err := h.service.CreateNormal(&req)
+		if err != nil {
+			if errors.Is(err, service.ErrTargetNotFound) {
+				dto.NotFound(c, "Target not found")
+				return
+			}
+			if errors.Is(err, service.ErrScanInvalidConfig) || errors.Is(err, service.ErrScanInvalidEngineNames) {
+				dto.BadRequest(c, err.Error())
+				return
+			}
+			dto.InternalError(c, "Failed to create scan")
+			return
+		}
+
+		dto.Created(c, h.service.ToScanDetailResponse(scan))
 
 	case "quick":
 		// Quick scan: requires targets list

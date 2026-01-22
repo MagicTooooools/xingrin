@@ -1,0 +1,4 @@
+# file: /Users/yangyang/Desktop/xingrin/backend/apps/asset/services/asset/host_port_mapping_service.py
+# hypothesis_version: 6.150.0
+
+[1000, '-created_at', 'created_at', 'host', 'hosts', 'ip', 'port', 'ports']

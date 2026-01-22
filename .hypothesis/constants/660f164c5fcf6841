@@ -1,0 +1,4 @@
+# file: /Users/yangyang/Desktop/xingrin/backend/apps/asset/repositories/statistics_repository.py
+# hypothesis_version: 6.150.0
+
+['date', 'total_assets', 'total_endpoints', 'total_ips', 'total_subdomains', 'total_targets', 'total_vulns', 'total_websites', '创建', '更新']

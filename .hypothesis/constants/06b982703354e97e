@@ -1,0 +1,4 @@
+# file: /Users/yangyang/Desktop/xingrin/backend/apps/asset/services/snapshot/host_port_mapping_snapshots_service.py
+# hypothesis_version: 6.150.0
+
+[1000, '保存主机端口关联快照 - 数量: %d', '快照数据为空，跳过保存', '步骤 1: 保存到快照表']

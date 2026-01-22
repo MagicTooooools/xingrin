@@ -1,0 +1,4 @@
+# file: /Users/yangyang/Desktop/xingrin/backend/apps/asset/services/snapshot/website_snapshots_service.py
+# hypothesis_version: 6.150.0
+
+[1000, 'host', 'status_code', 'tech', 'title', 'url', 'webserver', '步骤 1: 保存到快照表']

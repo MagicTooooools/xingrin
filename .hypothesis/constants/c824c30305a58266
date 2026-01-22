@@ -1,0 +1,4 @@
+# file: /Users/yangyang/Desktop/xingrin/backend/apps/scan/notifications/receivers.py
+# hypothesis_version: 6.150.0
+
+['Worker 删除警告', 'critical', 'high', 'low', 'medium', 'unknown', '未知目标', '系统负载较高']

@@ -1,0 +1,4 @@
+# file: /Users/yangyang/Desktop/xingrin/backend/apps/scan/models/scan_models.py
+# hypothesis_version: 6.150.0
+
+[100, 2000, '-created_at', 'IP地址数量', 'YAML 格式的扫描配置', 'deleted_at', 'engine.WorkerNode', 'full', 'quick', 'scan', 'scans', 'target', 'targets.Target', '严重漏洞数量', '中危漏洞数量', '任务创建时间', '任务状态', '低危漏洞数量', '删除时间（NULL表示未删除）', '各阶段进度详情', '子域名数量', '完整扫描', '引擎 ID 列表', '当前扫描阶段', '快速扫描', '截图数量', '执行扫描的 Worker 节点', '扫描任务', '扫描目标', '扫描结束时间', '扫描进度 0-100', '漏洞总数', '目录数量', '端点数量', '结果存储目录', '统计数据最后更新时间', '网站数量', '错误信息', '高危漏洞数量']

@@ -1,0 +1,4 @@
+# file: /Users/yangyang/Desktop/xingrin/backend/apps/targets/models.py
+# hypothesis_version: 6.150.0
+
+[300, 1000, '-created_at', 'CIDR范围', 'IP地址', 'Target', 'cidr', 'deleted_at', 'domain', 'ip', 'name', 'organization', 'organizations', 'target', 'type', '创建时间', '删除时间（NULL表示未删除）', '域名', '所属目标列表', '扫描目标', '最后扫描时间', '目标标识（域名/IP/CIDR）', '目标类型', '组织', '组织名称', '组织描述']

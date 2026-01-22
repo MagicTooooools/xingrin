@@ -30,6 +30,25 @@ func (r *ScanRepository) Create(scan *model.Scan) error {
 	return r.db.Create(scan).Error
 }
 
+// CreateWithInputTargets creates a scan and associated scan_input_target rows in a single transaction.
+func (r *ScanRepository) CreateWithInputTargets(scan *model.Scan, inputs []model.ScanInputTarget) error {
+	return r.db.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Create(scan).Error; err != nil {
+			return err
+		}
+		if len(inputs) == 0 {
+			return nil
+		}
+		for i := range inputs {
+			inputs[i].ScanID = scan.ID
+		}
+		if err := tx.Create(&inputs).Error; err != nil {
+			return err
+		}
+		return nil
+	})
+}
+
 // FindByID finds a scan by ID (excluding soft deleted)
 func (r *ScanRepository) FindByID(id int) (*model.Scan, error) {
 	var scan model.Scan

@@ -1,0 +1,4 @@
+# file: /Users/yangyang/Desktop/xingrin/backend/apps/engine/models/fingerprints.py
+# hypothesis_version: 6.150.0
+
+[100, 200, 300, 500, '-', '-created_at', 'ARL 指纹', 'CPE 标识符', 'Cookie 检测规则', 'EHole 指纹', 'FingerPrintHub 指纹', 'Fingers 指纹', 'Goby 指纹', 'HTML meta 标签检测规则', 'HTML 内容正则数组', 'HTTP Header 检测规则', 'HTTP 匹配规则', 'JavaScript 变量检测规则', 'Wappalyzer 指纹', 'arl_fingerprint', 'author', 'body', 'cms', 'cpe', 'ehole_fingerprint', 'fingers_fingerprint', 'focus', 'fp_id', 'goby_fingerprint', 'info', 'is_important', 'keyword', 'link', 'location', 'logic', 'method', 'name', 'severity', 'type', 'website', '严重程度', '产品/CMS名称', '产品名称', '作者', '依赖关系数组', '元数据', '关键词列表', '分类', '分类 ID 数组', '匹配位置', '匹配方式', '匹配规则数组', '匹配规则表达式', '官网链接', '应用名称', '应用描述', '指纹ID', '指纹名称', '是否重点关注', '是否重点资产', '来源文件', '标签', '标签数组', '相关链接', '脚本 URL 正则数组', '规则数组', '逻辑表达式', '默认端口数组']

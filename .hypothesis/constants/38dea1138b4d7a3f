@@ -1,0 +1,4 @@
+# file: /Users/yangyang/Desktop/xingrin/backend/apps/asset/models/screenshot_models.py
+# hypothesis_version: 6.150.0
+
+['-created_at', 'HTTP 响应状态码', 'scan', 'scan.Scan', 'screenshot', 'screenshot_snapshot', 'screenshot_snapshots', 'screenshots', 'target', 'targets.Target', 'url', '创建时间', '截图', '截图 WebP 二进制数据（压缩后）', '截图对应的 URL', '截图快照', '所属的扫描任务', '所属目标', '更新时间']

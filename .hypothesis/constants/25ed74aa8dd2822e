@@ -1,0 +1,4 @@
+# file: /Users/yangyang/Desktop/xingrin/backend/apps/scan/providers/snapshot_provider.py
+# hypothesis_version: 6.150.0
+
+[443, 1000, 'host', 'port']

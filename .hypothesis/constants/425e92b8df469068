@@ -1,0 +1,4 @@
+# file: /Users/yangyang/Desktop/xingrin/backend/apps/scan/models/scheduled_scan_model.py
+# hypothesis_version: 6.150.0
+
+[100, 200, '-created_at', '0 2 * * *', 'YAML 格式的扫描配置', 'is_enabled', 'name', 'scheduled_scan', 'scheduled_scans', 'targets.Organization', 'targets.Target', '上次执行时间', '下次执行时间', '任务名称', '创建时间', '定时扫描任务', '已执行次数', '引擎 ID 列表', '是否启用', '更新时间']

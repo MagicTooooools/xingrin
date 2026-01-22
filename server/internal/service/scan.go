@@ -3,17 +3,25 @@ package service
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
+	"io/fs"
+	"slices"
+	"strings"
 
 	"github.com/orbit/server/internal/dto"
+	"github.com/orbit/server/internal/engineschema"
 	"github.com/orbit/server/internal/model"
 	"github.com/orbit/server/internal/repository"
 	"gorm.io/gorm"
+	"gopkg.in/yaml.v3"
 )
 
 var (
-	ErrScanNotFound     = errors.New("scan not found")
-	ErrScanCannotStop   = errors.New("scan cannot be stopped in current status")
-	ErrNoTargetsForScan = errors.New("no targets provided for scan")
+	ErrScanNotFound           = errors.New("scan not found")
+	ErrScanCannotStop         = errors.New("scan cannot be stopped in current status")
+	ErrNoTargetsForScan       = errors.New("no targets provided for scan")
+	ErrScanInvalidConfig      = errors.New("invalid scan configuration")
+	ErrScanInvalidEngineNames = errors.New("invalid engineNames")
 )
 
 // ScanService handles scan business logic
@@ -107,8 +115,8 @@ func (s *ScanService) Stop(id int) (int, error) {
 		return 0, err
 	}
 
-	// Check if scan can be stopped
-	if scan.Status != model.ScanStatusRunning && scan.Status != model.ScanStatusPending && scan.Status != model.ScanStatusScheduled {
+	// Check if scan can be stopped (only pending or running can be stopped)
+	if scan.Status != model.ScanStatusRunning && scan.Status != model.ScanStatusPending {
 		return 0, ErrScanCannotStop
 	}
 
@@ -120,6 +128,138 @@ func (s *ScanService) Stop(id int) (int, error) {
 	// TODO: Revoke celery tasks when worker integration is implemented
 	// For now, just return 0 revoked tasks
 	return 0, nil
+}
+
+func normalizeEngineNames(engineNames []string) ([]string, error) {
+	if len(engineNames) == 0 {
+		return nil, nil
+	}
+
+	cleaned := make([]string, 0, len(engineNames))
+	for _, name := range engineNames {
+		n := strings.TrimSpace(name)
+		if n == "" {
+			continue
+		}
+		cleaned = append(cleaned, n)
+	}
+
+	// Deduplicate while preserving order
+	seen := map[string]bool{}
+	unique := make([]string, 0, len(cleaned))
+	for _, name := range cleaned {
+		if seen[name] {
+			continue
+		}
+		seen[name] = true
+		unique = append(unique, name)
+	}
+
+	if slices.Contains(unique, "") {
+		return nil, ErrScanInvalidEngineNames
+	}
+
+	return unique, nil
+}
+
+func parseYAMLMapping(b []byte) (map[string]any, error) {
+	var root map[string]any
+	if err := yaml.Unmarshal(b, &root); err != nil {
+		return nil, err
+	}
+	return root, nil
+}
+
+// CreateNormal creates a scan record for an existing target (create-only, no scheduling).
+// It validates the configuration YAML, and validates known engines (those with embedded schemas).
+func (s *ScanService) CreateNormal(req *dto.CreateScanRequest) (*model.Scan, error) {
+	if req == nil {
+		return nil, ErrScanInvalidConfig
+	}
+	if req.TargetID == 0 {
+		return nil, ErrTargetNotFound
+	}
+
+	configYAML := strings.TrimSpace(req.Configuration)
+	if configYAML == "" {
+		return nil, ErrScanInvalidConfig
+	}
+
+	root, err := parseYAMLMapping([]byte(configYAML))
+	if err != nil {
+		return nil, fmt.Errorf("%w: parse yaml: %v", ErrScanInvalidConfig, err)
+	}
+	if root == nil {
+		return nil, fmt.Errorf("%w: yaml must be a mapping", ErrScanInvalidConfig)
+	}
+
+	engineNames, err := normalizeEngineNames(req.EngineNames)
+	if err != nil {
+		return nil, err
+	}
+
+	// Validate known engines.
+	candidates := engineNames
+	if len(candidates) == 0 {
+		for k := range root {
+			candidates = append(candidates, k)
+		}
+	}
+	for _, engine := range candidates {
+		engine = strings.TrimSpace(engine)
+		if engine == "" {
+			continue
+		}
+		if err := engineschema.ValidateYAML(engine, []byte(configYAML)); err != nil {
+			// If schema doesn't exist yet for this engine, skip validation.
+			if errors.Is(err, fs.ErrNotExist) {
+				continue
+			}
+			return nil, fmt.Errorf("%w: %s: %v", ErrScanInvalidConfig, engine, err)
+		}
+	}
+
+	// Ensure target exists.
+	target, err := s.targetRepo.FindByID(req.TargetID)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, ErrTargetNotFound
+		}
+		return nil, err
+	}
+
+	// Prepare scan payload.
+	engineNamesJSON, err := json.Marshal(engineNames)
+	if err != nil {
+		return nil, err
+	}
+
+	engineIDs := make([]int64, 0, len(req.EngineIDs))
+	for _, id := range req.EngineIDs {
+		engineIDs = append(engineIDs, int64(id))
+	}
+
+	scan := &model.Scan{
+		TargetID:          req.TargetID,
+		EngineIDs:         engineIDs,
+		EngineNames:       engineNamesJSON,
+		YamlConfiguration: configYAML,
+		ScanMode:          model.ScanModeFull,
+		Status:            model.ScanStatusPending,
+	}
+
+	inputs := []model.ScanInputTarget{{
+		Value:     target.Name,
+		InputType: target.Type,
+	}}
+	if err := s.repo.CreateWithInputTargets(scan, inputs); err != nil {
+		return nil, err
+	}
+
+	// Attach target for response shaping.
+	scan.Target = target
+
+	return scan, nil
 }
 
 // ToScanResponse converts scan model to response DTO

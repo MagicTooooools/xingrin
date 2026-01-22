@@ -1,0 +1,4 @@
+# file: /Users/yangyang/Desktop/xingrin/backend/apps/engine/apps.py
+# hypothesis_version: 6.150.0
+
+['RUN_MAIN', 'SERVER_URL', 'apps.engine', 'runserver', 'true', '扫描引擎']

@@ -16,11 +16,11 @@ type Scan struct {
 	EngineNames       datatypes.JSON `gorm:"column:engine_names;type:jsonb" json:"engineNames"`
 	YamlConfiguration string         `gorm:"column:yaml_configuration;type:text" json:"yamlConfiguration"`
 	ScanMode          string         `gorm:"column:scan_mode;size:10;default:'full'" json:"scanMode"`
-	Status            string         `gorm:"column:status;size:20;default:'initiated';index:idx_scan_status" json:"status"`
+	Status            string         `gorm:"column:status;size:20;default:'pending';index:idx_scan_status" json:"status"`
 	ResultsDir        string         `gorm:"column:results_dir;size:100" json:"resultsDir"`
 	ContainerIDs      pq.StringArray `gorm:"column:container_ids;type:varchar(100)[]" json:"containerIds"`
 	WorkerID          *int           `gorm:"column:worker_id" json:"workerId"`
-	ErrorMessage      string         `gorm:"column:error_message;size:2000" json:"errorMessage"`
+	ErrorMessage      string         `gorm:"column:error_message;size:4096" json:"errorMessage"`
 	Progress          int            `gorm:"column:progress;default:0" json:"progress"`
 	CurrentStage      string         `gorm:"column:current_stage;size:50" json:"currentStage"`
 	StageProgress     datatypes.JSON `gorm:"column:stage_progress;type:jsonb" json:"stageProgress"`
@@ -66,10 +66,9 @@ func (s *Scan) BeforeCreate(tx *gorm.DB) error {
 }
 
 // ScanStatus constants
-// Status flow: pending → scheduled → running → completed/failed/cancelled
+// Status flow: pending → running → completed/failed/cancelled
 const (
-	ScanStatusPending   = "pending"   // Waiting for scheduling (user initiated, waiting for Agent assignment)
-	ScanStatusScheduled = "scheduled" // Assigned to Agent, waiting for execution
+	ScanStatusPending   = "pending"   // Waiting for Agent to pull and execute
 	ScanStatusRunning   = "running"   // Currently executing
 	ScanStatusCompleted = "completed" // Successfully completed
 	ScanStatusFailed    = "failed"    // Execution failed

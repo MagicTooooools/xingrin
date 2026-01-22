@@ -1,0 +1,4 @@
+# file: /Users/yangyang/Desktop/xingrin/backend/apps/asset/repositories/asset/host_port_mapping_repository.py
+# hypothesis_version: 6.150.0
+
+[1000, 'created_at', 'host', 'ip', 'port', '主机端口关联为空，跳过创建', '主机端口关联创建完成 - 数量: %d']

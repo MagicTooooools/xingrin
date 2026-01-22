@@ -1,0 +1,4 @@
+# file: /Users/yangyang/Desktop/xingrin/backend/apps/targets/apps.py
+# hypothesis_version: 6.150.0
+
+['apps.targets', '扫描目标管理']

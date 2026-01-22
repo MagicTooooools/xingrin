@@ -1,0 +1,4 @@
+# file: /Users/yangyang/Desktop/xingrin/backend/apps/asset/services/statistics_service.py
+# hypothesis_version: 6.150.0
+
+['change_assets', 'change_endpoints', 'change_ips', 'change_subdomains', 'change_targets', 'change_vulns', 'change_websites', 'count', 'critical', 'date', 'high', 'id', 'info', 'ip', 'low', 'medium', 'running', 'running_scans', 'severity', 'totalAssets', 'totalEndpoints', 'totalIps', 'totalSubdomains', 'totalTargets', 'totalVulns', 'totalWebsites', 'total_assets', 'total_endpoints', 'total_ips', 'total_subdomains', 'total_targets', 'total_vulns', 'total_websites', 'updated_at', 'vuln_by_severity', '开始刷新资产统计...', '资产统计刷新完成']

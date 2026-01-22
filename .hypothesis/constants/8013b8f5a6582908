@@ -1,0 +1,4 @@
+# file: /Users/yangyang/Desktop/xingrin/backend/apps/scan/notifications/repositories.py
+# hypothesis_version: 6.150.0
+
+['-created_at', 'system']

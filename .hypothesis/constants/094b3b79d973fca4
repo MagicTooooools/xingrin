@@ -1,0 +1,4 @@
+# file: /Users/yangyang/Desktop/xingrin/backend/apps/asset/models/statistics_models.py
+# hypothesis_version: 6.150.0
+
+['-date', 'AssetStatistics', 'IP地址总数', 'asset_statistics', 'date', 'statistics_history', '上次IP地址总数', '上次子域名总数', '上次总资产数', '上次漏洞总数', '上次目标总数', '上次端点总数', '上次网站总数', '创建时间', '子域名总数', '总资产数', '总资产数（子域名+IP+端点+网站）', '更新时间', '最后更新时间', '漏洞总数', '目标总数', '端点总数', '统计历史', '统计日期', '网站总数', '资产统计']

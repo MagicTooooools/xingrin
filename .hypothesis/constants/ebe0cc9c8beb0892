@@ -1,0 +1,4 @@
+# file: /Users/yangyang/Desktop/xingrin/backend/apps/common/definitions.py
+# hypothesis_version: 6.150.0
+
+['cancelled', 'completed', 'critical', 'failed', 'high', 'info', 'initiated', 'low', 'medium', 'running', 'unknown', '中', '低', '信息', '初始化', '危急', '失败', '已取消', '已完成', '未知', '运行中', '高']
