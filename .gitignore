@@ -27,10 +27,12 @@ bin/
 .env.local
 .env.*.local
 *.log
+.venv/
 
 # Testing
 coverage.txt
 *.coverprofile
+.hypothesis/
 
 # Temporary files
 *.tmp
@@ -38,6 +40,8 @@ tmp/
 temp/
 
 .kiro/
+.claude/
+.specify/
 
 # AI Assistant directories
 codex/
