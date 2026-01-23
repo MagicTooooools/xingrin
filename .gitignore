@@ -38,3 +38,8 @@ tmp/
 temp/
 
 .kiro/
+
+# AI Assistant directories
+codex/
+openspec/
+specs/
