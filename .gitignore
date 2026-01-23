@@ -1,0 +1,40 @@
+# Go
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+vendor/
+go.work
+
+# Build artifacts
+dist/
+build/
+bin/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Environment
+.env
+.env.local
+.env.*.local
+*.log
+
+# Testing
+coverage.txt
+*.coverprofile
+
+# Temporary files
+*.tmp
+tmp/
+temp/
+
+.kiro/

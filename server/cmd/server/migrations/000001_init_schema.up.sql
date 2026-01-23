@@ -623,3 +623,93 @@ INSERT INTO subfinder_provider_settings (id, providers) VALUES (1, '{
     "threatbook": {"enabled": false, "api_key": ""},
     "quake": {"enabled": false, "api_key": ""}
 }'::jsonb) ON CONFLICT (id) DO NOTHING;
+
+-- ============================================
+-- WebSocket Agent System tables
+-- ============================================
+
+-- agent
+CREATE TABLE IF NOT EXISTS agent (
+    id              SERIAL PRIMARY KEY,
+    name            VARCHAR(100) NOT NULL,
+    api_key         VARCHAR(8) NOT NULL UNIQUE,
+    status          VARCHAR(20) DEFAULT 'online',
+    hostname        VARCHAR(255),
+    ip_address      VARCHAR(45),
+    version         VARCHAR(20),
+
+    -- Scheduling configuration (can be dynamically modified via API)
+    max_tasks       INT DEFAULT 5,
+    cpu_threshold   INT DEFAULT 85,
+    mem_threshold   INT DEFAULT 85,
+    disk_threshold  INT DEFAULT 90,
+
+    -- Self-registration related
+    registration_token  VARCHAR(8),
+
+    -- Timestamps
+    connected_at    TIMESTAMP,
+    last_heartbeat  TIMESTAMP,
+    created_at      TIMESTAMP DEFAULT NOW(),
+    updated_at      TIMESTAMP DEFAULT NOW()
+);
+
+-- registration_token
+CREATE TABLE IF NOT EXISTS registration_token (
+    id              SERIAL PRIMARY KEY,
+    token           VARCHAR(8) NOT NULL UNIQUE,
+    expires_at      TIMESTAMP NOT NULL DEFAULT (NOW() + INTERVAL '1 hour'),
+    created_at      TIMESTAMP DEFAULT NOW()
+);
+
+-- scan_task
+CREATE TABLE IF NOT EXISTS scan_task (
+    id              SERIAL PRIMARY KEY,
+    scan_id         INT NOT NULL,
+    stage           INT NOT NULL DEFAULT 0,
+    workflow_name   VARCHAR(100) NOT NULL,
+    status          VARCHAR(20) DEFAULT 'pending',
+    version         VARCHAR(20),
+
+    -- Assignment information
+    agent_id        INT REFERENCES agent(id),
+    config          TEXT,
+    error_message   VARCHAR(4096),
+
+    -- Retry control
+    retry_count     INT DEFAULT 0,
+
+    -- Timestamps
+    created_at      TIMESTAMP DEFAULT NOW(),
+    started_at      TIMESTAMP,
+    completed_at    TIMESTAMP
+);
+
+-- Indexes for agent table
+CREATE INDEX IF NOT EXISTS idx_agent_status ON agent(status);
+CREATE INDEX IF NOT EXISTS idx_agent_api_key ON agent(api_key);
+
+-- Indexes for registration_token table
+CREATE INDEX IF NOT EXISTS idx_registration_token_token ON registration_token(token);
+CREATE INDEX IF NOT EXISTS idx_registration_token_expires ON registration_token(expires_at);
+
+-- Indexes for scan_task table
+CREATE INDEX IF NOT EXISTS idx_scan_task_pending_order ON scan_task(status, stage DESC, created_at ASC);
+CREATE INDEX IF NOT EXISTS idx_scan_task_agent_id ON scan_task(agent_id);
+CREATE INDEX IF NOT EXISTS idx_scan_task_scan_id ON scan_task(scan_id);
+
+-- Comments for agent tables
+COMMENT ON TABLE agent IS 'Agent metadata and configuration';
+COMMENT ON TABLE registration_token IS 'Registration tokens for agent self-registration';
+COMMENT ON TABLE scan_task IS 'Task queue supporting priority scheduling';
+COMMENT ON COLUMN agent.status IS 'Agent status: online/offline';
+COMMENT ON COLUMN agent.api_key IS '8-character hex string for authentication';
+COMMENT ON COLUMN registration_token.expires_at IS 'Token expiration time (default 1 hour after creation)';
+COMMENT ON COLUMN scan_task.stage IS 'Current stage (fixed at 0 for single workflow)';
+COMMENT ON COLUMN scan_task.workflow_name IS 'Workflow name (e.g. subdomain_discovery)';
+COMMENT ON COLUMN scan_task.status IS 'Task status: pending/running/completed/failed/cancelled';
+COMMENT ON COLUMN scan_task.version IS 'Worker version number (read from VERSION file)';
+COMMENT ON COLUMN scan_task.error_message IS 'Error message (truncated by Agent, max 4KB)';
+COMMENT ON INDEX idx_scan_task_pending_order IS 'Supports task pull queries (ordered by stage DESC, created_at ASC)';
+COMMENT ON INDEX idx_scan_task_agent_id IS 'Supports querying tasks by agent';
+COMMENT ON INDEX idx_scan_task_scan_id IS 'Supports querying tasks by scan';
