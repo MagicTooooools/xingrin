@@ -119,3 +119,72 @@ func TestMapConfigKeys_InternalParams_RejectOverride(t *testing.T) {
 	})
 	require.Error(t, err)
 }
+
+func TestMapConfigKeys_NilRawReturnsInternal(t *testing.T) {
+	tmpl := CommandTemplate{
+		BaseCommand: "tool",
+		CLIParams:   []Parameter{},
+		InternalParams: map[string]any{
+			"subdomain-wordlist-base-path-runtime": "/opt/orbit/wordlists",
+		},
+	}
+
+	normalized, err := MapConfigKeys(tmpl, nil)
+	require.NoError(t, err)
+	require.Equal(t, "/opt/orbit/wordlists", normalized["subdomain-wordlist-base-path-runtime"])
+}
+
+func TestMapConfigKeys_MissingSemanticID(t *testing.T) {
+	tmpl := CommandTemplate{
+		BaseCommand: "tool",
+		CLIParams: []Parameter{
+			{
+				SemanticID: "",
+				Var:        "Timeout",
+				Arg:        "-timeout {{.Timeout}}",
+				ConfigSchema: ConfigSchema{
+					Key:  "timeout-cli",
+					Type: "integer",
+				},
+				ConfigExample: ConfigExample{
+					ShowAs: "value",
+				},
+				Documentation: Documentation{
+					Description: "Scan timeout in seconds",
+				},
+			},
+		},
+	}
+
+	_, err := MapConfigKeys(tmpl, map[string]any{"timeout-cli": 10})
+	require.Error(t, err)
+}
+
+func TestMapConfigKeys_SemanticIDConflictsWithInternal(t *testing.T) {
+	tmpl := CommandTemplate{
+		BaseCommand: "tool",
+		CLIParams: []Parameter{
+			{
+				SemanticID: "timeout-runtime",
+				Var:        "Timeout",
+				Arg:        "-timeout {{.Timeout}}",
+				ConfigSchema: ConfigSchema{
+					Key:  "timeout-cli",
+					Type: "integer",
+				},
+				ConfigExample: ConfigExample{
+					ShowAs: "value",
+				},
+				Documentation: Documentation{
+					Description: "Scan timeout in seconds",
+				},
+			},
+		},
+		InternalParams: map[string]any{
+			"timeout-runtime": 30,
+		},
+	}
+
+	_, err := MapConfigKeys(tmpl, map[string]any{"timeout-cli": 10})
+	require.Error(t, err)
+}

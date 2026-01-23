@@ -17,6 +17,7 @@ func TestConfigDefaults(t *testing.T) {
 		"DB_MAX_OPEN_CONNS", "DB_MAX_IDLE_CONNS", "DB_CONN_MAX_LIFETIME",
 		"REDIS_HOST", "REDIS_PORT", "REDIS_PASSWORD", "REDIS_DB",
 		"LOG_LEVEL", "LOG_FORMAT",
+		"PUBLIC_URL",
 	}
 	for _, env := range envVars {
 		if err := os.Unsetenv(env); err != nil {
@@ -83,6 +84,9 @@ func TestConfigDefaults(t *testing.T) {
 	if cfg.Log.Format != defaults.Log.Format {
 		t.Errorf("Log.Format: expected %s, got %s", defaults.Log.Format, cfg.Log.Format)
 	}
+	if cfg.PublicURL != defaults.PublicURL {
+		t.Errorf("PublicURL: expected %s, got %s", defaults.PublicURL, cfg.PublicURL)
+	}
 }
 
 // TestConfigFromEnv tests that environment variables override defaults
@@ -100,11 +104,15 @@ func TestConfigFromEnv(t *testing.T) {
 	if err := os.Setenv("LOG_LEVEL", "debug"); err != nil {
 		t.Fatalf("Failed to set LOG_LEVEL: %v", err)
 	}
+	if err := os.Setenv("PUBLIC_URL", "https://public.example"); err != nil {
+		t.Fatalf("Failed to set PUBLIC_URL: %v", err)
+	}
 	defer func() {
 		_ = os.Unsetenv("SERVER_PORT")
 		_ = os.Unsetenv("DB_HOST")
 		_ = os.Unsetenv("DB_PORT")
 		_ = os.Unsetenv("LOG_LEVEL")
+		_ = os.Unsetenv("PUBLIC_URL")
 	}()
 
 	cfg, err := Load()
@@ -123,6 +131,9 @@ func TestConfigFromEnv(t *testing.T) {
 	}
 	if cfg.Log.Level != "debug" {
 		t.Errorf("Log.Level: expected debug, got %s", cfg.Log.Level)
+	}
+	if cfg.PublicURL != "https://public.example" {
+		t.Errorf("PublicURL: expected https://public.example, got %s", cfg.PublicURL)
 	}
 }
 

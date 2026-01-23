@@ -64,3 +64,7 @@ func TestValidateExplicitConfig_AllStagesAndToolsPresent(t *testing.T) {
 
 	require.NoError(t, validateExplicitConfig(config))
 }
+
+func TestValidateExplicitConfig_NilConfig(t *testing.T) {
+	require.Error(t, validateExplicitConfig(nil))
+}

@@ -59,3 +59,19 @@ func TestParseSubdomains_PropagatesScannerError(t *testing.T) {
 	require.True(t, ok)
 	require.Error(t, err)
 }
+
+func TestParseSubdomains_MissingFileIsIgnored(t *testing.T) {
+	prevLogger := pkg.Logger
+	pkg.Logger = zap.NewNop()
+	t.Cleanup(func() {
+		pkg.Logger = prevLogger
+	})
+
+	ch, errCh := ParseSubdomains([]string{filepath.Join(t.TempDir(), "missing.txt")})
+	for range ch {
+		t.Fatalf("expected no subdomains")
+	}
+
+	_, ok := <-errCh
+	require.False(t, ok)
+}

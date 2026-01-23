@@ -138,3 +138,123 @@ func TestTemplateLoader_Validate_MissingToolMetadata(t *testing.T) {
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "display_name is required")
 }
+
+func TestTemplateLoader_Validate_InvalidSemanticID(t *testing.T) {
+	loader := NewTemplateLoader(testFS, "testdata/invalid_semantic_id.yaml")
+
+	_, err := loader.Load()
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "invalid semantic_id")
+}
+
+func TestTemplateLoader_Validate_InvalidConfigKey(t *testing.T) {
+	loader := NewTemplateLoader(testFS, "testdata/invalid_config_key.yaml")
+
+	_, err := loader.Load()
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "invalid config_schema.key")
+}
+
+func TestTemplateLoader_Validate_DuplicateConfigKey(t *testing.T) {
+	loader := NewTemplateLoader(testFS, "testdata/duplicate_config_key.yaml")
+
+	_, err := loader.Load()
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "duplicate config_schema.key")
+}
+
+func TestTemplateLoader_Validate_InvalidShowAs(t *testing.T) {
+	loader := NewTemplateLoader(testFS, "testdata/invalid_show_as.yaml")
+
+	_, err := loader.Load()
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "invalid config_example.show_as")
+}
+
+func TestTemplateLoader_Validate_DuplicateSemanticID(t *testing.T) {
+	loader := NewTemplateLoader(testFS, "testdata/duplicate_semantic_id.yaml")
+
+	_, err := loader.Load()
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "duplicate semantic_id")
+}
+
+func TestTemplateLoader_Validate_InvalidVar(t *testing.T) {
+	loader := NewTemplateLoader(testFS, "testdata/invalid_var.yaml")
+
+	_, err := loader.Load()
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "invalid var")
+}
+
+func TestTemplateLoader_Validate_MissingShowAs(t *testing.T) {
+	loader := NewTemplateLoader(testFS, "testdata/missing_show_as.yaml")
+
+	_, err := loader.Load()
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "config_example.show_as is required")
+}
+
+func TestTemplateLoader_Validate_RequiredWithDefault(t *testing.T) {
+	loader := NewTemplateLoader(testFS, "testdata/required_with_default.yaml")
+
+	_, err := loader.Load()
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "required cannot be true when default is set")
+}
+
+func TestTemplateLoader_Validate_MissingStageID(t *testing.T) {
+	loader := NewTemplateLoader(testFS, "testdata/missing_stage_id.yaml")
+
+	_, err := loader.Load()
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "stage metadata: id is required")
+}
+
+func TestTemplateLoader_Validate_MissingVersion(t *testing.T) {
+	loader := NewTemplateLoader(testFS, "testdata/missing_version.yaml")
+
+	_, err := loader.Load()
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "version is required")
+}
+
+func TestTemplateLoader_Validate_MissingParamVar(t *testing.T) {
+	loader := NewTemplateLoader(testFS, "testdata/missing_param_var.yaml")
+
+	_, err := loader.Load()
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "param var is required")
+}
+
+func TestTemplateLoader_Validate_DuplicateParamVar(t *testing.T) {
+	loader := NewTemplateLoader(testFS, "testdata/duplicate_param_var.yaml")
+
+	_, err := loader.Load()
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "duplicate var")
+}
+
+func TestTemplateLoader_Validate_MissingSemanticID(t *testing.T) {
+	loader := NewTemplateLoader(testFS, "testdata/missing_semantic_id.yaml")
+
+	_, err := loader.Load()
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "semantic_id is required")
+}
+
+func TestTemplateLoader_Validate_MissingConfigKey(t *testing.T) {
+	loader := NewTemplateLoader(testFS, "testdata/missing_config_key.yaml")
+
+	_, err := loader.Load()
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "config_schema.key is required")
+}
+
+func TestTemplateLoader_Validate_MissingConfigType(t *testing.T) {
+	loader := NewTemplateLoader(testFS, "testdata/missing_config_type.yaml")
+
+	_, err := loader.Load()
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "config_schema.type is required")
+}

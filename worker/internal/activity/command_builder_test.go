@@ -205,6 +205,63 @@ func TestCommandBuilder_Build_MissingRequiredParameter(t *testing.T) {
 	assert.Contains(t, err.Error(), "Domain")
 }
 
+func TestCommandBuilder_Build_MissingRequiredConfigParam(t *testing.T) {
+	builder := NewCommandBuilder()
+
+	tmpl := CommandTemplate{
+		BaseCommand: "subfinder -d {{.Domain}}",
+		CLIParams: []Parameter{
+			{
+				SemanticID: "timeout-cli",
+				Var:        "Timeout",
+				Arg:        "-timeout {{.Timeout}}",
+				ConfigSchema: ConfigSchema{
+					Key:      "timeout-cli",
+					Type:     "integer",
+					Required: true,
+				},
+				ConfigExample: ConfigExample{
+					ShowAs: "value",
+				},
+				Documentation: Documentation{
+					Description: "Scan timeout in seconds",
+				},
+			},
+		},
+	}
+
+	params := map[string]any{
+		"Domain": "example.com",
+	}
+
+	_, err := builder.Build(tmpl, params, map[string]any{})
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "required parameter")
+}
+
+func TestCommandBuilder_Build_InvalidTemplate(t *testing.T) {
+	builder := NewCommandBuilder()
+
+	tmpl := CommandTemplate{
+		BaseCommand: "tool {{.Domain",
+	}
+
+	_, err := builder.Build(tmpl, map[string]any{"Domain": "example.com"}, nil)
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "parse")
+}
+
+func TestCommandBuilder_Build_MissingTemplateVar(t *testing.T) {
+	builder := NewCommandBuilder()
+
+	tmpl := CommandTemplate{
+		BaseCommand: "tool {{.Missing}}",
+	}
+
+	_, err := builder.Build(tmpl, map[string]any{}, nil)
+	require.Error(t, err)
+}
+
 func TestCommandBuilder_Build_TypeValidation(t *testing.T) {
 	builder := NewCommandBuilder()
 
