@@ -1,4 +1,0 @@
-# file: /Users/yangyang/Desktop/xingrin/backend/apps/scan/notifications/__init__.py
-# hypothesis_version: 6.150.0
-
-['Notification', 'NotificationCategory', 'NotificationLevel', 'create_notification']

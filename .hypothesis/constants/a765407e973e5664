@@ -1,4 +1,0 @@
-# file: /Users/yangyang/Desktop/xingrin/backend/apps/asset/services/snapshot/vulnerability_snapshots_service.py
-# hypothesis_version: 6.150.0
-
-[1000, 'severity', 'source', 'type', 'url', 'vuln_type', '步骤 1: 保存到漏洞快照表', '步骤 2: 同步到漏洞资产表']

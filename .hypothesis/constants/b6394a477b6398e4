@@ -1,4 +1,0 @@
-# file: /Users/yangyang/Desktop/xingrin/backend/apps/asset/dtos/asset/__init__.py
-# hypothesis_version: 6.150.0
-
-['DirectoryDTO', 'EndpointDTO', 'HostPortMappingDTO', 'IPAddressDTO', 'PortDTO', 'SubdomainDTO', 'VulnerabilityDTO', 'WebSiteDTO']

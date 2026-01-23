@@ -1,4 +1,0 @@
-# file: /Users/yangyang/Desktop/xingrin/backend/apps/scan/models/subfinder_provider_settings_model.py
-# hypothesis_version: 6.150.0
-
-['api_id', 'api_key', 'api_secret', 'censys', 'email', 'enabled', 'fofa', 'hunter', 'providers', 'quake', 'securitytrails', 'shodan', 'threatbook', 'zoomeye']

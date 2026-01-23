@@ -1,4 +1,0 @@
-# file: /Users/yangyang/Desktop/xingrin/backend/apps/asset/repositories/snapshot/endpoint_snapshot_repository.py
-# hypothesis_version: 6.150.0
-
-[1000, '-created_at', 'content_length', 'content_type', 'created_at', 'host', 'location', 'matched_gf_patterns', 'response_body', 'response_headers', 'status_code', 'tech', 'title', 'url', 'vhost', 'webserver', '准备保存端点快照 - 数量: %d', '端点快照为空，跳过保存', '端点快照保存成功 - 数量: %d']

@@ -1,4 +1,0 @@
-# file: /Users/yangyang/Desktop/xingrin/backend/apps/asset/models/__init__.py
-# hypothesis_version: 6.150.0
-
-['AssetStatistics', 'Directory', 'DirectorySnapshot', 'Endpoint', 'EndpointSnapshot', 'HostPortMapping', 'Screenshot', 'ScreenshotSnapshot', 'StatisticsHistory', 'Subdomain', 'SubdomainSnapshot', 'Vulnerability', 'WebSite', 'WebsiteSnapshot']

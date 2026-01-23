@@ -1,4 +1,0 @@
-# file: /Users/yangyang/Desktop/xingrin/backend/apps/engine/models/engine.py
-# hypothesis_version: 6.150.0
-
-[100, 200, 500, 10000, '-created_at', 'Git 仓库地址', 'Nuclei 模板仓库', 'SSH 密码', 'SSH 用户名', 'SSH 端口', 'Worker 节点', 'deploying', 'ip_address', 'name', 'nuclei_template_repo', 'offline', 'online', 'outdated', 'pending', 'root', 'scan_engine', 'unique_worker_name', 'updating', 'wordlist', 'worker_node', '仓库名称，用于前端展示和配置引用', '创建时间', '后端保存的字典文件绝对路径', '在线', '字典名称，唯一', '字典描述', '字典文件', '字典行数', '引擎名称', '引擎配置，yaml 格式', '待部署', '扫描引擎', '文件 SHA-256 哈希，用于缓存校验', '文件大小（字节）', '是否为本地节点（Docker 容器内）', '更新中', '更新时间', '最后一次成功同步时间', '本地工作目录绝对路径', '版本过低', '离线', '节点名称', '部署中']

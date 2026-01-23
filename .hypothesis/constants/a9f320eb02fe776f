@@ -1,4 +1,0 @@
-# file: /Users/yangyang/Desktop/xingrin/backend/apps/common/utils/csv_utils.py
-# hypothesis_version: 6.150.0
-
-['%Y-%m-%d %H:%M:%S', '.csv', ';', 'Content-Disposition', 'Content-Length', 'rb', 'utf-8', 'w', '\ufeff']

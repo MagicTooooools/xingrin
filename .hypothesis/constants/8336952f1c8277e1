@@ -1,4 +1,0 @@
-# file: /Users/yangyang/Desktop/xingrin/backend/apps/scan/providers/base.py
-# hypothesis_version: 6.150.0
-
-['BlacklistFilter', 'CIDR 解析失败: %s - %s', '不支持的 Target 类型: %s']

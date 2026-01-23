@@ -1,4 +1,0 @@
-# file: /Users/yangyang/Desktop/xingrin/backend/apps/common/normalizer.py
-# hypothesis_version: 6.150.0
-
-['.', '/', 'CIDR 不能为空', 'IP 地址不能为空', '^[\\d.:]+$', '域名不能为空', '目标名称不能为空']

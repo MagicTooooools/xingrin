@@ -1,4 +1,0 @@
-# file: /Users/yangyang/Desktop/xingrin/backend/apps/engine/scheduler.py
-# hypothesis_version: 6.150.0
-
-['  - 已注册: 定时扫描任务（每分钟）', '  - 已注册: 资产统计刷新（每小时）', 'APScheduler 调度器已关闭', 'coalesce', 'max_instances', 'misfire_grace_time', 'scan_cleanup', 'scheduled_scans', 'statistics_refresh', '定时扫描任务', '扫描结果清理', '调度器已在运行', '资产统计刷新', '资产统计刷新完成']

@@ -1,4 +1,0 @@
-# file: /Users/yangyang/Desktop/xingrin/backend/apps/scan/notifications/services.py
-# hypothesis_version: 6.150.0
-
-[200, 204, 3447003, 9807270, 10181046, 15158332, 15965202, 'Content-Type', 'SELECT 1', 'SERVER_URL', 'WORKER_API_KEY', 'X-Worker-API-Key', 'application/json', 'asset', 'categories', 'category', 'closed', 'color', 'connection', 'content', 'created_at', 'critical', 'description', 'discord', 'embeds', 'enabled', 'errcode', 'footer', 'high', 'id', 'level', 'low', 'markdown', 'medium', 'message', 'msgtype', 'notification.message', 'notifications', 'scan', 'system', 'text', 'timestamp', 'title', 'type', 'vulnerability', 'webhookUrl', 'webhook_url', 'wecom', '⚙️', '⚠️', '🌐', '📢', '🔍']

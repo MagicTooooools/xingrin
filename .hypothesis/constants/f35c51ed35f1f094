@@ -1,4 +1,0 @@
-# file: /Users/yangyang/Desktop/xingrin/backend/apps/scan/models/scan_log_model.py
-# hypothesis_version: 6.150.0
-
-['Error', 'Info', 'Scan', 'Warning', 'created_at', 'error', 'info', 'logs', 'scan', 'scan_log', 'warning', '关联的扫描任务', '创建时间', '扫描日志', '日志内容', '日志级别']

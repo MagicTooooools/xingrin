@@ -1,4 +1,0 @@
-# file: /Users/yangyang/Desktop/xingrin/backend/apps/scan/notifications/types.py
-# hypothesis_version: 6.150.0
-
-['asset', 'critical', 'high', 'low', 'medium', 'scan', 'system', 'vulnerability', '严重', '中', '低', '扫描任务', '漏洞发现', '系统消息', '资产发现', '高']

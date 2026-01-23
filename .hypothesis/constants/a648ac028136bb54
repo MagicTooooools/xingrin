@@ -1,4 +1,0 @@
-# file: /Users/yangyang/Desktop/xingrin/backend/apps/common/validators.py
-# hypothesis_version: 6.150.0
-
-[253, 2000, 65535, '.', '/', '://', 'CIDR 不能为空', 'IP 地址不能为空', 'URL 不能为空', 'URL 必须包含主机名', 'cidr', 'domain', 'http://', 'https://', 'ip', 'url', '域名不能为空', '目标名称不能为空', '端口号格式错误，无法转换为整数: %s', '输入不能为空']

@@ -1,4 +1,0 @@
-# file: /Users/yangyang/Desktop/xingrin/backend/apps/common/utils/filter_utils.py
-# hypothesis_version: 6.150.0
-
-[' __AND__ ', ' __OR__ ', '!=', '=', '==', 'AND', 'OR', '__', '__AND__', '__FILTER_', '__FILTER_{}__', '__OR__', 'array_to_string']
