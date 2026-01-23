@@ -4,10 +4,10 @@ import (
 	"database/sql"
 	"errors"
 
-	"github.com/orbit/server/internal/dto"
-	"github.com/orbit/server/internal/model"
-	"github.com/orbit/server/internal/pkg/validator"
-	"github.com/orbit/server/internal/repository"
+	"github.com/yyhuni/orbit/server/internal/dto"
+	"github.com/yyhuni/orbit/server/internal/model"
+	"github.com/yyhuni/orbit/server/internal/pkg/validator"
+	"github.com/yyhuni/orbit/server/internal/repository"
 	"gorm.io/gorm"
 )
 

@@ -5,7 +5,7 @@ import (
 	"runtime/debug"
 
 	"github.com/gin-gonic/gin"
-	"github.com/orbit/server/internal/pkg"
+	"github.com/yyhuni/orbit/server/internal/pkg"
 	"go.uber.org/zap"
 )
 

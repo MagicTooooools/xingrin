@@ -6,8 +6,8 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/orbit/server/internal/dto"
-	"github.com/orbit/server/internal/service"
+	"github.com/yyhuni/orbit/server/internal/dto"
+	"github.com/yyhuni/orbit/server/internal/service"
 )
 
 // ScanHandler handles scan HTTP requests
@@ -161,6 +161,7 @@ func (h *ScanHandler) Stop(c *gin.Context) {
 //	  "targetId": 123,                // required for mode=normal
 //	  "targets": ["example.com"],     // required for mode=quick (raw targets)
 //	  "engineIds": [1, 2],            // engine IDs to run
+//	  "engineNames": ["subdomain_discovery"], // required, exactly one value
 //	  "config": {}                    // optional scan configuration
 //	}
 func (h *ScanHandler) Create(c *gin.Context) {

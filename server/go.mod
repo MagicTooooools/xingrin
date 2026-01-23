@@ -1,4 +1,4 @@
-module github.com/orbit/server
+module github.com/yyhuni/orbit/server
 
 go 1.24.0
 

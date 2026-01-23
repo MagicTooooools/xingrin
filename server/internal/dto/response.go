@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	pkgvalidator "github.com/orbit/server/internal/pkg/validator"
+	pkgvalidator "github.com/yyhuni/orbit/server/internal/pkg/validator"
 )
 
 // ErrorResponse represents an error response

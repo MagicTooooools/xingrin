@@ -88,9 +88,9 @@ type CreateScanRequest struct {
 	Targets []string `json:"targets" binding:"omitempty"`
 
 	// Common fields
-	EngineIDs     []int  `json:"engineIds" binding:"omitempty"`
-	EngineNames   []string `json:"engineNames" binding:"omitempty"`
-	Configuration string `json:"configuration" binding:"omitempty"`
+	EngineIDs     []int    `json:"engineIds" binding:"omitempty"`
+	EngineNames   []string `json:"engineNames" binding:"required,min=1,max=1"`
+	Configuration string   `json:"configuration" binding:"omitempty"`
 }
 
 // QuickScanTarget represents a target in quick scan

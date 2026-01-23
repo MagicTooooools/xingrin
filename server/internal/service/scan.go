@@ -8,12 +8,12 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/orbit/server/internal/dto"
-	"github.com/orbit/server/internal/engineschema"
-	"github.com/orbit/server/internal/model"
-	"github.com/orbit/server/internal/repository"
-	"gorm.io/gorm"
+	"github.com/yyhuni/orbit/server/internal/dto"
+	"github.com/yyhuni/orbit/server/internal/engineschema"
+	"github.com/yyhuni/orbit/server/internal/model"
+	"github.com/yyhuni/orbit/server/internal/repository"
 	"gopkg.in/yaml.v3"
+	"gorm.io/gorm"
 )
 
 var (
@@ -193,18 +193,20 @@ func (s *ScanService) CreateNormal(req *dto.CreateScanRequest) (*model.Scan, err
 		return nil, fmt.Errorf("%w: yaml must be a mapping", ErrScanInvalidConfig)
 	}
 
+	if len(req.EngineNames) != 1 {
+		return nil, ErrScanInvalidEngineNames
+	}
+
 	engineNames, err := normalizeEngineNames(req.EngineNames)
 	if err != nil {
 		return nil, err
 	}
+	if len(engineNames) != 1 {
+		return nil, ErrScanInvalidEngineNames
+	}
 
 	// Validate known engines.
 	candidates := engineNames
-	if len(candidates) == 0 {
-		for k := range root {
-			candidates = append(candidates, k)
-		}
-	}
 	for _, engine := range candidates {
 		engine = strings.TrimSpace(engine)
 		if engine == "" {

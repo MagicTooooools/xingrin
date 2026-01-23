@@ -6,9 +6,9 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/orbit/server/internal/dto"
-	"github.com/orbit/server/internal/model"
-	"github.com/orbit/server/internal/repository"
+	"github.com/yyhuni/orbit/server/internal/dto"
+	"github.com/yyhuni/orbit/server/internal/model"
+	"github.com/yyhuni/orbit/server/internal/repository"
 	"gopkg.in/yaml.v3"
 	"gorm.io/gorm"
 )

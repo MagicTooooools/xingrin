@@ -5,8 +5,8 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/orbit/server/internal/dto"
-	"github.com/orbit/server/internal/service"
+	"github.com/yyhuni/orbit/server/internal/dto"
+	"github.com/yyhuni/orbit/server/internal/service"
 )
 
 // ScreenshotHandler handles screenshot endpoints
