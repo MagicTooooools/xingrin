@@ -10,13 +10,14 @@ import (
 
 // Config holds all configuration for the application
 type Config struct {
-	Server   ServerConfig
-	Database DatabaseConfig
-	Redis    RedisConfig
-	Log      LogConfig
-	JWT      JWTConfig
-	Storage  StorageConfig
-	Worker   WorkerConfig
+	Server    ServerConfig
+	Database  DatabaseConfig
+	Redis     RedisConfig
+	Log       LogConfig
+	JWT       JWTConfig
+	Storage   StorageConfig
+	Worker    WorkerConfig
+	PublicURL string
 }
 
 // ServerConfig holds server-related configuration
@@ -132,6 +133,9 @@ func Load() (*Config, error) {
 	// Worker config
 	cfg.Worker.Token = v.GetString("WORKER_TOKEN")
 
+	// Public URL config
+	cfg.PublicURL = v.GetString("PUBLIC_URL")
+
 	return cfg, nil
 }
 
@@ -172,6 +176,9 @@ func setDefaults(v *viper.Viper) {
 
 	// Worker defaults
 	v.SetDefault("WORKER_TOKEN", "change-me-worker-token")
+
+	// Public URL defaults
+	v.SetDefault("PUBLIC_URL", "")
 }
 
 // DSN returns the database connection string
@@ -226,5 +233,6 @@ func GetDefaults() *Config {
 		Worker: WorkerConfig{
 			Token: "change-me-worker-token",
 		},
+		PublicURL: "",
 	}
 }
