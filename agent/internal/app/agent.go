@@ -68,7 +68,10 @@ func Run(ctx context.Context, cfg config.Config, wsURL string) error {
 
 	handler := agentws.NewHandler()
 	handler.OnTaskAvailable(puller.NotifyTaskAvailable)
-	handler.OnTaskCancel(executor.CancelTask)
+	handler.OnTaskCancel(func(taskID int) {
+		executor.MarkCancelled(taskID)
+		executor.CancelTask(taskID)
+	})
 	handler.OnConfigUpdate(func(payload protocol.ConfigUpdatePayload) {
 		cfgUpdate := config.Update{
 			MaxTasks:      payload.MaxTasks,

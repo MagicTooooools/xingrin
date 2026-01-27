@@ -177,7 +177,7 @@ export function AgentCardCompact({
   const isHeartbeatStale = lastHeartbeatSeconds !== null && lastHeartbeatSeconds > 30
 
   return (
-    <Card className="transition-all duration-200 hover:shadow-md gap-3">
+    <Card className="transition-all duration-200 hover:shadow-md gap-0">
       <CardHeader className="pb-2">
         <div className="flex items-start justify-between gap-2">
           <div className="flex items-center gap-2 min-w-0 flex-1">
