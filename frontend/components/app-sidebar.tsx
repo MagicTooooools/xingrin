@@ -12,6 +12,7 @@ import {
   IconRadar, // Radar scan icon
   IconTool, // Tool icon
   IconServer, // Server icon
+  IconDatabase, // Database icon
   IconTerminal2, // Terminal icon
   IconBug, // Vulnerability icon
   IconSearch, // Search icon
@@ -149,6 +150,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       name: t('systemLogs'),
       url: "/settings/system-logs/",
       icon: IconTerminal2,
+    },
+    {
+      name: t('databaseHealth'),
+      url: "/settings/database-health/",
+      icon: IconDatabase,
     },
     {
       name: t('notifications'),

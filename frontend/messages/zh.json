@@ -340,8 +340,9 @@
     "fingerprints": "指纹管理",
     "nucleiTemplates": "Nuclei 模板",
     "settings": "系统设置",
-    "workers": "扫描节点",
+    "workers": "Agent 节点",
     "systemLogs": "系统日志",
+    "databaseHealth": "数据库健康",
     "notifications": "通知设置",
     "apiKeys": "API 密钥",
     "globalBlacklist": "全局黑名单",
@@ -1379,112 +1380,117 @@
   "settings": {
     "title": "设置",
     "workers": {
-      "title": "扫描节点",
-      "name": "节点名称",
-      "status": "状态",
-      "online": "在线",
-      "offline": "离线",
-      "lastSeen": "最后在线",
-      "addWorker": "添加节点",
-      "editWorker": "编辑扫描节点",
-      "addWorkerTitle": "添加扫描节点",
-      "addWorkerDesc": "输入远程 VPS 的 SSH 连接信息，添加后可通过「管理部署」一键部署扫描环境",
-      "editWorkerDesc": "修改节点的 SSH 连接信息",
-      "noWorkers": "暂无扫描节点",
-      "noWorkersDesc": "添加远程 VPS 服务器作为扫描节点，开始使用分布式扫描功能，提升扫描效率",
-      "addFirstWorker": "添加第一个节点",
-      "confirmDelete": "确认删除",
-      "confirmDeleteDesc": "确定要删除 Worker 节点 \"{name}\" 吗？此操作不可恢复。",
-      "confirmUninstall": "确认卸载",
-      "confirmUninstallDesc": "确定要在远程主机上卸载 Agent 并删除相关容器吗？此操作不会卸载 Docker。",
-      "workerNodes": "Worker 节点",
-      "workerNodesDesc": "管理分布式扫描节点，支持远程部署和监控",
-      "local": "本地",
-      "memory": "内存",
-      "manageDeploy": "管理部署",
-      "edit": "编辑",
-      "delete": "删除",
-      "learnMore": "了解更多",
-      "gotIt": "知道了",
+      "title": "Agent 节点",
+      "install": {
+        "title": "安装 Agent",
+        "desc": "打开安装器并复制命令到目标服务器执行。",
+        "step1Label": "步骤 1",
+        "step1Desc": "复制安装命令",
+        "step2Label": "步骤 2",
+        "step2Desc": "在目标服务器执行",
+        "step3Label": "步骤 3",
+        "step3Desc": "Agent 连接后出现在列表中",
+        "tokenTitle": "注册令牌",
+        "tokenDesc": "令牌 1 小时内有效，用于启动新 Agent。",
+        "generateToken": "生成命令",
+        "regenerateToken": "重新生成命令",
+        "tokenPlaceholder": "生成令牌后显示",
+        "tokenExpires": "过期时间 {time}",
+        "tokenHint": "生成令牌后才能复制安装命令",
+        "commandTitle": "安装命令",
+        "commandDesc": "复制并在目标服务器执行",
+        "commandPlaceholder": "正在生成安装命令...",
+        "commandStatusReady": "命令可用",
+        "commandStatusGenerating": "正在生成命令",
+        "commandExpires": "{time} 失效",
+        "stepsTitle": "步骤",
+        "requirementsTitle": "前置条件",
+        "requirementsDocker": "已安装并运行 Docker",
+        "requirementsAccess": "目标机可访问服务端",
+        "linuxTab": "Linux / macOS",
+        "windowsTab": "Windows",
+        "commandHint": "确保已安装 Docker，且服务端可访问",
+        "openDialog": "打开安装器",
+        "showAdvanced": "显示安装命令",
+        "hideAdvanced": "收起安装命令"
+      },
       "stats": {
-        "total": "总节点",
+        "total": "总数",
         "online": "在线",
         "offline": "离线",
-        "pending": "等待部署"
+        "unhealthy": "异常"
       },
       "status": {
         "online": "在线",
         "offline": "离线",
-        "pending": "等待部署",
-        "deploying": "部署中",
-        "updating": "更新中",
-        "outdated": "版本过低"
+        "unknown": "未知"
       },
-      "helpDialog": {
-        "title": "什么是分布式扫描？",
-        "desc": "分布式扫描允许你将扫描任务分发到多个远程服务器（扫描节点）上并行执行，显著提高扫描效率。"
+      "health": {
+        "ok": "健康",
+        "warning": "预警",
+        "error": "异常",
+        "unknown": "未知"
       },
-      "banner": {
-        "title": "分布式扫描：",
-        "desc": "添加 VPS 节点 → 一键部署 → 任务自动分发"
+      "agents": {
+        "title": "Agent 列表",
+        "desc": "查看 Agent 状态、版本与调度配置"
       },
-      "steps": {
-        "step1Title": "添加扫描节点",
-        "step1Desc": "点击\"添加节点\"按钮，填写 VPS 服务器的 SSH 连接信息（IP、端口、用户名、密码）",
-        "step2Title": "部署扫描环境",
-        "step2Desc": "点击\"管理部署\"按钮，系统会自动通过 SSH 在远程服务器上安装 Docker 和心跳agent",
-        "step3Title": "自动任务分发",
-        "step3Desc": "部署完成后节点会自动上报心跳，扫描任务将根据负载自动分发到各节点并行执行"
+      "metrics": {
+        "lastHeartbeat": "最后心跳",
+        "connectedAt": "连接时间",
+        "maxTasks": "最大任务 {value}",
+        "cpuThreshold": "CPU {value}%",
+        "memThreshold": "内存 {value}%",
+        "diskThreshold": "磁盘 {value}%",
+        "cpu": "CPU",
+        "mem": "内存",
+        "disk": "磁盘",
+        "tasks": "任务数",
+        "uptime": "运行 {value}",
+        "updatedAt": "更新 {value}"
       },
-      "form": {
-        "workerName": "节点名称",
-        "workerNamePlaceholder": "例如: 扫描节点-1",
-        "workerNameDesc": "用于识别节点的名称",
-        "nameRequired": "请输入节点名称",
-        "nameTooLong": "名称不能超过100个字符",
-        "hostIp": "IP 地址",
-        "hostIpPlaceholder": "例如: 192.168.1.100",
-        "ipRequired": "请输入 IP 地址",
-        "ipInvalid": "请输入有效的 IP 地址",
-        "ipNotEditable": "IP 地址不可修改",
-        "sshPort": "SSH 端口",
-        "username": "用户名",
-        "usernameRequired": "请输入用户名",
-        "usernamePlaceholder": "例如: root",
-        "password": "SSH 密码",
-        "passwordPlaceholder": "输入 SSH 密码",
-        "passwordRequired": "请输入 SSH 密码",
-        "passwordKeepEmpty": "留空保持不变",
-        "passwordHint": "密码仅用于部署，不会明文存储",
-        "passwordEditHint": "如需修改密码请输入新密码",
-        "creating": "创建中...",
-        "saving": "保存中...",
-        "createWorker": "创建节点",
-        "saveChanges": "保存修改"
+      "actions": {
+        "title": "操作",
+        "config": "配置",
+        "regenerateKey": "重置 API Key",
+        "delete": "删除 Agent",
+        "deleteTitle": "删除 Agent",
+        "deleteDesc": "确定删除 Agent \"{name}\" 吗？此操作不可恢复。",
+        "regenerateTitle": "重置 API Key",
+        "regenerateDesc": "将轮换 API Key，Agent 需要重新连接。",
+        "regenerateResultTitle": "新的 API Key",
+        "regenerateResultEmpty": "未返回 API Key"
       },
-      "loadFailed": "加载失败",
-      "loadError": "加载节点数据时出现错误",
-      "terminal": {
-        "connected": "已连接",
-        "disconnected": "未连接",
-        "connecting": "正在建立 SSH 连接...",
-        "wsConnected": "WebSocket 已连接",
-        "connectionClosed": "连接已关闭",
-        "connectionFailed": "连接失败",
-        "wsConnectionFailed": "WebSocket 连接失败",
-        "waitingConnection": "等待连接...",
-        "pendingHint": "节点未部署，点击右侧按钮开始部署扫描环境",
-        "deployingHint": "正在部署中，点击查看进度",
-        "onlineHint": "节点运行正常",
-        "offlineHint": "节点离线，可尝试重新部署",
-        "updatingHint": "正在自动更新 Agent...",
-        "outdatedHint": "版本过低，需要更新",
-        "reconnect": "重新连接",
-        "startDeploy": "开始部署",
-        "viewProgress": "查看进度",
-        "redeploy": "重新部署",
-        "uninstall": "卸载"
-      }
+      "config": {
+        "title": "调度配置",
+        "desc": "调整并发任务与资源阈值",
+        "maxTasks": "最大任务数",
+        "maxTasksDesc": "单个 Agent 允许的并发任务上限",
+        "cpuThreshold": "CPU %",
+        "memThreshold": "内存 %",
+        "diskThreshold": "磁盘 %",
+        "save": "保存配置",
+        "saving": "保存中..."
+      },
+      "empty": {
+        "title": "暂无 Agent",
+        "desc": "生成注册令牌并在远程服务器安装 Agent 以开始分布式扫描。",
+        "cta": "生成令牌"
+      },
+      "card": {
+        "warning": "警告",
+        "showDetails": "显示详情",
+        "hideDetails": "隐藏详情",
+        "systemMetrics": "系统指标",
+        "configuration": "配置信息",
+        "waitingForHeartbeat": "等待首次心跳数据..."
+      },
+      "list": {
+        "uptime": "运行"
+      },
+      "version": "v{version}",
+      "unknownHost": "未知主机",
+      "unknownIp": "未知 IP"
     },
     "systemLogs": {
       "title": "系统日志",
@@ -1731,6 +1737,24 @@
       "changePassword": {
         "success": "修改成功",
         "error": "修改失败"
+      }
+    },
+    "agent": {
+      "token": {
+        "success": "令牌已生成",
+        "error": "生成令牌失败"
+      },
+      "config": {
+        "success": "配置已更新",
+        "error": "更新失败"
+      },
+      "key": {
+        "success": "API Key 已重置",
+        "error": "重置失败"
+      },
+      "delete": {
+        "success": "已删除 Agent",
+        "error": "删除失败"
       }
     },
     "worker": {
@@ -1985,6 +2009,63 @@
     "used": "已使用",
     "available": "可用空间"
   },
+  "databaseHealth": {
+    "overview": {
+      "title": "概览",
+      "description": "主数据库的实时状态快照",
+      "role": "角色",
+      "region": "区域",
+      "version": "版本",
+      "readOnly": "只读",
+      "uptime": "运行时长",
+      "lastCheck": "最近检查",
+      "roleValue": {
+        "primary": "主库",
+        "replica": "从库"
+      },
+      "readOnlyYes": "是",
+      "readOnlyNo": "否"
+    },
+    "status": {
+      "online": "在线",
+      "degraded": "降级",
+      "maintenance": "维护中",
+      "offline": "离线"
+    },
+    "metrics": {
+      "latencyP95": "延迟 p95",
+      "connections": "连接数",
+      "replicationLag": "复制延迟",
+      "cacheHitRate": "缓存命中率",
+      "qps": "QPS",
+      "diskUsage": "磁盘使用率",
+      "walGenerated": "WAL 产生量 (24h)",
+      "deadlocks": "死锁 (1h)",
+      "longTransactions": "长事务",
+      "backupFreshness": "备份新鲜度"
+    },
+    "sections": {
+      "core": "核心指标",
+      "signals": "运行信号",
+      "signalsDesc": "基于 PostgreSQL 统计的运行信号"
+    },
+    "hints": {
+      "latencyP95": "目标 < 50 ms",
+      "connections": "占用 {value}% 上限",
+      "replicationLag": "目标 < 1000 ms",
+      "cacheHitRate": "目标 > 99%"
+    },
+    "alerts": {
+      "title": "告警",
+      "description": "近期健康事件与告警",
+      "empty": "暂无告警",
+      "severity": {
+        "info": "提示",
+        "warning": "警告",
+        "critical": "严重"
+      }
+    }
+  },
   "subdomains": {
     "loadFailed": "加载失败",
     "loadError": "加载域名数据时出现错误，请重试",
@@ -2064,8 +2145,12 @@
       "description": "管理系统中的所有目标信息"
     },
     "workers": {
-      "title": "扫描节点",
-      "description": "管理分布式扫描节点，支持远程 VPS 自动部署"
+      "title": "Agent 节点",
+      "description": "管理 Agent 安装、健康状态与调度阈值"
+    },
+    "databaseHealth": {
+      "title": "数据库健康",
+      "description": "监控 PostgreSQL 可用性、性能与复制信号"
     },
     "wordlists": {
       "title": "字典管理",

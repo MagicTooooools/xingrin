@@ -29,4 +29,10 @@ func TestBuildWebSocketURLInvalid(t *testing.T) {
 	if _, err := BuildWebSocketURL("example.com"); err == nil {
 		t.Fatalf("expected error for missing scheme")
 	}
+	if _, err := BuildWebSocketURL(" "); err == nil {
+		t.Fatalf("expected error for empty url")
+	}
+	if _, err := BuildWebSocketURL("ftp://example.com"); err == nil {
+		t.Fatalf("expected error for unsupported scheme")
+	}
 }

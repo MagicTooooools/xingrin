@@ -24,169 +24,101 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { useCreateWorker, useUpdateWorker } from "@/hooks/use-workers"
-import type { WorkerNode } from "@/types/worker.types"
+import { useUpdateAgentConfig } from "@/hooks/use-agents"
+import type { Agent } from "@/types/agent.types"
 
-// Explicitly define form type to resolve type inference issues
 type FormValues = {
-  name: string
-  ipAddress: string
-  sshPort: number
-  username: string
-  password?: string
+  maxTasks: number
+  cpuThreshold: number
+  memThreshold: number
+  diskThreshold: number
 }
 
-interface WorkerDialogProps {
+interface AgentConfigDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  worker?: WorkerNode | null
+  agent?: Agent | null
 }
 
-export function WorkerDialog({ open, onOpenChange, worker }: WorkerDialogProps) {
+export function AgentConfigDialog({ open, onOpenChange, agent }: AgentConfigDialogProps) {
   const t = useTranslations("settings.workers")
   const tCommon = useTranslations("common.actions")
-  const createWorker = useCreateWorker()
-  const updateWorker = useUpdateWorker()
-  const isEditing = !!worker
+  const updateAgentConfig = useUpdateAgentConfig()
 
-  // Form validation Schema - using translations
   const formSchema = z.object({
-    name: z.string().min(1, t("form.nameRequired")).max(100, t("form.nameTooLong")),
-    ipAddress: z.string()
-      .min(1, t("form.ipRequired"))
-      .regex(
-        /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/,
-        t("form.ipInvalid")
-      ),
-    sshPort: z.coerce.number().int().min(1).max(65535),
-    username: z.string().min(1, t("form.usernameRequired")),
-    password: z.string().optional(),
+    maxTasks: z.coerce.number().int().min(1).max(20),
+    cpuThreshold: z.coerce.number().int().min(1).max(100),
+    memThreshold: z.coerce.number().int().min(1).max(100),
+    diskThreshold: z.coerce.number().int().min(1).max(100),
   })
-  
+
   const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema) as any, // Bypass type checking issue
+    resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
-      ipAddress: "",
-      sshPort: 22,
-      username: "root",
-      password: "",
+      maxTasks: 5,
+      cpuThreshold: 85,
+      memThreshold: 85,
+      diskThreshold: 90,
     },
   })
 
-  // Populate form data
   useEffect(() => {
-    if (open && worker) {
-      form.reset({
-        name: worker.name,
-        ipAddress: worker.ipAddress,
-        sshPort: worker.sshPort,
-        username: worker.username,
-        password: "", // Don't show password when editing
-      })
-    } else if (open && !worker) {
-      form.reset({
-        name: "",
-        ipAddress: "",
-        sshPort: 22,
-        username: "root",
-        password: "",
-      })
-    }
-  }, [open, worker, form])
+    if (!open) return
+    form.reset({
+      maxTasks: agent?.maxTasks ?? 5,
+      cpuThreshold: agent?.cpuThreshold ?? 85,
+      memThreshold: agent?.memThreshold ?? 85,
+      diskThreshold: agent?.diskThreshold ?? 90,
+    })
+  }, [open, agent, form])
 
   const onSubmit = async (values: FormValues) => {
+    if (!agent) return
     try {
-      if (isEditing && worker) {
-        await updateWorker.mutateAsync({
-          id: worker.id,
-          data: {
-            name: values.name,
-            sshPort: values.sshPort,
-            username: values.username,
-            password: values.password || undefined, // Don't send if empty
-          }
-        })
-      } else {
-        if (!values.password) {
-          form.setError("password", { message: t("form.passwordRequired") })
-          return
-        }
-        await createWorker.mutateAsync({
-          name: values.name,
-          ipAddress: values.ipAddress,
-          sshPort: values.sshPort,
-          username: values.username,
-          password: values.password,
-        })
-      }
-      form.reset()
+      await updateAgentConfig.mutateAsync({
+        id: agent.id,
+        data: values,
+      })
       onOpenChange(false)
-    } catch (error) {
-      // Error already handled in hook
+    } catch {
+      // handled by hook
     }
   }
 
-  const isPending = createWorker.isPending || updateWorker.isPending
+  const isPending = updateAgentConfig.isPending
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[420px]">
         <DialogHeader>
-          <DialogTitle>{isEditing ? t("editWorker") : t("addWorkerTitle")}</DialogTitle>
-          <DialogDescription>
-            {isEditing 
-              ? t("editWorkerDesc") 
-              : t("addWorkerDesc")}
-          </DialogDescription>
+          <DialogTitle>{t("config.title")}</DialogTitle>
+          <DialogDescription>{t("config.desc")}</DialogDescription>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
               control={form.control}
-              name="name"
+              name="maxTasks"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>{t("form.workerName")}</FormLabel>
+                  <FormLabel>{t("config.maxTasks")}</FormLabel>
                   <FormControl>
-                    <Input placeholder={t("form.workerNamePlaceholder")} {...field} />
+                    <Input type="number" min={1} max={20} {...field} />
                   </FormControl>
-                  <FormDescription>
-                    {t("form.workerNameDesc")}
-                  </FormDescription>
+                  <FormDescription>{t("config.maxTasksDesc")}</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="ipAddress"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t("form.hostIp")}</FormLabel>
-                  <FormControl>
-                    <Input 
-                      placeholder={t("form.hostIpPlaceholder")} 
-                      {...field} 
-                      disabled={isEditing} // 编辑时 IP 禁用
-                    />
-                  </FormControl>
-                  {isEditing && (
-                    <FormDescription>{t("form.ipNotEditable")}</FormDescription>
-                  )}
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-3 gap-3">
               <FormField
                 control={form.control}
-                name="sshPort"
+                name="cpuThreshold"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t("form.sshPort")}</FormLabel>
+                    <FormLabel>{t("config.cpuThreshold")}</FormLabel>
                     <FormControl>
-                      <Input type="number" {...field} />
+                      <Input type="number" min={1} max={100} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -194,46 +126,42 @@ export function WorkerDialog({ open, onOpenChange, worker }: WorkerDialogProps) 
               />
               <FormField
                 control={form.control}
-                name="username"
+                name="memThreshold"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t("form.username")}</FormLabel>
+                    <FormLabel>{t("config.memThreshold")}</FormLabel>
                     <FormControl>
-                      <Input placeholder={t("form.usernamePlaceholder")} {...field} />
+                      <Input type="number" min={1} max={100} {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="diskThreshold"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("config.diskThreshold")}</FormLabel>
+                    <FormControl>
+                      <Input type="number" min={1} max={100} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t("form.password")}</FormLabel>
-                  <FormControl>
-                    <Input type="password" placeholder={isEditing ? t("form.passwordKeepEmpty") : t("form.passwordPlaceholder")} {...field} />
-                  </FormControl>
-                  <FormDescription>
-                    {isEditing ? t("form.passwordEditHint") : t("form.passwordHint")}
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
             <DialogFooter>
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => onOpenChange(false)}
+                disabled={isPending}
               >
                 {tCommon("cancel")}
               </Button>
               <Button type="submit" disabled={isPending}>
-                {isPending 
-                  ? (isEditing ? t("form.saving") : t("form.creating")) 
-                  : (isEditing ? t("form.saveChanges") : t("form.createWorker"))}
+                {isPending ? t("config.saving") : t("config.save")}
               </Button>
             </DialogFooter>
           </form>

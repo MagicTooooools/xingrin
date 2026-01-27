@@ -1,18 +1,22 @@
 package docker
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/yyhuni/orbit/agent/internal/domain"
+)
 
 func TestResolveWorkerImage(t *testing.T) {
-	if got := resolveWorkerImage(""); got != workerImagePrefix+"latest" {
-		t.Fatalf("expected latest image, got %s", got)
+	if _, err := resolveWorkerImage(""); err == nil {
+		t.Fatalf("expected error for empty version")
 	}
-	if got := resolveWorkerImage("v1.2.3"); got != workerImagePrefix+"v1.2.3" {
-		t.Fatalf("expected version image, got %s", got)
+	if got, err := resolveWorkerImage("v1.2.3"); err != nil || got != workerImagePrefix+"v1.2.3" {
+		t.Fatalf("expected version image, got %s, err: %v", got, err)
 	}
 }
 
 func TestBuildWorkerEnv(t *testing.T) {
-	spec := &TaskSpec{
+	spec := &domain.Task{
 		ScanID:       1,
 		TargetID:     2,
 		TargetName:   "example.com",

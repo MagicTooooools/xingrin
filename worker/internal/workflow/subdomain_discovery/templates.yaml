@@ -93,8 +93,7 @@ tools:
       stage: recon
 
     base_command: >
-      subfinder -d {{.Domain}} -all -o {{quote .OutputFile}} -v
-      {{if .ProviderConfig}}-pc {{quote .ProviderConfig}}{{end}}
+      subfinder -d {{.Domain}} -all -o {{quote .OutputFile}} -v{{if .ProviderConfig}} -pc {{quote .ProviderConfig}}{{end}}
     runtime_params:
       - semantic_id: timeout-runtime
         var: Timeout

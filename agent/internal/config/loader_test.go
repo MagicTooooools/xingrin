@@ -1,13 +1,13 @@
 package config
 
 import (
-	"os"
 	"testing"
 )
 
 func TestLoadConfigFromEnvAndFlags(t *testing.T) {
 	t.Setenv("SERVER_URL", "https://example.com")
 	t.Setenv("API_KEY", "abc12345")
+	t.Setenv("AGENT_VERSION", "v1.2.3")
 	t.Setenv("MAX_TASKS", "5")
 	t.Setenv("CPU_THRESHOLD", "80")
 	t.Setenv("MEM_THRESHOLD", "81")
@@ -53,6 +53,7 @@ func TestLoadConfigFromEnvAndFlags(t *testing.T) {
 func TestLoadConfigMissingRequired(t *testing.T) {
 	t.Setenv("SERVER_URL", "")
 	t.Setenv("API_KEY", "")
+	t.Setenv("AGENT_VERSION", "v1.2.3")
 
 	_, err := Load([]string{})
 	if err == nil {
@@ -60,20 +61,15 @@ func TestLoadConfigMissingRequired(t *testing.T) {
 	}
 }
 
-func TestReadVersionPrefersEnv(t *testing.T) {
-	t.Setenv("AGENT_VERSION", "v9.9.9")
-	if got := ReadVersion(); got != "v9.9.9" {
-		t.Fatalf("expected version from env, got %s", got)
+func TestLoadConfigInvalidEnvValue(t *testing.T) {
+	t.Setenv("SERVER_URL", "https://example.com")
+	t.Setenv("API_KEY", "abc")
+	t.Setenv("AGENT_VERSION", "v1.2.3")
+	t.Setenv("MAX_TASKS", "nope")
+
+	_, err := Load([]string{})
+	if err == nil {
+		t.Fatalf("expected error for invalid MAX_TASKS")
 	}
 }
 
-func TestReadVersionFileFallback(t *testing.T) {
-	tmp := t.TempDir()
-	path := tmp + "/VERSION"
-	if err := os.WriteFile(path, []byte("v1.2.3\n"), 0644); err != nil {
-		t.Fatalf("write version file: %v", err)
-	}
-	if got := readVersionFile(path); got != "v1.2.3" {
-		t.Fatalf("expected version from file, got %s", got)
-	}
-}

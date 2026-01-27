@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/yyhuni/orbit/server/internal/agentproto"
 	"github.com/yyhuni/orbit/server/internal/cache"
 	"github.com/yyhuni/orbit/server/internal/model"
 	"github.com/yyhuni/orbit/server/internal/repository"
@@ -78,7 +79,7 @@ func TestHandleHeartbeatUpdatesRepoAndCache(t *testing.T) {
 
 	agent := &model.Agent{ID: 1}
 	now := time.Now().UTC()
-	payload := heartbeatPayload{
+	payload := agentproto.HeartbeatPayload{
 		CPU:      12.5,
 		Mem:      34.5,
 		Disk:     56.7,
@@ -86,7 +87,7 @@ func TestHandleHeartbeatUpdatesRepoAndCache(t *testing.T) {
 		Version:  "v1.0.0",
 		Hostname: "node-1",
 		Uptime:   120,
-		Health: &healthStatus{
+		Health: &agentproto.HealthStatus{
 			State: "ok",
 			Since: &now,
 		},

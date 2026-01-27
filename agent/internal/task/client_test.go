@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"strings"
 	"testing"
+
+	"github.com/yyhuni/orbit/agent/internal/domain"
 )
 
 func TestClientPullTaskNoContent(t *testing.T) {
@@ -45,7 +47,7 @@ func TestClientPullTaskOK(t *testing.T) {
 				if r.Header.Get("X-Agent-Key") == "" {
 					t.Fatalf("missing api key header")
 				}
-				body, _ := json.Marshal(Task{ID: 1})
+				body, _ := json.Marshal(domain.Task{ID: 1})
 				return &http.Response{
 					StatusCode: http.StatusOK,
 					Body:       io.NopCloser(bytes.NewReader(body)),

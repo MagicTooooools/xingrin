@@ -1,6 +1,6 @@
 "use client"
 
-import { WorkerList } from "@/components/settings/workers"
+import { AgentList } from "@/components/settings/workers"
 import { useTranslations } from "next-intl"
 
 export default function WorkersPage() {
@@ -16,7 +16,7 @@ export default function WorkersPage() {
           </p>
         </div>
       </div>
-      <WorkerList />
+      <AgentList />
     </div>
   )
 }

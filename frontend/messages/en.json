@@ -326,8 +326,9 @@
     "fingerprints": "Fingerprints",
     "nucleiTemplates": "Nuclei Templates",
     "settings": "Settings",
-    "workers": "Workers",
+    "workers": "Agents",
     "systemLogs": "System Logs",
+    "databaseHealth": "Database Health",
     "notifications": "Notifications",
     "apiKeys": "API Keys",
     "globalBlacklist": "Global Blacklist",
@@ -1365,112 +1366,117 @@
   "settings": {
     "title": "Settings",
     "workers": {
-      "title": "Workers",
-      "name": "Worker Name",
-      "status": "Status",
-      "online": "Online",
-      "offline": "Offline",
-      "lastSeen": "Last Seen",
-      "addWorker": "Add Worker",
-      "editWorker": "Edit Worker",
-      "addWorkerTitle": "Add Worker",
-      "addWorkerDesc": "Enter SSH connection info for remote VPS. After adding, you can deploy scanning environment via \"Manage Deployment\"",
-      "editWorkerDesc": "Modify SSH connection info",
-      "noWorkers": "No Workers",
-      "noWorkersDesc": "Add remote VPS servers as scan workers to enable distributed scanning",
-      "addFirstWorker": "Add First Worker",
-      "confirmDelete": "Confirm Delete",
-      "confirmDeleteDesc": "Are you sure you want to delete worker \"{name}\"? This action cannot be undone.",
-      "confirmUninstall": "Confirm Uninstall",
-      "confirmUninstallDesc": "Are you sure you want to uninstall Agent and delete related containers on the remote host? This will not uninstall Docker.",
-      "workerNodes": "Worker Nodes",
-      "workerNodesDesc": "Manage distributed scan workers, support remote deployment and monitoring",
-      "local": "Local",
-      "memory": "Memory",
-      "manageDeploy": "Manage Deployment",
-      "edit": "Edit",
-      "delete": "Delete",
-      "learnMore": "Learn More",
-      "gotIt": "Got It",
+      "title": "Agents",
+      "install": {
+        "title": "Install Agent",
+        "desc": "Open the installer and copy the command to your target server.",
+        "step1Label": "Step 1",
+        "step1Desc": "Copy the install command",
+        "step2Label": "Step 2",
+        "step2Desc": "Run it on the target server",
+        "step3Label": "Step 3",
+        "step3Desc": "Agent connects and appears in the list",
+        "tokenTitle": "Registration Token",
+        "tokenDesc": "Each token expires in 1 hour. Use it to bootstrap a new agent.",
+        "generateToken": "Generate Command",
+        "regenerateToken": "Regenerate Command",
+        "tokenPlaceholder": "Generate a token to display",
+        "tokenExpires": "Expires at {time}",
+        "tokenHint": "Generate a token to unlock the install commands",
+        "commandTitle": "Install Command",
+        "commandDesc": "Copy and run the command on your target server",
+        "commandPlaceholder": "Generating install command...",
+        "commandStatusReady": "Command ready",
+        "commandStatusGenerating": "Generating command",
+        "commandExpires": "Expires {time}",
+        "stepsTitle": "Steps",
+        "requirementsTitle": "Prerequisites",
+        "requirementsDocker": "Docker installed and running",
+        "requirementsAccess": "Outbound access to the server",
+        "linuxTab": "Linux / macOS",
+        "windowsTab": "Windows",
+        "commandHint": "Make sure Docker is installed and the server is reachable",
+        "openDialog": "Open installer",
+        "showAdvanced": "Show install commands",
+        "hideAdvanced": "Hide install commands"
+      },
       "stats": {
         "total": "Total",
         "online": "Online",
         "offline": "Offline",
-        "pending": "Pending"
+        "unhealthy": "Unhealthy"
       },
       "status": {
         "online": "Online",
         "offline": "Offline",
-        "pending": "Pending Deploy",
-        "deploying": "Deploying",
-        "updating": "Updating",
-        "outdated": "Outdated"
+        "unknown": "Unknown"
       },
-      "helpDialog": {
-        "title": "What is Distributed Scanning?",
-        "desc": "Distributed scanning allows you to distribute scan tasks to multiple remote servers (scan workers) for parallel execution, significantly improving scanning efficiency."
+      "health": {
+        "ok": "Healthy",
+        "warning": "Warning",
+        "error": "Error",
+        "unknown": "Unknown"
       },
-      "banner": {
-        "title": "Distributed Scanning:",
-        "desc": "Add VPS Workers → One-click Deploy → Auto Task Distribution"
+      "agents": {
+        "title": "Agent Fleet",
+        "desc": "Monitor agent health, version, and scheduling thresholds"
       },
-      "steps": {
-        "step1Title": "Add Worker",
-        "step1Desc": "Click \"Add Worker\" button, fill in VPS SSH connection info (IP, port, username, password)",
-        "step2Title": "Deploy Environment",
-        "step2Desc": "Click \"Manage Deployment\" button, system will automatically install Docker and heartbeat agent via SSH",
-        "step3Title": "Auto Distribution",
-        "step3Desc": "After deployment, workers will report heartbeat automatically, scan tasks will be distributed based on load"
+      "metrics": {
+        "lastHeartbeat": "Last heartbeat",
+        "connectedAt": "Connected",
+        "maxTasks": "Max tasks {value}",
+        "cpuThreshold": "CPU {value}%",
+        "memThreshold": "Mem {value}%",
+        "diskThreshold": "Disk {value}%",
+        "cpu": "CPU",
+        "mem": "Memory",
+        "disk": "Disk",
+        "tasks": "Tasks",
+        "uptime": "Uptime {value}",
+        "updatedAt": "Updated {value}"
       },
-      "form": {
-        "workerName": "Worker Name",
-        "workerNamePlaceholder": "e.g., Scanner-1",
-        "workerNameDesc": "Name to identify the worker",
-        "nameRequired": "Please enter worker name",
-        "nameTooLong": "Name cannot exceed 100 characters",
-        "hostIp": "IP Address",
-        "hostIpPlaceholder": "e.g., 192.168.1.100",
-        "ipRequired": "Please enter IP address",
-        "ipInvalid": "Please enter a valid IP address",
-        "ipNotEditable": "IP address cannot be modified",
-        "sshPort": "SSH Port",
-        "username": "Username",
-        "usernameRequired": "Please enter username",
-        "usernamePlaceholder": "e.g., root",
-        "password": "SSH Password",
-        "passwordPlaceholder": "Enter SSH password",
-        "passwordRequired": "Please enter SSH password",
-        "passwordKeepEmpty": "Leave empty to keep unchanged",
-        "passwordHint": "Password is only used for deployment and will not be stored in plain text",
-        "passwordEditHint": "Enter new password if you want to change it",
-        "creating": "Creating...",
-        "saving": "Saving...",
-        "createWorker": "Create Worker",
-        "saveChanges": "Save Changes"
+      "actions": {
+        "title": "Actions",
+        "config": "Edit Config",
+        "regenerateKey": "Regenerate API Key",
+        "delete": "Delete Agent",
+        "deleteTitle": "Delete Agent",
+        "deleteDesc": "Delete agent \"{name}\"? This action cannot be undone.",
+        "regenerateTitle": "Regenerate API Key",
+        "regenerateDesc": "This will rotate the API key and disconnect the agent until it reconnects.",
+        "regenerateResultTitle": "New API Key",
+        "regenerateResultEmpty": "No API key returned"
       },
-      "loadFailed": "Failed to load",
-      "loadError": "Error loading worker data",
-      "terminal": {
-        "connected": "Connected",
-        "disconnected": "Disconnected",
-        "connecting": "Establishing SSH connection...",
-        "wsConnected": "WebSocket connected",
-        "connectionClosed": "Connection closed",
-        "connectionFailed": "Connection failed",
-        "wsConnectionFailed": "WebSocket connection failed",
-        "waitingConnection": "Waiting for connection...",
-        "pendingHint": "Node not deployed, click the button on the right to start deploying scan environment",
-        "deployingHint": "Deploying, click to view progress",
-        "onlineHint": "Node running normally",
-        "offlineHint": "Node offline, try redeploying",
-        "updatingHint": "Auto-updating Agent...",
-        "outdatedHint": "Version outdated, needs update",
-        "reconnect": "Reconnect",
-        "startDeploy": "Start Deploy",
-        "viewProgress": "View Progress",
-        "redeploy": "Redeploy",
-        "uninstall": "Uninstall"
-      }
+      "config": {
+        "title": "Scheduling Config",
+        "desc": "Adjust task concurrency and resource thresholds",
+        "maxTasks": "Max Tasks",
+        "maxTasksDesc": "Maximum concurrent tasks for this agent",
+        "cpuThreshold": "CPU %",
+        "memThreshold": "Mem %",
+        "diskThreshold": "Disk %",
+        "save": "Save Config",
+        "saving": "Saving..."
+      },
+      "empty": {
+        "title": "No agents yet",
+        "desc": "Generate a registration token and install agents on your remote servers to start distributing scan tasks.",
+        "cta": "Generate Token"
+      },
+      "card": {
+        "warning": "Warning",
+        "showDetails": "Show Details",
+        "hideDetails": "Hide Details",
+        "systemMetrics": "System Metrics",
+        "configuration": "Configuration",
+        "waitingForHeartbeat": "Waiting for first heartbeat..."
+      },
+      "list": {
+        "uptime": "Uptime"
+      },
+      "version": "v{version}",
+      "unknownHost": "Unknown host",
+      "unknownIp": "Unknown IP"
     },
     "systemLogs": {
       "title": "System Logs",
@@ -1717,6 +1723,24 @@
       "changePassword": {
         "success": "Change successful",
         "error": "Change failed"
+      }
+    },
+    "agent": {
+      "token": {
+        "success": "Token generated",
+        "error": "Failed to generate token"
+      },
+      "config": {
+        "success": "Config updated",
+        "error": "Update failed"
+      },
+      "key": {
+        "success": "API key regenerated",
+        "error": "Regenerate failed"
+      },
+      "delete": {
+        "success": "Agent deleted",
+        "error": "Delete failed"
       }
     },
     "worker": {
@@ -1971,6 +1995,63 @@
     "used": "Used",
     "available": "Available"
   },
+  "databaseHealth": {
+    "overview": {
+      "title": "Overview",
+      "description": "Real-time snapshot of the primary database",
+      "role": "Role",
+      "region": "Region",
+      "version": "Version",
+      "readOnly": "Read-only",
+      "uptime": "Uptime",
+      "lastCheck": "Last check",
+      "roleValue": {
+        "primary": "Primary",
+        "replica": "Replica"
+      },
+      "readOnlyYes": "Yes",
+      "readOnlyNo": "No"
+    },
+    "status": {
+      "online": "Online",
+      "degraded": "Degraded",
+      "maintenance": "Maintenance",
+      "offline": "Offline"
+    },
+    "metrics": {
+      "latencyP95": "Latency p95",
+      "connections": "Connections",
+      "replicationLag": "Replication lag",
+      "cacheHitRate": "Cache hit rate",
+      "qps": "QPS",
+      "diskUsage": "Disk usage",
+      "walGenerated": "WAL generated (24h)",
+      "deadlocks": "Deadlocks (1h)",
+      "longTransactions": "Long transactions",
+      "backupFreshness": "Backup freshness"
+    },
+    "sections": {
+      "core": "Core indicators",
+      "signals": "Signals",
+      "signalsDesc": "Operational signals derived from PostgreSQL stats"
+    },
+    "hints": {
+      "latencyP95": "Target < 50 ms",
+      "connections": "{value}% of limit",
+      "replicationLag": "Target < 1000 ms",
+      "cacheHitRate": "Target > 99%"
+    },
+    "alerts": {
+      "title": "Active alerts",
+      "description": "Recent health events and ongoing warnings",
+      "empty": "No active alerts",
+      "severity": {
+        "info": "Info",
+        "warning": "Warning",
+        "critical": "Critical"
+      }
+    }
+  },
   "subdomains": {
     "loadFailed": "Load Failed",
     "loadError": "Error loading subdomain data, please retry",
@@ -2050,8 +2131,12 @@
       "description": "Manage all targets in the system"
     },
     "workers": {
-      "title": "Workers",
-      "description": "Manage distributed scan workers, supports remote VPS auto-deployment"
+      "title": "Agents",
+      "description": "Manage agent installation, health, and scheduling thresholds"
+    },
+    "databaseHealth": {
+      "title": "Database Health",
+      "description": "Monitor PostgreSQL availability, performance, and replication signals"
     },
     "wordlists": {
       "title": "Wordlist Management",

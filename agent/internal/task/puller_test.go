@@ -4,6 +4,8 @@ import (
 	"math/rand"
 	"testing"
 	"time"
+
+	"github.com/yyhuni/orbit/agent/internal/domain"
 )
 
 func TestPullerUpdateConfig(t *testing.T) {
@@ -22,15 +24,11 @@ func TestPullerUpdateConfig(t *testing.T) {
 	}
 }
 
-func TestPullerPauseResume(t *testing.T) {
+func TestPullerPause(t *testing.T) {
 	p := NewPuller(nil, nil, nil, 1, 1, 1, 1)
 	p.Pause()
 	if !p.paused.Load() {
 		t.Fatalf("expected paused")
-	}
-	p.Resume()
-	if p.paused.Load() {
-		t.Fatalf("expected resumed")
 	}
 }
 
@@ -39,7 +37,7 @@ func TestPullerEnsureTaskHandler(t *testing.T) {
 	if err := p.EnsureTaskHandler(); err == nil {
 		t.Fatalf("expected error when handler missing")
 	}
-	p.SetOnTask(func(*Task) {})
+	p.SetOnTask(func(*domain.Task) {})
 	if err := p.EnsureTaskHandler(); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}

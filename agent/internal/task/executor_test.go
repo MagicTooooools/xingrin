@@ -4,6 +4,8 @@ import (
 	"context"
 	"testing"
 	"time"
+
+	"github.com/yyhuni/orbit/agent/internal/domain"
 )
 
 type fakeReporter struct {
@@ -25,7 +27,7 @@ func TestExecutorMissingWorkerToken(t *testing.T) {
 		workerToken: "",
 	}
 
-	exec.execute(context.Background(), &Task{ID: 1})
+	exec.execute(context.Background(), &domain.Task{ID: 1})
 	if reporter.status != "failed" {
 		t.Fatalf("expected failed status, got %s", reporter.status)
 	}
@@ -42,7 +44,7 @@ func TestExecutorDockerUnavailable(t *testing.T) {
 		workerToken: "token",
 	}
 
-	exec.execute(context.Background(), &Task{ID: 2})
+	exec.execute(context.Background(), &domain.Task{ID: 2})
 	if reporter.status != "failed" {
 		t.Fatalf("expected failed status, got %s", reporter.status)
 	}

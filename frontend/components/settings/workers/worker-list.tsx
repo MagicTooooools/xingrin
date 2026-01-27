@@ -1,19 +1,19 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { useTranslations } from "next-intl"
 import {
-  IconPlus,
   IconServer,
-  IconTerminal2,
-  IconTrash,
-  IconEdit,
   IconCloud,
   IconCloudOff,
-  IconClock,
+  IconHeartbeat,
+  IconDotsVertical,
+  IconSettings,
+  IconKey,
+  IconTrash,
+  IconLoader2,
 } from "@tabler/icons-react"
 import { Button } from "@/components/ui/button"
-import { Status, StatusIndicator, StatusLabel } from "@/components/ui/shadcn-io/status"
 import { Badge } from "@/components/ui/badge"
 import {
   Card,
@@ -23,357 +23,526 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs"
 import {
-  Banner,
-  BannerIcon,
-  BannerTitle,
-  BannerAction,
-  BannerClose,
-} from "@/components/ui/shadcn-io/banner"
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import { ConfirmDialog } from "@/components/ui/confirm-dialog"
+import { Status, StatusIndicator, StatusLabel } from "@/components/ui/shadcn-io/status"
 import { Skeleton } from "@/components/ui/skeleton"
-import { useWorkers, useDeleteWorker } from "@/hooks/use-workers"
-import type { WorkerNode, WorkerStatus } from "@/types/worker.types"
-import { WorkerDialog } from "./worker-dialog"
-import { DeployTerminalDialog } from "./deploy-terminal-dialog"
-import { Rocket } from "lucide-react"
+import { CopyablePopoverContent } from "@/components/ui/copyable-popover-content"
+import { useFormatNumber, useFormatRelativeTime } from "@/lib/i18n-format"
+import {
+  useAgents,
+  useCreateRegistrationToken,
+  useDeleteAgent,
+  useRegenerateAgentKey,
+} from "@/hooks/use-agents"
+import type { Agent, RegistrationTokenResponse } from "@/types/agent.types"
+import { AgentConfigDialog } from "./worker-dialog"
+import { AgentCardCompact } from "./agent-card-compact"
 
-// Backend status -> shadcn status mapping
-const STATUS_MAP: Record<WorkerStatus, 'online' | 'offline' | 'maintenance' | 'degraded'> = {
-  online: 'online',
-  offline: 'offline',
-  pending: 'maintenance',
-  deploying: 'degraded',
-  updating: 'degraded',
-  outdated: 'offline',
-}
+const FALLBACK_SERVER_URL = "https://your-orbit-server"
 
-// Stats cards component
-function StatsCards({ workers, t }: { workers: WorkerNode[], t: ReturnType<typeof useTranslations> }) {
-  const total = workers.length
-  const online = workers.filter(w => w.status === 'online').length
-  const offline = workers.filter(w => w.status === 'offline').length
-  const pending = workers.filter(w => w.status === 'pending').length
+function InstallDialog({
+  token,
+  onGenerate,
+  isGenerating,
+  open,
+  onOpenChange,
+}: {
+  token: RegistrationTokenResponse | null
+  onGenerate: () => void
+  isGenerating: boolean
+  open: boolean
+  onOpenChange: (open: boolean) => void
+}) {
+  const t = useTranslations("settings.workers")
+  const formatRelativeTime = useFormatRelativeTime()
+  const [serverUrl, setServerUrl] = useState("")
+  const autoRequestedRef = useRef(false)
 
-  const stats = [
-    { label: t("stats.total"), value: total, icon: IconServer, color: 'text-foreground' },
-    { label: t("stats.online"), value: online, icon: IconCloud, color: 'text-emerald-600' },
-    { label: t("stats.offline"), value: offline, icon: IconCloudOff, color: 'text-red-500' },
-    { label: t("stats.pending"), value: pending, icon: IconClock, color: 'text-amber-500' },
-  ]
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setServerUrl(window.location.origin)
+    }
+  }, [])
+
+  const safeServerUrl = serverUrl || FALLBACK_SERVER_URL
+  const registrationToken = token?.token || ""
+  const hasToken = Boolean(registrationToken)
+
+  const tokenExpiresAt = useMemo(() => {
+    if (!token?.expiresAt) return 0
+    const timestamp = new Date(token.expiresAt).getTime()
+    return Number.isNaN(timestamp) ? 0 : timestamp
+  }, [token])
+
+  const isTokenValid = tokenExpiresAt > Date.now()
+
+  const linuxCommand = useMemo(() => {
+    if (!registrationToken) return ""
+    return `curl -fsSL "${safeServerUrl}/api/agents/install.sh?token=${registrationToken}" | bash`
+  }, [safeServerUrl, registrationToken])
+
+  const windowsCommand = useMemo(() => {
+    if (!registrationToken) return ""
+    return `irm "${safeServerUrl}/api/agents/install.ps1?token=${registrationToken}" | iex`
+  }, [safeServerUrl, registrationToken])
+
+  useEffect(() => {
+    if (!open) {
+      autoRequestedRef.current = false
+      return
+    }
+    if (isGenerating || isTokenValid) return
+    if (autoRequestedRef.current) return
+    autoRequestedRef.current = true
+    onGenerate()
+  }, [open, isGenerating, isTokenValid, onGenerate])
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-      {stats.map((stat) => (
-        <Card key={stat.label} className="p-4">
-          <div className="flex items-center gap-3">
-            <div className={`p-2 rounded-lg bg-muted ${stat.color}`}>
-              <stat.icon className="h-5 w-5" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold">{stat.value}</p>
-              <p className="text-xs text-muted-foreground">{stat.label}</p>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <Card className="border-muted/60 bg-gradient-to-br from-muted/40 via-background to-background">
+        <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <CardTitle className="flex items-center gap-2">
+              <IconHeartbeat className="h-5 w-5 text-primary" />
+              {t("install.title")}
+            </CardTitle>
+            <CardDescription>{t("install.desc")}</CardDescription>
+          </div>
+          <DialogTrigger asChild>
+            <Button size="sm">{t("install.openDialog")}</Button>
+          </DialogTrigger>
+        </CardHeader>
+      </Card>
+
+      <DialogContent className="sm:max-w-[720px]">
+        <DialogHeader>
+          <DialogTitle>{t("install.title")}</DialogTitle>
+          <DialogDescription>{t("install.desc")}</DialogDescription>
+        </DialogHeader>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <Badge variant="outline" className={hasToken ? "border-emerald-500/30 text-emerald-600" : "border-muted-foreground/30"}>
+              {hasToken ? t("install.commandStatusReady") : t("install.commandStatusGenerating")}
+            </Badge>
+            {hasToken && token?.expiresAt && (
+              <span>{t("install.commandExpires", { time: formatRelativeTime(token.expiresAt) })}</span>
+            )}
+          </div>
+          <Button size="sm" onClick={onGenerate} disabled={isGenerating}>
+            {isGenerating && <IconLoader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {token ? t("install.regenerateToken") : t("install.generateToken")}
+          </Button>
+        </div>
+
+        <div className="grid gap-4 lg:grid-cols-[1.3fr,0.7fr]">
+          <div className="space-y-3">
+            <div className="rounded-lg border bg-background p-3 space-y-3">
+              <div>
+                <p className="text-sm font-medium">{t("install.commandTitle")}</p>
+                <p className="text-xs text-muted-foreground">{t("install.commandDesc")}</p>
+              </div>
+              <Tabs defaultValue="linux" className="w-full">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="linux">{t("install.linuxTab")}</TabsTrigger>
+                  <TabsTrigger value="windows">{t("install.windowsTab")}</TabsTrigger>
+                </TabsList>
+                <TabsContent value="linux" className="space-y-2">
+                  <div className="rounded-lg border bg-muted/40 p-3">
+                    {hasToken ? (
+                      <CopyablePopoverContent value={linuxCommand} className="font-mono text-xs whitespace-pre-wrap" />
+                    ) : (
+                      <div className="text-xs text-muted-foreground">{t("install.commandPlaceholder")}</div>
+                    )}
+                  </div>
+                </TabsContent>
+                <TabsContent value="windows" className="space-y-2">
+                  <div className="rounded-lg border bg-muted/40 p-3">
+                    {hasToken ? (
+                      <CopyablePopoverContent value={windowsCommand} className="font-mono text-xs whitespace-pre-wrap" />
+                    ) : (
+                      <div className="text-xs text-muted-foreground">{t("install.commandPlaceholder")}</div>
+                    )}
+                  </div>
+                </TabsContent>
+              </Tabs>
             </div>
           </div>
-        </Card>
-      ))}
-    </div>
-  )
-}
 
-// Quick start guide banner
-function QuickStartBanner({ t }: { t: ReturnType<typeof useTranslations> }) {
-  const [helpOpen, setHelpOpen] = useState(false)
-
-  const steps = [
-    { step: 1, title: t("steps.step1Title"), desc: t("steps.step1Desc") },
-    { step: 2, title: t("steps.step2Title"), desc: t("steps.step2Desc") },
-    { step: 3, title: t("steps.step3Title"), desc: t("steps.step3Desc") },
-  ]
-
-  return (
-    <>
-      <Banner inset className="mb-6">
-        <BannerIcon icon={Rocket} />
-        <BannerTitle>
-          <span className="font-medium">{t("banner.title")}</span>
-          <span className="opacity-90">{t("banner.desc")}</span>
-        </BannerTitle>
-        <BannerAction onClick={() => setHelpOpen(true)}>
-          {t("learnMore")}
-        </BannerAction>
-        <BannerClose />
-      </Banner>
-
-      <AlertDialog open={helpOpen} onOpenChange={setHelpOpen}>
-        <AlertDialogContent className="max-w-lg">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2">
-              <Rocket className="h-5 w-5" />
-              {t("helpDialog.title")}
-            </AlertDialogTitle>
-            <AlertDialogDescription asChild>
-              <div className="space-y-4 text-left">
-                <p>
-                  {t("helpDialog.desc")}
-                </p>
-                <div className="space-y-3">
-                  {steps.map((item) => (
-                    <div key={item.step} className="flex gap-3">
-                      <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-medium">
-                        {item.step}
-                      </div>
-                      <div>
-                        <p className="font-medium text-sm text-foreground">{item.title}</p>
-                        <p className="text-xs text-muted-foreground">{item.desc}</p>
-                      </div>
-                    </div>
-                  ))}
+          <div className="space-y-3">
+            <div className="rounded-lg border bg-muted/30 p-3">
+              <p className="text-sm font-medium mb-2">{t("install.stepsTitle")}</p>
+              <div className="grid gap-2 text-xs text-muted-foreground">
+                <div className="flex items-center gap-2">
+                  <span className="rounded-full border bg-background px-2 py-0.5 text-[10px] font-medium text-foreground">
+                    {t("install.step1Label")}
+                  </span>
+                  <span>{t("install.step1Desc")}</span>
                 </div>
-              </div>
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogAction>{t("gotIt")}</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </>
-  )
-}
-
-// Worker card view component
-function WorkerCardView({ 
-  workers, 
-  onEdit, 
-  onManage, 
-  onDelete,
-  t
-}: { 
-  workers: WorkerNode[]
-  onEdit: (w: WorkerNode) => void
-  onManage: (w: WorkerNode) => void
-  onDelete: (w: WorkerNode) => void
-  t: ReturnType<typeof useTranslations>
-}) {
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-      {workers.map((worker) => (
-        <Card key={worker.id}>
-          <CardHeader className="pb-2">
-            <div className="flex items-start justify-between">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-muted">
-                  <IconServer className="h-5 w-5 text-muted-foreground" />
+                <div className="flex items-center gap-2">
+                  <span className="rounded-full border bg-background px-2 py-0.5 text-[10px] font-medium text-foreground">
+                    {t("install.step2Label")}
+                  </span>
+                  <span>{t("install.step2Desc")}</span>
                 </div>
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2">
-                      <CardTitle className="text-base">{worker.name}</CardTitle>
-                      {worker.isLocal && (
-                        <Badge variant="outline" className="text-xs bg-[#848d97]/10 text-[#848d97] border-[#848d97]/20">{t("local")}</Badge>
-                      )}
-                    </div>
-                    <Status status={STATUS_MAP[worker.status]} className="mt-1">
-                      <StatusIndicator />
-                      <StatusLabel>{t(`status.${worker.status}`)}</StatusLabel>
-                    </Status>
-                  </div>
-              </div>
-              {/* Local node doesn't show edit and delete buttons */}
-              {!worker.isLocal && (
-                <div className="flex gap-1">
-                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onEdit(worker)} title={t("edit")}>
-                    <IconEdit className="h-4 w-4" />
-                  </Button>
-                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onDelete(worker)} title={t("delete")}>
-                    <IconTrash className="h-4 w-4 text-destructive" />
-                  </Button>
+                <div className="flex items-center gap-2">
+                  <span className="rounded-full border bg-background px-2 py-0.5 text-[10px] font-medium text-foreground">
+                    {t("install.step3Label")}
+                  </span>
+                  <span>{t("install.step3Desc")}</span>
                 </div>
-              )}
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {/* All nodes show CPU and memory */}
-            <div className="grid grid-cols-2 gap-2 text-sm">
-              <div className="text-center p-2 rounded-lg bg-muted">
-                <p className="text-xs text-muted-foreground">CPU</p>
-                <p className="font-mono font-medium">
-                  {worker.info?.cpuPercent != null ? `${worker.info.cpuPercent.toFixed(1)}%` : '-'}
-                </p>
-              </div>
-              <div className="text-center p-2 rounded-lg bg-muted">
-                <p className="text-xs text-muted-foreground">{t("memory")}</p>
-                <p className="font-mono font-medium">
-                  {worker.info?.memoryPercent != null ? `${worker.info.memoryPercent.toFixed(1)}%` : '-'}
-                </p>
               </div>
             </div>
-            
-            {/* Remote nodes: additionally show connection info and manage button */}
-            {!worker.isLocal && (
-              <>
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <span className="font-mono">{worker.ipAddress}:{worker.sshPort}</span>
-                  <span>•</span>
-                  <span>{worker.username}</span>
+
+            <div className="rounded-lg border bg-muted/30 p-3">
+              <p className="text-sm font-medium mb-2">{t("install.requirementsTitle")}</p>
+              <div className="grid gap-2 text-xs text-muted-foreground">
+                <div className="flex items-center gap-2">
+                  <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/60" />
+                  <span>{t("install.requirementsDocker")}</span>
                 </div>
-                
-                <Button variant="outline" size="sm" className="w-full" onClick={() => onManage(worker)}>
-                  <IconTerminal2 className="h-4 w-4 mr-1.5" />
-                  {t("manageDeploy")}
-                </Button>
-              </>
-            )}
-          </CardContent>
-        </Card>
-      ))}
-    </div>
+                <div className="flex items-center gap-2">
+                  <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/60" />
+                  <span>{t("install.requirementsAccess")}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
   )
 }
 
-// Empty state component
-function EmptyState({ onAdd, t }: { onAdd: () => void, t: ReturnType<typeof useTranslations> }) {
+function EmptyState({ onOpenInstall }: { onOpenInstall: () => void }) {
+  const t = useTranslations("settings.workers")
+
   return (
     <div className="flex flex-col items-center justify-center py-16 text-center">
       <div className="p-4 rounded-full bg-muted mb-4">
         <IconServer className="h-12 w-12 text-muted-foreground" />
       </div>
-      <h3 className="text-lg font-semibold mb-2">{t("noWorkers")}</h3>
-      <p className="text-sm text-muted-foreground mb-6 max-w-md">
-        {t("noWorkersDesc")}
-      </p>
-      <Button onClick={onAdd}>
-        <IconPlus className="h-4 w-4 mr-2" />
-        {t("addFirstWorker")}
-      </Button>
+      <h3 className="text-lg font-semibold mb-2">{t("empty.title")}</h3>
+      <p className="text-sm text-muted-foreground mb-6 max-w-md">{t("empty.desc")}</p>
+      <Button onClick={onOpenInstall}>{t("empty.cta")}</Button>
     </div>
   )
 }
 
-export function WorkerList() {
+export function AgentList() {
   const t = useTranslations("settings.workers")
-  const tCommon = useTranslations("common.actions")
-  const [page, setPage] = useState(1)
+  const [page] = useState(1)
   const [pageSize] = useState(10)
-  const [workerDialogOpen, setWorkerDialogOpen] = useState(false)
+  const [installOpen, setInstallOpen] = useState(false)
+  const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null)
+  const [configDialogOpen, setConfigDialogOpen] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-  const [deployDialogOpen, setDeployDialogOpen] = useState(false)
-  const [selectedWorker, setSelectedWorker] = useState<WorkerNode | null>(null)
-  const [workerToDeploy, setWorkerToDeploy] = useState<WorkerNode | null>(null)
-  const [workerToDelete, setWorkerToDelete] = useState<WorkerNode | null>(null)
+  const [regenerateDialogOpen, setRegenerateDialogOpen] = useState(false)
+  const [agentToDelete, setAgentToDelete] = useState<Agent | null>(null)
+  const [agentToRegenerate, setAgentToRegenerate] = useState<Agent | null>(null)
+  const [token, setToken] = useState<RegistrationTokenResponse | null>(null)
+  const [apiKeyDialogOpen, setApiKeyDialogOpen] = useState(false)
+  const [apiKeyValue, setApiKeyValue] = useState<string | null>(null)
 
-  const { data, isLoading, refetch } = useWorkers(page, pageSize)
-  const deleteWorker = useDeleteWorker()
+  const { data, isLoading } = useAgents(page, pageSize)
+  const createToken = useCreateRegistrationToken()
+  const deleteAgent = useDeleteAgent()
+  const regenerateAgentKey = useRegenerateAgentKey()
 
-  const workers = data?.results || []
-  const hasWorkers = workers.length > 0
+  const agents = data?.results || []
+  const hasAgents = agents.length > 0
 
-  const handleAdd = () => {
-    setSelectedWorker(null)
-    setWorkerDialogOpen(true)
+  const stats = useMemo(() => {
+    const total = agents.length
+    const online = agents.filter((agent) => agent.status === "online").length
+    const offline = agents.filter((agent) => agent.status === "offline").length
+    const unhealthy = agents.filter((agent) => {
+      const state = agent.health?.state?.toLowerCase()
+      return state && state !== "ok"
+    }).length
+
+    return [
+      { label: t("stats.total"), value: total, icon: IconServer, color: "text-foreground" },
+      { label: t("stats.online"), value: online, icon: IconCloud, color: "text-emerald-600" },
+      { label: t("stats.offline"), value: offline, icon: IconCloudOff, color: "text-red-500" },
+      { label: t("stats.unhealthy"), value: unhealthy, icon: IconHeartbeat, color: "text-amber-500" },
+    ]
+  }, [agents, t])
+
+  const handleGenerateToken = async () => {
+    try {
+      const response = await createToken.mutateAsync()
+      setToken(response)
+    } catch {
+      // handled by hook
+    }
   }
 
-  const handleEdit = (worker: WorkerNode) => {
-    setSelectedWorker(worker)
-    setWorkerDialogOpen(true)
+  const handleConfigure = (agent: Agent) => {
+    setSelectedAgent(agent)
+    setConfigDialogOpen(true)
   }
 
-  const handleManage = (worker: WorkerNode) => {
-    setWorkerToDeploy(worker)
-    setDeployDialogOpen(true)
+  const handleRegenerateKey = (agent: Agent) => {
+    setAgentToRegenerate(agent)
+    setRegenerateDialogOpen(true)
   }
 
-  const handleDeleteClick = (worker: WorkerNode) => {
-    setWorkerToDelete(worker)
+  const handleDelete = (agent: Agent) => {
+    setAgentToDelete(agent)
     setDeleteDialogOpen(true)
   }
 
-  const handleDeleteConfirm = () => {
-    if (workerToDelete) {
-      deleteWorker.mutate(workerToDelete.id)
+  const confirmDelete = async () => {
+    if (!agentToDelete) return
+    try {
+      await deleteAgent.mutateAsync(agentToDelete.id)
       setDeleteDialogOpen(false)
-      setWorkerToDelete(null)
+      setAgentToDelete(null)
+    } catch {
+      // handled by hook
+    }
+  }
+
+  const confirmRegenerate = async () => {
+    if (!agentToRegenerate) return
+    try {
+      const response = await regenerateAgentKey.mutateAsync(agentToRegenerate.id)
+      setApiKeyValue(response.apiKey)
+      setRegenerateDialogOpen(false)
+      setAgentToRegenerate(null)
+      setApiKeyDialogOpen(true)
+    } catch {
+      // handled by hook
+    }
+  }
+
+  const handleApiKeyOpenChange = (open: boolean) => {
+    setApiKeyDialogOpen(open)
+    if (!open) {
+      setApiKeyValue(null)
     }
   }
 
   return (
-    <div className="space-y-4">
-      {/* Quick start guide banner */}
-      <QuickStartBanner t={t} />
+    <div className="space-y-6">
+      {hasAgents && (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {stats.map((stat) => (
+            <Card key={stat.label} className="p-4">
+              <div className="flex items-center gap-3">
+                <div className={`p-2 rounded-lg bg-muted ${stat.color}`}>
+                  <stat.icon className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold">{stat.value}</p>
+                  <p className="text-xs text-muted-foreground">{stat.label}</p>
+                </div>
+              </div>
+            </Card>
+          ))}
+        </div>
+      )}
 
-      {/* Stats cards - only show when there are Workers */}
-      {hasWorkers && <StatsCards workers={workers} t={t} />}
-
-      {/* Main content card */}
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex items-start justify-between gap-4">
             <div>
               <CardTitle className="flex items-center gap-2">
                 <IconServer className="h-5 w-5" />
-                {t("workerNodes")}
+                {t("agents.title")}
               </CardTitle>
-              <CardDescription>{t("workerNodesDesc")}</CardDescription>
+              <CardDescription>{t("agents.desc")}</CardDescription>
             </div>
-            <div className="flex items-center gap-2">
-              <Button size="sm" onClick={handleAdd}>
-                <IconPlus className="mr-1 h-4 w-4" />{t("addWorker")}
-              </Button>
-            </div>
+            <Dialog open={installOpen} onOpenChange={setInstallOpen}>
+              <DialogTrigger asChild>
+                <Button size="sm">
+                  <IconHeartbeat className="h-4 w-4 mr-2" />
+                  {t("install.openDialog")}
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[720px]">
+                <DialogHeader>
+                  <DialogTitle>{t("install.title")}</DialogTitle>
+                  <DialogDescription>{t("install.desc")}</DialogDescription>
+                </DialogHeader>
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <Badge variant="outline" className={token ? "border-emerald-500/30 text-emerald-600" : "border-muted-foreground/30"}>
+                      {token ? t("install.commandStatusReady") : t("install.commandStatusGenerating")}
+                    </Badge>
+                    {token?.expiresAt && (
+                      <span>{t("install.commandExpires", { time: formatRelativeTime(token.expiresAt) })}</span>
+                    )}
+                  </div>
+                  <Button size="sm" onClick={handleGenerateToken} disabled={createToken.isPending}>
+                    {createToken.isPending && <IconLoader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    {token ? t("install.regenerateToken") : t("install.generateToken")}
+                  </Button>
+                </div>
+
+                <div className="grid gap-4 lg:grid-cols-[1.3fr,0.7fr]">
+                  <div className="space-y-3">
+                    <div className="rounded-lg border bg-background p-3 space-y-3">
+                      <div>
+                        <p className="text-sm font-medium">{t("install.commandTitle")}</p>
+                        <p className="text-xs text-muted-foreground">{t("install.commandDesc")}</p>
+                      </div>
+                      <Tabs defaultValue="linux" className="w-full">
+                        <TabsList className="grid w-full grid-cols-2">
+                          <TabsTrigger value="linux">{t("install.linuxTab")}</TabsTrigger>
+                          <TabsTrigger value="windows">{t("install.windowsTab")}</TabsTrigger>
+                        </TabsList>
+                        <TabsContent value="linux" className="space-y-2">
+                          <div className="rounded-lg border bg-muted/40 p-3">
+                            {token ? (
+                              <CopyablePopoverContent value={`curl -fsSL "${typeof window !== "undefined" ? window.location.origin : FALLBACK_SERVER_URL}/api/agents/install.sh?token=${token.token}" | bash`} className="font-mono text-xs whitespace-pre-wrap" />
+                            ) : (
+                              <div className="text-xs text-muted-foreground">{t("install.commandPlaceholder")}</div>
+                            )}
+                          </div>
+                        </TabsContent>
+                        <TabsContent value="windows" className="space-y-2">
+                          <div className="rounded-lg border bg-muted/40 p-3">
+                            {token ? (
+                              <CopyablePopoverContent value={`irm "${typeof window !== "undefined" ? window.location.origin : FALLBACK_SERVER_URL}/api/agents/install.ps1?token=${token.token}" | iex`} className="font-mono text-xs whitespace-pre-wrap" />
+                            ) : (
+                              <div className="text-xs text-muted-foreground">{t("install.commandPlaceholder")}</div>
+                            )}
+                          </div>
+                        </TabsContent>
+                      </Tabs>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="rounded-lg border bg-muted/30 p-3">
+                      <p className="text-sm font-medium mb-2">{t("install.stepsTitle")}</p>
+                      <div className="grid gap-2 text-xs text-muted-foreground">
+                        <div className="flex items-center gap-2">
+                          <span className="rounded-full border bg-background px-2 py-0.5 text-[10px] font-medium text-foreground">
+                            {t("install.step1Label")}
+                          </span>
+                          <span>{t("install.step1Desc")}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="rounded-full border bg-background px-2 py-0.5 text-[10px] font-medium text-foreground">
+                            {t("install.step2Label")}
+                          </span>
+                          <span>{t("install.step2Desc")}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="rounded-full border bg-background px-2 py-0.5 text-[10px] font-medium text-foreground">
+                            {t("install.step3Label")}
+                          </span>
+                          <span>{t("install.step3Desc")}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="rounded-lg border bg-muted/30 p-3">
+                      <p className="text-sm font-medium mb-2">{t("install.requirementsTitle")}</p>
+                      <div className="grid gap-2 text-xs text-muted-foreground">
+                        <div className="flex items-center gap-2">
+                          <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/60" />
+                          <span>{t("install.requirementsDocker")}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/60" />
+                          <span>{t("install.requirementsAccess")}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
         </CardHeader>
         <CardContent>
           {isLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {[...Array(3)].map((_, i) => <Skeleton key={i} className="h-48 w-full rounded-lg" />)}
+              {[...Array(3)].map((_, i) => (
+                <Skeleton key={i} className="h-52 w-full rounded-lg" />
+              ))}
             </div>
-          ) : !hasWorkers ? (
-            <EmptyState onAdd={handleAdd} t={t} />
+          ) : !hasAgents ? (
+            <EmptyState onOpenInstall={() => setInstallOpen(true)} />
           ) : (
-            <WorkerCardView
-              workers={workers}
-              onEdit={handleEdit}
-              onManage={handleManage}
-              onDelete={handleDeleteClick}
-              t={t}
-            />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {agents.map((agent) => (
+                <AgentCardCompact
+                  key={agent.id}
+                  agent={agent}
+                  onConfig={handleConfigure}
+                  onRegenerateKey={handleRegenerateKey}
+                  onDelete={handleDelete}
+                />
+              ))}
+            </div>
           )}
         </CardContent>
       </Card>
 
-      {/* Dialogs */}
-      <WorkerDialog 
-        open={workerDialogOpen} 
-        onOpenChange={setWorkerDialogOpen} 
-        worker={selectedWorker}
-      />
-      <DeployTerminalDialog
-        open={deployDialogOpen}
-        onOpenChange={setDeployDialogOpen}
-        worker={workerToDeploy}
-        onDeployComplete={() => refetch()}
+      <AgentConfigDialog
+        open={configDialogOpen}
+        onOpenChange={setConfigDialogOpen}
+        agent={selectedAgent}
       />
 
-      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t("confirmDelete")}</AlertDialogTitle>
-            <AlertDialogDescription>{t("confirmDeleteDesc", { name: workerToDelete?.name ?? "" })}</AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>{tCommon("cancel")}</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteConfirm} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">{tCommon("delete")}</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <ConfirmDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        title={t("actions.deleteTitle")}
+        description={t("actions.deleteDesc", { name: agentToDelete?.name ?? "" })}
+        onConfirm={confirmDelete}
+        variant="destructive"
+        loading={deleteAgent.isPending}
+      />
+
+      <ConfirmDialog
+        open={regenerateDialogOpen}
+        onOpenChange={setRegenerateDialogOpen}
+        title={t("actions.regenerateTitle")}
+        description={t("actions.regenerateDesc")}
+        onConfirm={confirmRegenerate}
+        loading={regenerateAgentKey.isPending}
+      />
+
+      <Dialog open={apiKeyDialogOpen} onOpenChange={handleApiKeyOpenChange}>
+        <DialogContent className="sm:max-w-[420px]">
+          <DialogHeader>
+            <DialogTitle>{t("actions.regenerateResultTitle")}</DialogTitle>
+          </DialogHeader>
+          <div className="rounded-lg border bg-muted/40 p-3">
+            {apiKeyValue ? (
+              <CopyablePopoverContent value={apiKeyValue} className="font-mono text-xs" />
+            ) : (
+              <div className="text-xs text-muted-foreground">{t("actions.regenerateResultEmpty")}</div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

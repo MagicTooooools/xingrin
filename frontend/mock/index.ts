@@ -20,6 +20,11 @@ export {
   getMockStatisticsHistory,
 } from './data/dashboard'
 
+// Database Health
+export {
+  mockDatabaseHealth,
+} from './data/database-health'
+
 // Organizations
 export {
   mockOrganizations,
@@ -85,7 +90,15 @@ export {
   getMockEngineById,
 } from './data/engines'
 
-// Workers
+// Agents
+export {
+  mockAgents,
+  getMockAgents,
+  getMockAgentById,
+  getMockRegistrationToken,
+} from './data/agents'
+
+// Workers (legacy)
 export {
   mockWorkers,
   getMockWorkers,
