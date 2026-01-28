@@ -15,7 +15,7 @@ func TestInstallScriptUsesPublicURL(t *testing.T) {
 	c, _ := gin.CreateTestContext(w)
 	c.Request = httptest.NewRequest("GET", "/api/agents/install.sh?token=abc123", nil)
 
-	h := NewAgentHandler(nil, "https://example.com", "v1.2.3", "yyhuni/orbit-agent", "worker-secret", nil)
+	h := NewAgentHandler(nil, "https://example.com", "v1.2.3", "yyhuni/orbit-agent", "worker-secret", nil, nil)
 	h.InstallScript(c)
 
 	if w.Code != 200 {
@@ -43,7 +43,7 @@ func TestInstallScriptInfersURL(t *testing.T) {
 	req.Header.Set("X-Forwarded-Host", "orbit.example.com")
 	c.Request = req
 
-	h := NewAgentHandler(nil, "", "v1.0.0", "yyhuni/orbit-agent", "worker-secret", nil)
+	h := NewAgentHandler(nil, "", "v1.0.0", "yyhuni/orbit-agent", "worker-secret", nil, nil)
 	h.InstallScript(c)
 
 	if w.Code != 200 {
@@ -61,7 +61,7 @@ func TestInstallScriptMissingToken(t *testing.T) {
 	c, _ := gin.CreateTestContext(w)
 	c.Request = httptest.NewRequest("GET", "/api/agents/install.sh", nil)
 
-	h := NewAgentHandler(nil, "https://example.com", "v1.2.3", "yyhuni/orbit-agent", "worker-secret", nil)
+	h := NewAgentHandler(nil, "https://example.com", "v1.2.3", "yyhuni/orbit-agent", "worker-secret", nil, nil)
 	h.InstallScript(c)
 
 	if w.Code != 400 {

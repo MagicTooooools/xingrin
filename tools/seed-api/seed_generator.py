@@ -43,14 +43,14 @@ Examples:
   python seed_generator.py --clear
   
   # Use custom API URL
-  python seed_generator.py --api-url http://192.168.1.100:8888
+  python seed_generator.py --api-url http://192.168.1.100:8080
         """
     )
     
     parser.add_argument(
         "--api-url",
-        default="http://localhost:8888",
-        help="API base URL (default: http://localhost:8888)"
+        default="http://localhost:8080",
+        help="API base URL (default: http://localhost:8080)"
     )
     
     parser.add_argument(

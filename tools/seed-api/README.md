@@ -41,7 +41,7 @@ python seed_generator.py
 python seed_generator.py [OPTIONS]
 
 Options:
-  --api-url URL          API 地址 (默认: http://localhost:8888)
+  --api-url URL          API 地址 (默认: http://localhost:8080)
   --username USER        用户名 (默认: admin)
   --password PASS        密码 (默认: admin)
   --orgs N               组织数量 (默认: 15)
@@ -70,7 +70,7 @@ python seed_generator.py --orgs 50 --targets-per-org 20
 python seed_generator.py --clear --orgs 10
 
 # 5. 使用自定义 API 地址
-python seed_generator.py --api-url http://192.168.1.100:8888
+python seed_generator.py --api-url http://192.168.1.100:8080
 
 # 6. 显示详细日志
 python seed_generator.py --verbose

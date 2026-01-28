@@ -25,7 +25,7 @@ class APIClient:
         Initialize API client.
         
         Args:
-            base_url: Base URL of the API (e.g., http://localhost:8888)
+            base_url: Base URL of the API (e.g., http://localhost:8080)
             username: Username for authentication
             password: Password for authentication
         """

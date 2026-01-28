@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"encoding/json"
 	"testing"
 	"time"
 
@@ -148,5 +149,64 @@ func TestUpdateRequiredSendsMessageAndCancels(t *testing.T) {
 
 	if !canceller.called || canceller.agent != 1 {
 		t.Fatalf("expected canceller to be invoked")
+	}
+}
+
+func TestSendConfigUpdateSendsMessage(t *testing.T) {
+	hub := ws.NewHub()
+	go hub.Run()
+
+	client := &ws.Client{
+		AgentID: 1,
+		Send:    make(chan []byte, 1),
+		Hub:     hub,
+	}
+	hub.Register(client)
+
+	for i := 0; i < 50; i++ {
+		if hub.IsConnected(1) {
+			break
+		}
+		time.Sleep(10 * time.Millisecond)
+	}
+
+	handler := NewAgentWebSocketHandler(hub, &fakeAgentRepo{}, nil, nil, "", "")
+	agent := &model.Agent{
+		ID:            1,
+		MaxTasks:      5,
+		CPUThreshold:  80,
+		MemThreshold:  81,
+		DiskThreshold: 82,
+	}
+
+	handler.sendConfigUpdate(agent)
+
+	select {
+	case msg := <-client.Send:
+		var envelope agentproto.Message
+		if err := json.Unmarshal(msg, &envelope); err != nil {
+			t.Fatalf("invalid message envelope: %v", err)
+		}
+		if envelope.Type != agentproto.MessageTypeConfigUpdate {
+			t.Fatalf("expected config_update, got %s", envelope.Type)
+		}
+		var payload agentproto.ConfigUpdatePayload
+		if err := json.Unmarshal(envelope.Payload, &payload); err != nil {
+			t.Fatalf("invalid config payload: %v", err)
+		}
+		if payload.MaxTasks == nil || *payload.MaxTasks != 5 {
+			t.Fatalf("expected max tasks 5")
+		}
+		if payload.CPUThreshold == nil || *payload.CPUThreshold != 80 {
+			t.Fatalf("expected cpu threshold 80")
+		}
+		if payload.MemThreshold == nil || *payload.MemThreshold != 81 {
+			t.Fatalf("expected mem threshold 81")
+		}
+		if payload.DiskThreshold == nil || *payload.DiskThreshold != 82 {
+			t.Fatalf("expected disk threshold 82")
+		}
+	default:
+		t.Fatalf("expected config_update to be sent")
 	}
 }

@@ -29,7 +29,7 @@ interface DeployTerminalDialogProps {
 
 // Auto-generate WebSocket URL based on current page URL
 const getWsBaseUrl = () => {
-  if (typeof window === 'undefined') return 'ws://localhost:8888'
+  if (typeof window === 'undefined') return 'ws://localhost:8080'
   
   // Prefer environment variable
   if (process.env.NEXT_PUBLIC_WS_URL) {

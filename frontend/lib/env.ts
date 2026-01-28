@@ -2,7 +2,7 @@
  * Environment variables and runtime configuration utilities
  */
 
-const DEFAULT_DEV_BACKEND_URL = 'http://localhost:8888'
+const DEFAULT_DEV_BACKEND_URL = 'http://localhost:8080'
 
 const stripTrailingSlash = (url: string) => url.replace(/\/+$/, '')
 
@@ -17,7 +17,7 @@ export function getBackendBaseUrl(): string {
 
   if (typeof window !== 'undefined') {
     const origin = window.location.origin
-    // In local development, backend runs on port 8888 by default
+    // In local development, backend runs on port 8080 by default
     if (window.location.hostname === 'localhost' && window.location.port === '3000') {
       return stripTrailingSlash(DEFAULT_DEV_BACKEND_URL)
     }

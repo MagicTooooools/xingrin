@@ -1,24 +1,26 @@
 # syntax=docker/dockerfile:1
 
 # ============================================
-# Go Server - build
+# Go Agent - build
 # ============================================
 FROM golang:1.24 AS builder
 
 WORKDIR /src
 
 # Cache dependencies
-COPY go.mod go.sum ./
+COPY agent/go.mod agent/go.sum ./
 RUN go mod download
 
 # Copy source
-COPY . .
+COPY agent ./agent
+
+WORKDIR /src/agent
 
 # Build (static where possible)
-RUN CGO_ENABLED=0 go build -o /out/server ./cmd/server
+RUN CGO_ENABLED=0 go build -o /out/agent ./cmd/agent
 
 # ============================================
-# Go Server - runtime
+# Go Agent - runtime
 # ============================================
 FROM debian:bookworm-slim
 
@@ -28,8 +30,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /app
 
-COPY --from=builder /out/server /usr/local/bin/server
+COPY --from=builder /out/agent /usr/local/bin/agent
 
-EXPOSE 8080
-
-CMD ["server"]
+CMD ["agent"]

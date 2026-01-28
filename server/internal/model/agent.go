@@ -7,7 +7,7 @@ type Agent struct {
 	ID     int    `gorm:"primaryKey;autoIncrement" json:"id"`
 	Name   string `gorm:"type:varchar(100);not null" json:"name"`
 	APIKey string `gorm:"type:varchar(8);not null;uniqueIndex" json:"api_key"`
-	Status string `gorm:"type:varchar(20);default:'online'" json:"status"` // online/offline
+	Status string `gorm:"type:varchar(20);default:'offline'" json:"status"` // online/offline
 
 	// Connection info
 	Hostname  string `gorm:"type:varchar(255)" json:"hostname"`
@@ -19,6 +19,12 @@ type Agent struct {
 	CPUThreshold  int `gorm:"default:85" json:"cpu_threshold"`
 	MemThreshold  int `gorm:"default:85" json:"mem_threshold"`
 	DiskThreshold int `gorm:"default:90" json:"disk_threshold"`
+
+	// Health status (from heartbeat)
+	HealthState   string     `gorm:"type:varchar(20);default:'ok'" json:"health_state"`
+	HealthReason  string     `gorm:"type:varchar(64)" json:"health_reason,omitempty"`
+	HealthMessage string     `gorm:"type:varchar(256)" json:"health_message,omitempty"`
+	HealthSince   *time.Time `gorm:"type:timestamp" json:"health_since,omitempty"`
 
 	// Self-registration related
 	RegistrationToken string `gorm:"type:varchar(8)" json:"registration_token,omitempty"`

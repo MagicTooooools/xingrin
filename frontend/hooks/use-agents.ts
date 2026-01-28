@@ -65,19 +65,6 @@ export function useUpdateAgentConfig() {
   })
 }
 
-export function useRegenerateAgentKey() {
-  const toastMessages = useToastMessages()
-
-  return useMutation({
-    mutationFn: (id: number) => agentService.regenerateAgentKey(id),
-    onSuccess: () => {
-      toastMessages.success('toast.agent.key.success')
-    },
-    onError: (error: any) => {
-      toastMessages.errorFromCode(getErrorCode(error?.response?.data), 'toast.agent.key.error')
-    },
-  })
-}
 
 export function useDeleteAgent() {
   const queryClient = useQueryClient()

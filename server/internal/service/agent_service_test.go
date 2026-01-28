@@ -156,25 +156,6 @@ func TestUpdateAgentConfig(t *testing.T) {
 	}
 }
 
-func TestRegenerateAPIKey(t *testing.T) {
-	agent := &model.Agent{
-		ID:     1,
-		APIKey: "deadbeef",
-	}
-	repo := &statefulAgentRepo{agent: agent}
-	svc := NewAgentService(repo, &fakeTokenRepo{})
-
-	apiKey, err := svc.RegenerateAPIKey(context.Background(), 1)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if len(apiKey) != 8 {
-		t.Fatalf("expected 8 hex api key")
-	}
-	if repo.updated == nil || repo.updated.APIKey != apiKey {
-		t.Fatalf("expected updated api key to persist")
-	}
-}
 
 func TestDeleteAgentNotFound(t *testing.T) {
 	repo := &statefulAgentRepo{deleteErr: gorm.ErrRecordNotFound}

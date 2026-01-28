@@ -1438,14 +1438,9 @@
       "actions": {
         "title": "Actions",
         "config": "Edit Config",
-        "regenerateKey": "Regenerate API Key",
         "delete": "Delete Agent",
         "deleteTitle": "Delete Agent",
-        "deleteDesc": "Delete agent \"{name}\"? This action cannot be undone.",
-        "regenerateTitle": "Regenerate API Key",
-        "regenerateDesc": "This will rotate the API key and disconnect the agent until it reconnects.",
-        "regenerateResultTitle": "New API Key",
-        "regenerateResultEmpty": "No API key returned"
+        "deleteDesc": "Delete agent \"{name}\"? This action cannot be undone."
       },
       "config": {
         "title": "Scheduling Config",

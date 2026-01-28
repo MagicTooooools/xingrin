@@ -7,7 +7,6 @@ import type {
   Agent,
   AgentsResponse,
   RegistrationTokenResponse,
-  RegenerateAgentKeyResponse,
   UpdateAgentConfigRequest,
 } from '@/types/agent.types'
 import { USE_MOCK, mockDelay, getMockAgents, getMockAgentById, getMockRegistrationToken } from '@/mock'
@@ -46,10 +45,6 @@ export const agentService = {
     return response.data
   },
 
-  async regenerateAgentKey(id: number): Promise<RegenerateAgentKeyResponse> {
-    const response = await api.post<RegenerateAgentKeyResponse>(`${BASE_URL}/${id}/regenerate-key`)
-    return response.data
-  },
 
   async createRegistrationToken(): Promise<RegistrationTokenResponse> {
     if (USE_MOCK) {

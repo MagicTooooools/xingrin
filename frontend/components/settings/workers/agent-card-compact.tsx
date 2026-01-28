@@ -5,7 +5,6 @@ import { useTranslations } from "next-intl"
 import {
   IconDotsVertical,
   IconSettings,
-  IconKey,
   IconTrash,
   IconAlertTriangle,
   IconActivity,
@@ -124,14 +123,12 @@ function MetricProgress({ label, value, threshold }: MetricProgressProps) {
 interface AgentCardCompactProps {
   agent: Agent
   onConfig: (agent: Agent) => void
-  onRegenerateKey: (agent: Agent) => void
   onDelete: (agent: Agent) => void
 }
 
 export function AgentCardCompact({
   agent,
   onConfig,
-  onRegenerateKey,
   onDelete,
 }: AgentCardCompactProps) {
   const t = useTranslations("settings.workers")
@@ -203,10 +200,6 @@ export function AgentCardCompact({
                 <DropdownMenuItem onClick={() => onConfig(agent)}>
                   <IconSettings className="h-4 w-4" />
                   {t("actions.config")}
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => onRegenerateKey(agent)}>
-                  <IconKey className="h-4 w-4" />
-                  {t("actions.regenerateKey")}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem variant="destructive" onClick={() => onDelete(agent)}>

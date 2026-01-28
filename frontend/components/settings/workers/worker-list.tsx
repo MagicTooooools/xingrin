@@ -7,10 +7,6 @@ import {
   IconCloud,
   IconCloudOff,
   IconHeartbeat,
-  IconDotsVertical,
-  IconSettings,
-  IconKey,
-  IconTrash,
   IconLoader2,
 } from "@tabler/icons-react"
 import { Button } from "@/components/ui/button"
@@ -29,14 +25,6 @@ import {
   TabsTrigger,
 } from "@/components/ui/tabs"
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -45,15 +33,13 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { ConfirmDialog } from "@/components/ui/confirm-dialog"
-import { Status, StatusIndicator, StatusLabel } from "@/components/ui/shadcn-io/status"
 import { Skeleton } from "@/components/ui/skeleton"
 import { CopyablePopoverContent } from "@/components/ui/copyable-popover-content"
-import { useFormatNumber, useFormatRelativeTime } from "@/lib/i18n-format"
+import { useFormatRelativeTime } from "@/lib/i18n-format"
 import {
   useAgents,
   useCreateRegistrationToken,
   useDeleteAgent,
-  useRegenerateAgentKey,
 } from "@/hooks/use-agents"
 import type { Agent, RegistrationTokenResponse } from "@/types/agent.types"
 import { AgentConfigDialog } from "./worker-dialog"
@@ -257,17 +243,12 @@ export function AgentList() {
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null)
   const [configDialogOpen, setConfigDialogOpen] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-  const [regenerateDialogOpen, setRegenerateDialogOpen] = useState(false)
   const [agentToDelete, setAgentToDelete] = useState<Agent | null>(null)
-  const [agentToRegenerate, setAgentToRegenerate] = useState<Agent | null>(null)
   const [token, setToken] = useState<RegistrationTokenResponse | null>(null)
-  const [apiKeyDialogOpen, setApiKeyDialogOpen] = useState(false)
-  const [apiKeyValue, setApiKeyValue] = useState<string | null>(null)
 
   const { data, isLoading } = useAgents(page, pageSize)
   const createToken = useCreateRegistrationToken()
   const deleteAgent = useDeleteAgent()
-  const regenerateAgentKey = useRegenerateAgentKey()
 
   const agents = data?.results || []
   const hasAgents = agents.length > 0
@@ -303,10 +284,6 @@ export function AgentList() {
     setConfigDialogOpen(true)
   }
 
-  const handleRegenerateKey = (agent: Agent) => {
-    setAgentToRegenerate(agent)
-    setRegenerateDialogOpen(true)
-  }
 
   const handleDelete = (agent: Agent) => {
     setAgentToDelete(agent)
@@ -324,25 +301,6 @@ export function AgentList() {
     }
   }
 
-  const confirmRegenerate = async () => {
-    if (!agentToRegenerate) return
-    try {
-      const response = await regenerateAgentKey.mutateAsync(agentToRegenerate.id)
-      setApiKeyValue(response.apiKey)
-      setRegenerateDialogOpen(false)
-      setAgentToRegenerate(null)
-      setApiKeyDialogOpen(true)
-    } catch {
-      // handled by hook
-    }
-  }
-
-  const handleApiKeyOpenChange = (open: boolean) => {
-    setApiKeyDialogOpen(open)
-    if (!open) {
-      setApiKeyValue(null)
-    }
-  }
 
   return (
     <div className="space-y-6">
@@ -495,7 +453,6 @@ export function AgentList() {
                   key={agent.id}
                   agent={agent}
                   onConfig={handleConfigure}
-                  onRegenerateKey={handleRegenerateKey}
                   onDelete={handleDelete}
                 />
               ))}
@@ -520,29 +477,6 @@ export function AgentList() {
         loading={deleteAgent.isPending}
       />
 
-      <ConfirmDialog
-        open={regenerateDialogOpen}
-        onOpenChange={setRegenerateDialogOpen}
-        title={t("actions.regenerateTitle")}
-        description={t("actions.regenerateDesc")}
-        onConfirm={confirmRegenerate}
-        loading={regenerateAgentKey.isPending}
-      />
-
-      <Dialog open={apiKeyDialogOpen} onOpenChange={handleApiKeyOpenChange}>
-        <DialogContent className="sm:max-w-[420px]">
-          <DialogHeader>
-            <DialogTitle>{t("actions.regenerateResultTitle")}</DialogTitle>
-          </DialogHeader>
-          <div className="rounded-lg border bg-muted/40 p-3">
-            {apiKeyValue ? (
-              <CopyablePopoverContent value={apiKeyValue} className="font-mono text-xs" />
-            ) : (
-              <div className="text-xs text-muted-foreground">{t("actions.regenerateResultEmpty")}</div>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   )
 }

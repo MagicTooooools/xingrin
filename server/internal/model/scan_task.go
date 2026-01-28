@@ -1,6 +1,9 @@
 package model
 
-import "time"
+import (
+	"fmt"
+	"time"
+)
 
 // ScanTask represents a task in the queue supporting priority scheduling
 type ScanTask struct {
@@ -9,7 +12,6 @@ type ScanTask struct {
 	Stage        int    `gorm:"not null;default:0;index:idx_scan_task_pending_order,priority:2" json:"stage"`
 	WorkflowName string `gorm:"type:varchar(100);not null" json:"workflow_name"`
 	Status       string `gorm:"type:varchar(20);default:'pending';index:idx_scan_task_pending_order,priority:1" json:"status"`
-	Version      string `gorm:"type:varchar(20)" json:"version"`
 
 	// Assignment information
 	AgentID      *int   `gorm:"index:idx_scan_task_agent_id" json:"agent_id,omitempty"`
@@ -28,4 +30,9 @@ type ScanTask struct {
 // TableName specifies the table name for ScanTask model
 func (ScanTask) TableName() string {
 	return "scan_task"
+}
+
+// WorkspaceDir returns the workspace path for this scan task.
+func (t *ScanTask) WorkspaceDir() string {
+	return fmt.Sprintf("/opt/orbit/results/scan_%d/task_%d/attempt_%d", t.ScanID, t.ID, t.RetryCount)
 }

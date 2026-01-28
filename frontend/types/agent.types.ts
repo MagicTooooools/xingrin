@@ -59,6 +59,3 @@ export interface RegistrationTokenResponse {
   expiresAt: string
 }
 
-export interface RegenerateAgentKeyResponse {
-  apiKey: string
-}

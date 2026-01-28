@@ -468,7 +468,7 @@ class DataGenerator:
 
     
     # Common ports
-    COMMON_PORTS = [22, 80, 443, 8080, 8443, 3000, 3306, 5432, 6379, 27017, 9200, 9300, 5000, 8000, 8888, 9000, 9090, 10000]
+    COMMON_PORTS = [22, 80, 443, 8080, 8443, 3000, 3306, 5432, 6379, 27017, 9200, 9300, 5000, 8000, 8080, 9000, 9090, 10000]
     
     @staticmethod
     def generate_host_ports(target: Dict[str, Any], count: int) -> List[Dict[str, Any]]:

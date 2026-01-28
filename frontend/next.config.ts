@@ -52,7 +52,7 @@ const nextConfig: NextConfig = {
       // Only match API paths with trailing slash
       {
         source: '/api/:path*/',
-        destination: `http://${apiHost}:8888/api/:path*/`,
+        destination: `http://${apiHost}:8080/api/:path*/`,
       },
     ];
   },

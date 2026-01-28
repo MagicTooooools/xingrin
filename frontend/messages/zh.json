@@ -1452,14 +1452,9 @@
       "actions": {
         "title": "操作",
         "config": "配置",
-        "regenerateKey": "重置 API Key",
         "delete": "删除 Agent",
         "deleteTitle": "删除 Agent",
-        "deleteDesc": "确定删除 Agent \"{name}\" 吗？此操作不可恢复。",
-        "regenerateTitle": "重置 API Key",
-        "regenerateDesc": "将轮换 API Key，Agent 需要重新连接。",
-        "regenerateResultTitle": "新的 API Key",
-        "regenerateResultEmpty": "未返回 API Key"
+        "deleteDesc": "确定删除 Agent \"{name}\" 吗？此操作不可恢复。"
       },
       "config": {
         "title": "调度配置",

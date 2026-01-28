@@ -142,7 +142,7 @@ func Load() (*Config, error) {
 // setDefaults sets default values for configuration
 func setDefaults(v *viper.Viper) {
 	// Server defaults
-	v.SetDefault("SERVER_PORT", 8888)
+	v.SetDefault("SERVER_PORT", 8080)
 	v.SetDefault("GIN_MODE", "release")
 
 	// Database defaults
@@ -198,7 +198,7 @@ func (c *RedisConfig) Addr() string {
 func GetDefaults() *Config {
 	return &Config{
 		Server: ServerConfig{
-			Port: 8888,
+			Port: 8080,
 			Mode: "release",
 		},
 		Database: DatabaseConfig{

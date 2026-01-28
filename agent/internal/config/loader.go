@@ -45,7 +45,7 @@ func Load(args []string) (*Config, error) {
 	}
 
 	fs := flag.NewFlagSet("agent", flag.ContinueOnError)
-	serverURL := fs.String("server-url", cfg.ServerURL, "Server base URL (e.g. https://localhost:8080)")
+	serverURL := fs.String("server-url", cfg.ServerURL, "Server base URL (e.g. https://1.1.1.1:8080)")
 	apiKey := fs.String("api-key", cfg.APIKey, "Agent API key")
 	maxTasksFlag := fs.Int("max-tasks", cfg.MaxTasks, "Maximum concurrent tasks")
 	cpuThresholdFlag := fs.Int("cpu-threshold", cfg.CPUThreshold, "CPU threshold percentage")
