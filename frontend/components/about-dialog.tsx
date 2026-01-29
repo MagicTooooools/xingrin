@@ -4,7 +4,6 @@ import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { useQueryClient } from '@tanstack/react-query'
 import {
-  IconRadar,
   IconRefresh,
   IconExternalLink,
   IconBrandGithub,
@@ -59,6 +58,7 @@ export function AboutDialog({ children }: AboutDialogProps) {
   const currentVersion = updateResult?.currentVersion || versionData?.version || '-'
   const latestVersion = updateResult?.latestVersion
   const hasUpdate = updateResult?.hasUpdate
+  const logoSrc = "/images/icon-64.png"
 
   return (
     <Dialog>
@@ -74,7 +74,7 @@ export function AboutDialog({ children }: AboutDialogProps) {
           {/* Logo and name */}
           <div className="flex flex-col items-center py-4">
             <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 mb-3">
-              <IconRadar className="h-8 w-8 text-primary" />
+              <img src={logoSrc} alt="LunaFox Logo" className="h-12 w-12" />
             </div>
             <h2 className="text-xl font-semibold">{t('productName')}</h2>
             <p className="text-sm text-muted-foreground">{t('description')}</p>

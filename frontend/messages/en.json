@@ -522,11 +522,11 @@
     "pattern": "Invalid format"
   },
   "auth": {
-    "title": "Orbit",
+    "title": "LunaFox",
     "subtitle": "Automated Asset Discovery & Vulnerability Scanning Platform",
     "login": "Login",
-    "pageTitle": "Login - Orbit | Attack Surface Management",
-    "pageDescription": "Orbit - Attack Surface Management (ASM) Platform, providing automated asset discovery and vulnerability scanning",
+    "pageTitle": "Login - LunaFox | Attack Surface Management",
+    "pageDescription": "LunaFox - Attack Surface Management (ASM) Platform, providing automated asset discovery and vulnerability scanning",
     "loggingIn": "Logging in...",
     "logout": "Logout",
     "username": "Username",
@@ -540,7 +540,7 @@
     "logoutSuccess": "Logged out successfully",
     "sessionExpired": "Session expired, please login again",
     "terminal": {
-      "title": "Orbit ASM Platform",
+      "title": "LunaFox ASM Platform",
       "subtitle": "Secure Authentication Terminal",
       "usernamePrompt": "Username",
       "passwordPrompt": "Password",
@@ -2381,10 +2381,10 @@
     }
   },
   "metadata": {
-    "title": "Orbit - Attack Surface Management Platform | ASM",
-    "description": "Orbit - Attack Surface Management (ASM) platform, providing automated asset discovery, vulnerability scanning, subdomain enumeration, port scanning, and more. Supports distributed scanning, Nuclei integration, and scheduled tasks.",
-    "keywords": "ASM, Attack Surface Management, Vulnerability Scanning, Asset Discovery, Bug Bounty, Penetration Testing, Nuclei, Subdomain Enumeration, Security Tools, EASM, Security",
-    "ogTitle": "Orbit - Attack Surface Management Platform",
+    "title": "LunaFox - Attack Surface Management Platform | ASM",
+    "description": "LunaFox - Attack Surface Management (ASM) platform, providing automated asset discovery, vulnerability scanning, subdomain enumeration, port scanning, and more. Supports distributed scanning, Nuclei integration, and scheduled tasks.",
+    "keywords": "ASM, Attack Surface Management, Vulnerability Scanning, Asset Discovery, Bug Bounty, Penetration Testing, Nuclei, Subdomain Enumeration, Security Tools, EASM, Security, LunaFox",
+    "ogTitle": "LunaFox - Attack Surface Management Platform",
     "ogDescription": "Attack Surface Management (ASM) platform providing automated asset discovery and vulnerability scanning"
   },
   "bulkAdd": {
@@ -2455,8 +2455,8 @@
     "rateLimited": "Too many requests, please try again later"
   },
   "about": {
-    "title": "About Orbit",
-    "productName": "Orbit",
+    "title": "About LunaFox",
+    "productName": "LunaFox",
     "description": "Attack Surface Management Platform",
     "currentVersion": "Current Version",
     "latestVersion": "Latest Version",

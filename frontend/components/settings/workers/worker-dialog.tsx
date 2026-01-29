@@ -27,12 +27,14 @@ import { Button } from "@/components/ui/button"
 import { useUpdateAgentConfig } from "@/hooks/use-agents"
 import type { Agent } from "@/types/agent.types"
 
-type FormValues = {
-  maxTasks: number
-  cpuThreshold: number
-  memThreshold: number
-  diskThreshold: number
-}
+const formSchema = z.object({
+  maxTasks: z.coerce.number().int().min(1).max(20),
+  cpuThreshold: z.coerce.number().int().min(1).max(100),
+  memThreshold: z.coerce.number().int().min(1).max(100),
+  diskThreshold: z.coerce.number().int().min(1).max(100),
+})
+
+type FormValues = z.infer<typeof formSchema>
 
 interface AgentConfigDialogProps {
   open: boolean
@@ -45,15 +47,8 @@ export function AgentConfigDialog({ open, onOpenChange, agent }: AgentConfigDial
   const tCommon = useTranslations("common.actions")
   const updateAgentConfig = useUpdateAgentConfig()
 
-  const formSchema = z.object({
-    maxTasks: z.coerce.number().int().min(1).max(20),
-    cpuThreshold: z.coerce.number().int().min(1).max(100),
-    memThreshold: z.coerce.number().int().min(1).max(100),
-    diskThreshold: z.coerce.number().int().min(1).max(100),
-  })
-
   const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(formSchema) as never,
     defaultValues: {
       maxTasks: 5,
       cpuThreshold: 85,

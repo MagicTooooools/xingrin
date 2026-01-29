@@ -680,9 +680,6 @@ CREATE TABLE IF NOT EXISTS scan_task (
     config          TEXT,
     error_message   VARCHAR(4096),
 
-    -- Retry control
-    retry_count     INT DEFAULT 0,
-
     -- Timestamps
     created_at      TIMESTAMP DEFAULT NOW(),
     started_at      TIMESTAMP,
@@ -709,11 +706,11 @@ COMMENT ON TABLE scan_task IS 'Task queue supporting priority scheduling';
 COMMENT ON COLUMN agent.status IS 'Agent status: online/offline';
 COMMENT ON COLUMN agent.api_key IS '8-character hex string for authentication';
 COMMENT ON COLUMN registration_token.expires_at IS 'Token expiration time (default 1 hour after creation)';
-COMMENT ON COLUMN scan_task.stage IS 'Current stage (fixed at 0 for single workflow)';
+COMMENT ON COLUMN scan_task.stage IS 'Stage order index (shared for parallel tasks)';
 COMMENT ON COLUMN scan_task.workflow_name IS 'Workflow name (e.g. subdomain_discovery)';
-COMMENT ON COLUMN scan_task.status IS 'Task status: pending/running/completed/failed/cancelled';
+COMMENT ON COLUMN scan_task.status IS 'Task status: blocked/pending/running/completed/failed/cancelled';
 COMMENT ON COLUMN scan_task.version IS 'Worker version number (read from VERSION file)';
 COMMENT ON COLUMN scan_task.error_message IS 'Error message (truncated by Agent, max 4KB)';
-COMMENT ON INDEX idx_scan_task_pending_order IS 'Supports task pull queries (ordered by stage DESC, created_at ASC)';
+COMMENT ON INDEX idx_scan_task_pending_order IS 'Supports task pull queries (ordered by stage DESC to prioritize completing existing scans, created_at ASC)';
 COMMENT ON INDEX idx_scan_task_agent_id IS 'Supports querying tasks by agent';
 COMMENT ON INDEX idx_scan_task_scan_id IS 'Supports querying tasks by scan';

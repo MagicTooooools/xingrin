@@ -18,9 +18,6 @@ type ScanTask struct {
 	Config       string `gorm:"type:text" json:"config"`
 	ErrorMessage string `gorm:"type:varchar(4096)" json:"error_message,omitempty"`
 
-	// Retry control
-	RetryCount int `gorm:"default:0" json:"retry_count"`
-
 	// Timestamps
 	CreatedAt   time.Time  `gorm:"type:timestamp;default:now();index:idx_scan_task_pending_order,priority:3" json:"created_at"`
 	StartedAt   *time.Time `gorm:"type:timestamp" json:"started_at,omitempty"`
@@ -34,5 +31,5 @@ func (ScanTask) TableName() string {
 
 // WorkspaceDir returns the workspace path for this scan task.
 func (t *ScanTask) WorkspaceDir() string {
-	return fmt.Sprintf("/opt/orbit/results/scan_%d/task_%d/attempt_%d", t.ScanID, t.ID, t.RetryCount)
+	return fmt.Sprintf("/opt/orbit/results/scan_%d/task_%d", t.ScanID, t.ID)
 }

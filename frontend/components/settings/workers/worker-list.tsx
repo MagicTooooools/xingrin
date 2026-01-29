@@ -237,6 +237,7 @@ function EmptyState({ onOpenInstall }: { onOpenInstall: () => void }) {
 
 export function AgentList() {
   const t = useTranslations("settings.workers")
+  const formatRelativeTime = useFormatRelativeTime()
   const [page] = useState(1)
   const [pageSize] = useState(10)
   const [installOpen, setInstallOpen] = useState(false)

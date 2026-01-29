@@ -536,11 +536,11 @@
     "pattern": "格式不正确"
   },
   "auth": {
-    "title": "Orbit - 星轨",
+    "title": "月狐 (LunaFox)",
     "subtitle": "自动化资产发现与漏洞扫描平台",
     "login": "登录",
-    "pageTitle": "登录 - 星轨 | 攻击面管理平台",
-    "pageDescription": "星轨 (Orbit) - 攻击面管理平台 (ASM)，提供自动化资产发现与漏洞扫描",
+    "pageTitle": "登录 - 月狐 | 攻击面管理平台",
+    "pageDescription": "月狐 (LunaFox) - 攻击面管理平台 (ASM)，提供自动化资产发现与漏洞扫描",
     "loggingIn": "登录中...",
     "logout": "退出登录",
     "username": "用户名",
@@ -554,7 +554,7 @@
     "logoutSuccess": "已退出登录",
     "sessionExpired": "会话已过期，请重新登录",
     "terminal": {
-      "title": "星轨攻击面管理平台",
+      "title": "月狐攻击面管理平台",
       "subtitle": "安全认证终端",
       "usernamePrompt": "用户名",
       "passwordPrompt": "密码",
@@ -2395,10 +2395,10 @@
     }
   },
   "metadata": {
-    "title": "星轨 (Orbit) - 攻击面管理平台 | ASM",
-    "description": "星轨 - 攻击面管理平台 (ASM)，提供自动化资产发现、漏洞扫描、子域名枚举、端口扫描等功能。支持分布式扫描、Nuclei 集成、定时任务。",
-    "keywords": "ASM, 攻击面管理, 漏洞扫描, 资产发现, Bug Bounty, 渗透测试, Nuclei, 子域名枚举, 安全工具, EASM, 安全",
-    "ogTitle": "星轨 (Orbit) - 攻击面管理平台",
+    "title": "月狐 (LunaFox) - 攻击面管理平台 | ASM",
+    "description": "月狐 (LunaFox) - 攻击面管理平台 (ASM)，提供自动化资产发现、漏洞扫描、子域名枚举、端口扫描等功能。支持分布式扫描、Nuclei 集成、定时任务。",
+    "keywords": "ASM, 攻击面管理, 漏洞扫描, 资产发现, Bug Bounty, 渗透测试, Nuclei, 子域名枚举, 安全工具, EASM, 安全, LunaFox, 月狐",
+    "ogTitle": "月狐 (LunaFox) - 攻击面管理平台",
     "ogDescription": "攻击面管理平台 (ASM)，提供自动化资产发现与漏洞扫描"
   },
   "bulkAdd": {
@@ -2469,8 +2469,8 @@
     "rateLimited": "请求过于频繁，请稍后重试"
   },
   "about": {
-    "title": "关于 星轨",
-    "productName": "星轨",
+    "title": "关于月狐",
+    "productName": "月狐 (LunaFox)",
     "description": "攻击面管理平台",
     "currentVersion": "当前版本",
     "latestVersion": "最新版本",

@@ -235,7 +235,7 @@ export function AgentListItem({
       </div>
 
       {/* 第二行：指标 */}
-      {hasHeartbeat ? (
+      {heartbeat ? (
         <div className="flex items-center gap-4 px-3 pb-3 pt-1 flex-wrap">
           <MetricBar
             label={t("metrics.cpu")}

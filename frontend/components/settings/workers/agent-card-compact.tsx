@@ -247,7 +247,7 @@ export function AgentCardCompact({
         <Separator />
 
         {/* 系统资源区 */}
-        {hasHeartbeat ? (
+        {heartbeat ? (
           <div className="space-y-3">
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <IconChartBar className="h-3.5 w-3.5" />
@@ -277,7 +277,7 @@ export function AgentCardCompact({
           </div>
         )}
 
-        {hasHeartbeat && (
+        {heartbeat && (
           <>
             <Separator />
 

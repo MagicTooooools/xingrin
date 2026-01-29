@@ -190,7 +190,7 @@ func Run(ctx context.Context, cfg *config.Config, migrationsFS embed.FS) {
 	scanLogHandler := handler.NewScanLogHandler(scanLogSvc)
 	workerHandler := handler.NewWorkerHandler(workerSvc)
 	agentHandler := handler.NewAgentHandler(agentSvc, cfg.PublicURL, serverVersion, agentImage, cfg.Worker.Token, heartbeatCache, wsHub)
-	agentWSHandler := handler.NewAgentWebSocketHandler(wsHub, agentRepo, heartbeatCache, scanTaskSvc, serverVersion, agentImage)
+	agentWSHandler := handler.NewAgentWebSocketHandler(wsHub, agentRepo, heartbeatCache, serverVersion, agentImage)
 	agentTaskHandler := handler.NewAgentTaskHandler(scanTaskSvc)
 	websiteSnapshotHandler := handler.NewWebsiteSnapshotHandler(websiteSnapshotSvc)
 	subdomainSnapshotHandler := handler.NewSubdomainSnapshotHandler(subdomainSnapshotSvc)

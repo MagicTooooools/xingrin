@@ -3,6 +3,7 @@
 import React from "react"
 import { cn } from "@/lib/utils"
 import { Spinner } from "@/components/ui/spinner"
+import { ShieldLoader } from "@/components/ui/shield-loader"
 
 interface LoadingSpinnerProps {
   size?: "sm" | "md" | "lg"
@@ -43,17 +44,11 @@ export function LoadingState({
   size = "md", 
   className 
 }: LoadingStateProps) {
-  const sizeMap = {
-    sm: "size-4",
-    md: "size-6", 
-    lg: "size-8"
-  }
-
   return (
     <div className={cn("flex items-center justify-center min-h-[200px] h-screen w-full", className)}>
       <div className="flex flex-col items-center space-y-4">
-        <Spinner className={sizeMap[size]} />
-        <p className="text-sm text-muted-foreground">{message}</p>
+        <ShieldLoader size={size} />
+        {message ? <p className="text-sm text-muted-foreground">{message}</p> : null}
       </div>
     </div>
   )

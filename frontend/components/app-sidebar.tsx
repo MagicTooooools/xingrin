@@ -65,11 +65,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const normalize = (p: string) => (p !== "/" && p.endsWith("/") ? p.slice(0, -1) : p)
   const current = normalize(pathname)
 
+  const logoSrc = "/images/icon-64.png"
+
   // User information
   const user = {
     name: "admin",
     email: "admin@admin.com",
-    avatar: "",
+    avatar: logoSrc,
   }
 
   // Main navigation menu items - using translations
@@ -184,8 +186,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               asChild
               className="data-[slot=sidebar-menu-button]:!p-1.5"
             >
-              <Link href="/">
-                <IconRadar className="!size-5 text-primary" />
+              <Link href="/" className="flex items-center gap-2">
+                <img src={logoSrc} alt="Logo" className="!size-5" />
                 <span className="text-base font-semibold">{t('appName')}</span>
               </Link>
             </SidebarMenuButton>

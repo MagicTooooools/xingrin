@@ -4,6 +4,8 @@ import * as React from "react"
 import dynamic from "next/dynamic"
 import { cn } from "@/lib/utils"
 
+import type { ShuffleRef } from "@/components/Shuffle"
+
 // Dynamic import to avoid SSR issues with GSAP
 const Shuffle = dynamic(() => import("@/components/Shuffle"), { ssr: false })
 
@@ -13,8 +15,7 @@ type BootLine = {
 }
 
 // Boot log animation timing (similar to LoginBootScreen)
-const AUTH_STEP_DELAYS_MS = [120, 160, 200, 240]
-const GLITCH_MS = 600
+const AUTH_STEP_DELAYS_MS = [400, 400, 400, 400]
 
 function AuthBootLog({
   authenticatingLabel,
@@ -28,23 +29,16 @@ function AuthBootLog({
   className?: string
 }) {
   const [visible, setVisible] = React.useState(0)
-  const [glitchOn, setGlitchOn] = React.useState(true)
 
   const authLines = React.useMemo<BootLine[]>(
     () => [
-      { text: `> ${authenticatingLabel}`, className: "text-yellow-500" },
-      { text: "> initializing secure channel...", className: "text-zinc-200" },
-      { text: "> validating credentials...", className: "text-zinc-200" },
-      { text: "> checking session...", className: "text-yellow-500" },
+      { text: `> ${authenticatingLabel}`, className: "text-white/90" },
+      { text: "> initializing secure channel...", className: "text-white/60" },
+      { text: "> validating credentials...", className: "text-white/60" },
+      { text: "> checking session...", className: "text-white/90" },
     ],
     [authenticatingLabel]
   )
-
-  React.useEffect(() => {
-    setGlitchOn(true)
-    const timer = setTimeout(() => setGlitchOn(false), GLITCH_MS)
-    return () => clearTimeout(timer)
-  }, [])
 
   React.useEffect(() => {
     setVisible(0)
@@ -76,28 +70,31 @@ function AuthBootLog({
   const progress = done ? 100 : Math.min(rawProgress, 99)
 
   return (
-    <div className={cn(glitchOn && "orbit-splash-glitch", className)}>
+    <div className={className}>
       <div className="space-y-1">
         {authLines.slice(0, visible).map((line, idx) => (
-          <div key={idx} className={cn("whitespace-pre-wrap", line.className)}>
+          <div 
+            key={idx} 
+            className={cn("animate-typing", line.className)}
+          >
             {line.text}
           </div>
         ))}
 
         {/* Cursor */}
-        <div className="text-green-500">
-          <span className="inline-block h-4 w-2 align-middle bg-green-500 animate-pulse" />
+        <div className="text-white/80">
+          <span className="inline-block h-4 w-2 align-middle bg-white/80 animate-pulse" />
         </div>
       </div>
 
       {/* Progress bar */}
       <div className="mt-6">
-        <div className="h-1.5 w-full rounded bg-zinc-800 overflow-hidden">
+        <div className="h-1.5 w-full rounded bg-white/10 overflow-hidden">
           <div
-            className="h-full bg-gradient-to-r from-[#FF10F0] to-[#B026FF]"
+            className="h-full bg-gradient-to-r from-zinc-400 to-zinc-100 transition-all duration-300"
             style={{
               width: `${progress}%`,
-              boxShadow: "0 0 10px rgba(255, 16, 240, 0.5), 0 0 20px rgba(176, 38, 255, 0.3)",
+              boxShadow: "0 0 10px rgba(255, 255, 255, 0.3), 0 0 20px rgba(255, 255, 255, 0.1)",
             }}
           />
         </div>
@@ -155,6 +152,8 @@ export function TerminalLogin({
   const [isFocused, setIsFocused] = React.useState(false)
   const inputRef = React.useRef<HTMLInputElement>(null)
   const containerRef = React.useRef<HTMLDivElement>(null)
+  const shuffleRef = React.useRef<ShuffleRef>(null)
+  const hasTriggeredShuffleRef = React.useRef(false)
 
   // Focus input on mount and when step changes
   React.useEffect(() => {
@@ -293,6 +292,12 @@ export function TerminalLogin({
     const value = e.target.value
     setCurrentValue(value)
     setCursorPosition(e.target.selectionStart || value.length)
+
+    // Trigger shuffle animation on first username input
+    if (step === "username" && value.length === 1 && !hasTriggeredShuffleRef.current) {
+      hasTriggeredShuffleRef.current = true
+      shuffleRef.current?.play()
+    }
   }
 
   const handleSelect = (e: React.SyntheticEvent<HTMLInputElement>) => {
@@ -360,7 +365,8 @@ export function TerminalLogin({
         {/* Shuffle Title Banner */}
         <div className="mb-6 text-center">
           <Shuffle
-            text="ORBIT"
+            ref={shuffleRef}
+            text="LUNAFOX"
             className="!text-4xl sm:!text-5xl md:!text-6xl !font-bold text-cyan-500"
             shuffleDirection="up"
             duration={0.5}
@@ -368,7 +374,7 @@ export function TerminalLogin({
             shuffleTimes={2}
             triggerOnHover={true}
             triggerOnce={false}
-            autoPlay={false}
+            autoPlay={true}
           />
           <div className="mt-3 flex items-center gap-3 text-zinc-400 text-sm">
             <span className="h-px flex-1 bg-zinc-700" />

@@ -76,7 +76,7 @@ func (f *fakeHeartbeatCache) Delete(ctx context.Context, agentID int) error {
 func TestHandleHeartbeatUpdatesRepoAndCache(t *testing.T) {
 	repo := &fakeAgentRepo{}
 	cacheStore := &fakeHeartbeatCache{}
-	handler := NewAgentWebSocketHandler(ws.NewHub(), repo, cacheStore, nil, "", "")
+	handler := NewAgentWebSocketHandler(ws.NewHub(), repo, cacheStore, "", "")
 
 	agent := &model.Agent{ID: 1}
 	now := time.Now().UTC()
@@ -111,18 +111,7 @@ func TestHandleHeartbeatUpdatesRepoAndCache(t *testing.T) {
 	}
 }
 
-type fakeCanceller struct {
-	called bool
-	agent  int
-}
-
-func (f *fakeCanceller) CancelRunningTasksForAgent(ctx context.Context, agentID int) error {
-	f.called = true
-	f.agent = agentID
-	return nil
-}
-
-func TestUpdateRequiredSendsMessageAndCancels(t *testing.T) {
+func TestUpdateRequiredSendsMessage(t *testing.T) {
 	hub := ws.NewHub()
 	go hub.Run()
 
@@ -133,8 +122,7 @@ func TestUpdateRequiredSendsMessageAndCancels(t *testing.T) {
 	}
 	hub.Register(client)
 
-	canceller := &fakeCanceller{}
-	handler := NewAgentWebSocketHandler(hub, &fakeAgentRepo{}, nil, canceller, "v2.0.0", "yyhuni/orbit-agent")
+	handler := NewAgentWebSocketHandler(hub, &fakeAgentRepo{}, nil, "v2.0.0", "yyhuni/orbit-agent")
 
 	handler.maybeSendUpdateRequired(context.Background(), 1, "v1.0.0")
 
@@ -145,10 +133,6 @@ func TestUpdateRequiredSendsMessageAndCancels(t *testing.T) {
 		}
 	default:
 		t.Fatalf("expected update_required to be sent")
-	}
-
-	if !canceller.called || canceller.agent != 1 {
-		t.Fatalf("expected canceller to be invoked")
 	}
 }
 
@@ -170,7 +154,7 @@ func TestSendConfigUpdateSendsMessage(t *testing.T) {
 		time.Sleep(10 * time.Millisecond)
 	}
 
-	handler := NewAgentWebSocketHandler(hub, &fakeAgentRepo{}, nil, nil, "", "")
+	handler := NewAgentWebSocketHandler(hub, &fakeAgentRepo{}, nil, "", "")
 	agent := &model.Agent{
 		ID:            1,
 		MaxTasks:      5,

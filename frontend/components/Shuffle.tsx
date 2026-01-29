@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState, useMemo } from 'react';
+import React, { useRef, useEffect, useState, useMemo, useImperativeHandle, forwardRef } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { SplitText as GSAPSplitText } from 'gsap/SplitText';
@@ -6,6 +6,10 @@ import { useGSAP } from '@gsap/react';
 import './Shuffle.css';
 
 gsap.registerPlugin(ScrollTrigger, GSAPSplitText, useGSAP);
+
+export interface ShuffleRef {
+  play: () => void;
+}
 
 interface ShuffleProps {
   text: string;
@@ -34,7 +38,7 @@ interface ShuffleProps {
   autoPlay?: boolean;
 }
 
-const Shuffle: React.FC<ShuffleProps> = ({
+const Shuffle = forwardRef<ShuffleRef, ShuffleProps>(({
   text,
   className = '',
   style = {},
@@ -59,7 +63,7 @@ const Shuffle: React.FC<ShuffleProps> = ({
   respectReducedMotion = true,
   triggerOnHover = true,
   autoPlay = true
-}) => {
+}, forwardedRef) => {
   const ref = useRef<HTMLElement | null>(null);
   const [fontsLoaded, setFontsLoaded] = useState(false);
   const [ready, setReady] = useState(false);
@@ -69,6 +73,9 @@ const Shuffle: React.FC<ShuffleProps> = ({
   const tlRef = useRef<gsap.core.Timeline | null>(null);
   const playingRef = useRef(false);
   const hoverHandlerRef = useRef<((e: MouseEvent) => void) | null>(null);
+  const playFnRef = useRef<(() => void) | null>(null);
+  const buildFnRef = useRef<(() => void) | null>(null);
+  const randomizeScramblesFnRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
     if ('fonts' in document) {
@@ -256,6 +263,7 @@ const Shuffle: React.FC<ShuffleProps> = ({
           }
         });
       };
+      randomizeScramblesFnRef.current = randomizeScrambles;
 
       const cleanupToStill = () => {
         wrappersRef.current.forEach(w => {
@@ -347,6 +355,8 @@ const Shuffle: React.FC<ShuffleProps> = ({
 
         tlRef.current = tl;
       };
+      playFnRef.current = play;
+      buildFnRef.current = build;
 
       const armHover = () => {
         if (!triggerOnHover || !ref.current) return;
@@ -412,12 +422,24 @@ const Shuffle: React.FC<ShuffleProps> = ({
     }
   );
 
+  // Expose play method via ref
+  useImperativeHandle(forwardedRef, () => ({
+    play: () => {
+      if (playingRef.current) return;
+      buildFnRef.current?.();
+      randomizeScramblesFnRef.current?.();
+      playFnRef.current?.();
+    }
+  }), []);
+
   const commonStyle = useMemo(() => ({ textAlign, ...style }), [textAlign, style]);
 
   const classes = useMemo(() => `shuffle-parent ${ready ? 'is-ready' : ''} ${className}`, [ready, className]);
 
   const Tag = tag || 'p';
   return React.createElement(Tag, { ref, className: classes, style: commonStyle }, text);
-};
+});
+
+Shuffle.displayName = 'Shuffle';
 
 export default Shuffle;

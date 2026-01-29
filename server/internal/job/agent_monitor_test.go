@@ -55,19 +55,7 @@ type fakeScanTaskRepo struct {
 	recovered []int
 }
 
-func (f *fakeScanTaskRepo) Create(ctx context.Context, task *model.ScanTask) error {
-	return nil
-}
-
 func (f *fakeScanTaskRepo) FindByID(ctx context.Context, id int) (*model.ScanTask, error) {
-	return nil, nil
-}
-
-func (f *fakeScanTaskRepo) FindByScanID(ctx context.Context, scanID int) ([]*model.ScanTask, error) {
-	return nil, nil
-}
-
-func (f *fakeScanTaskRepo) FindByAgentID(ctx context.Context, agentID int) ([]*model.ScanTask, error) {
 	return nil, nil
 }
 
@@ -79,16 +67,16 @@ func (f *fakeScanTaskRepo) UpdateStatus(ctx context.Context, id int, status stri
 	return nil
 }
 
-func (f *fakeScanTaskRepo) CancelRunningTasksForAgent(ctx context.Context, agentID int) ([]int, error) {
+func (f *fakeScanTaskRepo) GetStatusCountsByScanID(ctx context.Context, scanID int) (pending, running, completed, failed, cancelled int, err error) {
+	return 0, 0, 1, 0, 0, nil
+}
+
+func (f *fakeScanTaskRepo) CancelTasksByScanID(ctx context.Context, scanID int) ([]repository.CancelledTaskInfo, error) {
 	return nil, nil
 }
 
-func (f *fakeScanTaskRepo) RecoverTasksForOfflineAgent(ctx context.Context, agentID int) error {
+func (f *fakeScanTaskRepo) FailTasksForOfflineAgent(ctx context.Context, agentID int) error {
 	f.recovered = append(f.recovered, agentID)
-	return nil
-}
-
-func (f *fakeScanTaskRepo) Delete(ctx context.Context, id int) error {
 	return nil
 }
 

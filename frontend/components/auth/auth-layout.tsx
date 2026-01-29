@@ -44,6 +44,15 @@ export function AuthLayout({ children }: AuthLayoutProps) {
   // Check if it's a public route (login page)
   const isPublicRoute = isPublicPath(pathname)
 
+  // Hide the inline boot splash once app is ready
+  React.useEffect(() => {
+    const splash = document.getElementById('boot-splash')
+    if (splash) {
+      splash.classList.add('hidden')
+      setTimeout(() => splash.remove(), 300)
+    }
+  }, [])
+
   // Redirect to login page if not authenticated (useEffect must be before all conditional returns)
   React.useEffect(() => {
     if (!isLoading && !auth?.authenticated && !isPublicRoute) {
@@ -71,7 +80,7 @@ export function AuthLayout({ children }: AuthLayoutProps) {
     <SidebarProvider
       style={
         {
-          "--sidebar-width": "calc(var(--spacing) * 70)",
+          "--sidebar-width": "calc(var(--spacing) * 62)",
           "--header-height": "calc(var(--spacing) * 11)",
         } as React.CSSProperties
       }

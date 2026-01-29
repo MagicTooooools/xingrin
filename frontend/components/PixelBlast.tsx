@@ -522,15 +522,8 @@ const PixelBlast = ({
         setSize();
         const ro = new ResizeObserver(setSize);
         ro.observe(container);
-        const randomFloat = () => {
-          if (typeof window !== 'undefined' && window.crypto?.getRandomValues) {
-            const u32 = new Uint32Array(1);
-            window.crypto.getRandomValues(u32);
-            return u32[0] / 0xffffffff;
-          }
-          return Math.random();
-        };
-        const timeOffset = randomFloat() * 1000;
+        // Fixed seed for deterministic animation (no random)
+        const timeOffset = 42;
         let composer: EffectComposer | undefined;
         let touch: ReturnType<typeof createTouchTexture> | undefined;
         let liquidEffect: Effect | undefined;

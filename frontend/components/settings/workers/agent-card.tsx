@@ -209,7 +209,7 @@ export function AgentCard({
         </div>
 
         {/* 可折叠的详细信息 */}
-        {hasHeartbeat && (
+        {heartbeat && (
           <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
             <CollapsibleTrigger asChild>
               <Button
@@ -298,7 +298,7 @@ export function AgentCard({
         )}
 
         {/* 无心跳数据时的提示 */}
-        {!hasHeartbeat && (
+        {!heartbeat && (
           <div className="rounded-lg border border-dashed bg-muted/20 p-4 text-center">
             <p className="text-xs text-muted-foreground">
               {t("card.waitingForHeartbeat")}
