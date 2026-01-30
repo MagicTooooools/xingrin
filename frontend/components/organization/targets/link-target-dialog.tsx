@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useRef, useMemo } from "react"
-import { Plus, Target, Building2, Loader2 } from "lucide-react"
+import { Plus, Target, Building2 } from "lucide-react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
@@ -129,7 +129,7 @@ export function LinkTargetDialog({
       count: lines.length,
       invalid
     }
-  }, [targetsText])
+  }, [targetsText, t])
 
 
   // 处理表单提交
@@ -345,4 +345,3 @@ export function LinkTargetDialog({
     </Dialog>
   )
 }
-

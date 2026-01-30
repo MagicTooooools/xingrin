@@ -1,5 +1,5 @@
 import { useQuery, keepPreviousData } from '@tanstack/react-query'
-import { ScreenshotService, type PaginatedResponse, type Screenshot, type ScreenshotSnapshot } from '@/services/screenshot.service'
+import { ScreenshotService } from '@/services/screenshot.service'
 
 // 获取目标的截图列表
 export function useTargetScreenshots(

@@ -228,7 +228,7 @@ export function WebSitesView({
       a.download = `${prefix}-websites-${Date.now()}.csv`
       document.body.appendChild(a)
       a.click()
-      document.body.removeChild(a)
+      a.remove()
       URL.revokeObjectURL(url)
     } catch (error) {
       console.error("Failed to download website list", error)
@@ -250,7 +250,7 @@ export function WebSitesView({
     a.download = `${prefix}-websites-selected-${Date.now()}.csv`
     document.body.appendChild(a)
     a.click()
-    document.body.removeChild(a)
+    a.remove()
     URL.revokeObjectURL(url)
   }
 

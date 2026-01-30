@@ -172,7 +172,7 @@ export function ScanHistoryList({ hideToolbar = false, targetId, pageSize: custo
   })
 
   // Helper function - format date
-  const formatDate = (dateString: string): string => {
+  const formatDate = React.useCallback((dateString: string): string => {
     return new Date(dateString).toLocaleString(getDateLocale(locale), {
       year: "numeric",
       month: "numeric",
@@ -182,13 +182,13 @@ export function ScanHistoryList({ hideToolbar = false, targetId, pageSize: custo
       second: "2-digit",
       hour12: false,
     })
-  }
+  }, [locale])
 
   // Navigation function
   const router = useRouter()
-  const navigate = (path: string) => {
+  const navigate = React.useCallback((path: string) => {
     router.push(path)
-  }
+  }, [router])
 
   // Handle delete scan record
   const handleDeleteScan = (scan: ScanRecord) => {
@@ -252,7 +252,7 @@ export function ScanHistoryList({ hideToolbar = false, targetId, pageSize: custo
       const progressData = buildScanProgressData(freshScan)
       setProgressData(progressData)
       setProgressDialogOpen(true)
-    } catch (error) {
+    } catch {
       // If fetch fails, use current data
       const progressData = buildScanProgressData(scan)
       setProgressData(progressData)
@@ -295,7 +295,7 @@ export function ScanHistoryList({ hideToolbar = false, targetId, pageSize: custo
         t: translations,
         hideTargetColumn,
       }),
-    [navigate, translations, hideTargetColumn]
+    [formatDate, navigate, translations, hideTargetColumn]
   )
 
   // Error handling

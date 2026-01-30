@@ -68,7 +68,19 @@ export function ThemeToggle() {
     document.head.appendChild(style)
 
     // 3. After slider finishes, start View Transition to switch theme
-    const transition = (document as any).startViewTransition(() => {
+    type ViewTransition = { ready: Promise<void>; finished: Promise<void> }
+    type ViewTransitionDocument = Document & {
+      startViewTransition?: (callback: () => void) => ViewTransition
+    }
+
+    const viewTransition = (document as ViewTransitionDocument).startViewTransition
+    if (!viewTransition) {
+      setTheme(newTheme)
+      style.remove()
+      return
+    }
+
+    const transition = viewTransition(() => {
       flushSync(() => {
         setTheme(newTheme)
       })

@@ -49,7 +49,6 @@ export function AuthLayout({ children }: AuthLayoutProps) {
     const splash = document.getElementById('boot-splash')
     if (splash) {
       splash.classList.add('hidden')
-      setTimeout(() => splash.remove(), 300)
     }
   }, [])
 

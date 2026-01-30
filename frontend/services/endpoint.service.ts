@@ -2,12 +2,13 @@ import { api } from "@/lib/api-client"
 import type { 
   Endpoint, 
   CreateEndpointRequest, 
-  UpdateEndpointRequest,
   GetEndpointsRequest,
   GetEndpointsResponse,
+  CreateEndpointsResponse,
   BatchDeleteEndpointsRequest,
   BatchDeleteEndpointsResponse
 } from "@/types/endpoint.types"
+import type { PaginatedResponse } from "@/types/api-response.types"
 import { USE_MOCK, mockDelay, getMockEndpoints, getMockEndpointById } from '@/mock'
 
 // Bulk create endpoints response type
@@ -108,8 +109,8 @@ export class EndpointService {
     scanId: number,
     params: GetEndpointsRequest,
     filter?: string,
-  ): Promise<any> {
-    const response = await api.get(`/scans/${scanId}/endpoints/`, {
+  ): Promise<PaginatedResponse<Endpoint>> {
+    const response = await api.get<PaginatedResponse<Endpoint>>(`/scans/${scanId}/endpoints/`, {
       params: { ...params, filter },
     })
     return response.data
@@ -121,9 +122,9 @@ export class EndpointService {
    * @param data.endpoints - Endpoint data array
    * @returns Promise<CreateEndpointsResponse>
    */
-  static async createEndpoints(data: { endpoints: Array<CreateEndpointRequest> }): Promise<any> {
+  static async createEndpoints(data: { endpoints: Array<CreateEndpointRequest> }): Promise<CreateEndpointsResponse> {
     // api-client.ts automatically converts camelCase request body to snake_case
-    const response = await api.post('/endpoints/create/', data)
+    const response = await api.post<CreateEndpointsResponse>('/endpoints/create/', data)
     return response.data
   }
 

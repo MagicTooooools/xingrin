@@ -68,14 +68,16 @@ const Shuffle = forwardRef<ShuffleRef, ShuffleProps>(({
   const [fontsLoaded, setFontsLoaded] = useState(false);
   const [ready, setReady] = useState(false);
 
-  const splitRef = useRef<any>(null);
-  const wrappersRef = useRef<any[]>([]);
+  type SplitTextInstance = InstanceType<typeof GSAPSplitText>;
+  const splitRef = useRef<SplitTextInstance | null>(null);
+  const wrappersRef = useRef<HTMLSpanElement[]>([]);
   const tlRef = useRef<gsap.core.Timeline | null>(null);
   const playingRef = useRef(false);
   const hoverHandlerRef = useRef<((e: MouseEvent) => void) | null>(null);
   const playFnRef = useRef<(() => void) | null>(null);
   const buildFnRef = useRef<(() => void) | null>(null);
   const randomizeScramblesFnRef = useRef<(() => void) | null>(null);
+  const isActiveRef = useRef(true);
 
   useEffect(() => {
     if ('fonts' in document) {
@@ -96,6 +98,8 @@ const Shuffle = forwardRef<ShuffleRef, ShuffleProps>(({
   useGSAP(
     () => {
       if (!ref.current || !text || !fontsLoaded) return;
+      if (!ref.current.isConnected) return;
+      isActiveRef.current = true;
       if (respectReducedMotion && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
         setReady(true);
         onShuffleComplete?.();
@@ -136,24 +140,29 @@ const Shuffle = forwardRef<ShuffleRef, ShuffleProps>(({
       };
 
       const build = () => {
+        if (!ref.current || !ref.current.isConnected || !isActiveRef.current) return;
         teardown();
 
-        splitRef.current = new GSAPSplitText(el, {
-          type: 'chars',
-          charsClass: 'shuffle-char',
-          wordsClass: 'shuffle-word',
-          linesClass: 'shuffle-line',
-          smartWrap: true,
-          reduceWhiteSpace: false
-        });
+        try {
+          splitRef.current = new GSAPSplitText(el, {
+            type: 'chars',
+            charsClass: 'shuffle-char',
+            wordsClass: 'shuffle-word',
+            linesClass: 'shuffle-line',
+            smartWrap: true,
+            reduceWhiteSpace: false
+          });
+        } catch {
+          return;
+        }
 
-        const chars = splitRef.current.chars || [];
+        const chars = (splitRef.current?.chars || []) as HTMLElement[];
         wrappersRef.current = [];
 
         const rolls = Math.max(1, Math.floor(shuffleTimes));
         const rand = (set: string) => set.charAt(Math.floor(Math.random() * set.length)) || '';
 
-        chars.forEach((ch: any) => {
+        chars.forEach((ch) => {
           const parent = ch.parentElement;
           if (!parent) return;
 
@@ -177,10 +186,17 @@ const Shuffle = forwardRef<ShuffleRef, ShuffleProps>(({
             willChange: 'transform'
           });
 
-          parent.insertBefore(wrap, ch);
-          wrap.appendChild(inner);
+          // Verify ch is still a child of parent before inserting
+          try {
+            if (!parent.contains(ch)) return;
+            parent.insertBefore(wrap, ch);
+            wrap.appendChild(inner);
+          } catch {
+            // Silently skip if DOM operation fails
+            return;
+          }
 
-          const firstOrig = ch.cloneNode(true);
+          const firstOrig = ch.cloneNode(true) as HTMLElement;
           Object.assign(firstOrig.style, {
             display: shuffleDirection === 'up' || shuffleDirection === 'down' ? 'block' : 'inline-block',
             width: w + 'px',
@@ -196,7 +212,7 @@ const Shuffle = forwardRef<ShuffleRef, ShuffleProps>(({
 
           inner.appendChild(firstOrig);
           for (let k = 0; k < rolls; k++) {
-            const c = ch.cloneNode(true);
+            const c = ch.cloneNode(true) as HTMLElement;
             if (scrambleCharset) c.textContent = rand(scrambleCharset);
             Object.assign(c.style, {
               display: shuffleDirection === 'up' || shuffleDirection === 'down' ? 'block' : 'inline-block',
@@ -210,10 +226,17 @@ const Shuffle = forwardRef<ShuffleRef, ShuffleProps>(({
           const steps = rolls + 1;
 
           if (shuffleDirection === 'right' || shuffleDirection === 'down') {
-            const firstCopy = inner.firstElementChild;
-            const real = inner.lastElementChild;
-            if (real) inner.insertBefore(real, inner.firstChild);
-            if (firstCopy) inner.appendChild(firstCopy);
+            try {
+              const firstCopy = inner.firstElementChild;
+              const real = inner.lastElementChild;
+              // Only proceed if we have both elements and they're different
+              if (real && firstCopy && real !== firstCopy && inner.contains(real) && inner.contains(firstCopy)) {
+                inner.insertBefore(real, firstCopy);
+                inner.appendChild(firstCopy);
+              }
+            } catch {
+              // Silently skip if DOM operation fails
+            }
           }
 
           let startX = 0;
@@ -250,14 +273,17 @@ const Shuffle = forwardRef<ShuffleRef, ShuffleProps>(({
         });
       };
 
-      const inners = () => wrappersRef.current.map(w => w.firstElementChild);
+        const inners = () =>
+          wrappersRef.current
+            .map(w => w.firstElementChild)
+            .filter((el): el is HTMLElement => !!el);
 
       const randomizeScrambles = () => {
         if (!scrambleCharset) return;
         wrappersRef.current.forEach(w => {
-          const strip = w.firstElementChild;
+          const strip = w.firstElementChild as HTMLElement | null;
           if (!strip) return;
-          const kids = Array.from(strip.children) as Element[];
+          const kids = Array.from(strip.children) as HTMLElement[];
           for (let i = 1; i < kids.length - 1; i++) {
             kids[i].textContent = scrambleCharset.charAt(Math.floor(Math.random() * scrambleCharset.length));
           }
@@ -267,9 +293,9 @@ const Shuffle = forwardRef<ShuffleRef, ShuffleProps>(({
 
       const cleanupToStill = () => {
         wrappersRef.current.forEach(w => {
-          const strip = w.firstElementChild;
+          const strip = w.firstElementChild as HTMLElement | null;
           if (!strip) return;
-          const real = strip.querySelector('[data-orig="1"]');
+          const real = strip.querySelector<HTMLElement>('[data-orig="1"]');
           if (!real) return;
           strip.replaceChildren(real);
           strip.style.transform = 'none';
@@ -291,9 +317,9 @@ const Shuffle = forwardRef<ShuffleRef, ShuffleProps>(({
           onRepeat: () => {
             if (scrambleCharset) randomizeScrambles();
             if (isVertical) {
-              gsap.set(strips, { y: (i, t) => parseFloat(t.getAttribute('data-start-y') || '0') });
+              gsap.set(strips, { y: (_i, target) => parseFloat(target.getAttribute('data-start-y') || '0') });
             } else {
-              gsap.set(strips, { x: (i, t) => parseFloat(t.getAttribute('data-start-x') || '0') });
+              gsap.set(strips, { x: (_i, target) => parseFloat(target.getAttribute('data-start-x') || '0') });
             }
             onShuffleComplete?.();
           },
@@ -308,17 +334,17 @@ const Shuffle = forwardRef<ShuffleRef, ShuffleProps>(({
           }
         });
 
-        const addTween = (targets: any, at: any) => {
-          const vars: any = {
+        const addTween = (targets: gsap.TweenTarget, at: gsap.Position) => {
+          const vars: gsap.TweenVars = {
             duration,
             ease,
             force3D: true,
             stagger: animationMode === 'evenodd' ? stagger : 0
           };
           if (isVertical) {
-            vars.y = (i: number, t: any) => parseFloat(t.getAttribute('data-final-y') || '0');
+            vars.y = (_i: number, target: Element) => parseFloat(target.getAttribute('data-final-y') || '0');
           } else {
-            vars.x = (i: number, t: any) => parseFloat(t.getAttribute('data-final-x') || '0');
+            vars.x = (_i: number, target: Element) => parseFloat(target.getAttribute('data-final-x') || '0');
           }
 
           tl.to(targets, vars, at);
@@ -338,7 +364,7 @@ const Shuffle = forwardRef<ShuffleRef, ShuffleProps>(({
         } else {
           strips.forEach(strip => {
             const d = Math.random() * maxDelay;
-            const vars: any = {
+            const vars: gsap.TweenVars = {
               duration,
               ease,
               force3D: true
@@ -372,6 +398,7 @@ const Shuffle = forwardRef<ShuffleRef, ShuffleProps>(({
       };
 
       const create = () => {
+        if (!ref.current || !ref.current.isConnected || !isActiveRef.current) return;
         build();
         if (scrambleCharset) randomizeScrambles();
         if (autoPlay) {
@@ -389,6 +416,7 @@ const Shuffle = forwardRef<ShuffleRef, ShuffleProps>(({
       });
 
       return () => {
+        isActiveRef.current = false;
         st.kill();
         removeHover();
         teardown();

@@ -97,9 +97,6 @@ export function VulnerabilitiesDataTable({
   onBulkMarkAsPending,
   severityFilter = "all",
   onSeverityFilterChange,
-  sourceFilter = "all",
-  onSourceFilterChange,
-  availableSources = [],
 }: VulnerabilitiesDataTableProps) {
   const t = useTranslations("common.status")
   const tDownload = useTranslations("common.download")

@@ -166,7 +166,7 @@ export function CreateScheduledScanDialog({
   }, [open, presetOrganizationId, presetOrganizationName, presetTargetId, presetTargetName, t])
 
   const targets: Target[] = targetsData?.targets || []
-  const engines = enginesData || []
+  const engines = React.useMemo(() => enginesData || [], [enginesData])
   const organizations: Organization[] = organizationsData?.organizations || []
 
   // Get selected engines for display

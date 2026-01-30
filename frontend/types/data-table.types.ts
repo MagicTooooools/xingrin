@@ -9,6 +9,8 @@ declare module '@tanstack/react-table' {
   interface ColumnMeta<TData extends RowData, TValue> {
     /** Column title, used for column header and column visibility control */
     title?: string
+    /** Type anchor to avoid unused generic warnings */
+    __type?: { data: TData; value: TValue }
   }
 }
 
@@ -67,7 +69,7 @@ export interface DeleteConfirmationConfig {
 export interface UnifiedDataTableProps<TData> {
   // Core data
   data: TData[]
-  columns: ColumnDef<TData, any>[]
+  columns: ColumnDef<TData, unknown>[]
   getRowId?: (row: TData) => string
   
   // Pagination

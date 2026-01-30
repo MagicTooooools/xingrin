@@ -1,9 +1,9 @@
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query'
 import { useToastMessages } from '@/lib/toast-helpers'
-import { getErrorCode } from '@/lib/response-parser'
+import { getErrorCode, getErrorResponseData } from '@/lib/response-parser'
 import { DirectoryService } from '@/services/directory.service'
 import { api } from '@/lib/api-client'
-import type { Directory, DirectoryListResponse } from '@/types/directory.types'
+import type { DirectoryListResponse } from '@/types/directory.types'
 
 // API 服务函数
 const directoryService = {
@@ -121,9 +121,9 @@ export function useDeleteDirectory() {
       queryClient.invalidateQueries({ queryKey: ['targets'] })
       queryClient.invalidateQueries({ queryKey: ['scans'] })
     },
-    onError: (error: any, id) => {
+    onError: (error: unknown, id) => {
       toastMessages.dismiss(`delete-directory-${id}`)
-      toastMessages.errorFromCode(getErrorCode(error?.response?.data), 'toast.asset.directory.delete.error')
+      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.asset.directory.delete.error')
     },
   })
 }
@@ -147,9 +147,9 @@ export function useBulkDeleteDirectories() {
       queryClient.invalidateQueries({ queryKey: ['targets'] })
       queryClient.invalidateQueries({ queryKey: ['scans'] })
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toastMessages.dismiss('bulk-delete-directories')
-      toastMessages.errorFromCode(getErrorCode(error?.response?.data), 'toast.asset.directory.delete.error')
+      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.asset.directory.delete.error')
     },
   })
 }
@@ -187,10 +187,10 @@ export function useBulkCreateDirectories() {
         refetchType: 'active',
       })
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toastMessages.dismiss('bulk-create-directories')
       console.error('Failed to bulk create directories:', error)
-      toastMessages.errorFromCode(getErrorCode(error?.response?.data), 'toast.asset.directory.create.error')
+      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.asset.directory.create.error')
     },
   })
 }

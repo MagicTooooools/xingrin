@@ -24,12 +24,12 @@ import {
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { LoadingSpinner } from "@/components/loading-spinner"
-import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import { Zap, AlertCircle, ChevronRight, ChevronLeft, Target, Server, Settings } from "lucide-react"
 import { quickScan } from "@/services/scan.service"
 import { TargetValidator } from "@/lib/target-validator"
 import { useEngines } from "@/hooks/use-engines"
+import { useQueryClient } from "@tanstack/react-query"
 import { EnginePresetSelector } from "./engine-preset-selector"
 import { ScanConfigEditor } from "./scan-config-editor"
 
@@ -42,6 +42,7 @@ export function QuickScanDialog({ trigger }: QuickScanDialogProps) {
   const [open, setOpen] = React.useState(false)
   const [isSubmitting, setIsSubmitting] = React.useState(false)
   const [step, setStep] = React.useState(1)
+  const queryClient = useQueryClient()
   
   const [targetInput, setTargetInput] = React.useState("")
   const [selectedEngineIds, setSelectedEngineIds] = React.useState<number[]>([])
@@ -187,6 +188,8 @@ export function QuickScanDialog({ trigger }: QuickScanDialogProps) {
           ? t("toast.createSuccessDesc", { created: targetStats.created, failed: targetStats.failed })
           : undefined
       })
+      queryClient.invalidateQueries({ queryKey: ["scans"] })
+      queryClient.invalidateQueries({ queryKey: ["scan-statistics"] })
       handleClose(false)
     } catch (error: unknown) {
       const err = error as { response?: { data?: { error?: { code?: string; message?: string }; detail?: string } } }

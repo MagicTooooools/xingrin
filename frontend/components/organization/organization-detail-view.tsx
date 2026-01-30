@@ -1,14 +1,12 @@
 "use client"
 
-import React, { useState, useMemo } from "react"
+import React, { useState, useMemo, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { Building2, AlertTriangle } from "lucide-react"
 import { useTranslations, useLocale } from "next-intl"
 import { TargetsDataTable } from "./targets/targets-data-table"
 import { createTargetColumns } from "./targets/targets-columns"
 import { AddTargetDialog } from "./targets/add-target-dialog"
-import { LoadingSpinner } from "@/components/loading-spinner"
-import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import { getDateLocale } from "@/lib/date-utils"
 import {
@@ -23,7 +21,6 @@ import {
 } from "@/components/ui/alert-dialog"
 import { useOrganization, useOrganizationTargets, useUnlinkTargetsFromOrganization } from "@/hooks/use-organizations"
 import type { Target } from "@/types/target.types"
-import { toast } from "sonner"
 
 /**
  * Organization detail view component
@@ -134,7 +131,7 @@ export function OrganizationDetailView({
   const error = orgError || targetsError
 
   // Helper function - format date
-  const formatDate = (dateString: string): string => {
+  const formatDate = useCallback((dateString: string): string => {
     return new Date(dateString).toLocaleString(getDateLocale(locale), {
       year: "numeric",
       month: "numeric",
@@ -144,19 +141,19 @@ export function OrganizationDetailView({
       second: "2-digit",
       hour12: false,
     })
-  }
+  }, [locale])
 
   // Navigation function
   const router = useRouter()
-  const navigate = (path: string) => {
+  const navigate = useCallback((path: string) => {
     router.push(path)
-  }
+  }, [router])
 
   // Handle unlink target
-  const handleDeleteTarget = (target: Target) => {
+  const handleDeleteTarget = useCallback((target: Target) => {
     setTargetToDelete(target)
     setDeleteDialogOpen(true)
-  }
+  }, [])
 
   // Confirm unlink target
   const confirmDelete = async () => {

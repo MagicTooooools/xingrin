@@ -22,7 +22,6 @@ import {
   ArrowLeft,
   Search,
   RefreshCw,
-  AlertTriangle,
   Tag,
   User,
 } from "lucide-react"
@@ -109,7 +108,7 @@ export default function NucleiRepoDetailPage() {
   const numericRepoId = repoId ? Number(repoId) : null
 
   const { data: tree, isLoading, isError } = useNucleiRepoTree(numericRepoId)
-  const { data: templateContent, isLoading: isLoadingContent } = useNucleiRepoContent(numericRepoId, selectedPath)
+  const { data: templateContent } = useNucleiRepoContent(numericRepoId, selectedPath)
   const { data: repoDetail } = useNucleiRepo(numericRepoId)
   const refreshMutation = useRefreshNucleiRepo()
 

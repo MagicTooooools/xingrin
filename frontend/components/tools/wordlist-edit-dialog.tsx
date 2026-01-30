@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from "react"
 import { FileText, Save, X, AlertTriangle } from "lucide-react"
 import Editor from "@monaco-editor/react"
+import type { editor } from "monaco-editor"
 import { useTranslations } from "next-intl"
 import {
   Dialog,
@@ -35,7 +36,7 @@ export function WordlistEditDialog({
   const [hasChanges, setHasChanges] = useState(false)
   const [isEditorReady, setIsEditorReady] = useState(false)
   const { currentTheme } = useColorTheme()
-  const editorRef = useRef<any>(null)
+  const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null)
 
   const { data: originalContent, isLoading } = useWordlistContent(
     open && wordlist ? wordlist.id : null
@@ -63,8 +64,8 @@ export function WordlistEditDialog({
     setHasChanges(newValue !== originalContent)
   }
 
-  const handleEditorDidMount = (editor: any) => {
-    editorRef.current = editor
+  const handleEditorDidMount = (editorInstance: editor.IStandaloneCodeEditor) => {
+    editorRef.current = editorInstance
     setIsEditorReady(true)
   }
 

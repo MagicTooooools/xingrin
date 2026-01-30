@@ -10,12 +10,22 @@ import {
   stopScan
 } from '@/services/scan.service'
 import { useToastMessages } from '@/lib/toast-helpers'
-import { parseResponse, getErrorCode } from '@/lib/response-parser'
+import { parseResponse, getErrorCode, getErrorResponseData } from '@/lib/response-parser'
 import type { 
   GetScansParams, 
   QuickScanRequest, 
   InitiateScanRequest 
 } from '@/types/scan.types'
+
+type QuickScanResponse = {
+  scans?: unknown[]
+  targetStats?: { created?: number }
+  count?: number
+}
+
+type InitiateScanResponse = Record<string, unknown>
+type BulkDeleteScansResponse = { deletedCount?: number }
+type StopScanResponse = { revokedTaskCount?: number }
 
 export function useScans(params: GetScansParams = { page: 1, pageSize: 10 }) {
   return useQuery({
@@ -68,7 +78,7 @@ export function useQuickScan() {
   return useMutation({
     mutationFn: (data: QuickScanRequest) => quickScan(data),
     onSuccess: (response) => {
-      const data = parseResponse<any>(response)
+      const data = parseResponse<QuickScanResponse>(response)
       if (data) {
         // 使用 i18n 消息显示成功提示
         const count = data.scans?.length || data.targetStats?.created || data.count || 0
@@ -78,8 +88,8 @@ export function useQuickScan() {
         queryClient.invalidateQueries({ queryKey: ['scan-statistics'] })
       }
     },
-    onError: (error: any) => {
-      const errorCode = getErrorCode(error.response?.data)
+    onError: (error: unknown) => {
+      const errorCode = getErrorCode(getErrorResponseData(error))
       if (errorCode) {
         toastMessages.errorFromCode(errorCode)
       } else {
@@ -99,7 +109,7 @@ export function useInitiateScan() {
   return useMutation({
     mutationFn: (data: InitiateScanRequest) => initiateScan(data),
     onSuccess: (response) => {
-      const data = parseResponse<any>(response)
+      const data = parseResponse<InitiateScanResponse>(response)
       if (data) {
         // 使用 i18n 消息显示成功提示
         toastMessages.success('toast.scan.initiate.success')
@@ -108,8 +118,8 @@ export function useInitiateScan() {
         queryClient.invalidateQueries({ queryKey: ['scan-statistics'] })
       }
     },
-    onError: (error: any) => {
-      const errorCode = getErrorCode(error.response?.data)
+    onError: (error: unknown) => {
+      const errorCode = getErrorCode(getErrorResponseData(error))
       if (errorCode) {
         toastMessages.errorFromCode(errorCode)
       } else {
@@ -129,7 +139,7 @@ export function useDeleteScan() {
   return useMutation({
     mutationFn: (id: number) => deleteScan(id),
     onSuccess: (response, id) => {
-      const data = parseResponse<any>(response)
+      parseResponse<unknown>(response)
       // 使用 i18n 消息显示成功提示
       toastMessages.success('toast.scan.delete.success', { 
         name: `Scan #${id}` 
@@ -138,8 +148,8 @@ export function useDeleteScan() {
       queryClient.invalidateQueries({ queryKey: ['scans'] })
       queryClient.invalidateQueries({ queryKey: ['scan-statistics'] })
     },
-    onError: (error: any) => {
-      const errorCode = getErrorCode(error.response?.data)
+    onError: (error: unknown) => {
+      const errorCode = getErrorCode(getErrorResponseData(error))
       if (errorCode) {
         toastMessages.errorFromCode(errorCode)
       } else {
@@ -159,7 +169,7 @@ export function useBulkDeleteScans() {
   return useMutation({
     mutationFn: (ids: number[]) => bulkDeleteScans(ids),
     onSuccess: (response, ids) => {
-      const data = parseResponse<any>(response)
+      const data = parseResponse<BulkDeleteScansResponse>(response)
       if (data) {
         // 使用 i18n 消息显示成功提示
         const count = data.deletedCount || ids.length || 0
@@ -169,8 +179,8 @@ export function useBulkDeleteScans() {
         queryClient.invalidateQueries({ queryKey: ['scan-statistics'] })
       }
     },
-    onError: (error: any) => {
-      const errorCode = getErrorCode(error.response?.data)
+    onError: (error: unknown) => {
+      const errorCode = getErrorCode(getErrorResponseData(error))
       if (errorCode) {
         toastMessages.errorFromCode(errorCode)
       } else {
@@ -190,7 +200,7 @@ export function useStopScan() {
   return useMutation({
     mutationFn: (id: number) => stopScan(id),
     onSuccess: (response) => {
-      const data = parseResponse<any>(response)
+      const data = parseResponse<StopScanResponse>(response)
       if (data) {
         // 使用 i18n 消息显示成功提示
         const count = data.revokedTaskCount || 1
@@ -200,8 +210,8 @@ export function useStopScan() {
         queryClient.invalidateQueries({ queryKey: ['scan-statistics'] })
       }
     },
-    onError: (error: any) => {
-      const errorCode = getErrorCode(error.response?.data)
+    onError: (error: unknown) => {
+      const errorCode = getErrorCode(getErrorResponseData(error))
       if (errorCode) {
         toastMessages.errorFromCode(errorCode)
       } else {

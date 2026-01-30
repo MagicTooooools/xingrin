@@ -5,7 +5,6 @@
 
 import api from '@/lib/api-client'
 import type {
-  Notification,
   GetNotificationsRequest,
   GetNotificationsResponse,
 } from '@/types/notification.types'

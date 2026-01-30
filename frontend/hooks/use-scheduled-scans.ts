@@ -8,8 +8,13 @@ import {
   toggleScheduledScan,
 } from '@/services/scheduled-scan.service'
 import { useToastMessages } from '@/lib/toast-helpers'
-import { parseResponse, getErrorCode } from '@/lib/response-parser'
-import type { CreateScheduledScanRequest, UpdateScheduledScanRequest } from '@/types/scheduled-scan.types'
+import { parseResponse, getErrorCode, getErrorResponseData } from '@/lib/response-parser'
+import type {
+  CreateScheduledScanRequest,
+  UpdateScheduledScanRequest,
+  GetScheduledScansResponse,
+  ScheduledScan,
+} from '@/types/scheduled-scan.types'
 
 /**
  * 获取定时扫描列表
@@ -49,13 +54,13 @@ export function useCreateScheduledScan() {
   return useMutation({
     mutationFn: (data: CreateScheduledScanRequest) => createScheduledScan(data),
     onSuccess: (response) => {
-      const data = parseResponse<any>(response)
+      parseResponse<unknown>(response)
       // 使用 i18n 消息显示成功提示
       toastMessages.success('toast.scheduledScan.create.success')
       queryClient.invalidateQueries({ queryKey: ['scheduled-scans'] })
     },
-    onError: (error: any) => {
-      const errorCode = getErrorCode(error.response?.data)
+    onError: (error: unknown) => {
+      const errorCode = getErrorCode(getErrorResponseData(error))
       if (errorCode) {
         toastMessages.errorFromCode(errorCode)
       } else {
@@ -76,14 +81,14 @@ export function useUpdateScheduledScan() {
     mutationFn: ({ id, data }: { id: number; data: UpdateScheduledScanRequest }) =>
       updateScheduledScan(id, data),
     onSuccess: (response) => {
-      const data = parseResponse<any>(response)
+      parseResponse<unknown>(response)
       // 使用 i18n 消息显示成功提示
       toastMessages.success('toast.scheduledScan.update.success')
       queryClient.invalidateQueries({ queryKey: ['scheduled-scans'] })
       queryClient.invalidateQueries({ queryKey: ['scheduled-scan'] })
     },
-    onError: (error: any) => {
-      const errorCode = getErrorCode(error.response?.data)
+    onError: (error: unknown) => {
+      const errorCode = getErrorCode(getErrorResponseData(error))
       if (errorCode) {
         toastMessages.errorFromCode(errorCode)
       } else {
@@ -103,13 +108,13 @@ export function useDeleteScheduledScan() {
   return useMutation({
     mutationFn: (id: number) => deleteScheduledScan(id),
     onSuccess: (response) => {
-      const data = parseResponse<any>(response)
+      parseResponse<unknown>(response)
       // 使用 i18n 消息显示成功提示
       toastMessages.success('toast.scheduledScan.delete.success')
       queryClient.invalidateQueries({ queryKey: ['scheduled-scans'] })
     },
-    onError: (error: any) => {
-      const errorCode = getErrorCode(error.response?.data)
+    onError: (error: unknown) => {
+      const errorCode = getErrorCode(getErrorResponseData(error))
       if (errorCode) {
         toastMessages.errorFromCode(errorCode)
       } else {
@@ -140,11 +145,11 @@ export function useToggleScheduledScan() {
       // 乐观更新所有匹配的查询缓存
       queryClient.setQueriesData(
         { queryKey: ['scheduled-scans'] },
-        (old: any) => {
+        (old: GetScheduledScansResponse | undefined) => {
           if (!old?.results) return old
           return {
             ...old,
-            results: old.results.map((item: any) =>
+            results: old.results.map((item: ScheduledScan) =>
               item.id === id ? { ...item, isEnabled } : item
             ),
           }
@@ -155,7 +160,7 @@ export function useToggleScheduledScan() {
       return { previousQueries }
     },
     onSuccess: (response, { isEnabled }) => {
-      const data = parseResponse<any>(response)
+      parseResponse<unknown>(response)
       // 使用 i18n 消息显示成功提示
       if (isEnabled) {
         toastMessages.success('toast.scheduledScan.toggle.enabled')
@@ -164,14 +169,14 @@ export function useToggleScheduledScan() {
       }
       // 不调用 invalidateQueries，保持当前排序
     },
-    onError: (error: any, _variables, context) => {
+    onError: (error: unknown, _variables, context) => {
       // 回滚到之前的状态
       if (context?.previousQueries) {
         context.previousQueries.forEach(([queryKey, data]) => {
           queryClient.setQueryData(queryKey, data)
         })
       }
-      const errorCode = getErrorCode(error.response?.data)
+      const errorCode = getErrorCode(getErrorResponseData(error))
       if (errorCode) {
         toastMessages.errorFromCode(errorCode)
       } else {
@@ -180,4 +185,3 @@ export function useToggleScheduledScan() {
     },
   })
 }
-

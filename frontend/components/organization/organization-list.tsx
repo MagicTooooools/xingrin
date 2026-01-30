@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo, useCallback, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { Trash2, Plus, Building2 } from "lucide-react"
+import { Trash2 } from "lucide-react"
 import { useTranslations, useLocale } from "next-intl"
 import { getDateLocale } from "@/lib/date-utils"
 
@@ -36,7 +36,6 @@ import {
   useOrganizations,
   useDeleteOrganization,
   useBatchDeleteOrganizations,
-  useUpdateOrganization,
 } from "@/hooks/use-organizations"
 
 // 导入类型定义
@@ -133,7 +132,6 @@ export function OrganizationList() {
   // Mutations
   const deleteOrganization = useDeleteOrganization()
   const batchDeleteOrganizations = useBatchDeleteOrganizations()
-  const updateOrganization = useUpdateOrganization()
 
   // 辅助函数 - 格式化日期
   const formatDate = useCallback((dateString: string): string => {
@@ -204,7 +202,7 @@ export function OrganizationList() {
   }
 
   // 编辑组织成功回调
-  const handleOrganizationEdited = (updatedOrganization: Organization) => {
+  const handleOrganizationEdited = () => {
     // 只需要关闭对话框，React Query 已经在 dialog 中处理了更新
     setEditDialogOpen(false)
     setOrganizationToEdit(null)

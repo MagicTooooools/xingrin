@@ -54,7 +54,7 @@ export function GobyFingerprintView() {
   }
 
   // Format date
-  const formatDate = (dateString: string): string => {
+  const formatDate = React.useCallback((dateString: string): string => {
     return new Date(dateString).toLocaleString(getDateLocale(locale), {
       year: "numeric",
       month: "numeric",
@@ -63,7 +63,10 @@ export function GobyFingerprintView() {
       minute: "2-digit",
       hour12: false,
     })
-  }
+  }, [locale])
+
+  const getErrorMessage = (error: unknown): string =>
+    error instanceof Error ? error.message : ""
 
   // Export
   const handleExport = async () => {
@@ -75,11 +78,11 @@ export function GobyFingerprintView() {
       a.download = `goby-fingerprints-${Date.now()}.json`
       document.body.appendChild(a)
       a.click()
-      document.body.removeChild(a)
+      a.remove()
       URL.revokeObjectURL(url)
       toast.success(tFingerprints("toast.exportSuccess"))
-    } catch (error: any) {
-      toast.error(error.message || tFingerprints("toast.exportFailed"))
+    } catch (error) {
+      toast.error(getErrorMessage(error) || tFingerprints("toast.exportFailed"))
     }
   }
 
@@ -92,8 +95,8 @@ export function GobyFingerprintView() {
       const result = await bulkDeleteMutation.mutateAsync(ids)
       toast.success(tFingerprints("toast.deleteSuccess", { count: result.deleted }))
       setSelectedFingerprints([])
-    } catch (error: any) {
-      toast.error(error.message || tFingerprints("toast.deleteFailed"))
+    } catch (error) {
+      toast.error(getErrorMessage(error) || tFingerprints("toast.deleteFailed"))
     }
   }
 
@@ -102,15 +105,15 @@ export function GobyFingerprintView() {
     try {
       const result = await deleteAllMutation.mutateAsync()
       toast.success(tFingerprints("toast.deleteSuccess", { count: result.deleted }))
-    } catch (error: any) {
-      toast.error(error.message || tFingerprints("toast.deleteFailed"))
+    } catch (error) {
+      toast.error(getErrorMessage(error) || tFingerprints("toast.deleteFailed"))
     }
   }
 
   // Column definitions
   const columns = useMemo(
     () => createGobyFingerprintColumns({ formatDate }),
-    []
+    [formatDate]
   )
 
   // Transform data

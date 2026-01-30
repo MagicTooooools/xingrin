@@ -187,6 +187,16 @@ export function getErrorCode(response: unknown): string | null {
 }
 
 /**
+ * Extract response payload from an error object.
+ */
+export function getErrorResponseData(error: unknown): unknown {
+  if (!error || typeof error !== 'object') return undefined;
+  if (!('response' in error)) return undefined;
+  const response = (error as { response?: { data?: unknown } }).response;
+  return response?.data;
+}
+
+/**
  * 从响应中获取错误消息（用于调试）
  * 
  * @param response - API 响应对象

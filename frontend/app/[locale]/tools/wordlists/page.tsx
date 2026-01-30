@@ -20,7 +20,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 import type { Wordlist } from "@/types/wordlist.types"
 import { MasterDetailSkeleton } from "@/components/ui/master-detail-skeleton"
@@ -65,11 +64,6 @@ export default function WordlistsPage() {
   const handleEdit = (wordlist: Wordlist) => {
     setEditingWordlist(wordlist)
     setIsEditDialogOpen(true)
-  }
-
-  const handleCopyId = (id: number) => {
-    navigator.clipboard.writeText(String(id))
-    toast.success(t("idCopied"))
   }
 
   const handleDelete = (wordlist: Wordlist) => {

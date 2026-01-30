@@ -1,14 +1,17 @@
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query'
 import { useToastMessages } from '@/lib/toast-helpers'
-import { getErrorCode } from '@/lib/response-parser'
+import { getErrorCode, getErrorResponseData } from '@/lib/response-parser'
 import { OrganizationService } from '@/services/organization.service'
 import type { Organization, CreateOrganizationRequest, UpdateOrganizationRequest } from '@/types/organization.types'
+
+type OrganizationListParams = { page?: number; pageSize?: number; filter?: string }
+type OrganizationListCache = { organizations?: Organization[] } & Record<string, unknown>
 
 // Query Keys - Unified query key management
 export const organizationKeys = {
   all: ['organizations'] as const,
   lists: () => [...organizationKeys.all, 'list'] as const,
-  list: (params?: any) => [...organizationKeys.lists(), params] as const,
+  list: (params?: OrganizationListParams) => [...organizationKeys.lists(), params] as const,
   details: () => [...organizationKeys.all, 'detail'] as const,
   detail: (id: number) => [...organizationKeys.details(), id] as const,
 }
@@ -122,10 +125,10 @@ export function useCreateOrganization() {
       queryClient.invalidateQueries({ queryKey: ['organizations'] })
       toastMessages.success('toast.organization.create.success')
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toastMessages.dismiss('create-organization')
       console.error('Failed to create organization:', error)
-      toastMessages.errorFromCode(getErrorCode(error?.response?.data), 'toast.organization.create.error')
+      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.organization.create.error')
     },
   })
 }
@@ -148,10 +151,10 @@ export function useUpdateOrganization() {
       queryClient.invalidateQueries({ queryKey: ['organizations'] })
       toastMessages.success('toast.organization.update.success')
     },
-    onError: (error: any, { id }) => {
+    onError: (error: unknown, { id }) => {
       toastMessages.dismiss(`update-${id}`)
       console.error('Failed to update organization:', error)
-      toastMessages.errorFromCode(getErrorCode(error?.response?.data), 'toast.organization.update.error')
+      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.organization.update.error')
     },
   })
 }
@@ -173,7 +176,7 @@ export function useDeleteOrganization() {
 
       queryClient.setQueriesData(
         { queryKey: ['organizations'] },
-        (old: any) => {
+        (old: OrganizationListCache | undefined) => {
           if (old?.organizations) {
             return {
               ...old,
@@ -191,7 +194,7 @@ export function useDeleteOrganization() {
       const { organizationName } = response
       toastMessages.success('toast.organization.delete.success', { name: organizationName })
     },
-    onError: (error: any, deletedId, context) => {
+    onError: (error: unknown, deletedId, context) => {
       toastMessages.dismiss(`delete-${deletedId}`)
       
       if (context?.previousData) {
@@ -201,7 +204,7 @@ export function useDeleteOrganization() {
       }
       
       console.error('Failed to delete organization:', error)
-      toastMessages.errorFromCode(getErrorCode(error?.response?.data), 'toast.organization.delete.error')
+      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.organization.delete.error')
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['organizations'] })
@@ -228,7 +231,7 @@ export function useBatchDeleteOrganizations() {
 
       queryClient.setQueriesData(
         { queryKey: ['organizations'] },
-        (old: any) => {
+        (old: OrganizationListCache | undefined) => {
           if (old?.organizations) {
             return {
               ...old,
@@ -248,7 +251,7 @@ export function useBatchDeleteOrganizations() {
       const { deletedCount } = response
       toastMessages.success('toast.organization.delete.bulkSuccess', { count: deletedCount })
     },
-    onError: (error: any, deletedIds, context) => {
+    onError: (error: unknown, deletedIds, context) => {
       toastMessages.dismiss('batch-delete')
       
       if (context?.previousData) {
@@ -258,7 +261,7 @@ export function useBatchDeleteOrganizations() {
       }
       
       console.error('Failed to batch delete organizations:', error)
-      toastMessages.errorFromCode(getErrorCode(error?.response?.data), 'toast.organization.delete.error')
+      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.organization.delete.error')
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['organizations'] })
@@ -289,10 +292,10 @@ export function useUnlinkTargetsFromOrganization() {
       queryClient.invalidateQueries({ queryKey: ['targets'] })
       queryClient.invalidateQueries({ queryKey: ['organizations'] })
     },
-    onError: (error: any, { organizationId }) => {
+    onError: (error: unknown, { organizationId }) => {
       toastMessages.dismiss(`unlink-${organizationId}`)
       console.error('Failed to unlink targets:', error)
-      toastMessages.errorFromCode(getErrorCode(error?.response?.data), 'toast.target.unlink.error')
+      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.target.unlink.error')
     },
   })
 }

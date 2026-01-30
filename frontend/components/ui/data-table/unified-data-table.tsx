@@ -32,8 +32,6 @@ import {
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import {
@@ -272,7 +270,7 @@ export function UnifiedDataTable<TData>({
       setColumnSizing(calculatedWidths)
       setAutoSizingCalculated(true)
     }
-  }, [enableAutoColumnSizing, autoSizingCalculated, validData, columns])
+  }, [enableAutoColumnSizing, autoSizingCalculated, validData, columns, locale])
 
   // Create table instance
   const table = useReactTable({
@@ -317,7 +315,11 @@ export function UnifiedDataTable<TData>({
    * Calculate all column widths once at the table root element, store as CSS variables
    * Avoid calling column.getSize() on every cell
    */
+  const { columnSizingInfo, columnSizing: tableColumnSizing } = table.getState()
+
   const columnSizeVars = React.useMemo(() => {
+    void columnSizingInfo
+    void tableColumnSizing
     const headers = table.getFlatHeaders()
     const colSizes: Record<string, number> = {}
     for (let i = 0; i < headers.length; i++) {
@@ -326,7 +328,7 @@ export function UnifiedDataTable<TData>({
       colSizes[`--col-${header.column.id}-size`] = header.column.getSize()
     }
     return colSizes
-  }, [table.getState().columnSizingInfo, table.getState().columnSizing])
+  }, [columnSizingInfo, tableColumnSizing, table])
 
   // Listen for selected row changes
   const prevRowSelectionRef = React.useRef<Record<string, boolean>>({})

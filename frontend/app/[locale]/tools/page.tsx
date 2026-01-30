@@ -12,7 +12,6 @@ import { useTranslations } from "next-intl"
  */
 export default function ToolsPage() {
   const t = useTranslations("pages.tools")
-  const tCommon = useTranslations("common")
 
   // Feature modules
   const modules = [

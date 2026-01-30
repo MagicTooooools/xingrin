@@ -63,7 +63,7 @@ async function copyToClipboard(text: string): Promise<boolean> {
       textArea.focus()
       textArea.select()
       document.execCommand('copy')
-      document.body.removeChild(textArea)
+      textArea.remove()
     }
     return true
   } catch {
@@ -150,14 +150,12 @@ function TargetNameCell({
  * Target row actions component
  */
 function TargetRowActions({
-  target,
   onView,
   onInitiateScan,
   onScheduleScan,
   onDelete,
   t,
 }: {
-  target: Target
   onView: () => void
   onInitiateScan: () => void
   onScheduleScan: () => void
@@ -352,7 +350,6 @@ export const createAllTargetsColumns = ({
     enableResizing: false,
     cell: ({ row }) => (
       <TargetRowActions
-        target={row.original}
         onView={() => navigate(`/target/${row.original.id}/details`)}
         onInitiateScan={() => handleInitiateScan(row.original)}
         onScheduleScan={() => handleScheduleScan(row.original)}

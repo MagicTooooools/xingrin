@@ -19,7 +19,6 @@ import {
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import {
-  Command,
   CommandDialog,
   CommandEmpty,
   CommandGroup,
@@ -41,7 +40,6 @@ import { TargetValidator } from "@/lib/target-validator"
 // Import React Query Hooks
 import { useOrganizations } from "@/hooks/use-organizations"
 import { useBatchCreateTargets } from "@/hooks/use-targets"
-import { toast } from "sonner"
 import type { BatchCreateTargetsRequest } from "@/types/target.types"
 
 // Component props type definition
@@ -181,7 +179,7 @@ export function AddTargetDialog({
     batchCreateTargets.mutate(
       payload,
       {
-        onSuccess: (batchCreateResult) => {
+        onSuccess: () => {
           // Reset form
           setFormData({
             targets: "",

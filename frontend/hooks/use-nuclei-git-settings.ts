@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useToastMessages } from '@/lib/toast-helpers'
-import { getErrorCode } from '@/lib/response-parser'
+import { getErrorCode, getErrorResponseData } from '@/lib/response-parser'
 import { NucleiGitService } from "@/services/nuclei-git.service"
 import type { UpdateNucleiGitSettingsRequest } from "@/types/nuclei-git.types"
 
@@ -23,8 +23,8 @@ export function useUpdateNucleiGitSettings() {
       qc.invalidateQueries({ queryKey: ["nuclei", "git", "settings"] })
       toastMessages.success('toast.nucleiGit.settings.success')
     },
-    onError: (error: any) => {
-      toastMessages.errorFromCode(getErrorCode(error?.response?.data), 'toast.nucleiGit.settings.error')
+    onError: (error: unknown) => {
+      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.nucleiGit.settings.error')
     },
   })
 }

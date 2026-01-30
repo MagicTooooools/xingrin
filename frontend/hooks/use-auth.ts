@@ -5,7 +5,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
 import { login, logout, getMe, changePassword } from '@/services/auth.service'
 import { useToastMessages } from '@/lib/toast-helpers'
-import { getErrorCode } from '@/lib/response-parser'
+import { getErrorCode, getErrorResponseData } from '@/lib/response-parser'
 import type { LoginRequest, ChangePasswordRequest } from '@/types/auth.types'
 
 /**
@@ -36,8 +36,8 @@ export function useLogin() {
       // Navigation and data prefetch are handled by the login page.
       toastMessages.success('toast.auth.login.success')
     },
-    onError: (error: any) => {
-      const errorCode = getErrorCode(error.response?.data)
+    onError: (error: unknown) => {
+      const errorCode = getErrorCode(getErrorResponseData(error))
       if (errorCode) {
         toastMessages.errorFromCode(errorCode)
       } else {
@@ -62,8 +62,8 @@ export function useLogout() {
       toastMessages.success('toast.auth.logout.success')
       router.push('/login/')
     },
-    onError: (error: any) => {
-      const errorCode = getErrorCode(error.response?.data)
+    onError: (error: unknown) => {
+      const errorCode = getErrorCode(getErrorResponseData(error))
       if (errorCode) {
         toastMessages.errorFromCode(errorCode)
       } else {
@@ -84,8 +84,8 @@ export function useChangePassword() {
     onSuccess: () => {
       toastMessages.success('toast.auth.changePassword.success')
     },
-    onError: (error: any) => {
-      const errorCode = getErrorCode(error.response?.data)
+    onError: (error: unknown) => {
+      const errorCode = getErrorCode(getErrorResponseData(error))
       if (errorCode) {
         toastMessages.errorFromCode(errorCode)
       } else {

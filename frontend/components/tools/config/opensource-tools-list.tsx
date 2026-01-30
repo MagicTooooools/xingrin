@@ -57,7 +57,7 @@ export function OpensourceToolsList() {
       await new Promise(resolve => setTimeout(resolve, 2000))
       
       console.log("Check complete:", toolId)
-    } catch (error) {
+    } catch {
       console.error("Check update failed:", error)
     } finally {
       setCheckingToolId(null)
@@ -93,7 +93,7 @@ export function OpensourceToolsList() {
       await deleteTool.mutateAsync(toolToDelete.id)
       // Close dialog after successful deletion
       setToolToDelete(null)
-    } catch (error) {
+    } catch {
       // Error already handled in hook
     }
   }

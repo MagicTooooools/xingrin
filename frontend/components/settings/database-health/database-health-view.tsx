@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, type ReactNode } from "react"
+import { useMemo, useCallback, type ReactNode } from "react"
 import { useLocale, useTranslations } from "next-intl"
 import { IconDatabase, IconServer, IconTrendingUp, IconUsers } from "@tabler/icons-react"
 
@@ -105,11 +105,11 @@ export function DatabaseHealthView() {
   const { data, isLoading } = useDatabaseHealth()
   const loading = isLoading && !data
 
-  const formatNumber = (value: number, digits: number = 0) =>
+  const formatNumber = useCallback((value: number, digits: number = 0) =>
     new Intl.NumberFormat(locale, {
       maximumFractionDigits: digits,
       minimumFractionDigits: digits,
-    }).format(value)
+    }).format(value), [locale])
 
   const signals = data?.signals
   const connectionsPercent = signals && signals.connectionsMax > 0

@@ -3,7 +3,7 @@
 import React from "react"
 import { usePathname, useParams } from "next/navigation"
 import Link from "next/link"
-import { Target, LayoutDashboard, Package, FolderSearch, Image, ShieldAlert } from "lucide-react"
+import { Target, LayoutDashboard, Package, FolderSearch, Image as ImageIcon, ShieldAlert } from "lucide-react"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -109,7 +109,7 @@ export default function ScanHistoryLayout({
         <span className="text-muted-foreground">/</span>
         <span className="font-medium flex items-center gap-1.5">
           <Target className="h-4 w-4" />
-          {(scanData?.target as any)?.name || t("taskId", { id })}
+          {scanData?.target?.name || t("taskId", { id })}
         </span>
       </div>
 
@@ -147,7 +147,7 @@ export default function ScanHistoryLayout({
             </TabsTrigger>
             <TabsTrigger value="screenshots" asChild>
               <Link href={primaryPaths.screenshots} className="flex items-center gap-1.5">
-                <Image className="h-4 w-4" />
+                <ImageIcon className="h-4 w-4" />
                 {t("tabs.screenshots")}
                 {counts.screenshots > 0 && (
                   <Badge variant="secondary" className="ml-1.5 h-5 min-w-5 rounded-full px-1.5 text-xs">

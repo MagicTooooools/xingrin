@@ -2,7 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useToastMessages } from '@/lib/toast-helpers'
-import { getErrorCode } from '@/lib/response-parser'
+import { getErrorCode, getErrorResponseData } from '@/lib/response-parser'
 import {
   getWordlists,
   uploadWordlist,
@@ -28,7 +28,7 @@ export function useUploadWordlist() {
   const queryClient = useQueryClient()
   const toastMessages = useToastMessages()
 
-  return useMutation<{}, Error, { name: string; description?: string; file: File }>({
+  return useMutation<unknown, Error, { name: string; description?: string; file: File }>({
     mutationFn: (payload) => uploadWordlist(payload),
     onMutate: () => {
       toastMessages.loading('common.status.uploading', {}, 'upload-wordlist')
@@ -38,9 +38,9 @@ export function useUploadWordlist() {
       toastMessages.success('toast.wordlist.upload.success')
       queryClient.invalidateQueries({ queryKey: ["wordlists"] })
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toastMessages.dismiss('upload-wordlist')
-      toastMessages.errorFromCode(getErrorCode(error?.response?.data), 'toast.wordlist.upload.error')
+      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.wordlist.upload.error')
     },
   })
 }
@@ -60,9 +60,9 @@ export function useDeleteWordlist() {
       toastMessages.success('toast.wordlist.delete.success')
       queryClient.invalidateQueries({ queryKey: ["wordlists"] })
     },
-    onError: (error: any, id) => {
+    onError: (error: unknown, id) => {
       toastMessages.dismiss(`delete-wordlist-${id}`)
-      toastMessages.errorFromCode(getErrorCode(error?.response?.data), 'toast.wordlist.delete.error')
+      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.wordlist.delete.error')
     },
   })
 }
@@ -92,9 +92,9 @@ export function useUpdateWordlistContent() {
       queryClient.invalidateQueries({ queryKey: ["wordlists"] })
       queryClient.invalidateQueries({ queryKey: ["wordlist-content", data.id] })
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toastMessages.dismiss('update-wordlist-content')
-      toastMessages.errorFromCode(getErrorCode(error?.response?.data), 'toast.wordlist.update.error')
+      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.wordlist.update.error')
     },
   })
 }

@@ -21,12 +21,11 @@ import {
 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { useTarget } from "@/hooks/use-targets"
 import { useScheduledScans } from "@/hooks/use-scheduled-scans"
 import { ScanHistoryList } from "@/components/scan/history/scan-history-list"
-import { getDateLocale } from "@/lib/date-utils"
+import type { TargetDetail } from "@/types/target.types"
 
 // Dynamic import for InitiateScanDialog (only loaded when dialog is opened)
 const InitiateScanDialog = dynamic(() => import('@/components/scan/initiate-scan-dialog').then(m => ({ default: m.InitiateScanDialog })), {
@@ -107,6 +106,59 @@ export function TargetOverview({ targetId }: TargetOverviewProps) {
     pageSize: 5
   })
 
+  const targetSummary = (target as TargetDetail | undefined)?.summary
+
+  // Memoize summary and vulnerability data to avoid unnecessary recalculations
+  const summary = React.useMemo(() => ({
+    subdomains: targetSummary?.subdomains ?? 0,
+    websites: targetSummary?.websites ?? 0,
+    endpoints: targetSummary?.endpoints ?? 0,
+    ips: targetSummary?.ips ?? 0,
+    directories: targetSummary?.directories ?? 0,
+  }), [targetSummary])
+
+  const vulnSummary = React.useMemo(
+    () => targetSummary?.vulnerabilities || { total: 0, critical: 0, high: 0, medium: 0, low: 0 },
+    [targetSummary]
+  )
+
+  // Memoize asset cards array to avoid recreation on every render
+  const assetCards = React.useMemo(
+    () => [
+      {
+        title: t("cards.websites"),
+        value: summary.websites || 0,
+        icon: Globe,
+        href: `/target/${targetId}/websites/`,
+      },
+      {
+        title: t("cards.subdomains"),
+        value: summary.subdomains || 0,
+        icon: Network,
+        href: `/target/${targetId}/subdomain/`,
+      },
+      {
+        title: t("cards.ips"),
+        value: summary.ips || 0,
+        icon: Server,
+        href: `/target/${targetId}/ip-addresses/`,
+      },
+      {
+        title: t("cards.urls"),
+        value: summary.endpoints || 0,
+        icon: Link2,
+        href: `/target/${targetId}/endpoints/`,
+      },
+      {
+        title: t("cards.directories"),
+        value: summary.directories || 0,
+        icon: FolderOpen,
+        href: `/target/${targetId}/directories/`,
+      },
+    ],
+    [summary, targetId, t]
+  )
+
   // Memoize derived values to avoid unnecessary recalculations
   const scheduledScans = React.useMemo(() => scheduledScansData?.results || [], [scheduledScansData?.results])
   const totalScheduledScans = React.useMemo(() => scheduledScansData?.total || 0, [scheduledScansData?.total])
@@ -152,50 +204,6 @@ export function TargetOverview({ targetId }: TargetOverviewProps) {
       </div>
     )
   }
-
-  // Memoize summary and vulnerability data to avoid unnecessary recalculations
-  const summary = React.useMemo(() => (target as any).summary || {}, [target])
-  const vulnSummary = React.useMemo(
-    () => summary.vulnerabilities || { total: 0, critical: 0, high: 0, medium: 0, low: 0 },
-    [summary]
-  )
-
-  // Memoize asset cards array to avoid recreation on every render
-  const assetCards = React.useMemo(
-    () => [
-      {
-        title: t("cards.websites"),
-        value: summary.websites || 0,
-        icon: Globe,
-        href: `/target/${targetId}/websites/`,
-      },
-      {
-        title: t("cards.subdomains"),
-        value: summary.subdomains || 0,
-        icon: Network,
-        href: `/target/${targetId}/subdomain/`,
-      },
-      {
-        title: t("cards.ips"),
-        value: summary.ips || 0,
-        icon: Server,
-        href: `/target/${targetId}/ip-addresses/`,
-      },
-      {
-        title: t("cards.urls"),
-        value: summary.endpoints || 0,
-        icon: Link2,
-        href: `/target/${targetId}/endpoints/`,
-      },
-      {
-        title: t("cards.directories"),
-        value: summary.directories || 0,
-        icon: FolderOpen,
-        href: `/target/${targetId}/directories/`,
-      },
-    ],
-    [summary, targetId, t]
-  )
 
   return (
     <div className="space-y-6">

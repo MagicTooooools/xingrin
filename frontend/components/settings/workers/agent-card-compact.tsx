@@ -28,8 +28,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Separator } from "@/components/ui/separator"
-import { Status, StatusIndicator, StatusLabel } from "@/components/ui/shadcn-io/status"
-import { Progress } from "@/components/ui/progress"
+import { Status, StatusIndicator } from "@/components/ui/shadcn-io/status"
 import { useFormatNumber, useFormatRelativeTime } from "@/lib/i18n-format"
 import { cn } from "@/lib/utils"
 import type { Agent } from "@/types/agent.types"
@@ -135,11 +134,6 @@ export function AgentCardCompact({
   const formatRelativeTime = useFormatRelativeTime()
   const formatNumber = useFormatNumber()
 
-  const statusLabel = useMemo(() => {
-    if (agent.status === "online") return t("status.online")
-    if (agent.status === "offline") return t("status.offline")
-    return t("status.unknown")
-  }, [agent.status, t])
 
   const healthState = (agent.health?.state || "unknown").toLowerCase()
   const healthLabel = useMemo(() => {
@@ -150,7 +144,6 @@ export function AgentCardCompact({
   }, [healthState, t])
 
   const heartbeat = agent.heartbeat
-  const hasHeartbeat = Boolean(heartbeat)
 
   // 检查是否有指标超过阈值
   const hasWarnings = useMemo(() => {

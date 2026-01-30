@@ -181,7 +181,7 @@ export function VulnerabilitiesDetailView({
     : (targetId ? targetStatsQuery.data?.reviewedCount : globalStatsQuery.data?.reviewedCount) ?? 0
 
 
-  const formatDate = (dateString: string): string => {
+  const formatDate = React.useCallback((dateString: string): string => {
     return new Date(dateString).toLocaleString(getDateLocale(locale), {
       year: "numeric",
       month: "numeric",
@@ -191,21 +191,12 @@ export function VulnerabilitiesDetailView({
       second: "2-digit",
       hour12: false,
     })
-  }
+  }, [locale])
 
-  const navigate = (path: string) => {
-    console.log("Navigate to:", path)
-  }
-
-  const handleViewDetail = (vulnerability: Vulnerability) => {
+  const handleViewDetail = React.useCallback((vulnerability: Vulnerability) => {
     setSelectedVulnerability(vulnerability)
     setDetailDialogOpen(true)
-  }
-
-  const handleDeleteVulnerability = (vulnerability: Vulnerability) => {
-    setVulnerabilityToDelete(vulnerability)
-    setDeleteDialogOpen(true)
-  }
+  }, [])
 
   const confirmDelete = async () => {
     if (!vulnerabilityToDelete) return
@@ -218,13 +209,6 @@ export function VulnerabilitiesDetailView({
       setVulnerabilityToDelete(null)
       setIsLoading(false)
     }, 1000)
-  }
-
-  const handleBulkDelete = () => {
-    if (selectedVulnerabilities.length === 0) {
-      return
-    }
-    setBulkDeleteDialogOpen(true)
   }
 
   const confirmBulkDelete = async () => {
@@ -247,13 +231,13 @@ export function VulnerabilitiesDetailView({
   }
 
   // Handle toggle review status for single vulnerability
-  const handleToggleReview = (vulnerability: Vulnerability) => {
+  const handleToggleReview = React.useCallback((vulnerability: Vulnerability) => {
     if (vulnerability.isReviewed) {
       markAsUnreviewed.mutate(vulnerability.id)
     } else {
       markAsReviewed.mutate(vulnerability.id)
     }
-  }
+  }, [markAsReviewed, markAsUnreviewed])
 
   // Handle bulk mark as reviewed
   const handleBulkMarkAsReviewed = () => {
@@ -277,21 +261,6 @@ export function VulnerabilitiesDetailView({
     })
   }
 
-  // Handle download all vulnerabilities
-  const handleDownloadAll = () => {
-    // TODO: Implement download all vulnerabilities functionality
-    console.log('Download all vulnerabilities')
-  }
-
-  // Handle download selected vulnerabilities
-  const handleDownloadSelected = () => {
-    // TODO: Implement download selected vulnerabilities functionality
-    console.log('Download selected vulnerabilities:', selectedVulnerabilities)
-    if (selectedVulnerabilities.length === 0) {
-      return
-    }
-  }
-
   const vulnerabilityColumns = useMemo(
     () =>
       createVulnerabilityColumns({
@@ -300,7 +269,7 @@ export function VulnerabilitiesDetailView({
         onToggleReview: handleToggleReview,
         t: translations,
       }),
-    [handleViewDetail, handleToggleReview, translations]
+    [formatDate, handleViewDetail, handleToggleReview, translations]
   )
 
   if ((isLoading || isQueryLoading) && !activeQuery.data) {

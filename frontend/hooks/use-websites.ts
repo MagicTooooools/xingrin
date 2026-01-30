@@ -1,9 +1,9 @@
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query'
 import { useToastMessages } from '@/lib/toast-helpers'
-import { getErrorCode } from '@/lib/response-parser'
+import { getErrorCode, getErrorResponseData } from '@/lib/response-parser'
 import { WebsiteService } from '@/services/website.service'
 import { api } from '@/lib/api-client'
-import type { WebSite, WebSiteListResponse } from '@/types/website.types'
+import type { WebSiteListResponse } from '@/types/website.types'
 
 // API 服务函数
 const websiteService = {
@@ -121,9 +121,9 @@ export function useDeleteWebSite() {
       queryClient.invalidateQueries({ queryKey: ['targets'] })
       queryClient.invalidateQueries({ queryKey: ['scans'] })
     },
-    onError: (error: any, id) => {
+    onError: (error: unknown, id) => {
       toastMessages.dismiss(`delete-website-${id}`)
-      toastMessages.errorFromCode(getErrorCode(error?.response?.data), 'toast.asset.website.delete.error')
+      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.asset.website.delete.error')
     },
   })
 }
@@ -147,9 +147,9 @@ export function useBulkDeleteWebSites() {
       queryClient.invalidateQueries({ queryKey: ['targets'] })
       queryClient.invalidateQueries({ queryKey: ['scans'] })
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toastMessages.dismiss('bulk-delete-websites')
-      toastMessages.errorFromCode(getErrorCode(error?.response?.data), 'toast.asset.website.delete.error')
+      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.asset.website.delete.error')
     },
   })
 }
@@ -191,10 +191,10 @@ export function useBulkCreateWebsites() {
         refetchType: 'active',
       })
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toastMessages.dismiss('bulk-create-websites')
       console.error('Failed to bulk create websites:', error)
-      toastMessages.errorFromCode(getErrorCode(error?.response?.data), 'toast.asset.website.create.error')
+      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.asset.website.create.error')
     },
   })
 }

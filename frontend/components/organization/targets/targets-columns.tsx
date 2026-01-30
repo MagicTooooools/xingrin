@@ -50,12 +50,10 @@ interface CreateColumnsProps {
  * 目标行操作组件
  */
 function TargetRowActions({
-  target,
   onView,
   onDelete,
   t,
 }: {
-  target: Target
   onView: () => void
   onDelete: () => void
   t: OrgTargetsTranslations
@@ -172,7 +170,9 @@ export const createTargetColumns = ({
   navigate,
   handleDelete,
   t,
-}: CreateColumnsProps): ColumnDef<Target>[] => [
+}: CreateColumnsProps): ColumnDef<Target>[] => {
+  void formatDate
+  return [
   {
     id: "select",
     size: 40,
@@ -250,7 +250,6 @@ export const createTargetColumns = ({
     enableResizing: false,
     cell: ({ row }) => (
       <TargetRowActions
-        target={row.original}
         onView={() => navigate(`/target/${row.original.id}/overview/`)}
         onDelete={() => handleDelete(row.original)}
         t={t}
@@ -259,4 +258,5 @@ export const createTargetColumns = ({
     enableSorting: false,
     enableHiding: false,
   },
-]
+  ]
+}

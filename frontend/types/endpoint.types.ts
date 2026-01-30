@@ -70,9 +70,7 @@ export interface CreateEndpointRequest {
 }
 
 // Create Endpoint response (extends common batch create response)
-export interface CreateEndpointsResponse extends BatchCreateResponse {
-  // Inherited fields: message, requestedCount, createdCount, existedCount
-}
+export type CreateEndpointsResponse = BatchCreateResponse
 
 // Update Endpoint request parameters
 export interface UpdateEndpointRequest {

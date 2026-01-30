@@ -15,7 +15,7 @@ interface ColumnOptions {
 
 interface RuleItem {
   key: string
-  value: any
+  value: unknown
 }
 
 /**
@@ -55,7 +55,7 @@ function RulesCell({ fp }: { fp: WappalyzerFingerprint }) {
       <div className="font-mono text-xs space-y-0.5">
         {displayRules.map((rule, idx) => (
           <div key={idx} className={expanded ? "break-all" : "truncate"}>
-            "{rule.key}": {JSON.stringify(rule.value)}
+            {`${JSON.stringify(rule.key)}: `}{JSON.stringify(rule.value)}
           </div>
         ))}
       </div>

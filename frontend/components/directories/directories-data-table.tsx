@@ -60,8 +60,6 @@ export function DirectoriesDataTable({
   const t = useTranslations("common.status")
   const tActions = useTranslations("common.actions")
   const tDownload = useTranslations("common.download")
-  const [selectedRows, setSelectedRows] = React.useState<Directory[]>([])
-
   // Handle smart filter search
   const handleSmartSearch = (rawQuery: string) => {
     if (onFilterChange) {
@@ -71,7 +69,6 @@ export function DirectoriesDataTable({
 
   // Handle selection change
   const handleSelectionChange = (rows: Directory[]) => {
-    setSelectedRows(rows)
     onSelectionChange?.(rows)
   }
 

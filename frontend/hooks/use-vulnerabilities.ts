@@ -12,6 +12,30 @@ import type {
 } from "@/types/vulnerability.types"
 import type { PaginationInfo } from "@/types/common.types"
 
+type VulnerabilityResponseItem = Partial<Vulnerability> & {
+  severity?: VulnerabilitySeverity | "unknown"
+  cvssScore?: number | string | null
+  createdAt?: string
+  reviewedAt?: string | null
+  isReviewed?: boolean
+  rawOutput?: Record<string, unknown>
+  source?: string
+  vulnType?: string
+  url?: string
+  description?: string
+  target?: number
+}
+
+type VulnerabilityListResponse = {
+  results?: VulnerabilityResponseItem[]
+  total?: number
+  page?: number
+  pageSize?: number
+  totalPages?: number
+  page_size?: number
+  total_pages?: number
+}
+
 export const vulnerabilityKeys = {
   all: ["vulnerabilities"] as const,
   list: (params: GetVulnerabilitiesParams, filter?: string) =>
@@ -40,10 +64,13 @@ export function useAllVulnerabilities(
     queryKey: vulnerabilityKeys.list(defaultParams, filter),
     queryFn: () => VulnerabilityService.getAllVulnerabilities(defaultParams, filter),
     enabled: options?.enabled ?? true,
-    select: (response: any) => {
-      const items = (response?.results ?? []) as any[]
+    select: (response: VulnerabilityListResponse) => {
+      const items = response?.results ?? []
 
-      const vulnerabilities: Vulnerability[] = items.map((item) => {
+      const vulnerabilities: Vulnerability[] = items.flatMap((item) => {
+        if (typeof item.id !== "number") {
+          return []
+        }
         let severity = (item.severity || "info") as
           | VulnerabilitySeverity
           | "unknown"
@@ -59,9 +86,9 @@ export function useAllVulnerabilities(
           cvssScore = Number.isNaN(num) ? undefined : num
         }
 
-        const createdAt: string = item.createdAt
+        const createdAt = item.createdAt ?? new Date().toISOString()
 
-        return {
+        return [{
           id: item.id,
           vulnType: item.vulnType || "unknown",
           url: item.url || "",
@@ -73,7 +100,7 @@ export function useAllVulnerabilities(
           isReviewed: item.isReviewed ?? false,
           reviewedAt: item.reviewedAt ?? null,
           createdAt,
-        }
+        }]
       })
 
       const pagination: PaginationInfo = {
@@ -113,10 +140,13 @@ export function useScanVulnerabilities(
     queryFn: () =>
       VulnerabilityService.getVulnerabilitiesByScanId(scanId, defaultParams, filter),
     enabled: options?.enabled !== undefined ? options.enabled : !!scanId,
-    select: (response: any) => {
-      const items = (response?.results ?? []) as any[]
+    select: (response: VulnerabilityListResponse) => {
+      const items = response?.results ?? []
 
-      const vulnerabilities: Vulnerability[] = items.map((item) => {
+      const vulnerabilities: Vulnerability[] = items.flatMap((item) => {
+        if (typeof item.id !== "number") {
+          return []
+        }
         let severity = (item.severity || "info") as
           | VulnerabilitySeverity
           | "unknown"
@@ -132,9 +162,9 @@ export function useScanVulnerabilities(
           cvssScore = Number.isNaN(num) ? undefined : num
         }
 
-        const createdAt: string = item.createdAt
+        const createdAt = item.createdAt ?? new Date().toISOString()
 
-        return {
+        return [{
           id: item.id,
           vulnType: item.vulnType || "unknown",
           url: item.url || "",
@@ -146,7 +176,7 @@ export function useScanVulnerabilities(
           isReviewed: item.isReviewed ?? false,
           reviewedAt: item.reviewedAt ?? null,
           createdAt,
-        }
+        }]
       })
 
       const pagination: PaginationInfo = {
@@ -186,10 +216,13 @@ export function useTargetVulnerabilities(
     queryFn: () =>
       VulnerabilityService.getVulnerabilitiesByTargetId(targetId, defaultParams, filter),
     enabled: options?.enabled !== undefined ? options.enabled : !!targetId,
-    select: (response: any) => {
-      const items = (response?.results ?? []) as any[]
+    select: (response: VulnerabilityListResponse) => {
+      const items = response?.results ?? []
 
-      const vulnerabilities: Vulnerability[] = items.map((item) => {
+      const vulnerabilities: Vulnerability[] = items.flatMap((item) => {
+        if (typeof item.id !== "number") {
+          return []
+        }
         let severity = (item.severity || "info") as
           | VulnerabilitySeverity
           | "unknown"
@@ -205,9 +238,9 @@ export function useTargetVulnerabilities(
           cvssScore = Number.isNaN(num) ? undefined : num
         }
 
-        const createdAt: string = item.createdAt
+        const createdAt = item.createdAt ?? new Date().toISOString()
 
-        return {
+        return [{
           id: item.id,
           vulnType: item.vulnType || "unknown",
           url: item.url || "",
@@ -220,7 +253,7 @@ export function useTargetVulnerabilities(
           isReviewed: item.isReviewed ?? false,
           reviewedAt: item.reviewedAt ?? null,
           createdAt,
-        }
+        }]
       })
 
       const pagination: PaginationInfo = {

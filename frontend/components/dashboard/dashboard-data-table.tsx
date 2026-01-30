@@ -91,7 +91,7 @@ export function DashboardDataTable() {
   const scans = scanQuery.data?.results ?? []
 
   // 格式化日期
-  const formatDate = (dateString: string): string => {
+  const formatDate = React.useCallback((dateString: string): string => {
     return new Date(dateString).toLocaleString(getDateLocale(locale), {
       year: "numeric",
       month: "numeric",
@@ -101,7 +101,7 @@ export function DashboardDataTable() {
       second: "2-digit",
       hour12: false,
     })
-  }
+  }, [locale])
 
   // 点击漏洞行
   const handleVulnRowClick = React.useCallback((vuln: Vulnerability) => {
@@ -141,7 +141,7 @@ export function DashboardDataTable() {
         },
       },
     }),
-    [handleVulnRowClick, t]
+    [formatDate, handleVulnRowClick, t]
   )
 
   // 扫描进度查看
@@ -244,7 +244,7 @@ export function DashboardDataTable() {
         },
       },
     }),
-    [router, handleViewProgress, handleDelete, handleStop, t]
+    [formatDate, router, handleViewProgress, handleDelete, handleStop, t]
   )
 
   // 漏洞分页信息

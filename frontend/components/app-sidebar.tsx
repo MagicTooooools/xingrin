@@ -187,6 +187,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               className="data-[slot=sidebar-menu-button]:!p-1.5"
             >
               <Link href="/" className="flex items-center gap-2">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={logoSrc} alt="Logo" className="!size-5" />
                 <span className="text-base font-semibold">{t('appName')}</span>
               </Link>

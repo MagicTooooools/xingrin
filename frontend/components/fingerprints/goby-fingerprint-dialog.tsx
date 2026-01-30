@@ -129,13 +129,13 @@ export function GobyFingerprintDialog({
       }
       onOpenChange(false)
       onSuccess?.()
-    } catch (error: any) {
-      toast.error(error.message || (isEdit ? t("toast.updateFailed") : t("toast.createFailed")))
+    } catch (error) {
+      const message = error instanceof Error ? error.message : ""
+      toast.error(message || (isEdit ? t("toast.updateFailed") : t("toast.createFailed")))
     }
   }
 
   const addRule = () => {
-    const nextLabel = String.fromCharCode(97 + fields.length)
     append({ label: "title", feature: "", is_equal: true })
   }
 

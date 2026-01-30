@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { ApiKeySettingsService } from '@/services/api-key-settings.service'
 import type { ApiKeySettings } from '@/types/api-key-settings.types'
 import { useToastMessages } from '@/lib/toast-helpers'
-import { getErrorCode } from '@/lib/response-parser'
+import { getErrorCode, getErrorResponseData } from '@/lib/response-parser'
 
 export function useApiKeySettings() {
   return useQuery({
@@ -22,8 +22,8 @@ export function useUpdateApiKeySettings() {
       qc.invalidateQueries({ queryKey: ['api-key-settings'] })
       toastMessages.success('toast.apiKeys.settings.success')
     },
-    onError: (error: any) => {
-      toastMessages.errorFromCode(getErrorCode(error?.response?.data), 'toast.apiKeys.settings.error')
+    onError: (error: unknown) => {
+      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.apiKeys.settings.error')
     },
   })
 }

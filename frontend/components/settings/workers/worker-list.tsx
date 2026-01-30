@@ -45,8 +45,9 @@ import type { Agent, RegistrationTokenResponse } from "@/types/agent.types"
 import { AgentConfigDialog } from "./worker-dialog"
 import { AgentCardCompact } from "./agent-card-compact"
 
-const FALLBACK_SERVER_URL = "https://your-orbit-server"
+const FALLBACK_SERVER_URL = "https://your-lunafox-server"
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function InstallDialog({
   token,
   onGenerate,
@@ -251,7 +252,7 @@ export function AgentList() {
   const createToken = useCreateRegistrationToken()
   const deleteAgent = useDeleteAgent()
 
-  const agents = data?.results || []
+  const agents = useMemo(() => data?.results || [], [data?.results])
   const hasAgents = agents.length > 0
 
   const stats = useMemo(() => {

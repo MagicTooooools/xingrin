@@ -61,7 +61,6 @@ export const mockWorkers: WorkerNode[] = [
 
 export function getMockWorkers(page = 1, pageSize = 10): WorkersResponse {
   const total = mockWorkers.length
-  const totalPages = Math.ceil(total / pageSize)
   const start = (page - 1) * pageSize
   const results = mockWorkers.slice(start, start + pageSize)
 

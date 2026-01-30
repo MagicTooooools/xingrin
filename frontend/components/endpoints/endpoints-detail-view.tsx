@@ -240,7 +240,7 @@ export function EndpointsDetailView({
         const data = await EndpointService.exportEndpointsByTargetId(targetId)
         blob = data
       } else {
-        const endpoints: Endpoint[] = (data as any)?.endpoints || []
+        const endpoints: Endpoint[] = data?.endpoints || []
         if (!endpoints || endpoints.length === 0) {
           return
         }
@@ -257,7 +257,7 @@ export function EndpointsDetailView({
       a.download = `${prefix}-endpoints-${Date.now()}.csv`
       document.body.appendChild(a)
       a.click()
-      document.body.removeChild(a)
+      a.remove()
       URL.revokeObjectURL(url)
     } catch (error) {
       console.error("Failed to download endpoint list", error)
@@ -279,7 +279,7 @@ export function EndpointsDetailView({
     a.download = `${prefix}-endpoints-selected-${Date.now()}.csv`
     document.body.appendChild(a)
     a.click()
-    document.body.removeChild(a)
+    a.remove()
     URL.revokeObjectURL(url)
   }
 

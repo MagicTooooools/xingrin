@@ -8,7 +8,7 @@ import { DataTableColumnHeader } from "@/components/ui/data-table/column-header"
 import { ExpandableCell } from "@/components/ui/data-table/expandable-cell"
 import { ChevronDown, ChevronUp } from "lucide-react"
 import { useTranslations } from "next-intl"
-import type { FingersFingerprint } from "@/types/fingerprint.types"
+import type { FingersFingerprint, FingersRule } from "@/types/fingerprint.types"
 
 interface ColumnOptions {
   formatDate: (date: string) => string
@@ -62,16 +62,16 @@ function TagListCell({ tags }: { tags: string[] }) {
  */
 interface RuleItem {
   key: string
-  value: any
+  value: unknown
 }
 
-function extractRuleItems(rules: any[]): RuleItem[] {
+function extractRuleItems(rules: FingersRule[]): RuleItem[] {
   const items: RuleItem[] = []
   
   rules.forEach((rule) => {
-    if (rule.regexps) {
-      Object.entries(rule.regexps).forEach(([key, value]) => {
-        items.push({ key, value })
+    if (Array.isArray(rule.regexps)) {
+      rule.regexps.forEach((regexp, index) => {
+        items.push({ key: `regexps[${index}]`, value: regexp })
       })
     }
   })
@@ -82,7 +82,7 @@ function extractRuleItems(rules: any[]): RuleItem[] {
 /**
  * Rules cell - displays rules in JSON format (matching Wappalyzer style)
  */
-function RulesCell({ rules }: { rules: any[] }) {
+function RulesCell({ rules }: { rules: FingersRule[] }) {
   const t = useTranslations("tooltips")
   const [expanded, setExpanded] = React.useState(false)
   const ruleItems = extractRuleItems(rules)
@@ -99,7 +99,7 @@ function RulesCell({ rules }: { rules: any[] }) {
       <div className="font-mono text-xs space-y-0.5 w-full">
         {displayItems.map((item, idx) => (
           <div key={idx} className={expanded ? "break-all w-full" : "truncate w-full"}>
-            "{item.key}": {JSON.stringify(item.value)}
+            {`${JSON.stringify(item.key)}: `}{JSON.stringify(item.value)}
           </div>
         ))}
       </div>

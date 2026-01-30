@@ -1,14 +1,12 @@
 "use client"
 
-import React, { useState, useMemo } from "react"
+import React, { useState, useMemo, useCallback } from "react"
 import { AlertTriangle } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useTranslations, useLocale } from "next-intl"
-import { toast } from "sonner"
 import { TargetsDataTable } from "./targets-data-table"
 import { createTargetColumns } from "./targets-columns"
 import { AddTargetDialog } from "./add-target-dialog"
-import { LoadingSpinner } from "@/components/loading-spinner"
 import { DataTableSkeleton } from "@/components/ui/data-table-skeleton"
 import {
   AlertDialog,
@@ -105,7 +103,7 @@ export function OrganizationTargetsDetailView({
   const error = orgError || targetsError
 
   // 辅助函数 - 格式化日期
-  const formatDate = (dateString: string): string => {
+  const formatDate = useCallback((dateString: string): string => {
     return new Date(dateString).toLocaleString(getDateLocale(locale), {
       year: "numeric",
       month: "numeric",
@@ -115,19 +113,19 @@ export function OrganizationTargetsDetailView({
       second: "2-digit",
       hour12: false,
     })
-  }
+  }, [locale])
 
   // 导航函数（使用 Next.js 客户端路由）
   const router = useRouter()
-  const navigate = (path: string) => {
+  const navigate = useCallback((path: string) => {
     router.push(path)
-  }
+  }, [router])
 
   // 处理解除关联目标
-  const handleDeleteTarget = (target: Target) => {
+  const handleDeleteTarget = useCallback((target: Target) => {
     setTargetToDelete(target)
     setDeleteDialogOpen(true)
-  }
+  }, [])
 
   // 确认解除关联目标
   const confirmDelete = async () => {

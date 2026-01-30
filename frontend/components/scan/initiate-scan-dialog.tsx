@@ -31,6 +31,7 @@ import type { Organization } from "@/types/organization.types"
 import { initiateScan } from "@/services/scan.service"
 import { toast } from "sonner"
 import { useEngines } from "@/hooks/use-engines"
+import { useQueryClient } from "@tanstack/react-query"
 
 interface InitiateScanDialogProps {
   organization?: Organization | null
@@ -53,6 +54,7 @@ export function InitiateScanDialog({
 }: InitiateScanDialogProps) {
   const t = useTranslations("scan.initiate")
   const tToast = useTranslations("toast")
+  const queryClient = useQueryClient()
   const [step, setStep] = useState(1)
   const [selectedEngineIds, setSelectedEngineIds] = useState<number[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -144,6 +146,8 @@ export function InitiateScanDialog({
       toast.success(tToast("scanInitiated"), {
         description: response.message || tToast("scanInitiatedDesc", { count: scanCount }),
       })
+      queryClient.invalidateQueries({ queryKey: ["scans"] })
+      queryClient.invalidateQueries({ queryKey: ["scan-statistics"] })
       onSuccess?.()
       onOpenChange(false)
       setSelectedEngineIds([])

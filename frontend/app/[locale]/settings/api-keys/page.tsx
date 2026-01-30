@@ -11,7 +11,13 @@ import { Separator } from '@/components/ui/separator'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useApiKeySettings, useUpdateApiKeySettings } from '@/hooks/use-api-key-settings'
-import type { ApiKeySettings } from '@/types/api-key-settings.types'
+import type {
+  ApiKeySettings,
+  ProviderKey,
+  FofaProviderConfig,
+  CensysProviderConfig,
+  SingleFieldProviderConfig,
+} from '@/types/api-key-settings.types'
 
 // 密码输入框组件（带显示/隐藏切换）
 function PasswordInput({ value, onChange, placeholder, disabled }: {
@@ -42,8 +48,31 @@ function PasswordInput({ value, onChange, placeholder, disabled }: {
   )
 }
 
+type ProviderField = {
+  name: ProviderFieldName
+  label: string
+  type: "text" | "password"
+  placeholder?: string
+}
+
+type ProviderFieldName =
+  | keyof FofaProviderConfig
+  | keyof CensysProviderConfig
+  | keyof SingleFieldProviderConfig
+
+type ProviderDefinition = {
+  key: ProviderKey
+  name: string
+  description: string
+  icon: React.ComponentType<{ className?: string }>
+  color: string
+  bgColor: string
+  fields: ProviderField[]
+  docUrl: string
+}
+
 // Provider 配置定义
-const PROVIDERS = [
+const PROVIDERS: ProviderDefinition[] = [
   {
     key: 'fofa',
     name: 'FOFA',
@@ -171,14 +200,22 @@ export default function ApiKeysSettingsPage() {
     }
   }, [settings])
 
-  const updateProvider = (providerKey: string, field: string, value: any) => {
-    setFormData(prev => ({
-      ...prev,
-      [providerKey]: {
-        ...prev[providerKey as keyof ApiKeySettings],
+  const updateProvider = (
+    providerKey: ProviderKey,
+    field: ProviderFieldName,
+    value: string | boolean
+  ) => {
+    setFormData((prev) => {
+      const current = prev[providerKey]
+      const updated = {
+        ...current,
         [field]: value,
+      } as typeof current
+      return {
+        ...prev,
+        [providerKey]: updated,
       }
-    }))
+    })
     setHasChanges(true)
   }
 
@@ -187,7 +224,7 @@ export default function ApiKeysSettingsPage() {
     setHasChanges(false)
   }
 
-  const enabledCount = Object.values(formData).filter((p: any) => p?.enabled).length
+  const enabledCount = Object.values(formData).filter((provider) => provider.enabled).length
 
   if (isLoading) {
     return (
@@ -223,8 +260,8 @@ export default function ApiKeysSettingsPage() {
       {/* Provider 卡片列表 */}
       <div className="grid gap-4">
         {PROVIDERS.map((provider) => {
-          const data = formData[provider.key as keyof ApiKeySettings] || {}
-          const isEnabled = (data as any)?.enabled || false
+          const data = formData[provider.key]
+          const isEnabled = data.enabled
 
           return (
             <Card key={provider.key}>
@@ -254,25 +291,28 @@ export default function ApiKeysSettingsPage() {
                 <CardContent className="pt-0">
                   <Separator className="mb-4" />
                   <div className="space-y-4">
-                    {provider.fields.map((field) => (
+                    {provider.fields.map((field) => {
+                      const rawValue = (data as Record<ProviderFieldName, string | boolean>)[field.name]
+                      const fieldValue = typeof rawValue === "string" ? rawValue : ""
+                      return (
                       <div key={field.name} className="space-y-2">
                         <label className="text-sm font-medium">{field.label}</label>
                         {field.type === 'password' ? (
                           <PasswordInput
-                            value={(data as any)[field.name] || ''}
+                            value={fieldValue}
                             onChange={(value) => updateProvider(provider.key, field.name, value)}
                             placeholder={field.placeholder}
                           />
                         ) : (
                           <Input
                             type="text"
-                            value={(data as any)[field.name] || ''}
+                            value={fieldValue}
                             onChange={(e) => updateProvider(provider.key, field.name, e.target.value)}
                             placeholder={field.placeholder}
                           />
                         )}
                       </div>
-                    ))}
+                    )})}
                     <p className="text-xs text-muted-foreground">
                       获取 API Key：
                       <a 

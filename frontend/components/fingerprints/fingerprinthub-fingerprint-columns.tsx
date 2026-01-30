@@ -8,7 +8,11 @@ import { DataTableColumnHeader } from "@/components/ui/data-table/column-header"
 import { ExpandableCell, ExpandableMonoCell } from "@/components/ui/data-table/expandable-cell"
 import { ChevronDown, ChevronUp } from "lucide-react"
 import { useTranslations } from "next-intl"
-import type { FingerPrintHubFingerprint } from "@/types/fingerprint.types"
+import type {
+  FingerPrintHubFingerprint,
+  FingerPrintHubHttpMatcher,
+  FingerPrintHubMetadata,
+} from "@/types/fingerprint.types"
 import { getSeverityStyle } from "@/lib/severity-config"
 
 interface ColumnOptions {
@@ -75,7 +79,7 @@ function TagListCell({ tags }: { tags: string }) {
 /**
  * Metadata cell - displays vendor, product, verified and queries
  */
-function MetadataCell({ metadata }: { metadata: any }) {
+function MetadataCell({ metadata }: { metadata?: FingerPrintHubMetadata | null }) {
   const t = useTranslations("tooltips")
   const [expanded, setExpanded] = React.useState(false)
   
@@ -83,8 +87,8 @@ function MetadataCell({ metadata }: { metadata: any }) {
     return <span className="text-muted-foreground">-</span>
   }
   
-  const items: { key: string; value: any }[] = []
-  Object.entries(metadata).forEach(([key, value]) => {
+  const items: { key: string; value: unknown }[] = []
+  Object.entries(metadata ?? {}).forEach(([key, value]) => {
     items.push({ key, value })
   })
   
@@ -96,7 +100,7 @@ function MetadataCell({ metadata }: { metadata: any }) {
       <div className="font-mono text-xs space-y-0.5 w-full">
         {displayItems.map((item, idx) => (
           <div key={idx} className={expanded ? "break-all w-full" : "truncate w-full"}>
-            "{item.key}": {JSON.stringify(item.value)}
+            {`${JSON.stringify(item.key)}: `}{JSON.stringify(item.value)}
           </div>
         ))}
       </div>
@@ -125,14 +129,14 @@ function MetadataCell({ metadata }: { metadata: any }) {
 /**
  * HTTP matchers cell - displays detailed HTTP rules in JSON format
  */
-function HttpMatchersCell({ http }: { http: any[] }) {
+function HttpMatchersCell({ http }: { http?: FingerPrintHubHttpMatcher[] }) {
   const t = useTranslations("tooltips")
   const [expanded, setExpanded] = React.useState(false)
   
   if (!http || http.length === 0) return <span className="text-muted-foreground">-</span>
   
   // Extract key fields from http matchers
-  const httpItems: { key: string; value: any }[] = []
+  const httpItems: { key: string; value: unknown }[] = []
   const hasMultiple = http.length > 1
   http.forEach((item, idx) => {
     const prefix = hasMultiple ? `[${idx}].` : ""
@@ -149,7 +153,7 @@ function HttpMatchersCell({ http }: { http: any[] }) {
       <div className="font-mono text-xs space-y-0.5 w-full">
         {displayItems.map((item, idx) => (
           <div key={idx} className={expanded ? "break-all w-full" : "truncate w-full"}>
-            "{item.key}": {JSON.stringify(item.value)}
+            {`${JSON.stringify(item.key)}: `}{JSON.stringify(item.value)}
           </div>
         ))}
       </div>

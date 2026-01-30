@@ -24,7 +24,7 @@ import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import { IconExternalLink } from "@tabler/icons-react"
 import { Circle, CheckCircle2 } from "lucide-react"
-import type { VulnerabilitySeverity } from "@/types/vulnerability.types"
+import type { Vulnerability, VulnerabilitySeverity } from "@/types/vulnerability.types"
 import { useTranslations } from "next-intl"
 import { useLocale } from "next-intl"
 import { SEVERITY_STYLES } from "@/lib/severity-config"
@@ -102,7 +102,7 @@ export function RecentVulnerabilities() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {vulnerabilities.map((vuln: any) => {
+                {vulnerabilities.map((vuln: Vulnerability) => {
                   const isReviewed = vuln.isReviewed
                   const isPending = !isReviewed
 

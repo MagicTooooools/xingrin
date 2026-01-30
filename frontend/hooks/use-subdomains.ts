@@ -2,10 +2,10 @@
 
 import { useMutation, useQuery, useQueryClient, keepPreviousData } from "@tanstack/react-query"
 import { useToastMessages } from '@/lib/toast-helpers'
-import { getErrorCode } from '@/lib/response-parser'
+import { getErrorCode, getErrorResponseData } from '@/lib/response-parser'
 import { SubdomainService } from "@/services/subdomain.service"
 import { OrganizationService } from "@/services/organization.service"
-import type { Subdomain, GetSubdomainsResponse, GetAllSubdomainsParams } from "@/types/subdomain.types"
+import type { GetAllSubdomainsParams } from "@/types/subdomain.types"
 import type { PaginationParams } from "@/types/common.types"
 
 // Query Keys
@@ -80,10 +80,10 @@ export function useCreateSubdomain() {
       queryClient.invalidateQueries({ queryKey: ['subdomains'] })
       queryClient.invalidateQueries({ queryKey: ['assets'] })
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toastMessages.dismiss('create-subdomain')
       console.error('Failed to create subdomain:', error)
-      toastMessages.errorFromCode(getErrorCode(error?.response?.data), 'toast.asset.subdomain.create.error')
+      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.asset.subdomain.create.error')
     },
   })
 }
@@ -108,10 +108,10 @@ export function useDeleteSubdomainFromOrganization() {
       queryClient.invalidateQueries({ queryKey: ['subdomains'] })
       queryClient.invalidateQueries({ queryKey: ['organizations'] })
     },
-    onError: (error: any, { organizationId, targetId }) => {
+    onError: (error: unknown, { organizationId, targetId }) => {
       toastMessages.dismiss(`delete-${organizationId}-${targetId}`)
       console.error('Failed to remove subdomain:', error)
-      toastMessages.errorFromCode(getErrorCode(error?.response?.data), 'toast.asset.subdomain.delete.error')
+      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.asset.subdomain.delete.error')
     },
   })
 }
@@ -134,10 +134,10 @@ export function useBatchDeleteSubdomainsFromOrganization() {
       queryClient.invalidateQueries({ queryKey: ['subdomains'] })
       queryClient.invalidateQueries({ queryKey: ['organizations'] })
     },
-    onError: (error: any, { organizationId }) => {
+    onError: (error: unknown, { organizationId }) => {
       toastMessages.dismiss(`batch-delete-${organizationId}`)
       console.error('Failed to batch remove subdomains:', error)
-      toastMessages.errorFromCode(getErrorCode(error?.response?.data), 'toast.asset.subdomain.delete.error')
+      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.asset.subdomain.delete.error')
     },
   })
 }
@@ -161,10 +161,10 @@ export function useDeleteSubdomain() {
       queryClient.invalidateQueries({ queryKey: ['scans'] })
       queryClient.invalidateQueries({ queryKey: ['organizations'] })
     },
-    onError: (error: any, id) => {
+    onError: (error: unknown, id) => {
       toastMessages.dismiss(`delete-subdomain-${id}`)
       console.error('Failed to delete subdomain:', error)
-      toastMessages.errorFromCode(getErrorCode(error?.response?.data), 'toast.asset.subdomain.delete.error')
+      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.asset.subdomain.delete.error')
     },
   })
 }
@@ -188,10 +188,10 @@ export function useBatchDeleteSubdomains() {
       queryClient.invalidateQueries({ queryKey: ['scans'] })
       queryClient.invalidateQueries({ queryKey: ['organizations'] })
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toastMessages.dismiss('batch-delete-subdomains')
       console.error('Failed to batch delete subdomains:', error)
-      toastMessages.errorFromCode(getErrorCode(error?.response?.data), 'toast.asset.subdomain.delete.error')
+      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.asset.subdomain.delete.error')
     },
   })
 }
@@ -213,10 +213,10 @@ export function useUpdateSubdomain() {
       queryClient.invalidateQueries({ queryKey: ['subdomains'] })
       queryClient.invalidateQueries({ queryKey: ['organizations'] })
     },
-    onError: (error: any, { id }) => {
+    onError: (error: unknown, { id }) => {
       toastMessages.dismiss(`update-subdomain-${id}`)
       console.error('Failed to update subdomain:', error)
-      toastMessages.errorFromCode(getErrorCode(error?.response?.data), 'common.status.updateFailed')
+      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'common.status.updateFailed')
     },
   })
 }
@@ -311,10 +311,10 @@ export function useBulkCreateSubdomains() {
         refetchType: 'active',
       })
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toastMessages.dismiss('bulk-create-subdomains')
       console.error('Failed to bulk create subdomains:', error)
-      toastMessages.errorFromCode(getErrorCode(error?.response?.data), 'toast.asset.subdomain.create.error')
+      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.asset.subdomain.create.error')
     },
   })
 }

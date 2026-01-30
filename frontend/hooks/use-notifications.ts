@@ -7,7 +7,6 @@ import { NotificationService } from '@/services/notification.service'
 import type {
   GetNotificationsRequest,
 } from '@/types/notification.types'
-import { toast } from 'sonner'
 
 /**
  * Get notification list
@@ -41,9 +40,8 @@ export function useMarkAllAsRead() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notifications'] })
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       console.error('Failed to mark all as read:', error)
     },
   })
 }
-

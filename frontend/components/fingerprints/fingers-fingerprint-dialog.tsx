@@ -20,7 +20,7 @@ import {
   useCreateFingersFingerprint,
   useUpdateFingersFingerprint,
 } from "@/hooks/use-fingerprints"
-import type { FingersFingerprint } from "@/types/fingerprint.types"
+import type { FingersFingerprint, FingersRule } from "@/types/fingerprint.types"
 import { useTranslations } from "next-intl"
 
 interface FingersFingerprintDialogProps {
@@ -92,16 +92,19 @@ export function FingersFingerprintDialog({
     }
   }, [fingerprint, reset])
 
+  const getErrorMessage = (error: unknown): string =>
+    error instanceof Error ? error.message : ""
+
   const onSubmit = async (data: FormData) => {
     // Parse rule JSON
-    let ruleArray: any[]
+    let ruleArray: FingersRule[]
     try {
       ruleArray = JSON.parse(data.rule)
       if (!Array.isArray(ruleArray)) {
         toast.error(t("form.ruleArrayRequired"))
         return
       }
-    } catch (e) {
+    } catch {
       toast.error(t("form.ruleJsonInvalid"))
       return
     }
@@ -137,8 +140,8 @@ export function FingersFingerprintDialog({
       }
       onOpenChange(false)
       onSuccess?.()
-    } catch (error: any) {
-      toast.error(error.message || (isEdit ? t("toast.updateFailed") : t("toast.createFailed")))
+    } catch (error) {
+      toast.error(getErrorMessage(error) || (isEdit ? t("toast.updateFailed") : t("toast.createFailed")))
     }
   }
 

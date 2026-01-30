@@ -2,9 +2,9 @@
  * Targets Hooks - 目标管理相关 hooks
  */
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query'
-import { useCallback, useMemo } from 'react'
+import { useCallback } from 'react'
 import { useToastMessages } from '@/lib/toast-helpers'
-import { getErrorCode } from '@/lib/response-parser'
+import { getErrorCode, getErrorResponseData } from '@/lib/response-parser'
 import {
   getTargets,
   getTargetById,
@@ -25,7 +25,26 @@ import type {
   UpdateTargetRequest,
   BatchDeleteTargetsRequest,
   BatchCreateTargetsRequest,
+  Target,
+  TargetsResponse,
 } from '@/types/target.types'
+import type { Endpoint } from '@/types/endpoint.types'
+
+type TargetSelectResponse = TargetsResponse & {
+  targets: Target[]
+  count: number
+}
+
+type EndpointListResponse = {
+  results?: Endpoint[]
+  endpoints?: Endpoint[]
+  total?: number
+  page?: number
+  pageSize?: number
+  totalPages?: number
+  page_size?: number
+  total_pages?: number
+}
 
 /**
  * 获取所有目标列表
@@ -68,11 +87,11 @@ export function useTargets(
   }
 
   // Memoize the select function to avoid unnecessary re-computations
-  const selectFn = useCallback((response: any) => {
+  const selectFn = useCallback((response: TargetsResponse): TargetSelectResponse => {
     // 如果指定了 organizationId，过滤结果
     if (actualOrgId) {
-      const filteredResults = response.results.filter((target: any) =>
-        target.organizations?.some((org: any) => org.id === actualOrgId)
+      const filteredResults = response.results.filter((target) =>
+        target.organizations?.some((org) => org.id === actualOrgId)
       )
       return {
         ...response,
@@ -134,8 +153,8 @@ export function useCreateTarget() {
       queryClient.invalidateQueries({ queryKey: ['targets'] })
       toastMessages.success('toast.target.create.success')
     },
-    onError: (error: any) => {
-      toastMessages.errorFromCode(getErrorCode(error?.response?.data), 'toast.target.create.error')
+    onError: (error: unknown) => {
+      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.target.create.error')
     },
   })
 }
@@ -155,8 +174,8 @@ export function useUpdateTarget() {
       queryClient.invalidateQueries({ queryKey: ['targets', variables.id] })
       toastMessages.success('toast.target.update.success')
     },
-    onError: (error: any) => {
-      toastMessages.errorFromCode(getErrorCode(error?.response?.data), 'toast.target.update.error')
+    onError: (error: unknown) => {
+      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.target.update.error')
     },
   })
 }
@@ -169,7 +188,7 @@ export function useDeleteTarget() {
   const toastMessages = useToastMessages()
 
   return useMutation({
-    mutationFn: ({ id, name }: { id: number; name: string }) => deleteTarget(id),
+    mutationFn: ({ id }: { id: number; name: string }) => deleteTarget(id),
     onMutate: ({ id }) => {
       toastMessages.loading('common.status.deleting', {}, `delete-target-${id}`)
     },
@@ -180,9 +199,9 @@ export function useDeleteTarget() {
       queryClient.invalidateQueries({ queryKey: ['targets'] })
       queryClient.invalidateQueries({ queryKey: ['organizations'] })
     },
-    onError: (error: any, { id }) => {
+    onError: (error: unknown, { id }) => {
       toastMessages.dismiss(`delete-target-${id}`)
-      toastMessages.errorFromCode(getErrorCode(error?.response?.data), 'toast.target.delete.error')
+      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.target.delete.error')
     },
   })
 }
@@ -200,8 +219,8 @@ export function useBatchDeleteTargets() {
       queryClient.invalidateQueries({ queryKey: ['targets'] })
       toastMessages.success('toast.target.delete.bulkSuccess', { count: response.deletedCount })
     },
-    onError: (error: any) => {
-      toastMessages.errorFromCode(getErrorCode(error?.response?.data), 'toast.target.delete.error')
+    onError: (error: unknown) => {
+      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.target.delete.error')
     },
   })
 }
@@ -220,8 +239,8 @@ export function useBatchCreateTargets() {
       queryClient.invalidateQueries({ queryKey: ['organizations'] })
       toastMessages.success('toast.target.create.bulkSuccess', { count: response.createdCount || 0 })
     },
-    onError: (error: any) => {
-      toastMessages.errorFromCode(getErrorCode(error?.response?.data), 'toast.target.create.error')
+    onError: (error: unknown) => {
+      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.target.create.error')
     },
   })
 }
@@ -252,8 +271,8 @@ export function useLinkTargetOrganizations() {
       queryClient.invalidateQueries({ queryKey: ['targets', variables.targetId] })
       toastMessages.success('toast.target.link.success')
     },
-    onError: (error: any) => {
-      toastMessages.errorFromCode(getErrorCode(error?.response?.data), 'toast.target.link.error')
+    onError: (error: unknown) => {
+      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.target.link.error')
     },
   })
 }
@@ -273,8 +292,8 @@ export function useUnlinkTargetOrganizations() {
       queryClient.invalidateQueries({ queryKey: ['targets', variables.targetId] })
       toastMessages.success('toast.target.unlink.success')
     },
-    onError: (error: any) => {
-      toastMessages.errorFromCode(getErrorCode(error?.response?.data), 'toast.target.unlink.error')
+    onError: (error: unknown) => {
+      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.target.unlink.error')
     },
   })
 }
@@ -301,7 +320,7 @@ export function useTargetEndpoints(
     }],
     queryFn: () => getTargetEndpoints(targetId, params?.page || 1, params?.pageSize || 10, params?.filter),
     enabled: options?.enabled !== undefined ? options.enabled : !!targetId,
-    select: (response: any) => {
+    select: (response: EndpointListResponse) => {
       // 后端使用通用分页格式：results/total/page/pageSize/totalPages
       return {
         endpoints: response.results || response.endpoints || [],
@@ -341,9 +360,8 @@ export function useUpdateTargetBlacklist() {
       queryClient.invalidateQueries({ queryKey: ['targets', variables.targetId, 'blacklist'] })
       toastMessages.success('toast.blacklist.save.success')
     },
-    onError: (error: any) => {
-      toastMessages.errorFromCode(getErrorCode(error?.response?.data), 'toast.blacklist.save.error')
+    onError: (error: unknown) => {
+      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.blacklist.save.error')
     },
   })
 }
-

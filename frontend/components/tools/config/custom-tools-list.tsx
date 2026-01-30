@@ -76,7 +76,7 @@ export function CustomToolsList() {
       await deleteTool.mutateAsync(toolToDelete.id)
       // Close dialog after successful deletion
       setToolToDelete(null)
-    } catch (error) {
+    } catch {
       // Error already handled in hook
     }
   }

@@ -2,17 +2,25 @@
 
 import { useMutation, useQuery, useQueryClient, keepPreviousData } from "@tanstack/react-query"
 import { useToastMessages } from '@/lib/toast-helpers'
-import { getErrorCode } from '@/lib/response-parser'
+import { getErrorCode, getErrorResponseData } from '@/lib/response-parser'
 import { EndpointService } from "@/services/endpoint.service"
 import type { 
   Endpoint, 
   CreateEndpointRequest,
-  UpdateEndpointRequest,
   GetEndpointsRequest,
   GetEndpointsResponse,
-  BatchDeleteEndpointsRequest,
-  BatchDeleteEndpointsResponse
+  BatchDeleteEndpointsRequest
 } from "@/types/endpoint.types"
+
+type EndpointPageResponse = {
+  results?: Endpoint[]
+  total?: number
+  page?: number
+  pageSize?: number
+  totalPages?: number
+  page_size?: number
+  total_pages?: number
+}
 
 // Query Keys
 export const endpointKeys = {
@@ -93,7 +101,7 @@ export function useScanEndpoints(scanId: number, params?: Omit<GetEndpointsReque
     queryKey: [...endpointKeys.byScan(scanId, defaultParams), filter],
     queryFn: () => EndpointService.getEndpointsByScanId(scanId, defaultParams, filter),
     enabled: options?.enabled !== undefined ? options.enabled : !!scanId,
-    select: (response: any) => {
+    select: (response: EndpointPageResponse) => {
       // 后端使用通用分页格式：results/total/page/pageSize/totalPages
       return {
         endpoints: response.results || [],
@@ -137,10 +145,10 @@ export function useCreateEndpoint() {
       
       queryClient.invalidateQueries({ queryKey: ['endpoints'] })
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toastMessages.dismiss('create-endpoint')
       console.error('Failed to create endpoint:', error)
-      toastMessages.errorFromCode(getErrorCode(error?.response?.data), 'toast.asset.endpoint.create.error')
+      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.asset.endpoint.create.error')
     },
   })
 }
@@ -160,10 +168,10 @@ export function useDeleteEndpoint() {
       toastMessages.success('toast.asset.endpoint.delete.success')
       queryClient.invalidateQueries({ queryKey: ['endpoints'] })
     },
-    onError: (error: any, id) => {
+    onError: (error: unknown, id) => {
       toastMessages.dismiss(`delete-endpoint-${id}`)
       console.error('Failed to delete endpoint:', error)
-      toastMessages.errorFromCode(getErrorCode(error?.response?.data), 'toast.asset.endpoint.delete.error')
+      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.asset.endpoint.delete.error')
     },
   })
 }
@@ -184,10 +192,10 @@ export function useBatchDeleteEndpoints() {
       toastMessages.success('toast.asset.endpoint.delete.bulkSuccess', { count: deletedCount })
       queryClient.invalidateQueries({ queryKey: ['endpoints'] })
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toastMessages.dismiss('batch-delete-endpoints')
       console.error('Failed to batch delete endpoints:', error)
-      toastMessages.errorFromCode(getErrorCode(error?.response?.data), 'toast.asset.endpoint.delete.error')
+      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.asset.endpoint.delete.error')
     },
   })
 }
@@ -224,10 +232,10 @@ export function useBulkCreateEndpoints() {
         refetchType: 'active',
       })
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toastMessages.dismiss('bulk-create-endpoints')
       console.error('Failed to bulk create endpoints:', error)
-      toastMessages.errorFromCode(getErrorCode(error?.response?.data), 'toast.asset.endpoint.create.error')
+      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.asset.endpoint.create.error')
     },
   })
 }

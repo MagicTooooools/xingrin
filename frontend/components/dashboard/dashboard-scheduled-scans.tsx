@@ -17,9 +17,9 @@ export function DashboardScheduledScans() {
   const locale = useLocale()
 
   // Internationalization
-  const tColumns = React.useMemo(() => useTranslations("columns"), [])
-  const tCommon = React.useMemo(() => useTranslations("common"), [])
-  const tScan = React.useMemo(() => useTranslations("scan"), [])
+  const tColumns = useTranslations("columns")
+  const tCommon = useTranslations("common")
+  const tScan = useTranslations("scan")
 
   // Build translation object
   const translations = React.useMemo(() => ({
@@ -72,10 +72,13 @@ export function DashboardScheduledScans() {
     }
   }, [isFetching, isSearching])
 
-  const formatDate = (dateString: string) => new Date(dateString).toLocaleString(getDateLocale(locale), { hour12: false })
-  const handleEdit = () => router.push(`/scan/scheduled/`)
-  const handleDelete = () => {}
-  const handleToggleStatus = () => {}
+  const formatDate = React.useCallback(
+    (dateString: string) => new Date(dateString).toLocaleString(getDateLocale(locale), { hour12: false }),
+    [locale]
+  )
+  const handleEdit = React.useCallback(() => router.push(`/scan/scheduled/`), [router])
+  const handleDelete = React.useCallback(() => {}, [])
+  const handleToggleStatus = React.useCallback(() => {}, [])
 
   const columns = React.useMemo(
     () =>
@@ -86,7 +89,7 @@ export function DashboardScheduledScans() {
         handleToggleStatus,
         t: translations,
       }),
-    [formatDate, handleEdit, translations]
+    [formatDate, handleEdit, handleDelete, handleToggleStatus, translations]
   )
 
   if (isLoading && !data) {

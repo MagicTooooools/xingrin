@@ -1,17 +1,39 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useToastMessages } from '@/lib/toast-helpers'
-import { getErrorCode } from '@/lib/response-parser'
+import { getErrorCode, getErrorResponseData } from '@/lib/response-parser'
 import {
+  getPresetEngines,
+  getPresetEngine,
   getEngines,
   getEngine,
   createEngine,
   updateEngine,
   deleteEngine,
 } from '@/services/engine.service'
-import type { ScanEngine } from '@/types/engine.types'
 
 /**
- * Get engine list
+ * Get preset engine list (system-defined, read-only)
+ */
+export function usePresetEngines() {
+  return useQuery({
+    queryKey: ['preset-engines'],
+    queryFn: getPresetEngines,
+  })
+}
+
+/**
+ * Get preset engine by ID
+ */
+export function usePresetEngine(id: string) {
+  return useQuery({
+    queryKey: ['preset-engines', id],
+    queryFn: () => getPresetEngine(id),
+    enabled: !!id,
+  })
+}
+
+/**
+ * Get user engine list (stored in database, editable)
  */
 export function useEngines() {
   return useQuery({
@@ -44,8 +66,8 @@ export function useCreateEngine() {
       queryClient.invalidateQueries({ queryKey: ['engines'] })
       toastMessages.success('toast.engine.create.success')
     },
-    onError: (error: any) => {
-      toastMessages.errorFromCode(getErrorCode(error?.response?.data), 'toast.engine.create.error')
+    onError: (error: unknown) => {
+      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.engine.create.error')
     },
   })
 }
@@ -65,8 +87,8 @@ export function useUpdateEngine() {
       queryClient.invalidateQueries({ queryKey: ['engines', variables.id] })
       toastMessages.success('toast.engine.update.success')
     },
-    onError: (error: any) => {
-      toastMessages.errorFromCode(getErrorCode(error?.response?.data), 'toast.engine.update.error')
+    onError: (error: unknown) => {
+      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.engine.update.error')
     },
   })
 }
@@ -84,9 +106,8 @@ export function useDeleteEngine() {
       queryClient.invalidateQueries({ queryKey: ['engines'] })
       toastMessages.success('toast.engine.delete.success')
     },
-    onError: (error: any) => {
-      toastMessages.errorFromCode(getErrorCode(error?.response?.data), 'toast.engine.delete.error')
+    onError: (error: unknown) => {
+      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.engine.delete.error')
     },
   })
 }
-

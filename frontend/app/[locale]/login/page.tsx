@@ -33,7 +33,6 @@ export default function LoginPage() {
       const splash = document.getElementById('boot-splash')
       if (splash) {
         splash.classList.add('hidden')
-        setTimeout(() => splash.remove(), 300)
       }
       setIsReady(true)
     }, 100)
@@ -246,7 +245,7 @@ export default function LoginPage() {
       </div>
 
       {/* Fingerprint identifier - for FOFA/Shodan and other search engines to identify */}
-      <meta name="generator" content="Orbit ASM Platform" />
+      <meta name="generator" content="LunaFox ASM Platform" />
 
       {/* Main content area */}
       <div

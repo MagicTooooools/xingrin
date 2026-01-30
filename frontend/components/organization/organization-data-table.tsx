@@ -15,7 +15,6 @@ export function OrganizationDataTable({
   onBulkDelete,
   onSelectionChange,
   searchPlaceholder,
-  searchColumn = "name",
   searchValue,
   onSearch,
   isSearching,

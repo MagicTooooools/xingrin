@@ -26,7 +26,7 @@ import {
   useCreateFingerPrintHubFingerprint,
   useUpdateFingerPrintHubFingerprint,
 } from "@/hooks/use-fingerprints"
-import type { FingerPrintHubFingerprint } from "@/types/fingerprint.types"
+import type { FingerPrintHubFingerprint, FingerPrintHubHttpMatcher } from "@/types/fingerprint.types"
 import { useTranslations } from "next-intl"
 
 interface FingerPrintHubFingerprintDialogProps {
@@ -114,29 +114,32 @@ export function FingerPrintHubFingerprintDialog({
     }
   }, [fingerprint, reset])
 
+  const getErrorMessage = (error: unknown): string =>
+    error instanceof Error ? error.message : ""
+
   const onSubmit = async (data: FormData) => {
     // Parse metadata JSON
-    let metadataObj: any
+    let metadataObj: Record<string, unknown>
     try {
       metadataObj = JSON.parse(data.metadata)
       if (typeof metadataObj !== "object" || Array.isArray(metadataObj)) {
         toast.error(t("form.metadataObjectRequired"))
         return
       }
-    } catch (e) {
+    } catch {
       toast.error(t("form.metadataJsonInvalid"))
       return
     }
 
     // Parse http JSON
-    let httpArray: any[]
+    let httpArray: FingerPrintHubHttpMatcher[]
     try {
       httpArray = JSON.parse(data.http)
       if (!Array.isArray(httpArray)) {
         toast.error(t("form.httpArrayRequired"))
         return
       }
-    } catch (e) {
+    } catch {
       toast.error(t("form.httpJsonInvalid"))
       return
     }
@@ -162,8 +165,8 @@ export function FingerPrintHubFingerprintDialog({
       }
       onOpenChange(false)
       onSuccess?.()
-    } catch (error: any) {
-      toast.error(error.message || (isEdit ? t("toast.updateFailed") : t("toast.createFailed")))
+    } catch (error) {
+      toast.error(getErrorMessage(error) || (isEdit ? t("toast.updateFailed") : t("toast.createFailed")))
     }
   }
 

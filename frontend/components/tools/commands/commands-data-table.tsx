@@ -6,14 +6,14 @@ import { useTranslations } from "next-intl"
 import { Input } from "@/components/ui/input"
 import { UnifiedDataTable } from "@/components/ui/data-table"
 
-interface CommandsDataTableProps<TData extends { id: number }> {
-  columns: ColumnDef<TData, any>[]
+interface CommandsDataTableProps<TData extends { id: number; displayName?: string }> {
+  columns: ColumnDef<TData, unknown>[]
   data: TData[]
   onBulkDelete?: (selectedIds: number[]) => void
   onAdd?: () => void
 }
 
-export function CommandsDataTable<TData extends { id: number }>({
+export function CommandsDataTable<TData extends { id: number; displayName?: string }>({
   columns,
   data,
   onBulkDelete,
@@ -30,7 +30,7 @@ export function CommandsDataTable<TData extends { id: number }>({
   const filteredData = React.useMemo(() => {
     if (!searchValue) return data
     return data.filter((item) => {
-      const displayName = (item as any).displayName || ""
+      const displayName = item.displayName || ""
       return displayName.toLowerCase().includes(searchValue.toLowerCase())
     })
   }, [data, searchValue])

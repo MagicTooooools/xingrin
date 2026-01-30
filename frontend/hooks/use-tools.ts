@@ -2,9 +2,9 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useToastMessages } from '@/lib/toast-helpers'
-import { getErrorCode } from '@/lib/response-parser'
+import { getErrorCode, getErrorResponseData } from '@/lib/response-parser'
 import { ToolService } from "@/services/tool.service"
-import type { Tool, GetToolsParams, CreateToolRequest, UpdateToolRequest } from "@/types/tool.types"
+import type { GetToolsParams, CreateToolRequest, UpdateToolRequest } from "@/types/tool.types"
 
 // Query Keys
 export const toolKeys = {
@@ -51,10 +51,10 @@ export function useCreateTool() {
         refetchType: 'active' 
       })
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toastMessages.dismiss('create-tool')
       console.error('Failed to create tool:', error)
-      toastMessages.errorFromCode(getErrorCode(error?.response?.data), 'toast.tool.create.error')
+      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.tool.create.error')
     },
   })
 }
@@ -78,10 +78,10 @@ export function useUpdateTool() {
         refetchType: 'active' 
       })
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toastMessages.dismiss('update-tool')
       console.error('Failed to update tool:', error)
-      toastMessages.errorFromCode(getErrorCode(error?.response?.data), 'toast.tool.update.error')
+      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.tool.update.error')
     },
   })
 }
@@ -104,10 +104,10 @@ export function useDeleteTool() {
         refetchType: 'active' 
       })
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toastMessages.dismiss('delete-tool')
       console.error('Failed to delete tool:', error)
-      toastMessages.errorFromCode(getErrorCode(error?.response?.data), 'toast.tool.delete.error')
+      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.tool.delete.error')
     },
   })
 }

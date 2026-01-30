@@ -1,8 +1,6 @@
 import { ColumnDef } from "@tanstack/react-table"
 import { PaginationParams, PaginationInfo } from "./common.types"
-import type { Organization } from "./organization.types"
 import type { BatchCreateResponse } from "./api-response.types"
-import type { Port } from "./ip-address.types"
 
 // Subdomain related type definitions (renamed from domain.types.ts)
 

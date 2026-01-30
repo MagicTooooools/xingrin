@@ -42,6 +42,12 @@ const formatTimeAgo = (date: Date): string => {
   return date.toLocaleDateString()
 }
 
+const isBackendNotification = (value: unknown): value is BackendNotification => {
+  if (!value || typeof value !== 'object') return false
+  const record = value as Record<string, unknown>
+  return typeof record.id === 'number' && typeof record.title === 'string' && typeof record.message === 'string'
+}
+
 export const transformBackendNotification = (backendNotification: BackendNotification): Notification => {
   const createdAtRaw = backendNotification.createdAt ?? backendNotification.created_at
   const createdDate = createdAtRaw ? new Date(createdAtRaw) : new Date()
@@ -161,35 +167,35 @@ export function useNotificationSSE() {
 
       ws.onmessage = (event) => {
         try {
-          const data = JSON.parse(event.data)
+          const data = JSON.parse(event.data) as Record<string, unknown>
           console.log('[MESSAGE] WebSocket 消息接收:', data)
 
-          if (data.type === 'connected') {
+          const messageType = typeof data.type === 'string' ? data.type : undefined
+
+          if (messageType === 'connected') {
             console.log('[SUCCESS] WebSocket 连接成功')
             return
           }
 
-          if (data.type === 'pong') {
+          if (messageType === 'pong') {
             // 心跳响应
             console.log('[HEARTBEAT] 心跳响应')
             return
           }
 
-          if (data.type === 'error') {
-            console.error('[ERROR] WebSocket 错误:', data.message)
-            toastMessages.error('toast.notification.connection.error', { message: data.message })
+          if (messageType === 'error') {
+            const errorMessage = typeof data.message === 'string' ? data.message : ''
+            console.error('[ERROR] WebSocket 错误:', errorMessage)
+            toastMessages.error('toast.notification.connection.error', { message: errorMessage })
             return
           }
 
           // 处理通知消息
-          if (data.type === 'notification') {
+          if (messageType === 'notification') {
             console.log('[NOTIFICATION] 处理通知消息 (type=notification)')
-            // 移除 type 字段，获取实际的通知数据
-            const { type, ...payload } = data as any
-
-            if (payload.id && payload.title && payload.message) {
-              console.log('[TRANSFORM] 转换通知:', payload)
-              const notification = transformBackendNotification(payload as BackendNotification)
+            if (isBackendNotification(data)) {
+              console.log('[TRANSFORM] 转换通知:', data)
+              const notification = transformBackendNotification(data)
               console.log('[UPDATE] 更新通知列表，新通知:', notification)
               setNotifications(prev => {
                 const updated = [notification, ...prev.slice(0, 49)]
@@ -199,15 +205,15 @@ export function useNotificationSSE() {
 
               queryClient.invalidateQueries({ queryKey: ['notifications'] })
             } else {
-              console.warn('[WARN] 通知数据不完整:', payload)
+              console.warn('[WARN] 通知数据不完整:', data)
             }
             return
           }
 
           // 备用处理：直接检查通知字段
-          if (data.id && data.title && data.message) {
+          if (isBackendNotification(data)) {
             console.log('[NOTIFICATION] 处理通知消息 (直接字段)')
-            const notification = transformBackendNotification(data as BackendNotification)
+            const notification = transformBackendNotification(data)
 
             // 添加到通知列表
             console.log('[UPDATE] 更新通知列表，新通知:', notification)

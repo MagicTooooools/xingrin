@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from "react"
 import { FileCode, Save, X, AlertCircle, CheckCircle2, AlertTriangle } from "lucide-react"
 import Editor from "@monaco-editor/react"
+import type { editor } from "monaco-editor"
 import * as yaml from "js-yaml"
 import { useTranslations } from "next-intl"
 import {
@@ -45,7 +46,7 @@ export function EngineEditDialog({
   const [isEditorReady, setIsEditorReady] = useState(false)
   const [yamlError, setYamlError] = useState<{ message: string; line?: number; column?: number } | null>(null)
   const { currentTheme } = useColorTheme()
-  const editorRef = useRef<any>(null)
+  const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null)
 
   // Generate sample YAML configuration
   const generateSampleYaml = (engine: ScanEngine) => {
@@ -174,8 +175,8 @@ url_fetch:
   }
 
   // Handle editor mount
-  const handleEditorDidMount = (editor: any) => {
-    editorRef.current = editor
+  const handleEditorDidMount = (editorInstance: editor.IStandaloneCodeEditor) => {
+    editorRef.current = editorInstance
     setIsEditorReady(true)
   }
 

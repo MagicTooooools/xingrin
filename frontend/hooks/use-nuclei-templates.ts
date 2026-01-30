@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useToastMessages } from '@/lib/toast-helpers'
-import { getErrorCode } from '@/lib/response-parser'
+import { getErrorCode, getErrorResponseData } from '@/lib/response-parser'
 import { getNucleiTemplateTree, getNucleiTemplateContent, refreshNucleiTemplates, saveNucleiTemplate, uploadNucleiTemplate } from "@/services/nuclei.service"
 import type { NucleiTemplateTreeNode, NucleiTemplateContent, UploadNucleiTemplatePayload, SaveNucleiTemplatePayload } from "@/types/nuclei.types"
 
@@ -35,9 +35,9 @@ export function useRefreshNucleiTemplates() {
       toastMessages.success('toast.nucleiTemplate.refresh.success')
       queryClient.invalidateQueries({ queryKey: ["nuclei", "templates", "tree"] })
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toastMessages.dismiss('refresh-nuclei-templates')
-      toastMessages.errorFromCode(getErrorCode(error?.response?.data), 'toast.nucleiTemplate.refresh.error')
+      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.nucleiTemplate.refresh.error')
     },
   })
 }
@@ -56,9 +56,9 @@ export function useUploadNucleiTemplate() {
       toastMessages.success('toast.nucleiTemplate.upload.success')
       queryClient.invalidateQueries({ queryKey: ["nuclei", "templates", "tree"] })
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toastMessages.dismiss('upload-nuclei-template')
-      toastMessages.errorFromCode(getErrorCode(error?.response?.data), 'toast.nucleiTemplate.upload.error')
+      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.nucleiTemplate.upload.error')
     },
   })
 }
@@ -77,9 +77,9 @@ export function useSaveNucleiTemplate() {
       toastMessages.success('toast.nucleiTemplate.save.success')
       queryClient.invalidateQueries({ queryKey: ["nuclei", "templates", "content", variables.path] })
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toastMessages.dismiss('save-nuclei-template')
-      toastMessages.errorFromCode(getErrorCode(error?.response?.data), 'toast.nucleiTemplate.save.error')
+      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.nucleiTemplate.save.error')
     },
   })
 }

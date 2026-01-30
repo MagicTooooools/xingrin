@@ -73,6 +73,9 @@ export function ARLFingerprintDialog({
     }
   }, [fingerprint, reset])
 
+  const getErrorMessage = (error: unknown): string =>
+    error instanceof Error ? error.message : ""
+
   const onSubmit = async (data: FormData) => {
     const payload = {
       name: data.name.trim(),
@@ -89,8 +92,8 @@ export function ARLFingerprintDialog({
       }
       onOpenChange(false)
       onSuccess?.()
-    } catch (error: any) {
-      toast.error(error.message || (isEdit ? t("toast.updateFailed") : t("toast.createFailed")))
+    } catch (error) {
+      toast.error(getErrorMessage(error) || (isEdit ? t("toast.updateFailed") : t("toast.createFailed")))
     }
   }
 

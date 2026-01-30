@@ -2,13 +2,13 @@ import type { SystemLogResponse, LogFilesResponse, LogFile } from '@/types/syste
 
 export const mockLogFiles: LogFile[] = [
   {
-    filename: 'orbit.log',
+    filename: 'lunafox.log',
     category: 'system',
     size: 1234567,
     modifiedAt: '2024-12-28T10:00:00Z',
   },
   {
-    filename: 'orbit-error.log',
+    filename: 'lunafox-error.log',
     category: 'error',
     size: 45678,
     modifiedAt: '2024-12-28T09:30:00Z',
@@ -80,7 +80,7 @@ export function getMockSystemLogs(params?: {
   file?: string
   lines?: number
 }): SystemLogResponse {
-  const filename = params?.file || 'orbit.log'
+  const filename = params?.file || 'lunafox.log'
   const lines = params?.lines || 100
 
   let content: string

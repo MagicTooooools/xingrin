@@ -219,7 +219,7 @@ function hexToRgb(hex: string) {
   return [((num >> 16) & 255) / 255, ((num >> 8) & 255) / 255, (num & 255) / 255];
 }
 
-interface FaultyTerminalProps {
+interface FaultyTerminalProps extends React.HTMLAttributes<HTMLDivElement> {
   scale?: number;
   gridMul?: [number, number];
   digitSize?: number;
@@ -240,7 +240,6 @@ interface FaultyTerminalProps {
   brightness?: number;
   className?: string;
   style?: React.CSSProperties;
-  [key: string]: any;
 }
 
 export default function FaultyTerminal({
@@ -267,8 +266,8 @@ export default function FaultyTerminal({
   ...rest
 }: FaultyTerminalProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const programRef = useRef<any>(null);
-  const rendererRef = useRef<any>(null);
+  const programRef = useRef<Program | null>(null);
+  const rendererRef = useRef<Renderer | null>(null);
   const mouseRef = useRef({ x: 0.5, y: 0.5 });
   const smoothMouseRef = useRef({ x: 0.5, y: 0.5 });
   const frozenTimeRef = useRef(0);

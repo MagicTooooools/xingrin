@@ -5,7 +5,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { agentService } from '@/services/agent.service'
 import { useToastMessages } from '@/lib/toast-helpers'
-import { getErrorCode } from '@/lib/response-parser'
+import { getErrorCode, getErrorResponseData } from '@/lib/response-parser'
 import type { UpdateAgentConfigRequest } from '@/types/agent.types'
 
 export const agentKeys = {
@@ -41,8 +41,8 @@ export function useCreateRegistrationToken() {
     onSuccess: () => {
       toastMessages.success('toast.agent.token.success')
     },
-    onError: (error: any) => {
-      toastMessages.errorFromCode(getErrorCode(error?.response?.data), 'toast.agent.token.error')
+    onError: (error: unknown) => {
+      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.agent.token.error')
     },
   })
 }
@@ -59,8 +59,8 @@ export function useUpdateAgentConfig() {
       queryClient.invalidateQueries({ queryKey: agentKeys.detail(id) })
       toastMessages.success('toast.agent.config.success')
     },
-    onError: (error: any) => {
-      toastMessages.errorFromCode(getErrorCode(error?.response?.data), 'toast.agent.config.error')
+    onError: (error: unknown) => {
+      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.agent.config.error')
     },
   })
 }
@@ -76,8 +76,8 @@ export function useDeleteAgent() {
       queryClient.invalidateQueries({ queryKey: agentKeys.lists(), refetchType: 'active' })
       toastMessages.success('toast.agent.delete.success')
     },
-    onError: (error: any) => {
-      toastMessages.errorFromCode(getErrorCode(error?.response?.data), 'toast.agent.delete.error')
+    onError: (error: unknown) => {
+      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.agent.delete.error')
     },
   })
 }

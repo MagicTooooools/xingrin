@@ -262,6 +262,7 @@ export function ScreenshotsGallery({ targetId, scanId }: ScreenshotsGalleryProps
             )}
 
             {/* Image */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={getImageUrl(screenshot)}
               alt={screenshot.url}
@@ -386,6 +387,7 @@ export function ScreenshotsGallery({ targetId, scanId }: ScreenshotsGalleryProps
             {/* Image */}
             {screenshots[lightboxIndex] && (
               <div className="flex flex-col items-center gap-4 p-8">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={getImageUrl(screenshots[lightboxIndex])}
                   alt={screenshots[lightboxIndex].url}

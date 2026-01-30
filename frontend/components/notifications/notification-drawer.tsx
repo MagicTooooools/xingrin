@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { useTranslations } from "next-intl"
-import { Bell, AlertTriangle, Activity, Info, Server, BellOff, Wifi, WifiOff, CheckCheck, Loader2 } from "lucide-react"
+import { Bell, AlertTriangle, Activity, Info, Server, BellOff, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -24,26 +24,6 @@ import { SEVERITY_CARD_STYLES, SEVERITY_ICON_BG } from "@/lib/severity-config"
  * Notification drawer component
  * A side panel that slides out from the right, displaying detailed notification information
  */
-
-/** Connection status indicator */
-function ConnectionStatus({ isConnected, t }: { isConnected: boolean, t: ReturnType<typeof useTranslations> }) {
-  return (
-    <div className="flex items-center gap-1.5">
-      <span className="relative flex h-2 w-2">
-        {isConnected && (
-          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-        )}
-        <span className={cn(
-          "relative inline-flex h-2 w-2 rounded-full",
-          isConnected ? "bg-emerald-500" : "bg-gray-400"
-        )} />
-      </span>
-      <span className="text-xs text-muted-foreground">
-        {isConnected ? t("status.realtime") : t("status.offline")}
-      </span>
-    </div>
-  )
-}
 
 /** Notification skeleton screen */
 function NotificationSkeleton() {
@@ -151,7 +131,7 @@ export function NotificationDrawer() {
   }), [t])
 
   // SSE real-time notifications
-  const { notifications: sseNotifications, isConnected, markNotificationsAsRead } = useNotificationSSE()
+  const { notifications: sseNotifications, markNotificationsAsRead } = useNotificationSSE()
 
   const [historyNotifications, setHistoryNotifications] = React.useState<Notification[]>([])
 

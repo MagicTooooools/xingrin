@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useMemo } from "react"
-import { Settings, Search, Pencil, Trash2, Check, X, Plus } from "lucide-react"
+import { Settings, Search, Pencil, Trash2, Check, Plus, Lock, AlertTriangle, ChevronDown, ChevronRight } from "lucide-react"
 import * as yaml from "js-yaml"
 import Editor from "@monaco-editor/react"
 import { useTranslations } from "next-intl"
@@ -11,6 +11,11 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,9 +27,9 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { EngineEditDialog, EngineCreateDialog } from "@/components/scan/engine"
-import { useEngines, useCreateEngine, useUpdateEngine, useDeleteEngine } from "@/hooks/use-engines"
+import { useEngines, usePresetEngines, useCreateEngine, useUpdateEngine, useDeleteEngine } from "@/hooks/use-engines"
 import { cn } from "@/lib/utils"
-import type { ScanEngine } from "@/types/engine.types"
+import type { ScanEngine, PresetEngine } from "@/types/engine.types"
 import { MasterDetailSkeleton } from "@/components/ui/master-detail-skeleton"
 
 /** Feature configuration item definition - corresponds to YAML configuration structure */
@@ -42,7 +47,7 @@ const FEATURE_LIST = [
 type FeatureKey = typeof FEATURE_LIST[number]["key"]
 
 /** Parse engine configuration to get enabled features */
-function parseEngineFeatures(engine: ScanEngine): Record<FeatureKey, boolean> {
+function parseEngineFeatures(configuration?: string): Record<FeatureKey, boolean> {
   const defaultFeatures: Record<FeatureKey, boolean> = {
     subdomain_discovery: false,
     port_scan: false,
@@ -54,10 +59,10 @@ function parseEngineFeatures(engine: ScanEngine): Record<FeatureKey, boolean> {
     vuln_scan: false,
   }
 
-  if (!engine.configuration) return defaultFeatures
+  if (!configuration) return defaultFeatures
 
   try {
-    const config = yaml.load(engine.configuration) as Record<string, unknown>
+    const config = yaml.load(configuration) as Record<string, unknown>
     if (!config) return defaultFeatures
 
     return {
@@ -76,22 +81,31 @@ function parseEngineFeatures(engine: ScanEngine): Record<FeatureKey, boolean> {
 }
 
 /** Calculate the number of enabled features */
-function countEnabledFeatures(engine: ScanEngine) {
-  const features = parseEngineFeatures(engine)
+function countEnabledFeatures(configuration?: string) {
+  const features = parseEngineFeatures(configuration)
   return Object.values(features).filter(Boolean).length
 }
+
+/** Selection type for engine list */
+type EngineSelection = 
+  | { type: 'preset'; engine: PresetEngine }
+  | { type: 'user'; engine: ScanEngine }
+  | null
 
 /**
  * Scan engine page
  */
 export default function ScanEnginePage() {
-  const [selectedId, setSelectedId] = useState<number | null>(null)
+  const [selection, setSelection] = useState<EngineSelection>(null)
   const [searchQuery, setSearchQuery] = useState("")
   const [editingEngine, setEditingEngine] = useState<ScanEngine | null>(null)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
+  const [createFromPreset, setCreateFromPreset] = useState<PresetEngine | null>(null)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [engineToDelete, setEngineToDelete] = useState<ScanEngine | null>(null)
+  const [presetsOpen, setPresetsOpen] = useState(true)
+  const [myEnginesOpen, setMyEnginesOpen] = useState(true)
 
   const { currentTheme } = useColorTheme()
   
@@ -102,29 +116,43 @@ export default function ScanEnginePage() {
   const tEngine = useTranslations("scan.engine")
 
   // API Hooks
-  const { data: engines = [], isLoading } = useEngines()
+  const { data: presetEngines = [], isLoading: isLoadingPresets } = usePresetEngines()
+  const { data: userEngines = [], isLoading: isLoadingEngines } = useEngines()
   const createEngineMutation = useCreateEngine()
   const updateEngineMutation = useUpdateEngine()
   const deleteEngineMutation = useDeleteEngine()
 
-  // Filter engine list
-  const filteredEngines = useMemo(() => {
-    if (!searchQuery.trim()) return engines
+  const isLoading = isLoadingPresets || isLoadingEngines
+
+  // Filter engine lists based on search query
+  const filteredPresetEngines = useMemo(() => {
+    if (!searchQuery.trim()) return presetEngines
     const query = searchQuery.toLowerCase()
-    return engines.filter((e) => e.name.toLowerCase().includes(query))
-  }, [engines, searchQuery])
+    return presetEngines.filter((e) => e.name.toLowerCase().includes(query))
+  }, [presetEngines, searchQuery])
 
-  // Selected engine
-  const selectedEngine = useMemo(() => {
-    if (!selectedId) return null
-    return engines.find((e) => e.id === selectedId) || null
-  }, [selectedId, engines])
+  const filteredUserEngines = useMemo(() => {
+    if (!searchQuery.trim()) return userEngines
+    const query = searchQuery.toLowerCase()
+    return userEngines.filter((e) => e.name.toLowerCase().includes(query))
+  }, [userEngines, searchQuery])
 
-  // Selected engine's feature status
+  // Get selected features
   const selectedFeatures = useMemo(() => {
-    if (!selectedEngine) return null
-    return parseEngineFeatures(selectedEngine)
-  }, [selectedEngine])
+    if (!selection) return null
+    const config = selection.type === 'preset' 
+      ? selection.engine.configuration 
+      : selection.engine.configuration
+    return parseEngineFeatures(config)
+  }, [selection])
+
+  const handleSelectPreset = (preset: PresetEngine) => {
+    setSelection({ type: 'preset', engine: preset })
+  }
+
+  const handleSelectUserEngine = (engine: ScanEngine) => {
+    setSelection({ type: 'user', engine })
+  }
 
   const handleEdit = (engine: ScanEngine) => {
     setEditingEngine(engine)
@@ -147,8 +175,8 @@ export default function ScanEnginePage() {
     if (!engineToDelete) return
     deleteEngineMutation.mutate(engineToDelete.id, {
       onSuccess: () => {
-        if (selectedId === engineToDelete.id) {
-          setSelectedId(null)
+        if (selection?.type === 'user' && selection.engine.id === engineToDelete.id) {
+          setSelection(null)
         }
         setDeleteDialogOpen(false)
         setEngineToDelete(null)
@@ -161,6 +189,12 @@ export default function ScanEnginePage() {
       name,
       configuration: yamlContent,
     })
+    setCreateFromPreset(null)
+  }
+
+  const handleOpenCreateDialog: React.MouseEventHandler<HTMLButtonElement> = () => {
+    setCreateFromPreset(null)
+    setIsCreateDialogOpen(true)
   }
 
   // Loading state
@@ -184,7 +218,7 @@ export default function ScanEnginePage() {
             />
           </div>
         </div>
-        <Button onClick={() => setIsCreateDialogOpen(true)}>
+        <Button onClick={handleOpenCreateDialog}>
           <Plus className="h-4 w-4 mr-1" />
           {tEngine("createEngine")}
         </Button>
@@ -196,64 +230,155 @@ export default function ScanEnginePage() {
       <div className="flex flex-1 min-h-0">
         {/* Left: Engine list */}
         <div className="w-72 lg:w-80 border-r flex flex-col">
-          <div className="px-4 py-3 border-b">
-            <h2 className="text-sm font-medium text-muted-foreground">
-              {tEngine("engineList")} ({filteredEngines.length})
-            </h2>
-          </div>
           <ScrollArea className="flex-1">
-            {isLoading ? (
-              <div className="p-4 text-sm text-muted-foreground">{tCommon("loading")}</div>
-            ) : filteredEngines.length === 0 ? (
-              <div className="p-4 text-sm text-muted-foreground">
-                {searchQuery ? tEngine("noMatchingEngine") : tEngine("noEngines")}
-              </div>
-            ) : (
-              <div className="p-2">
-                {filteredEngines.map((engine) => (
-                  <button
-                    key={engine.id}
-                    onClick={() => setSelectedId(engine.id)}
-                    className={cn(
-                      "w-full text-left rounded-lg px-3 py-2.5 transition-colors",
-                      selectedId === engine.id
-                        ? "bg-primary/10 text-primary"
-                        : "hover:bg-muted"
-                    )}
-                  >
-                    <div className="font-medium text-sm truncate">
-                      {engine.name}
-                    </div>
-                    <div className="text-xs text-muted-foreground mt-0.5">
-                      {tEngine("featuresEnabled", { count: countEnabledFeatures(engine) })}
-                    </div>
-                  </button>
-                ))}
-              </div>
-            )}
+            {/* Preset engines section */}
+            <Collapsible open={presetsOpen} onOpenChange={setPresetsOpen} className="p-2">
+              <CollapsibleTrigger className="flex items-center justify-between w-full px-2 py-2 hover:bg-muted rounded-lg transition-colors">
+                <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1">
+                  {presetsOpen ? (
+                    <ChevronDown className="h-3.5 w-3.5" />
+                  ) : (
+                    <ChevronRight className="h-3.5 w-3.5" />
+                  )}
+                  {tEngine("presetEngines")}
+                </h2>
+                <span className="text-xs text-muted-foreground">{filteredPresetEngines.length}</span>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="mt-1">
+                {filteredPresetEngines.length === 0 ? (
+                  <div className="px-3 py-4 text-sm text-muted-foreground text-center">
+                    {tEngine("noMatchingEngine")}
+                  </div>
+                ) : (
+                  filteredPresetEngines.map((preset) => (
+                    <button
+                      key={preset.id}
+                      onClick={() => handleSelectPreset(preset)}
+                      className={cn(
+                        "w-full text-left rounded-lg px-3 py-2.5 transition-colors",
+                        selection?.type === 'preset' && selection.engine.id === preset.id
+                          ? "bg-primary/10 text-primary"
+                          : "hover:bg-muted"
+                      )}
+                    >
+                      <div className="flex items-center gap-2">
+                        <Lock className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                        <span className="font-medium text-sm truncate">{preset.name}</span>
+                      </div>
+                      <div className="text-xs text-muted-foreground mt-0.5 ml-5.5">
+                        {tEngine("featuresEnabled", { count: preset.enabledFeatures.length })}
+                      </div>
+                    </button>
+                  ))
+                )}
+              </CollapsibleContent>
+            </Collapsible>
+
+            <Separator className="my-2" />
+
+            {/* User engines section */}
+            <Collapsible open={myEnginesOpen} onOpenChange={setMyEnginesOpen} className="p-2">
+              <CollapsibleTrigger className="flex items-center justify-between w-full px-2 py-2 hover:bg-muted rounded-lg transition-colors">
+                <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1">
+                  {myEnginesOpen ? (
+                    <ChevronDown className="h-3.5 w-3.5" />
+                  ) : (
+                    <ChevronRight className="h-3.5 w-3.5" />
+                  )}
+                  {tEngine("myEngines")}
+                </h2>
+                <span className="text-xs text-muted-foreground">{filteredUserEngines.length}</span>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="mt-1">
+                {filteredUserEngines.length === 0 ? (
+                  <div className="px-3 py-4 text-sm text-muted-foreground text-center">
+                    {searchQuery ? tEngine("noMatchingEngine") : tEngine("noEngines")}
+                  </div>
+                ) : (
+                  filteredUserEngines.map((engine) => (
+                    <button
+                      key={engine.id}
+                      onClick={() => handleSelectUserEngine(engine)}
+                      className={cn(
+                        "w-full text-left rounded-lg px-3 py-2.5 transition-colors",
+                        selection?.type === 'user' && selection.engine.id === engine.id
+                          ? "bg-primary/10 text-primary"
+                          : "hover:bg-muted"
+                      )}
+                    >
+                      <div className="flex items-center gap-2">
+                        {engine.isValid === false ? (
+                          <AlertTriangle className="h-3.5 w-3.5 text-amber-500 shrink-0" />
+                        ) : (
+                          <Check className="h-3.5 w-3.5 text-green-500 shrink-0" />
+                        )}
+                        <span className="font-medium text-sm truncate">{engine.name}</span>
+                      </div>
+                      <div className="text-xs text-muted-foreground mt-0.5 ml-5.5">
+                        {engine.isValid === false ? (
+                          <span className="text-amber-500">{tEngine("configNeedsUpdate")}</span>
+                        ) : (
+                          tEngine("featuresEnabled", { count: countEnabledFeatures(engine.configuration) })
+                        )}
+                      </div>
+                    </button>
+                  ))
+                )}
+              </CollapsibleContent>
+            </Collapsible>
           </ScrollArea>
         </div>
 
         {/* Right: Engine details */}
         <div className="flex-1 flex flex-col min-w-0">
-          {selectedEngine && selectedFeatures ? (
+          {selection && selectedFeatures ? (
             <>
               {/* Details header */}
               <div className="px-6 py-4 border-b">
                 <div className="flex items-start gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 shrink-0">
-                    <Settings className="h-5 w-5 text-primary" />
+                  <div className={cn(
+                    "flex h-10 w-10 items-center justify-center rounded-lg shrink-0",
+                    selection.type === 'preset' ? "bg-muted" : "bg-primary/10"
+                  )}>
+                    {selection.type === 'preset' ? (
+                      <Lock className="h-5 w-5 text-muted-foreground" />
+                    ) : (
+                      <Settings className="h-5 w-5 text-primary" />
+                    )}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <h2 className="text-lg font-semibold truncate">
-                      {selectedEngine.name}
-                    </h2>
-                    <p className="text-sm text-muted-foreground mt-0.5">
-                      {tEngine("updatedAt")} {new Date(selectedEngine.updatedAt).toLocaleString()}
-                    </p>
+                    <div className="flex items-center gap-2">
+                      <h2 className="text-lg font-semibold truncate">
+                        {selection.engine.name}
+                      </h2>
+                      {selection.type === 'preset' && (
+                        <Badge variant="secondary" className="text-xs">
+                          {tEngine("preset")}
+                        </Badge>
+                      )}
+                      {selection.type === 'user' && selection.engine.isValid === false && (
+                        <Badge variant="outline" className="text-amber-500 border-amber-500 text-xs">
+                          {tEngine("needsUpdate")}
+                        </Badge>
+                      )}
+                    </div>
+                    {selection.type === 'preset' && selection.engine.description && (
+                      <p className="text-sm text-muted-foreground mt-0.5">
+                        {selection.engine.description}
+                      </p>
+                    )}
+                    {selection.type === 'user' && (
+                      <p className="text-sm text-muted-foreground mt-0.5">
+                        {tEngine("updatedAt")} {new Date(selection.engine.updatedAt).toLocaleString()}
+                      </p>
+                    )}
                   </div>
                   <Badge variant="outline">
-                    {tEngine("featuresCount", { count: countEnabledFeatures(selectedEngine) })}
+                    {tEngine("featuresCount", { 
+                      count: selection.type === 'preset' 
+                        ? selection.engine.enabledFeatures.length 
+                        : countEnabledFeatures(selection.engine.configuration) 
+                    })}
                   </Badge>
                 </div>
               </div>
@@ -263,40 +388,37 @@ export default function ScanEnginePage() {
                 {/* Feature status */}
                 <div className="shrink-0">
                   <h3 className="text-sm font-medium mb-3">{tEngine("enabledFeatures")}</h3>
-                  <div className="rounded-lg border">
-                    <div className="grid grid-cols-3 gap-px bg-muted">
-                      {FEATURE_LIST.map((feature) => {
-                        const enabled = selectedFeatures[feature.key as keyof typeof selectedFeatures]
-                        return (
-                          <div
-                            key={feature.key}
-                            className={cn(
-                              "flex items-center gap-2 px-3 py-2.5 bg-background",
-                              enabled ? "text-foreground" : "text-muted-foreground"
-                            )}
-                          >
-                            {enabled ? (
-                              <Check className="h-4 w-4 text-green-600 shrink-0" />
-                            ) : (
-                              <X className="h-4 w-4 text-muted-foreground/50 shrink-0" />
-                            )}
-                            <span className="text-sm truncate">{tEngine(`features.${feature.key}`)}</span>
-                          </div>
-                        )
-                      })}
-                    </div>
+                  <div className="flex flex-wrap gap-2">
+                    {FEATURE_LIST.map((feature) => {
+                      const enabled = selectedFeatures[feature.key as keyof typeof selectedFeatures]
+                      return (
+                        <Badge
+                          key={feature.key}
+                          variant={enabled ? "default" : "outline"}
+                          className={cn(
+                            "text-xs",
+                            enabled 
+                              ? "bg-primary/10 text-primary hover:bg-primary/10" 
+                              : "text-muted-foreground/50"
+                          )}
+                        >
+                          {enabled && <Check className="h-3 w-3 mr-1" />}
+                          {tEngine(`features.${feature.key}`)}
+                        </Badge>
+                      )
+                    })}
                   </div>
                 </div>
 
                 {/* Configuration preview */}
-                {selectedEngine.configuration && (
+                {(selection.type === 'preset' ? selection.engine.configuration : selection.engine.configuration) && (
                   <div className="flex-1 flex flex-col min-h-0">
                     <h3 className="text-sm font-medium mb-3 shrink-0">{tEngine("configPreview")}</h3>
                     <div className="flex-1 rounded-lg border overflow-hidden min-h-0">
                       <Editor
                         height="100%"
                         defaultLanguage="yaml"
-                        value={selectedEngine.configuration}
+                        value={selection.type === 'preset' ? selection.engine.configuration : selection.engine.configuration}
                         options={{
                           readOnly: true,
                           minimap: { enabled: false },
@@ -315,28 +437,30 @@ export default function ScanEnginePage() {
                 )}
               </div>
 
-              {/* Action buttons */}
-              <div className="px-6 py-4 border-t flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleEdit(selectedEngine)}
-                >
-                  <Pencil className="h-4 w-4 mr-1.5" />
-                  {tEngine("editConfig")}
-                </Button>
-                <div className="flex-1" />
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="text-destructive hover:text-destructive"
-                  onClick={() => handleDelete(selectedEngine)}
-                  disabled={deleteEngineMutation.isPending}
-                >
-                  <Trash2 className="h-4 w-4 mr-1.5" />
-                  {tCommon("actions.delete")}
-                </Button>
-              </div>
+              {/* Action buttons - only show for user engines */}
+              {selection.type === 'user' && (
+                <div className="px-6 py-4 border-t flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleEdit(selection.engine)}
+                  >
+                    <Pencil className="h-4 w-4 mr-1.5" />
+                    {tEngine("editConfig")}
+                  </Button>
+                  <div className="flex-1" />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-destructive hover:text-destructive"
+                    onClick={() => handleDelete(selection.engine)}
+                    disabled={deleteEngineMutation.isPending}
+                  >
+                    <Trash2 className="h-4 w-4 mr-1.5" />
+                    {tCommon("actions.delete")}
+                  </Button>
+                </div>
+              )}
             </>
           ) : (
             // Unselected state
@@ -361,8 +485,12 @@ export default function ScanEnginePage() {
       {/* Create engine dialog */}
       <EngineCreateDialog
         open={isCreateDialogOpen}
-        onOpenChange={setIsCreateDialogOpen}
+        onOpenChange={(open) => {
+          setIsCreateDialogOpen(open)
+          if (!open) setCreateFromPreset(null)
+        }}
         onSave={handleCreateEngine}
+        preSelectedPreset={createFromPreset || undefined}
       />
 
       {/* Delete confirmation dialog */}
@@ -389,4 +517,3 @@ export default function ScanEnginePage() {
     </div>
   )
 }
-

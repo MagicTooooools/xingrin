@@ -24,7 +24,7 @@ export function formatDate(date: string | Date | null | undefined): string {
       second: "2-digit",
       hour12: false,
     }).format(d)
-  } catch (error) {
+  } catch {
     return "-"
   }
 }

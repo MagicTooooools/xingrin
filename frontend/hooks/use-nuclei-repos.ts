@@ -4,7 +4,7 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useToastMessages } from '@/lib/toast-helpers'
-import { getErrorCode } from '@/lib/response-parser'
+import { getErrorCode, getErrorResponseData } from '@/lib/response-parser'
 import { nucleiRepoApi } from "../services/nuclei-repo.api"
 import type { NucleiTemplateTreeNode, NucleiTemplateContent } from "@/types/nuclei.types"
 
@@ -49,8 +49,8 @@ export function useCreateNucleiRepo() {
       toastMessages.success('toast.nucleiRepo.create.success')
       queryClient.invalidateQueries({ queryKey: ["nuclei-repos"] })
     },
-    onError: (error: any) => {
-      toastMessages.errorFromCode(getErrorCode(error?.response?.data), 'toast.nucleiRepo.create.error')
+    onError: (error: unknown) => {
+      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.nucleiRepo.create.error')
     },
   })
 }
@@ -70,8 +70,8 @@ export function useUpdateNucleiRepo() {
       queryClient.invalidateQueries({ queryKey: ["nuclei-repos"] })
       queryClient.invalidateQueries({ queryKey: ["nuclei-repos", variables.id] })
     },
-    onError: (error: any) => {
-      toastMessages.errorFromCode(getErrorCode(error?.response?.data), 'toast.nucleiRepo.update.error')
+    onError: (error: unknown) => {
+      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.nucleiRepo.update.error')
     },
   })
 }
@@ -87,8 +87,8 @@ export function useDeleteNucleiRepo() {
       toastMessages.success('toast.nucleiRepo.delete.success')
       queryClient.invalidateQueries({ queryKey: ["nuclei-repos"] })
     },
-    onError: (error: any) => {
-      toastMessages.errorFromCode(getErrorCode(error?.response?.data), 'toast.nucleiRepo.delete.error')
+    onError: (error: unknown) => {
+      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.nucleiRepo.delete.error')
     },
   })
 }
@@ -108,8 +108,8 @@ export function useRefreshNucleiRepo() {
       queryClient.invalidateQueries({ queryKey: ["nuclei-repos", repoId] })
       queryClient.invalidateQueries({ queryKey: ["nuclei-repo-tree", repoId] })
     },
-    onError: (error: any) => {
-      toastMessages.errorFromCode(getErrorCode(error?.response?.data), 'toast.nucleiRepo.sync.error')
+    onError: (error: unknown) => {
+      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.nucleiRepo.sync.error')
     },
   })
 }

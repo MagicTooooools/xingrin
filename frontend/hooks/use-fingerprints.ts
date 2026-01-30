@@ -4,7 +4,9 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { FingerprintService } from "@/services/fingerprint.service"
-import type { EholeFingerprint, GobyFingerprint, WappalyzerFingerprint, FingersFingerprint, FingerPrintHubFingerprint, ARLFingerprint, FingerprintStats } from "@/types/fingerprint.types"
+import type { EholeFingerprint, GobyFingerprint, WappalyzerFingerprint, FingersFingerprint, FingerPrintHubFingerprint, ARLFingerprint } from "@/types/fingerprint.types"
+
+type FingerprintListParams = { page?: number; pageSize?: number; filter?: string }
 
 // Query Keys
 export const fingerprintKeys = {
@@ -12,32 +14,32 @@ export const fingerprintKeys = {
   stats: () => [...fingerprintKeys.all, "stats"] as const,
   ehole: {
     all: () => [...fingerprintKeys.all, "ehole"] as const,
-    list: (params: any) => [...fingerprintKeys.ehole.all(), "list", params] as const,
+    list: (params: FingerprintListParams) => [...fingerprintKeys.ehole.all(), "list", params] as const,
     detail: (id: number) => [...fingerprintKeys.ehole.all(), "detail", id] as const,
   },
   goby: {
     all: () => [...fingerprintKeys.all, "goby"] as const,
-    list: (params: any) => [...fingerprintKeys.goby.all(), "list", params] as const,
+    list: (params: FingerprintListParams) => [...fingerprintKeys.goby.all(), "list", params] as const,
     detail: (id: number) => [...fingerprintKeys.goby.all(), "detail", id] as const,
   },
   wappalyzer: {
     all: () => [...fingerprintKeys.all, "wappalyzer"] as const,
-    list: (params: any) => [...fingerprintKeys.wappalyzer.all(), "list", params] as const,
+    list: (params: FingerprintListParams) => [...fingerprintKeys.wappalyzer.all(), "list", params] as const,
     detail: (id: number) => [...fingerprintKeys.wappalyzer.all(), "detail", id] as const,
   },
   fingers: {
     all: () => [...fingerprintKeys.all, "fingers"] as const,
-    list: (params: any) => [...fingerprintKeys.fingers.all(), "list", params] as const,
+    list: (params: FingerprintListParams) => [...fingerprintKeys.fingers.all(), "list", params] as const,
     detail: (id: number) => [...fingerprintKeys.fingers.all(), "detail", id] as const,
   },
   fingerprinthub: {
     all: () => [...fingerprintKeys.all, "fingerprinthub"] as const,
-    list: (params: any) => [...fingerprintKeys.fingerprinthub.all(), "list", params] as const,
+    list: (params: FingerprintListParams) => [...fingerprintKeys.fingerprinthub.all(), "list", params] as const,
     detail: (id: number) => [...fingerprintKeys.fingerprinthub.all(), "detail", id] as const,
   },
   arl: {
     all: () => [...fingerprintKeys.all, "arl"] as const,
-    list: (params: any) => [...fingerprintKeys.arl.all(), "list", params] as const,
+    list: (params: FingerprintListParams) => [...fingerprintKeys.arl.all(), "list", params] as const,
     detail: (id: number) => [...fingerprintKeys.arl.all(), "detail", id] as const,
   },
 }

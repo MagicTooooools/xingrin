@@ -58,7 +58,7 @@ export class EndpointValidator {
     let parsedUrl: URL
     try {
       parsedUrl = new URL(trimmedUrl)
-    } catch (error) {
+    } catch {
       return {
         isValid: false,
         error: 'Invalid Endpoint format, cannot parse'

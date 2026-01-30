@@ -31,6 +31,7 @@ function ShieldLoader({ size = "md", className }: ShieldLoaderProps) {
       <div className="shield-loader__ring shield-loader__ring--s3" />
       <div className="shield-loader__ring shield-loader__ring--s2" />
       <div className="shield-loader__ring shield-loader__ring--s1" />
+      {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         className="shield-loader__logo"
         src="/images/icon-256.png"

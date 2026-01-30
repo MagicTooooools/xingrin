@@ -7,7 +7,7 @@ import { DataTableColumnHeader } from "@/components/ui/data-table/column-header"
 import { ExpandableCell, ExpandableMonoCell } from "@/components/ui/data-table/expandable-cell"
 import { ChevronDown, ChevronUp } from "lucide-react"
 import { useTranslations } from "next-intl"
-import type { GobyFingerprint } from "@/types/fingerprint.types"
+import type { GobyFingerprint, GobyRule } from "@/types/fingerprint.types"
 
 interface ColumnOptions {
   formatDate: (date: string) => string
@@ -16,7 +16,7 @@ interface ColumnOptions {
 /**
  * Rule details cell component - displays raw JSON data
  */
-function RuleDetailsCell({ rules }: { rules: any[] }) {
+function RuleDetailsCell({ rules }: { rules: GobyRule[] }) {
   const t = useTranslations("tooltips")
   const [expanded, setExpanded] = React.useState(false)
   
@@ -118,7 +118,7 @@ export function createGobyFingerprintColumns({
         <DataTableColumnHeader column={column} title="Rules" />
       ),
       cell: ({ row }) => {
-        const rules = row.getValue("rule") as any[]
+        const rules = row.getValue("rule") as GobyRule[]
         return <span>{rules?.length || 0}</span>
       },
       enableResizing: false,

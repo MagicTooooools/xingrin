@@ -70,7 +70,7 @@ export function DashboardScanHistory() {
   const formatDate = React.useCallback((dateString: string) => new Date(dateString).toLocaleString(getDateLocale(locale), { hour12: false }), [locale])
   const navigate = React.useCallback((path: string) => router.push(path), [router])
   const handleDelete = React.useCallback(() => {}, [])
-  const handleStop = React.useCallback((scan: ScanRecord) => {
+  const handleStop = React.useCallback(() => {
     // 仪表盘列表暂时不提供停止逻辑，实现时可在此调用对应的停止扫描接口
   }, [])
 

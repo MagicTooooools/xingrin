@@ -12,7 +12,7 @@ import { useSystemLogs, useLogFiles } from "@/hooks/use-system-logs"
 import { LogToolbar, type LogLevel } from "./log-toolbar"
 import { AnsiLogViewer } from "./ansi-log-viewer"
 
-const DEFAULT_FILE = "orbit.log"
+const DEFAULT_FILE = "lunafox.log"
 const DEFAULT_LINES = 500
 
 export function SystemLogsView() {
@@ -62,7 +62,7 @@ export function SystemLogsView() {
     a.download = selectedFile
     document.body.appendChild(a)
     a.click()
-    document.body.removeChild(a)
+    a.remove()
     URL.revokeObjectURL(url)
   }, [content, selectedFile])
 

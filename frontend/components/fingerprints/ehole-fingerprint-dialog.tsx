@@ -112,6 +112,9 @@ export function EholeFingerprintDialog({
     }
   }, [fingerprint, reset])
 
+  const getErrorMessage = (error: unknown): string =>
+    error instanceof Error ? error.message : ""
+
   const onSubmit = async (data: FormData) => {
     const keywordArray = data.keyword
       .split(",")
@@ -142,8 +145,8 @@ export function EholeFingerprintDialog({
       }
       onOpenChange(false)
       onSuccess?.()
-    } catch (error: any) {
-      toast.error(error.message || (isEdit ? t("toast.updateFailed") : t("toast.createFailed")))
+    } catch (error) {
+      toast.error(getErrorMessage(error) || (isEdit ? t("toast.updateFailed") : t("toast.createFailed")))
     }
   }
 

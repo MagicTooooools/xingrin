@@ -20,7 +20,7 @@ import { cn } from "@/lib/utils"
 import { useUpdateScheduledScan } from "@/hooks/use-scheduled-scans"
 import { useTargets } from "@/hooks/use-targets"
 import { useEngines } from "@/hooks/use-engines"
-import { useTranslations, useLocale } from "next-intl"
+import { useTranslations } from "next-intl"
 import type { ScheduledScan, UpdateScheduledScanRequest } from "@/types/scheduled-scan.types"
 import type { ScanEngine } from "@/types/engine.types"
 import type { Target } from "@/types/target.types"
@@ -42,8 +42,6 @@ export function EditScheduledScanDialog({
   const { data: targetsData } = useTargets()
   const { data: enginesData } = useEngines()
   const t = useTranslations("scan.scheduled")
-  const tCommon = useTranslations("common")
-  const locale = useLocale()
 
   const CRON_PRESETS = [
     { label: t("presets.everyMinute"), value: "* * * * *" },

@@ -41,7 +41,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     title: t('title'),
     description: t('description'),
     keywords: t('keywords').split(',').map(k => k.trim()),
-    generator: "Orbit ASM Platform",
+    generator: "LunaFox ASM Platform",
     authors: [{ name: "yyhuni" }],
     icons: {
       icon: [
@@ -324,7 +324,8 @@ export default async function LocaleLayout({
             <div className="center">
               <div className="logo-container">
                 <div className="logo-spinner"></div>
-                <img className="logo" src="/images/icon-256.png" alt="" />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img className="logo" src="/images/icon-256.png" alt="" />
               </div>
               <h1 className="title">
                 <span className="title-luna">Luna</span>

@@ -148,7 +148,7 @@ export function IPAddressesView({
       a.download = `${prefix}-ip-addresses-${Date.now()}.csv`
       document.body.appendChild(a)
       a.click()
-      document.body.removeChild(a)
+      a.remove()
       URL.revokeObjectURL(url)
     } catch (error) {
       console.error("Failed to download IP address list", error)
@@ -230,7 +230,7 @@ export function IPAddressesView({
       a.download = `${prefix}-ip-addresses-selected-${Date.now()}.csv`
       document.body.appendChild(a)
       a.click()
-      document.body.removeChild(a)
+      a.remove()
       URL.revokeObjectURL(url)
     } catch (error) {
       console.error("Failed to download selected IP addresses", error)

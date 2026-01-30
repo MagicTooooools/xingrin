@@ -1,5 +1,6 @@
 import { api } from "@/lib/api-client"
 import type { Organization, OrganizationsResponse } from "@/types/organization.types"
+import type { TargetsResponse } from "@/types/target.types"
 import { USE_MOCK, mockDelay, getMockOrganizations, mockOrganizations } from '@/mock'
 
 
@@ -58,8 +59,8 @@ export class OrganizationService {
     pageSize?: number
     search?: string
     type?: string
-  }): Promise<any> {
-    const response = await api.get<any>(
+  }): Promise<TargetsResponse> {
+    const response = await api.get<TargetsResponse>(
       `/organizations/${id}/targets/`,
       { params }
     )

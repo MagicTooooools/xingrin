@@ -1,6 +1,8 @@
 "use client"
 
 import { useState, useEffect, useRef, useCallback } from "react"
+import type { Terminal } from "@xterm/xterm"
+import type { FitAddon } from "@xterm/addon-fit"
 import { useTranslations } from "next-intl"
 import {
   Dialog,
@@ -16,7 +18,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { Button } from "@/components/ui/button"
 import { IconRocket, IconEye, IconTrash, IconRefresh } from "@tabler/icons-react"
 import type { WorkerNode } from "@/types/worker.types"
 
@@ -52,7 +53,7 @@ export function DeployTerminalDialog({
   const tCommon = useTranslations("common.actions")
   const tTerminal = useTranslations("settings.workers.terminal")
   const [isConnected, setIsConnected] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [, setError] = useState<string | null>(null)
   // Local worker state for real-time button display updates
   const [localStatus, setLocalStatus] = useState<string | null>(null)
   const [uninstallDialogOpen, setUninstallDialogOpen] = useState(false)
@@ -60,53 +61,9 @@ export function DeployTerminalDialog({
   // Use local state or passed worker state
   const currentStatus = localStatus || worker?.status
   const terminalRef = useRef<HTMLDivElement>(null)
-  const terminalInstanceRef = useRef<any>(null)
-  const fitAddonRef = useRef<any>(null)
+  const terminalInstanceRef = useRef<Terminal | null>(null)
+  const fitAddonRef = useRef<FitAddon | null>(null)
   const wsRef = useRef<WebSocket | null>(null)
-
-  // Initialize xterm
-  const initTerminal = useCallback(async () => {
-    if (!terminalRef.current || terminalInstanceRef.current) return
-    
-    const { Terminal } = await import('@xterm/xterm')
-    const { FitAddon } = await import('@xterm/addon-fit')
-    const { WebLinksAddon } = await import('@xterm/addon-web-links')
-    
-    const terminal = new Terminal({
-      cursorBlink: true,
-      fontSize: 12, // Reduced font size
-      fontFamily: 'Menlo, Monaco, "Courier New", monospace',
-      theme: {
-        background: '#1a1b26',
-        foreground: '#a9b1d6',
-        cursor: '#c0caf5',
-        black: '#32344a',
-        red: '#f7768e',
-        green: '#9ece6a',
-        yellow: '#e0af68',
-        blue: '#7aa2f7',
-        magenta: '#ad8ee6',
-        cyan: '#449dab',
-        white: '#787c99',
-      },
-    })
-    
-    const fitAddon = new FitAddon()
-    terminal.loadAddon(fitAddon)
-    terminal.loadAddon(new WebLinksAddon())
-    
-    terminal.open(terminalRef.current)
-    fitAddon.fit()
-    
-    terminalInstanceRef.current = terminal
-    fitAddonRef.current = fitAddon
-    
-    // Show connection prompt
-    terminal.writeln(`\x1b[90m${tTerminal("connecting")}\x1b[0m`)
-
-    // Auto-connect WebSocket
-    connectWs()
-  }, [worker])
 
   // Manage window resize listener separately for proper cleanup
   useEffect(() => {
@@ -119,7 +76,7 @@ export function DeployTerminalDialog({
     return () => {
       window.removeEventListener('resize', handleResize)
     }
-  }, [fitAddonRef.current])
+  }, [open, worker])
 
   // Connect WebSocket
   const connectWs = useCallback(() => {
@@ -189,7 +146,51 @@ export function DeployTerminalDialog({
       terminal.writeln(`\x1b[31m✗ ${tTerminal("wsConnectionFailed")}\x1b[0m`)
       setError(tTerminal("connectionFailed"))
     }
-  }, [worker, onDeployComplete])
+  }, [worker, onDeployComplete, tTerminal])
+
+  // Initialize xterm
+  const initTerminal = useCallback(async () => {
+    if (!terminalRef.current || terminalInstanceRef.current) return
+    
+    const { Terminal } = await import('@xterm/xterm')
+    const { FitAddon } = await import('@xterm/addon-fit')
+    const { WebLinksAddon } = await import('@xterm/addon-web-links')
+    
+    const terminal = new Terminal({
+      cursorBlink: true,
+      fontSize: 12, // Reduced font size
+      fontFamily: 'Menlo, Monaco, "Courier New", monospace',
+      theme: {
+        background: '#1a1b26',
+        foreground: '#a9b1d6',
+        cursor: '#c0caf5',
+        black: '#32344a',
+        red: '#f7768e',
+        green: '#9ece6a',
+        yellow: '#e0af68',
+        blue: '#7aa2f7',
+        magenta: '#ad8ee6',
+        cyan: '#449dab',
+        white: '#787c99',
+      },
+    })
+    
+    const fitAddon = new FitAddon()
+    terminal.loadAddon(fitAddon)
+    terminal.loadAddon(new WebLinksAddon())
+    
+    terminal.open(terminalRef.current)
+    fitAddon.fit()
+    
+    terminalInstanceRef.current = terminal
+    fitAddonRef.current = fitAddon
+    
+    // Show connection prompt
+    terminal.writeln(`\x1b[90m${tTerminal("connecting")}\x1b[0m`)
+
+    // Auto-connect WebSocket
+    connectWs()
+  }, [connectWs, tTerminal])
 
   // Send terminal size change
   useEffect(() => {

@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo } from "react"
+import { useMemo, useCallback } from "react"
 import { useFormatter } from "next-intl"
 import type { ColumnDef } from "@tanstack/react-table"
 import { Badge } from "@/components/ui/badge"
@@ -17,7 +17,7 @@ interface SearchResultsTableProps {
 export function SearchResultsTable({ results, assetType }: SearchResultsTableProps) {
   const format = useFormatter()
 
-  const formatDate = (dateString: string) => {
+  const formatDate = useCallback((dateString: string) => {
     return format.dateTime(new Date(dateString), {
       year: 'numeric',
       month: '2-digit',
@@ -25,7 +25,7 @@ export function SearchResultsTable({ results, assetType }: SearchResultsTablePro
       hour: '2-digit',
       minute: '2-digit',
     })
-  }
+  }, [format])
 
   // 基础列定义（Website 和 Endpoint 共用）
   const baseColumns: ColumnDef<SearchResult, unknown>[] = useMemo(() => [

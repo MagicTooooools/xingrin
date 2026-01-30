@@ -1,6 +1,5 @@
 import { api } from "@/lib/api-client"
 import type {
-  Command,
   GetCommandsRequest,
   GetCommandsResponse,
   CreateCommandRequest,

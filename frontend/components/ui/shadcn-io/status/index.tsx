@@ -18,7 +18,7 @@ export const Status = ({ className, status, ...props }: StatusProps) => (
   <Badge
     className={cn('flex items-center gap-2', 'group', status, statusStyles[status], className)}
     variant="outline"
-    {...(props as any)}
+    {...props}
   />
 );
 
@@ -28,7 +28,7 @@ export const StatusIndicator = ({
   className,
   ...props
 }: StatusIndicatorProps) => (
-  <span className={cn('relative flex h-2 w-2', className)} {...(props as any)}>
+  <span className={cn('relative flex h-2 w-2', className)} {...props}>
     <span
       className={cn(
         'absolute inline-flex h-full w-full animate-ping rounded-full opacity-75',
@@ -57,7 +57,7 @@ export const StatusLabel = ({
   children,
   ...props
 }: StatusLabelProps) => (
-  <span className={cn(className)} {...(props as any)}>
+  <span className={cn(className)} {...props}>
     {children ?? (
       <>
         <span className="hidden group-[.online]:block">Online</span>

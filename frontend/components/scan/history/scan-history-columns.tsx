@@ -568,7 +568,7 @@ export const createScanHistoryColumns = ({
 
   // Filter out target column if hideTargetColumn is true
   if (hideTargetColumn) {
-    return columns.filter(col => (col as any).accessorKey !== 'target')
+    return columns.filter((col) => (col as { accessorKey?: string }).accessorKey !== 'target')
   }
 
   return columns

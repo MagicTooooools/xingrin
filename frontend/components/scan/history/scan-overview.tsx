@@ -37,7 +37,7 @@ import { useScan } from "@/hooks/use-scans"
 import { useScanLogs } from "@/hooks/use-scan-logs"
 import { ScanLogList } from "@/components/scan/scan-log-list"
 import { cn } from "@/lib/utils"
-import type { StageStatus } from "@/types/scan.types"
+import type { ScanRecord, ScanStatus, StageProgressItem, StageStatus } from "@/types/scan.types"
 
 // Dynamic import for YamlEditor (only loaded when config tab is active)
 const YamlEditor = dynamic(() => import('@/components/ui/yaml-editor').then(m => ({ default: m.YamlEditor })), {
@@ -168,6 +168,32 @@ export function ScanOverview({ scanId }: ScanOverviewProps) {
 
   const { data: scan, isLoading, error } = useScan(scanId)
 
+  type LegacyVulnerabilitySummary = {
+    total?: number
+    critical?: number
+    high?: number
+    medium?: number
+    low?: number
+  }
+
+  type LegacyScanSummary = {
+    subdomains?: number
+    websites?: number
+    endpoints?: number
+    ips?: number
+    directories?: number
+    screenshots?: number
+    vulnerabilities?: LegacyVulnerabilitySummary
+  }
+
+  type ScanRecordWithLegacy = ScanRecord & {
+    summary?: LegacyScanSummary
+    startedAt?: string
+    completedAt?: string
+  }
+
+  const scanWithLegacy = scan as ScanRecordWithLegacy | undefined
+
   // Memoize isRunning to avoid unnecessary recalculations
   const isRunning = React.useMemo(
     () => scan?.status === 'running' || scan?.status === 'pending',
@@ -187,72 +213,45 @@ export function ScanOverview({ scanId }: ScanOverviewProps) {
     pollingInterval: isRunning && autoRefresh ? 3000 : 0,
   })
 
-  if (isLoading) {
-    return (
-      <div className="space-y-6">
-        {/* Stats cards skeleton */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {[...Array(6)].map((_, i) => (
-            <Card key={i}>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <Skeleton className="h-4 w-24" />
-                <Skeleton className="h-4 w-4" />
-              </CardHeader>
-              <CardContent>
-                <Skeleton className="h-8 w-16" />
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </div>
-    )
-  }
-
-  if (error || !scan) {
-    return (
-      <div className="flex flex-col items-center justify-center py-12">
-        <AlertTriangle className="h-10 w-10 text-destructive mb-4" />
-        <p className="text-muted-foreground">{t("loadError")}</p>
-      </div>
-    )
-  }
-
   // Memoize derived values to avoid unnecessary recalculations
   const summary = React.useMemo(() => {
-    const scanAny = scan as any
-    const stats = scan.cachedStats || scanAny.summary || {}
+    const stats = scan?.cachedStats
+    const legacy = scanWithLegacy?.summary
     return {
-      subdomains: stats.subdomainsCount ?? stats.subdomains ?? 0,
-      websites: stats.websitesCount ?? stats.websites ?? 0,
-      endpoints: stats.endpointsCount ?? stats.endpoints ?? 0,
-      ips: stats.ipsCount ?? stats.ips ?? 0,
-      directories: stats.directoriesCount ?? stats.directories ?? 0,
-      screenshots: stats.screenshotsCount ?? stats.screenshots ?? 0,
+      subdomains: stats?.subdomainsCount ?? legacy?.subdomains ?? 0,
+      websites: stats?.websitesCount ?? legacy?.websites ?? 0,
+      endpoints: stats?.endpointsCount ?? legacy?.endpoints ?? 0,
+      ips: stats?.ipsCount ?? legacy?.ips ?? 0,
+      directories: stats?.directoriesCount ?? legacy?.directories ?? 0,
+      screenshots: stats?.screenshotsCount ?? legacy?.screenshots ?? 0,
     }
-  }, [scan])
+  }, [scan, scanWithLegacy])
 
   const vulnSummary = React.useMemo(() => {
-    const scanAny = scan as any
-    const stats = scan.cachedStats || scanAny.summary || {}
-    return stats.vulnerabilities || {
-      total: stats.vulnsTotal ?? 0,
-      critical: stats.vulnsCritical ?? 0,
-      high: stats.vulnsHigh ?? 0,
-      medium: stats.vulnsMedium ?? 0,
-      low: stats.vulnsLow ?? 0,
-    }
-  }, [scan])
+    const stats = scan?.cachedStats
+    const legacy = scanWithLegacy?.summary
+    return (
+      legacy?.vulnerabilities || {
+        total: stats?.vulnsTotal ?? 0,
+        critical: stats?.vulnsCritical ?? 0,
+        high: stats?.vulnsHigh ?? 0,
+        medium: stats?.vulnsMedium ?? 0,
+        low: stats?.vulnsLow ?? 0,
+      }
+    )
+  }, [scan, scanWithLegacy])
 
-  const statusIconConfig = React.useMemo(() => getStatusIcon(scan.status), [scan.status])
+  const status = (scan?.status ?? "pending") as ScanStatus
+  const statusIconConfig = React.useMemo(() => getStatusIcon(status), [status])
   const StatusIcon = statusIconConfig.icon
-  const statusStyle = SCAN_STATUS_STYLES[scan.status] || "bg-muted text-muted-foreground"
-  const targetId = scan.targetId
-  const targetName = scan.target?.name
-  const startedAt = React.useMemo(() => {
-    const scanAny = scan as any
-    return scanAny.startedAt || scan.createdAt
-  }, [scan])
-  const completedAt = React.useMemo(() => (scan as any).completedAt, [scan])
+  const statusStyle = SCAN_STATUS_STYLES[status] || "bg-muted text-muted-foreground"
+  const targetId = scan?.targetId
+  const targetName = scan?.target?.name
+  const startedAt = React.useMemo(
+    () => scanWithLegacy?.startedAt || scan?.createdAt,
+    [scan, scanWithLegacy]
+  )
+  const completedAt = React.useMemo(() => scanWithLegacy?.completedAt, [scanWithLegacy])
 
   const assetCards = React.useMemo(
     () => [
@@ -289,6 +288,36 @@ export function ScanOverview({ scanId }: ScanOverviewProps) {
     ],
     [summary, scanId, t]
   )
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        {/* Stats cards skeleton */}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {[...Array(6)].map((_, i) => (
+            <Card key={i}>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-4 w-4" />
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-8 w-16" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  if (error || !scan) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12">
+        <AlertTriangle className="h-10 w-10 text-destructive mb-4" />
+        <p className="text-muted-foreground">{t("loadError")}</p>
+      </div>
+    )
+  }
 
   return (
     <div className="flex flex-col gap-6 flex-1 min-h-0">
@@ -367,7 +396,7 @@ export function ScanOverview({ scanId }: ScanOverviewProps) {
               <CardTitle className="text-sm font-medium">{t("stagesTitle")}</CardTitle>
               {scan.stageProgress && (
                 <span className="text-xs text-muted-foreground">
-                  {Object.values(scan.stageProgress).filter((p: any) => p.status === "completed").length}/
+                  {Object.values(scan.stageProgress).filter((p) => p.status === "completed").length}/
                   {Object.keys(scan.stageProgress).length} {t("stagesCompleted")}
                 </span>
               )}
@@ -375,19 +404,16 @@ export function ScanOverview({ scanId }: ScanOverviewProps) {
             <CardContent className="pt-0 flex flex-col flex-1 min-h-0">
               {scan.stageProgress && Object.keys(scan.stageProgress).length > 0 ? (
                 <div className="space-y-1 flex-1 min-h-0 overflow-y-auto pr-1">
-                  {Object.entries(scan.stageProgress)
+                  {(Object.entries(scan.stageProgress) as Array<[string, StageProgressItem]>)
                     .toSorted(([, a], [, b]) => {
-                      const progressA = a as any
-                      const progressB = b as any
-                      const priorityA = STAGE_STATUS_PRIORITY[progressA.status as StageStatus] ?? 99
-                      const priorityB = STAGE_STATUS_PRIORITY[progressB.status as StageStatus] ?? 99
+                      const priorityA = STAGE_STATUS_PRIORITY[a.status as StageStatus] ?? 99
+                      const priorityB = STAGE_STATUS_PRIORITY[b.status as StageStatus] ?? 99
                       if (priorityA !== priorityB) {
                         return priorityA - priorityB
                       }
-                      return (progressA.order ?? 0) - (progressB.order ?? 0)
+                      return (a.order ?? 0) - (b.order ?? 0)
                     })
-                    .map(([stageName, progress]) => {
-                      const stageProgress = progress as any
+                    .map(([stageName, stageProgress]) => {
                       const isRunning = stageProgress.status === "running"
                       return (
                         <div
@@ -453,7 +479,7 @@ export function ScanOverview({ scanId }: ScanOverviewProps) {
                     <span className="text-sm font-medium">{vulnSummary.low}</span>
                   </div>
                   <span className="text-xs text-muted-foreground ml-auto">
-                    {t("totalVulns", { count: vulnSummary.total })}
+                    {t("totalVulns", { count: vulnSummary.total ?? 0 })}
                   </span>
                 </div>
               </CardContent>

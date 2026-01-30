@@ -8,7 +8,7 @@ import type {
   Command,
 } from "@/types/command.types"
 import { useToastMessages } from '@/lib/toast-helpers'
-import { getErrorCode } from '@/lib/response-parser'
+import { getErrorCode, getErrorResponseData } from '@/lib/response-parser'
 
 // Mock data
 const MOCK_COMMANDS: Command[] = [
@@ -282,9 +282,9 @@ export function useCreateCommand() {
       toastMessages.success('toast.command.create.success')
       queryClient.invalidateQueries({ queryKey: ["commands"] })
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       console.error("Failed to create command:", error)
-      toastMessages.errorFromCode(getErrorCode(error?.response?.data), 'toast.command.create.error')
+      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.command.create.error')
     },
   })
 }
@@ -304,9 +304,9 @@ export function useUpdateCommand() {
       queryClient.invalidateQueries({ queryKey: ["commands"] })
       queryClient.invalidateQueries({ queryKey: ["command"] })
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       console.error("Failed to update command:", error)
-      toastMessages.errorFromCode(getErrorCode(error?.response?.data), 'toast.command.update.error')
+      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.command.update.error')
     },
   })
 }
@@ -324,9 +324,9 @@ export function useDeleteCommand() {
       toastMessages.success('toast.command.delete.success')
       queryClient.invalidateQueries({ queryKey: ["commands"] })
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       console.error("Failed to delete command:", error)
-      toastMessages.errorFromCode(getErrorCode(error?.response?.data), 'toast.command.delete.error')
+      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.command.delete.error')
     },
   })
 }
@@ -357,9 +357,9 @@ export function useBatchDeleteCommands() {
       toastMessages.success('toast.command.delete.bulkSuccess', { count: response.deletedCount || 0 })
       queryClient.invalidateQueries({ queryKey: ["commands"] })
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       console.error("Failed to batch delete commands:", error)
-      toastMessages.errorFromCode(getErrorCode(error?.response?.data), 'toast.command.delete.error')
+      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.command.delete.error')
     },
   })
 }

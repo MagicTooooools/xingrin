@@ -2,7 +2,6 @@
 
 import React, { useState, useMemo } from "react"
 import { AlertTriangle } from "lucide-react"
-import { useRouter } from "next/navigation"
 import { useTranslations, useLocale } from "next-intl"
 import { useTarget } from "@/hooks/use-targets"
 import {
@@ -109,7 +108,7 @@ export function SubdomainsDetailView({
   const { data: targetData } = useTarget(targetId || 0)
 
   // Helper function - format date
-  const formatDate = (dateString: string): string => {
+  const formatDate = React.useCallback((dateString: string): string => {
     return new Date(dateString).toLocaleString(getDateLocale(locale), {
       year: "numeric",
       month: "numeric",
@@ -119,13 +118,7 @@ export function SubdomainsDetailView({
       second: "2-digit",
       hour12: false,
     })
-  }
-
-  // Navigation function
-  const router = useRouter()
-  const navigate = (path: string) => {
-    router.push(path)
-  }
+  }, [locale])
 
   // Handle pagination change
   const handlePaginationChange = (newPagination: { pageIndex: number; pageSize: number }) => {
@@ -196,7 +189,7 @@ export function SubdomainsDetailView({
       a.download = `${prefix}-subdomains-${Date.now()}.csv`
       document.body.appendChild(a)
       a.click()
-      document.body.removeChild(a)
+      a.remove()
       URL.revokeObjectURL(url)
     } catch (error) {
       console.error("Failed to download subdomains", error)
@@ -216,7 +209,7 @@ export function SubdomainsDetailView({
     a.download = `subdomains-selected-${scanId ?? targetId ?? "all"}-${Date.now()}.csv`
     document.body.appendChild(a)
     a.click()
-    document.body.removeChild(a)
+    a.remove()
     URL.revokeObjectURL(url)
   }
 
@@ -254,7 +247,7 @@ export function SubdomainsDetailView({
   // Note: Backend uses djangorestframework-camel-case to automatically convert field names to camelCase
   const subdomains: Subdomain[] = useMemo(() => {
     if (!subdomainsData?.results) return []
-    return subdomainsData.results.map((item: any) => ({
+    return subdomainsData.results.map((item) => ({
       id: item.id,
       name: item.name,
       createdAt: item.createdAt,  // Created time (already converted to camelCase by backend)

@@ -1,5 +1,6 @@
 import { api } from "@/lib/api-client"
-import type { Subdomain, GetSubdomainsParams, GetSubdomainsResponse, GetAllSubdomainsParams, GetAllSubdomainsResponse, GetSubdomainByIDResponse, BatchCreateSubdomainsResponse } from "@/types/subdomain.types"
+import type { Subdomain, GetSubdomainsResponse, GetAllSubdomainsParams, GetAllSubdomainsResponse, GetSubdomainByIDResponse, BatchCreateSubdomainsResponse } from "@/types/subdomain.types"
+import type { PaginatedResponse } from "@/types/api-response.types"
 import { USE_MOCK, mockDelay, getMockSubdomains, getMockSubdomainById } from '@/mock'
 
 // Bulk create subdomains response type
@@ -10,6 +11,25 @@ export interface BulkCreateSubdomainsResponse {
   invalidCount: number
   mismatchedCount: number
   totalReceived: number
+}
+
+type BasicSubdomainResult = {
+  id: number
+  name: string
+  createdAt: string
+}
+
+type ScanSubdomainResult = BasicSubdomainResult & {
+  cname: string[]
+  isCdn: boolean
+  cdnName: string
+  ports: Array<{
+    number: number
+    serviceName: string
+    description: string
+    isUncommon: boolean
+  }>
+  ipAddresses: string[]
 }
 
 export class SubdomainService {
@@ -67,7 +87,7 @@ export class SubdomainService {
     name?: string
     description?: string
   }): Promise<Subdomain> {
-    const requestBody: any = {}
+    const requestBody: { name?: string; description?: string } = {}
     if (data.name !== undefined) requestBody.name = data.name
     if (data.description !== undefined) requestBody.description = data.description
     const response = await api.patch<Subdomain>(`/domains/${data.id}/`, requestBody)
@@ -140,7 +160,7 @@ export class SubdomainService {
     successCount: number
     failedCount: number
   }> {
-    const response = await api.post<any>(
+    const response = await api.post<{ message: string; successCount: number; failedCount: number }>(
       `/organizations/${data.organizationId}/domains/batch-remove/`,
       {
         domainIds: data.domainIds, // Interceptor converts to domain_ids
@@ -192,8 +212,8 @@ export class SubdomainService {
       pageSize?: number
       filter?: string
     }
-  ): Promise<any> {
-    const response = await api.get(`/targets/${targetId}/subdomains/`, {
+  ): Promise<PaginatedResponse<BasicSubdomainResult>> {
+    const response = await api.get<PaginatedResponse<BasicSubdomainResult>>(`/targets/${targetId}/subdomains/`, {
       params: {
         page: params?.page || 1,
         pageSize: params?.pageSize || 10,
@@ -211,35 +231,15 @@ export class SubdomainService {
       pageSize?: number
       filter?: string
     }
-  ): Promise<{
-    results: Array<{
-      id: number
-      name: string
-      createdAt: string  // Backend automatically converts to camelCase
-      cname: string[]
-      isCdn: boolean     // Backend automatically converts to camelCase
-      cdnName: string    // Backend automatically converts to camelCase
-      ports: Array<{
-        number: number
-        serviceName: string
-        description: string
-        isUncommon: boolean
-      }>
-      ipAddresses: string[]  // IP address list
-    }>
-    total: number
-    page: number
-    pageSize: number     // Backend automatically converts to camelCase
-    totalPages: number   // Backend automatically converts to camelCase
-  }> {
-    const response = await api.get(`/scans/${scanId}/subdomains/`, {
+  ): Promise<PaginatedResponse<ScanSubdomainResult>> {
+    const response = await api.get<PaginatedResponse<ScanSubdomainResult>>(`/scans/${scanId}/subdomains/`, {
       params: {
         page: params?.page || 1,
         pageSize: params?.pageSize || 10,
         ...(params?.filter && { filter: params.filter }),
       }
     })
-    return response.data as any
+    return response.data
   }
 
   /** Export all subdomain names by target (text file, one per line) */

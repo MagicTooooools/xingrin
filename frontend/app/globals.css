@@ -434,7 +434,7 @@
 }
 
 /* 登录页 - Glitch Reveal（全屏开场） - 增强版赛博朋克风格 */
-@keyframes orbit-splash-jitter {
+@keyframes lunafox-splash-jitter {
   0%,
   100% {
     transform: translate3d(0, 0, 0);
@@ -462,7 +462,7 @@
   }
 }
 
-@keyframes orbit-splash-noise {
+@keyframes lunafox-splash-noise {
   0% {
     transform: translate3d(-2%, -2%, 0);
     opacity: 0.22;
@@ -485,7 +485,7 @@
   }
 }
 
-@keyframes orbit-splash-sweep {
+@keyframes lunafox-splash-sweep {
   0% {
     transform: translate3d(0, -120%, 0);
     opacity: 0;
@@ -499,7 +499,7 @@
   }
 }
 
-@keyframes orbit-glitch-clip {
+@keyframes lunafox-glitch-clip {
   0% {
     clip-path: inset(0 0 0 0);
     transform: translate3d(0, 0, 0);
@@ -530,12 +530,12 @@
   }
 }
 
-.orbit-splash-glitch {
+.lunafox-splash-glitch {
   isolation: isolate;
-  animation: orbit-splash-jitter 0.5s steps(2, end) infinite;
+  animation: lunafox-splash-jitter 0.5s steps(2, end) infinite;
 }
 
-.orbit-splash-glitch::before {
+.lunafox-splash-glitch::before {
   content: "";
   position: absolute;
   inset: -20%;
@@ -564,10 +564,10 @@
       transparent 1px,
       transparent 9px
     );
-  animation: orbit-splash-noise 0.5s steps(2, end) infinite;
+  animation: lunafox-splash-noise 0.5s steps(2, end) infinite;
 }
 
-.orbit-splash-glitch::after {
+.lunafox-splash-glitch::after {
   content: "";
   position: absolute;
   inset: 0;
@@ -580,41 +580,41 @@
     transparent 100%
   );
   opacity: 0;
-  animation: orbit-splash-sweep 0.5s ease-out both;
+  animation: lunafox-splash-sweep 0.5s ease-out both;
 }
 
-.orbit-glitch-text {
+.lunafox-glitch-text {
   position: relative;
   display: inline-block;
   text-shadow: 0 0 20px rgba(255, 16, 240, 0.4), 0 0 40px rgba(255, 16, 240, 0.2);
 }
 
-.orbit-glitch-text::before,
-.orbit-glitch-text::after {
+.lunafox-glitch-text::before,
+.lunafox-glitch-text::after {
   content: attr(data-text);
   position: absolute;
   inset: 0;
   pointer-events: none;
 }
 
-.orbit-glitch-text::before {
+.lunafox-glitch-text::before {
   color: rgba(255, 16, 240, 0.85);
   transform: translate3d(-2px, 0, 0);
-  animation: orbit-glitch-clip 0.5s steps(2, end) infinite;
+  animation: lunafox-glitch-clip 0.5s steps(2, end) infinite;
 }
 
-.orbit-glitch-text::after {
+.lunafox-glitch-text::after {
   color: rgba(176, 38, 255, 0.75);
   transform: translate3d(2px, 0, 0);
-  animation: orbit-glitch-clip 0.5s steps(2, end) infinite reverse;
+  animation: lunafox-glitch-clip 0.5s steps(2, end) infinite reverse;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .orbit-splash-glitch,
-  .orbit-splash-glitch::before,
-  .orbit-splash-glitch::after,
-  .orbit-glitch-text::before,
-  .orbit-glitch-text::after {
+  .lunafox-splash-glitch,
+  .lunafox-splash-glitch::before,
+  .lunafox-splash-glitch::after,
+  .lunafox-glitch-text::before,
+  .lunafox-glitch-text::after {
     animation: none !important;
   }
 }

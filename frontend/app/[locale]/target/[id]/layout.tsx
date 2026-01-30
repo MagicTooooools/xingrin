@@ -3,7 +3,7 @@
 import React from "react"
 import { usePathname, useParams } from "next/navigation"
 import Link from "next/link"
-import { Target, LayoutDashboard, Package, FolderSearch, Image, ShieldAlert, Settings, HelpCircle } from "lucide-react"
+import { Target, LayoutDashboard, Package, FolderSearch, Image as ImageIcon, ShieldAlert, Settings, HelpCircle } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/tooltip"
 import { useTarget } from "@/hooks/use-targets"
 import { useTranslations } from "next-intl"
+import type { TargetDetail } from "@/types/target.types"
 
 /**
  * Target detail layout
@@ -87,14 +88,15 @@ export default function TargetLayout({
   }
 
   // Get counts for each tab from target data
+  const targetSummary = (target as TargetDetail | undefined)?.summary
   const counts = {
-    subdomain: (target as any)?.summary?.subdomains || 0,
-    endpoints: (target as any)?.summary?.endpoints || 0,
-    websites: (target as any)?.summary?.websites || 0,
-    directories: (target as any)?.summary?.directories || 0,
-    vulnerabilities: (target as any)?.summary?.vulnerabilities?.total || 0,
-    "ip-addresses": (target as any)?.summary?.ips || 0,
-    screenshots: (target as any)?.summary?.screenshots || 0,
+    subdomain: targetSummary?.subdomains || 0,
+    endpoints: targetSummary?.endpoints || 0,
+    websites: targetSummary?.websites || 0,
+    directories: targetSummary?.directories || 0,
+    vulnerabilities: targetSummary?.vulnerabilities?.total || 0,
+    "ip-addresses": targetSummary?.ips || 0,
+    screenshots: targetSummary?.screenshots || 0,
   }
 
   // Calculate total assets count
@@ -200,7 +202,7 @@ export default function TargetLayout({
               </TabsTrigger>
               <TabsTrigger value="screenshots" asChild>
                 <Link href={primaryPaths.screenshots} className="flex items-center gap-1.5">
-                  <Image className="h-4 w-4" />
+                  <ImageIcon className="h-4 w-4" />
                   {t("tabs.screenshots")}
                   {counts.screenshots > 0 && (
                     <Badge variant="secondary" className="ml-1.5 h-5 min-w-5 rounded-full px-1.5 text-xs">

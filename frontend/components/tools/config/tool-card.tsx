@@ -3,7 +3,7 @@
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { IconBrandGithub, IconScale, IconRefresh, IconEdit, IconTrash } from "@tabler/icons-react"
+import { IconBrandGithub, IconRefresh, IconEdit, IconTrash } from "@tabler/icons-react"
 import type { Tool } from "@/types/tool.types"
 import { CategoryNameMap } from "@/types/tool.types"
 import Link from "next/link"
@@ -15,14 +15,6 @@ interface ToolCardProps {
   onEdit?: (tool: Tool) => void  // Edit tool callback
   onDelete?: (toolId: number) => void  // Delete tool callback
   isChecking?: boolean  // Whether checking for updates
-}
-
-/**
- * Highlighted description text component
- * Simply display description text, keep it concise
- */
-function HighlightedDescription({ description }: { description: string }) {
-  return <p className="line-clamp-4">{description}</p>
 }
 
 /**

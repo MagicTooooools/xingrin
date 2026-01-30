@@ -100,7 +100,6 @@ export function AgentCard({
   }, [healthState, t])
 
   const heartbeat = agent.heartbeat
-  const hasHeartbeat = Boolean(heartbeat)
 
   // 检查是否有指标超过阈值
   const hasWarnings = useMemo(() => {

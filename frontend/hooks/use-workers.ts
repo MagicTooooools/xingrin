@@ -6,7 +6,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { workerService } from '@/services/worker.service'
 import type { CreateWorkerRequest, UpdateWorkerRequest } from '@/types/worker.types'
 import { useToastMessages } from '@/lib/toast-helpers'
-import { getErrorCode } from '@/lib/response-parser'
+import { getErrorCode, getErrorResponseData } from '@/lib/response-parser'
 
 // Query Keys
 export const workerKeys = {
@@ -51,8 +51,8 @@ export function useCreateWorker() {
       queryClient.invalidateQueries({ queryKey: workerKeys.lists() })
       toastMessages.success('toast.worker.create.success')
     },
-    onError: (error: any) => {
-      toastMessages.errorFromCode(getErrorCode(error?.response?.data), 'toast.worker.create.error')
+    onError: (error: unknown) => {
+      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.worker.create.error')
     },
   })
 }
@@ -72,8 +72,8 @@ export function useUpdateWorker() {
       queryClient.invalidateQueries({ queryKey: workerKeys.detail(id) })
       toastMessages.success('toast.worker.update.success')
     },
-    onError: (error: any) => {
-      toastMessages.errorFromCode(getErrorCode(error?.response?.data), 'toast.worker.update.error')
+    onError: (error: unknown) => {
+      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.worker.update.error')
     },
   })
 }
@@ -94,8 +94,8 @@ export function useDeleteWorker() {
       })
       toastMessages.success('toast.worker.delete.success')
     },
-    onError: (error: any) => {
-      toastMessages.errorFromCode(getErrorCode(error?.response?.data), 'toast.worker.delete.error')
+    onError: (error: unknown) => {
+      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.worker.delete.error')
     },
   })
 }
@@ -114,8 +114,8 @@ export function useDeployWorker() {
       queryClient.invalidateQueries({ queryKey: workerKeys.lists() })
       toastMessages.success('toast.worker.deploy.success')
     },
-    onError: (error: any) => {
-      toastMessages.errorFromCode(getErrorCode(error?.response?.data), 'toast.worker.deploy.error')
+    onError: (error: unknown) => {
+      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.worker.deploy.error')
     },
   })
 }
@@ -134,8 +134,8 @@ export function useRestartWorker() {
       queryClient.invalidateQueries({ queryKey: workerKeys.lists() })
       toastMessages.success('toast.worker.restart.success')
     },
-    onError: (error: any) => {
-      toastMessages.errorFromCode(getErrorCode(error?.response?.data), 'toast.worker.restart.error')
+    onError: (error: unknown) => {
+      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.worker.restart.error')
     },
   })
 }
@@ -154,8 +154,8 @@ export function useStopWorker() {
       queryClient.invalidateQueries({ queryKey: workerKeys.lists() })
       toastMessages.success('toast.worker.stop.success')
     },
-    onError: (error: any) => {
-      toastMessages.errorFromCode(getErrorCode(error?.response?.data), 'toast.worker.stop.error')
+    onError: (error: unknown) => {
+      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.worker.stop.error')
     },
   })
 }

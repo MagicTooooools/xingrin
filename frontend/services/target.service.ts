@@ -12,6 +12,8 @@ import type {
   BatchCreateTargetsRequest,
   BatchCreateTargetsResponse,
 } from '@/types/target.types'
+import type { Endpoint } from '@/types/endpoint.types'
+import type { PaginatedResponse } from '@/types/api-response.types'
 import { USE_MOCK, mockDelay, getMockTargets, getMockTargetById, getMockTargetBlacklist, updateMockTargetBlacklist } from '@/mock'
 
 /**
@@ -138,8 +140,8 @@ export async function getTargetEndpoints(
   page = 1,
   pageSize = 10,
   filter?: string
-): Promise<any> {
-  const response = await api.get(`/targets/${id}/endpoints/`, {
+): Promise<PaginatedResponse<Endpoint>> {
+  const response = await api.get<PaginatedResponse<Endpoint>>(`/targets/${id}/endpoints/`, {
     params: {
       page,
       pageSize,
@@ -176,4 +178,3 @@ export async function updateTargetBlacklist(
   const response = await api.put<{ count: number }>(`/targets/${id}/blacklist/`, { patterns })
   return response.data
 }
-

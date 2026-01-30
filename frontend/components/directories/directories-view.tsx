@@ -37,7 +37,6 @@ export function DirectoriesView({
   const [isSearching, setIsSearching] = useState(false)
 
   // Internationalization
-  const t = useTranslations("pages.targetDetail")
   const tColumns = useTranslations("columns")
   const tCommon = useTranslations("common")
   const tToast = useTranslations("toast")
@@ -218,7 +217,7 @@ export function DirectoriesView({
       a.download = `${prefix}-directories-${Date.now()}.csv`
       document.body.appendChild(a)
       a.click()
-      document.body.removeChild(a)
+      a.remove()
       URL.revokeObjectURL(url)
     } catch (error) {
       console.error("Failed to download directory list", error)
@@ -240,7 +239,7 @@ export function DirectoriesView({
     a.download = `${prefix}-directories-selected-${Date.now()}.csv`
     document.body.appendChild(a)
     a.click()
-    document.body.removeChild(a)
+    a.remove()
     URL.revokeObjectURL(url)
   }
 

@@ -13,14 +13,12 @@ import { Separator } from "@/components/ui/separator"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   IconCircleCheck,
-  IconLoader,
   IconClock,
   IconCircleX,
-  IconPlayerStop,
 } from "@tabler/icons-react"
 import { cn } from "@/lib/utils"
 import { useTranslations, useLocale } from "next-intl"
-import type { ScanStage, ScanRecord, StageProgress, StageStatus } from "@/types/scan.types"
+import type { ScanStage, ScanRecord, StageStatus } from "@/types/scan.types"
 import { useScanLogs } from "@/hooks/use-scan-logs"
 import { ScanLogList } from "./scan-log-list"
 

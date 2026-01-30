@@ -1,6 +1,4 @@
 import { Button } from "@/components/ui/button"
-// Import separator component
-import { Separator } from "@/components/ui/separator"
 // Import sidebar trigger component
 import { SidebarTrigger } from "@/components/ui/sidebar"
 // Import notification drawer component

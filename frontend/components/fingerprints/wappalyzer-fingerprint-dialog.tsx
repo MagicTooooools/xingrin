@@ -121,13 +121,37 @@ export function WappalyzerFingerprintDialog({
     return str.split(",").map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n))
   }
 
-  const parseJson = (str: string): Record<string, any> => {
+  const parseJson = (str: string): Record<string, unknown> => {
     try {
       return JSON.parse(str)
     } catch {
       return {}
     }
   }
+
+  const parseStringRecord = (str: string): Record<string, string> => {
+    const raw = parseJson(str)
+    return Object.fromEntries(
+      Object.entries(raw).filter(([, value]) => typeof value === "string")
+    ) as Record<string, string>
+  }
+
+  const parseStringArrayRecord = (str: string): Record<string, string[]> => {
+    const raw = parseJson(str)
+    const output: Record<string, string[]> = {}
+    for (const [key, value] of Object.entries(raw)) {
+      if (Array.isArray(value)) {
+        const items = value.filter((item): item is string => typeof item === "string")
+        if (items.length > 0) {
+          output[key] = items
+        }
+      }
+    }
+    return output
+  }
+
+  const getErrorMessage = (error: unknown): string =>
+    error instanceof Error ? error.message : ""
 
   const onSubmit = async (data: FormData) => {
     const payload = {
@@ -136,11 +160,11 @@ export function WappalyzerFingerprintDialog({
       description: data.description.trim(),
       website: data.website.trim(),
       cpe: data.cpe.trim(),
-      cookies: parseJson(data.cookies),
-      headers: parseJson(data.headers),
+      cookies: parseStringRecord(data.cookies),
+      headers: parseStringRecord(data.headers),
       scriptSrc: parseArray(data.scriptSrc),
       js: parseArray(data.js),
-      meta: parseJson(data.meta),
+      meta: parseStringArrayRecord(data.meta),
       html: parseArray(data.html),
       implies: parseArray(data.implies),
     }
@@ -155,8 +179,8 @@ export function WappalyzerFingerprintDialog({
       }
       onOpenChange(false)
       onSuccess?.()
-    } catch (error: any) {
-      toast.error(error.message || (isEdit ? t("toast.updateFailed") : t("toast.createFailed")))
+    } catch (error) {
+      toast.error(getErrorMessage(error) || (isEdit ? t("toast.updateFailed") : t("toast.createFailed")))
     }
   }
 

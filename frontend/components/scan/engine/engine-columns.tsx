@@ -52,7 +52,7 @@ export interface EngineTranslations {
 function parseEngineFeatures(engine: ScanEngine) {
   if (engine.configuration) {
     try {
-      const config = yaml.load(engine.configuration) as any
+      const config = yaml.load(engine.configuration) as Record<string, unknown> | null
       return {
         subdomain_discovery: !!config?.subdomain_discovery,
         port_scan: !!config?.port_scan,
