@@ -1,6 +1,6 @@
 package subdomain_discovery
 
-import "github.com/orbit/worker/internal/activity"
+import "github.com/yyhuni/lunafox/worker/internal/activity"
 
 // runStageCommands executes commands using stage metadata (sequential or parallel).
 func (w *Workflow) runStageCommands(ctx *workflowContext, stageName string, commands []activity.Command) []*activity.Result {

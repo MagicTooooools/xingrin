@@ -1,8 +1,8 @@
 package repository
 
 import (
-	"github.com/yyhuni/orbit/server/internal/model"
-	"github.com/yyhuni/orbit/server/internal/pkg/scope"
+	"github.com/yyhuni/lunafox/server/internal/model"
+	"github.com/yyhuni/lunafox/server/internal/pkg/scope"
 	"gorm.io/gorm"
 )
 

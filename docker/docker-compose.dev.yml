@@ -4,7 +4,7 @@ services:
     image: postgres:16-alpine
     restart: unless-stopped
     environment:
-      POSTGRES_DB: ${DB_NAME:-orbit}
+      POSTGRES_DB: ${DB_NAME:-lunafox}
       POSTGRES_USER: ${DB_USER:-postgres}
       POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
     ports:
@@ -48,7 +48,7 @@ services:
       redis:
         condition: service_healthy
     volumes:
-      - /opt/orbit:/opt/orbit
+      - /opt/lunafox:/opt/lunafox
       - /var/run/docker.sock:/var/run/docker.sock
       - ../server:/workspace/server
       - ../VERSION:/workspace/server/VERSION:ro
@@ -78,7 +78,7 @@ services:
     build:
       context: ..
       dockerfile: docker/nginx/Dockerfile
-    image: yyhuni/orbit-nginx:${IMAGE_TAG:-dev}
+    image: yyhuni/lunafox-nginx:${IMAGE_TAG:-dev}
     restart: unless-stopped
     depends_on:
       server:
@@ -95,10 +95,10 @@ services:
     build:
       context: ..
       dockerfile: worker/Dockerfile
-    image: yyhuni/orbit-worker:${IMAGE_TAG:-dev}
+    image: yyhuni/lunafox-worker:${IMAGE_TAG:-dev}
     restart: "no"
     volumes:
-      - /opt/orbit:/opt/orbit
+      - /opt/lunafox:/opt/lunafox
     command: echo "Worker image built for development"
 
 volumes:
@@ -110,4 +110,4 @@ volumes:
 
 networks:
   default:
-    name: orbit_network  # Fixed network name, independent of directory name
+    name: lunafox_network  # Fixed network name, independent of directory name

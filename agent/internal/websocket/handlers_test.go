@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/yyhuni/orbit/agent/internal/protocol"
+	"github.com/yyhuni/lunafox/agent/internal/protocol"
 )
 
 func TestHandlersTaskAvailable(t *testing.T) {
@@ -52,7 +52,7 @@ func TestHandlersUpdateRequired(t *testing.T) {
 	var version string
 	h.OnUpdateRequired(func(payload protocol.UpdateRequiredPayload) { version = payload.Version })
 
-	message := fmt.Sprintf(`{"type":"%s","payload":{"version":"v1.0.1","image":"yyhuni/orbit-agent"},"timestamp":"2026-01-01T00:00:00Z"}`, protocol.MessageTypeUpdateRequired)
+	message := fmt.Sprintf(`{"type":"%s","payload":{"version":"v1.0.1","image":"yyhuni/lunafox-agent"},"timestamp":"2026-01-01T00:00:00Z"}`, protocol.MessageTypeUpdateRequired)
 	h.Handle([]byte(message))
 	if version != "v1.0.1" {
 		t.Fatalf("expected version")
@@ -75,7 +75,7 @@ func TestHandlersUpdateRequiredMissingFields(t *testing.T) {
 	called := 0
 	h.OnUpdateRequired(func(payload protocol.UpdateRequiredPayload) { called++ })
 
-	message := fmt.Sprintf(`{"type":"%s","payload":{"version":"","image":"yyhuni/orbit-agent"}}`, protocol.MessageTypeUpdateRequired)
+	message := fmt.Sprintf(`{"type":"%s","payload":{"version":"","image":"yyhuni/lunafox-agent"}}`, protocol.MessageTypeUpdateRequired)
 	h.Handle([]byte(message))
 	message = fmt.Sprintf(`{"type":"%s","payload":{"version":"v1.2.3","image":""}}`, protocol.MessageTypeUpdateRequired)
 	h.Handle([]byte(message))

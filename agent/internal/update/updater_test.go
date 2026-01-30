@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yyhuni/orbit/agent/internal/domain"
+	"github.com/yyhuni/lunafox/agent/internal/domain"
 )
 
 func TestSanitizeContainerName(t *testing.T) {
@@ -33,7 +33,7 @@ func TestWithJitterRange(t *testing.T) {
 
 func TestUpdateOnceDockerUnavailable(t *testing.T) {
 	updater := &Updater{}
-	payload := domain.UpdateRequiredPayload{Version: "v1.0.0", Image: "yyhuni/orbit-agent"}
+	payload := domain.UpdateRequiredPayload{Version: "v1.0.0", Image: "yyhuni/lunafox-agent"}
 
 	err := updater.updateOnce(payload)
 	if err == nil {

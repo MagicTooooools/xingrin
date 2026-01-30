@@ -2,7 +2,7 @@ package router
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/yyhuni/orbit/server/internal/handler"
+	"github.com/yyhuni/lunafox/server/internal/handler"
 )
 
 func RegisterAuthRoutes(api *gin.RouterGroup, authHandler *handler.AuthHandler) {

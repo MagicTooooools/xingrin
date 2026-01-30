@@ -8,9 +8,9 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/yyhuni/orbit/server/internal/dto"
-	"github.com/yyhuni/orbit/server/internal/pkg/csv"
-	"github.com/yyhuni/orbit/server/internal/service"
+	"github.com/yyhuni/lunafox/server/internal/dto"
+	"github.com/yyhuni/lunafox/server/internal/pkg/csv"
+	"github.com/yyhuni/lunafox/server/internal/service"
 )
 
 // HostPortHandler handles host-port endpoints

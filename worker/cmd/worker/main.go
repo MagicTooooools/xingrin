@@ -5,14 +5,14 @@ import (
 	"log"
 	"os"
 
-	"github.com/orbit/worker/internal/config"
-	"github.com/orbit/worker/internal/pkg"
-	"github.com/orbit/worker/internal/server"
-	"github.com/orbit/worker/internal/workflow"
+	"github.com/yyhuni/lunafox/worker/internal/config"
+	"github.com/yyhuni/lunafox/worker/internal/pkg"
+	"github.com/yyhuni/lunafox/worker/internal/server"
+	"github.com/yyhuni/lunafox/worker/internal/workflow"
 	"go.uber.org/zap"
 
 	// Import workflows to trigger init() registration
-	_ "github.com/orbit/worker/internal/workflow/subdomain_discovery"
+	_ "github.com/yyhuni/lunafox/worker/internal/workflow/subdomain_discovery"
 )
 
 func main() {

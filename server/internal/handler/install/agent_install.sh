@@ -6,7 +6,7 @@ SERVER_URL="{{.ServerURL}}"
 AGENT_IMAGE="{{.AgentImage}}"
 AGENT_VERSION="{{.AgentVersion}}"
 DEFAULT_WORKER_TOKEN="{{.WorkerToken}}"
-WORKER_IMAGE="yyhuni/orbit-worker"
+WORKER_IMAGE="yyhuni/lunafox-worker"
 
 require_cmd() {
   if ! command -v "$1" >/dev/null 2>&1; then
@@ -43,10 +43,10 @@ if [ -z "${WORKER_TOKEN:-}" ]; then
   exit 1
 fi
 
-HOSTNAME="${ORBIT_HOSTNAME:-$(hostname)}"
-DATA_DIR="${ORBIT_DATA_DIR:-/opt/orbit}"
+HOSTNAME="${LUNAFOX_HOSTNAME:-$(hostname)}"
+DATA_DIR="${LUNAFOX_DATA_DIR:-/opt/lunafox}"
 
-echo "Installing Orbit Agent $AGENT_VERSION..."
+echo "Installing LunaFox Agent $AGENT_VERSION..."
 echo "Registering agent..."
 RESPONSE=$(curl -fsSL --connect-timeout 10 --max-time 30 \
   -X POST "$SERVER_URL/api/agents/register" \
@@ -71,8 +71,8 @@ $DOCKER_CMD pull "$AGENT_IMAGE:$AGENT_VERSION"
 echo "Pulling worker image..."
 $DOCKER_CMD pull "$WORKER_IMAGE:$AGENT_VERSION"
 
-$DOCKER_CMD rm -f orbit-agent >/dev/null 2>&1 || true
-$DOCKER_CMD run -d --restart unless-stopped --name orbit-agent \
+$DOCKER_CMD rm -f lunafox-agent >/dev/null 2>&1 || true
+$DOCKER_CMD run -d --restart unless-stopped --name lunafox-agent \
   --hostname "$HOSTNAME" \
   -e SERVER_URL="$SERVER_URL" \
   -e API_KEY="$API_KEY" \
@@ -82,9 +82,9 @@ $DOCKER_CMD run -d --restart unless-stopped --name orbit-agent \
   -e CPU_THRESHOLD="${CPU_THRESHOLD:-85}" \
   -e MEM_THRESHOLD="${MEM_THRESHOLD:-85}" \
   -e DISK_THRESHOLD="${DISK_THRESHOLD:-90}" \
-  -e ORBIT_HOSTNAME="$HOSTNAME" \
+  -e LUNAFOX_HOSTNAME="$HOSTNAME" \
   -v /var/run/docker.sock:/var/run/docker.sock \
-  -v "$DATA_DIR:/opt/orbit" \
+  -v "$DATA_DIR:/opt/lunafox" \
   "$AGENT_IMAGE:$AGENT_VERSION" >/dev/null
 
-echo "Agent installed and running (container: orbit-agent)"
+echo "Agent installed and running (container: lunafox-agent)"

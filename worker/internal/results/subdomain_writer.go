@@ -3,7 +3,7 @@ package results
 import (
 	"context"
 
-	"github.com/orbit/worker/internal/server"
+	"github.com/yyhuni/lunafox/worker/internal/server"
 )
 
 const subdomainBatchSize = 5000

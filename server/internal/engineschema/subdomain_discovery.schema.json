@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "orbit://schemas/engines/subdomain_discovery/1.0.0",
+  "$id": "lunafox://schemas/engines/subdomain_discovery/1.0.0",
   "title": "Subdomain Discovery",
   "description": "Discover all subdomains of target domains through reconnaissance, dictionary bruteforce, and permutation",
   "x-engine": "subdomain_discovery",

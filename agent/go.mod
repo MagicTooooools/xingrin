@@ -1,4 +1,4 @@
-module github.com/yyhuni/orbit/agent
+module github.com/yyhuni/lunafox/agent
 
 go 1.24.5
 

@@ -9,8 +9,8 @@ import (
 	"text/template"
 	"text/template/parse"
 
-	"github.com/orbit/worker/internal/activity"
-	"github.com/orbit/worker/internal/pkg"
+	"github.com/yyhuni/lunafox/worker/internal/activity"
+	"github.com/yyhuni/lunafox/worker/internal/pkg"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -432,7 +432,7 @@ func TestCommandGeneration_Sublist3r(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.Contains(t, cmd, "python3")
-	assert.Contains(t, cmd, "/opt/orbit-tools/share/Sublist3r/sublist3r.py")
+	assert.Contains(t, cmd, "/opt/lunafox-tools/share/Sublist3r/sublist3r.py")
 	assert.Contains(t, cmd, "-d example.com")
 	assert.Contains(t, cmd, "-o \"/tmp/output.txt\"")
 	assert.Contains(t, cmd, "-t 10")
@@ -480,8 +480,8 @@ func TestCommandGeneration_SubdomainBruteforce(t *testing.T) {
 	params := map[string]any{
 		"Domain":     "example.com",
 		"OutputFile": "/tmp/output.txt",
-		"Wordlist":   "/opt/orbit/wordlists/subdomains-top1million-110000.txt",
-		"Resolvers":  "/opt/orbit/wordlists/resolvers.txt",
+		"Wordlist":   "/opt/lunafox/wordlists/subdomains-top1million-110000.txt",
+		"Resolvers":  "/opt/lunafox/wordlists/resolvers.txt",
 	}
 	config := map[string]any{
 		"timeout-runtime":                   3600,
@@ -496,9 +496,9 @@ func TestCommandGeneration_SubdomainBruteforce(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.Contains(t, cmd, "puredns bruteforce")
-	assert.Contains(t, cmd, "\"/opt/orbit/wordlists/subdomains-top1million-110000.txt\"")
+	assert.Contains(t, cmd, "\"/opt/lunafox/wordlists/subdomains-top1million-110000.txt\"")
 	assert.Contains(t, cmd, "example.com")
-	assert.Contains(t, cmd, "-r \"/opt/orbit/wordlists/resolvers.txt\"")
+	assert.Contains(t, cmd, "-r \"/opt/lunafox/wordlists/resolvers.txt\"")
 	assert.Contains(t, cmd, "--write \"/tmp/output.txt\"")
 	assert.Contains(t, cmd, "-t 100")
 	assert.Contains(t, cmd, "--rate-limit 150")
@@ -520,7 +520,7 @@ func TestCommandGeneration_SubdomainResolve(t *testing.T) {
 	params := map[string]any{
 		"InputFile":  "/tmp/input.txt",
 		"OutputFile": "/tmp/output.txt",
-		"Resolvers":  "/opt/orbit/wordlists/resolvers.txt",
+		"Resolvers":  "/opt/lunafox/wordlists/resolvers.txt",
 	}
 	config := map[string]any{
 		"timeout-runtime": 3600,
@@ -533,7 +533,7 @@ func TestCommandGeneration_SubdomainResolve(t *testing.T) {
 
 	assert.Contains(t, cmd, "puredns resolve")
 	assert.Contains(t, cmd, "\"/tmp/input.txt\"")
-	assert.Contains(t, cmd, "-r \"/opt/orbit/wordlists/resolvers.txt\"")
+	assert.Contains(t, cmd, "-r \"/opt/lunafox/wordlists/resolvers.txt\"")
 	assert.Contains(t, cmd, "--write \"/tmp/output.txt\"")
 	assert.Contains(t, cmd, "-t 100")
 	assert.Contains(t, cmd, "--rate-limit 150")
@@ -553,7 +553,7 @@ func TestCommandGeneration_SubdomainPermutationResolve(t *testing.T) {
 	params := map[string]any{
 		"InputFile":  "/tmp/input.txt",
 		"OutputFile": "/tmp/output.txt",
-		"Resolvers":  "/opt/orbit/wordlists/resolvers.txt",
+		"Resolvers":  "/opt/lunafox/wordlists/resolvers.txt",
 	}
 	config := map[string]any{
 		"timeout-runtime":                      3600,
@@ -573,7 +573,7 @@ func TestCommandGeneration_SubdomainPermutationResolve(t *testing.T) {
 	assert.Contains(t, cmd, "cat \"/tmp/input.txt\"")
 	assert.Contains(t, cmd, "dnsgen -")
 	assert.Contains(t, cmd, "puredns resolve")
-	assert.Contains(t, cmd, "-r \"/opt/orbit/wordlists/resolvers.txt\"")
+	assert.Contains(t, cmd, "-r \"/opt/lunafox/wordlists/resolvers.txt\"")
 	assert.Contains(t, cmd, "--write \"/tmp/output.txt\"")
 	assert.Contains(t, cmd, "-t 100")
 	assert.Contains(t, cmd, "--rate-limit 150")
@@ -663,8 +663,8 @@ func TestInternalParams_SubdomainBruteforce(t *testing.T) {
 
 	// 验证 internal_params 存在且值正确
 	assert.NotEmpty(t, tmpl.InternalParams)
-	assert.Equal(t, "/opt/orbit/wordlists", tmpl.InternalParams["subdomain-wordlist-base-path-runtime"])
-	assert.Equal(t, "/opt/orbit/wordlists/resolvers.txt", tmpl.InternalParams["resolvers-path-cli"])
+	assert.Equal(t, "/opt/lunafox/wordlists", tmpl.InternalParams["subdomain-wordlist-base-path-runtime"])
+	assert.Equal(t, "/opt/lunafox/wordlists/resolvers.txt", tmpl.InternalParams["resolvers-path-cli"])
 }
 
 // TestInternalParams_SubdomainResolve 测试 subdomain-resolve 的 internal_params
@@ -675,7 +675,7 @@ func TestInternalParams_SubdomainResolve(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.NotEmpty(t, tmpl.InternalParams)
-	assert.Equal(t, "/opt/orbit/wordlists/resolvers.txt", tmpl.InternalParams["resolvers-path-cli"])
+	assert.Equal(t, "/opt/lunafox/wordlists/resolvers.txt", tmpl.InternalParams["resolvers-path-cli"])
 }
 
 // TestAllToolsHaveRequiredMetadata 验证所有工具都有必需的 metadata 字段

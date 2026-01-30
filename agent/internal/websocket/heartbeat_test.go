@@ -5,9 +5,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yyhuni/orbit/agent/internal/health"
-	"github.com/yyhuni/orbit/agent/internal/metrics"
-	"github.com/yyhuni/orbit/agent/internal/protocol"
+	"github.com/yyhuni/lunafox/agent/internal/health"
+	"github.com/yyhuni/lunafox/agent/internal/metrics"
+	"github.com/yyhuni/lunafox/agent/internal/protocol"
 )
 
 func TestHeartbeatSenderSendOnce(t *testing.T) {

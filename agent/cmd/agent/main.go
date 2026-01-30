@@ -7,8 +7,8 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/yyhuni/orbit/agent/internal/app"
-	"github.com/yyhuni/orbit/agent/internal/config"
+	"github.com/yyhuni/lunafox/agent/internal/app"
+	"github.com/yyhuni/lunafox/agent/internal/config"
 )
 
 func main() {

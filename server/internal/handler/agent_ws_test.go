@@ -6,11 +6,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yyhuni/orbit/server/internal/agentproto"
-	"github.com/yyhuni/orbit/server/internal/cache"
-	"github.com/yyhuni/orbit/server/internal/model"
-	"github.com/yyhuni/orbit/server/internal/repository"
-	ws "github.com/yyhuni/orbit/server/internal/websocket"
+	"github.com/yyhuni/lunafox/server/internal/agentproto"
+	"github.com/yyhuni/lunafox/server/internal/cache"
+	"github.com/yyhuni/lunafox/server/internal/model"
+	"github.com/yyhuni/lunafox/server/internal/repository"
+	ws "github.com/yyhuni/lunafox/server/internal/websocket"
 )
 
 type fakeAgentRepo struct {
@@ -122,7 +122,7 @@ func TestUpdateRequiredSendsMessage(t *testing.T) {
 	}
 	hub.Register(client)
 
-	handler := NewAgentWebSocketHandler(hub, &fakeAgentRepo{}, nil, "v2.0.0", "yyhuni/orbit-agent")
+	handler := NewAgentWebSocketHandler(hub, &fakeAgentRepo{}, nil, "v2.0.0", "yyhuni/lunafox-agent")
 
 	handler.maybeSendUpdateRequired(context.Background(), 1, "v1.0.0")
 

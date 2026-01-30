@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
-	"github.com/orbit/worker/internal/pkg"
-	"github.com/orbit/worker/internal/server"
+	"github.com/yyhuni/lunafox/worker/internal/pkg"
+	"github.com/yyhuni/lunafox/worker/internal/server"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"

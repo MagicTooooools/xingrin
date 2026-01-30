@@ -9,10 +9,10 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/yyhuni/orbit/server/internal/agentproto"
-	"github.com/yyhuni/orbit/server/internal/model"
-	"github.com/yyhuni/orbit/server/internal/repository"
-	"github.com/yyhuni/orbit/server/internal/service"
+	"github.com/yyhuni/lunafox/server/internal/agentproto"
+	"github.com/yyhuni/lunafox/server/internal/model"
+	"github.com/yyhuni/lunafox/server/internal/repository"
+	"github.com/yyhuni/lunafox/server/internal/service"
 	"gorm.io/gorm"
 )
 

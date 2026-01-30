@@ -9,9 +9,9 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/yyhuni/orbit/server/internal/dto"
-	"github.com/yyhuni/orbit/server/internal/model"
-	"github.com/yyhuni/orbit/server/internal/service"
+	"github.com/yyhuni/lunafox/server/internal/dto"
+	"github.com/yyhuni/lunafox/server/internal/model"
+	"github.com/yyhuni/lunafox/server/internal/service"
 )
 
 // MockWebsiteSnapshotService is a mock implementation for testing

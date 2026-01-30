@@ -7,8 +7,8 @@ import (
 	"sync"
 	"text/template"
 
-	"github.com/orbit/worker/internal/pkg"
-	"github.com/orbit/worker/internal/workflow"
+	"github.com/yyhuni/lunafox/worker/internal/pkg"
+	"github.com/yyhuni/lunafox/worker/internal/workflow"
 	"go.uber.org/zap"
 	"gopkg.in/yaml.v3"
 )

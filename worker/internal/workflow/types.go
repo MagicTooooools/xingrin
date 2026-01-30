@@ -3,7 +3,7 @@ package workflow
 import (
 	"context"
 
-	"github.com/orbit/worker/internal/server"
+	"github.com/yyhuni/lunafox/worker/internal/server"
 )
 
 // Workflow defines the workflow interface

@@ -3,7 +3,7 @@ package protocol
 import (
 	"time"
 
-	"github.com/yyhuni/orbit/agent/internal/domain"
+	"github.com/yyhuni/lunafox/agent/internal/domain"
 )
 
 const (

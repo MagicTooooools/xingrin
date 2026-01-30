@@ -9,9 +9,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/orbit/worker/internal/activity"
-	"github.com/orbit/worker/internal/pkg"
-	"github.com/orbit/worker/internal/pkg/validator"
+	"github.com/yyhuni/lunafox/worker/internal/activity"
+	"github.com/yyhuni/lunafox/worker/internal/pkg"
+	"github.com/yyhuni/lunafox/worker/internal/pkg/validator"
 	"go.uber.org/zap"
 )
 

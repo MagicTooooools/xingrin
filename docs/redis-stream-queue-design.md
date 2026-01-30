@@ -183,7 +183,7 @@ import (
     "fmt"
     "time"
     "github.com/redis/go-redis/v9"
-    "github.com/yyhuni/orbit/server/internal/repository"
+    "github.com/yyhuni/lunafox/server/internal/repository"
 )
 
 type EndpointConsumer struct {
@@ -284,8 +284,8 @@ package queue
 
 import (
     "sync"
-    "github.com/yyhuni/orbit/server/internal/model"
-    "github.com/yyhuni/orbit/server/internal/repository"
+    "github.com/yyhuni/lunafox/server/internal/model"
+    "github.com/yyhuni/lunafox/server/internal/repository"
 )
 
 type BatchWriter struct {

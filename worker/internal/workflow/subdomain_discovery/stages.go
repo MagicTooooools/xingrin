@@ -3,8 +3,8 @@ package subdomain_discovery
 import (
 	"context"
 
-	"github.com/orbit/worker/internal/activity"
-	"github.com/orbit/worker/internal/server"
+	"github.com/yyhuni/lunafox/worker/internal/activity"
+	"github.com/yyhuni/lunafox/worker/internal/server"
 )
 
 // reconTools lists all reconnaissance tools (references auto-generated constants)

@@ -3,7 +3,7 @@ package repository
 import (
 	"testing"
 
-	"github.com/yyhuni/orbit/server/internal/model"
+	"github.com/yyhuni/lunafox/server/internal/model"
 )
 
 // TestWebsiteSnapshotFilterMapping tests the filter mapping configuration

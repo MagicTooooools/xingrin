@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/orbit/worker/internal/pkg"
+	"github.com/yyhuni/lunafox/worker/internal/pkg"
 	"go.uber.org/zap"
 )
 

@@ -1,4 +1,4 @@
-module github.com/orbit/worker
+module github.com/yyhuni/lunafox/worker
 
 go 1.24.0
 

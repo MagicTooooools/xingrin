@@ -9,19 +9,19 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis/v8"
-	"github.com/yyhuni/orbit/server/internal/auth"
-	"github.com/yyhuni/orbit/server/internal/cache"
-	"github.com/yyhuni/orbit/server/internal/config"
-	"github.com/yyhuni/orbit/server/internal/database"
-	"github.com/yyhuni/orbit/server/internal/handler"
-	"github.com/yyhuni/orbit/server/internal/job"
-	"github.com/yyhuni/orbit/server/internal/middleware"
-	"github.com/yyhuni/orbit/server/internal/pkg"
-	pkgvalidator "github.com/yyhuni/orbit/server/internal/pkg/validator"
-	"github.com/yyhuni/orbit/server/internal/repository"
-	"github.com/yyhuni/orbit/server/internal/router"
-	"github.com/yyhuni/orbit/server/internal/service"
-	ws "github.com/yyhuni/orbit/server/internal/websocket"
+	"github.com/yyhuni/lunafox/server/internal/auth"
+	"github.com/yyhuni/lunafox/server/internal/cache"
+	"github.com/yyhuni/lunafox/server/internal/config"
+	"github.com/yyhuni/lunafox/server/internal/database"
+	"github.com/yyhuni/lunafox/server/internal/handler"
+	"github.com/yyhuni/lunafox/server/internal/job"
+	"github.com/yyhuni/lunafox/server/internal/middleware"
+	"github.com/yyhuni/lunafox/server/internal/pkg"
+	pkgvalidator "github.com/yyhuni/lunafox/server/internal/pkg/validator"
+	"github.com/yyhuni/lunafox/server/internal/repository"
+	"github.com/yyhuni/lunafox/server/internal/router"
+	"github.com/yyhuni/lunafox/server/internal/service"
+	ws "github.com/yyhuni/lunafox/server/internal/websocket"
 	"go.uber.org/zap"
 )
 
@@ -33,7 +33,7 @@ func Run(ctx context.Context, cfg *config.Config, migrationsFS embed.FS) {
 	)
 
 	serverVersion := pkg.ReadVersion("VERSION")
-	agentImage := "yyhuni/orbit-agent"
+	agentImage := "yyhuni/lunafox-agent"
 
 	// Initialize custom validator with translations
 	if err := pkgvalidator.Init(); err != nil {

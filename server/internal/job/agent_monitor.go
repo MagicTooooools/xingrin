@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/yyhuni/orbit/server/internal/pkg"
-	"github.com/yyhuni/orbit/server/internal/repository"
+	"github.com/yyhuni/lunafox/server/internal/pkg"
+	"github.com/yyhuni/lunafox/server/internal/repository"
 	"go.uber.org/zap"
 )
 
@@ -58,8 +58,8 @@ func (m *AgentMonitor) check(ctx context.Context) {
 			pkg.Warn("Failed to mark agent offline", zap.Int("agent_id", agent.ID), zap.Error(err))
 			continue
 		}
-		if err := m.scanTaskRepo.RecoverTasksForOfflineAgent(ctx, agent.ID); err != nil {
-			pkg.Warn("Failed to recover tasks for offline agent", zap.Int("agent_id", agent.ID), zap.Error(err))
+		if err := m.scanTaskRepo.FailTasksForOfflineAgent(ctx, agent.ID); err != nil {
+			pkg.Warn("Failed to fail tasks for offline agent", zap.Int("agent_id", agent.ID), zap.Error(err))
 		}
 	}
 }

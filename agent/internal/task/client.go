@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yyhuni/orbit/agent/internal/domain"
+	"github.com/yyhuni/lunafox/agent/internal/domain"
 )
 
 // Client handles HTTP API requests to the server.

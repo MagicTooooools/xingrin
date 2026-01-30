@@ -9,7 +9,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/yyhuni/orbit/agent/internal/domain"
+	"github.com/yyhuni/lunafox/agent/internal/domain"
 )
 
 // Puller coordinates task pulling with load gating and backoff.

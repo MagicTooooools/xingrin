@@ -3,7 +3,7 @@ package websocket
 import (
 	"encoding/json"
 
-	"github.com/yyhuni/orbit/agent/internal/protocol"
+	"github.com/yyhuni/lunafox/agent/internal/protocol"
 )
 
 // Handler routes incoming WebSocket messages.

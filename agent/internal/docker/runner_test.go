@@ -3,7 +3,7 @@ package docker
 import (
 	"testing"
 
-	"github.com/yyhuni/orbit/agent/internal/domain"
+	"github.com/yyhuni/lunafox/agent/internal/domain"
 )
 
 func TestResolveWorkerImage(t *testing.T) {
@@ -22,7 +22,7 @@ func TestBuildWorkerEnv(t *testing.T) {
 		TargetName:   "example.com",
 		TargetType:   "domain",
 		WorkflowName: "subdomain_discovery",
-		WorkspaceDir: "/opt/orbit/results",
+		WorkspaceDir: "/opt/lunafox/results",
 		Config:       "config-yaml",
 	}
 
@@ -35,7 +35,7 @@ func TestBuildWorkerEnv(t *testing.T) {
 		"TARGET_NAME=example.com",
 		"TARGET_TYPE=domain",
 		"WORKFLOW_NAME=subdomain_discovery",
-		"WORKSPACE_DIR=/opt/orbit/results",
+		"WORKSPACE_DIR=/opt/lunafox/results",
 		"CONFIG=config-yaml",
 	}
 

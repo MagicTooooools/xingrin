@@ -52,7 +52,7 @@ func Load() (*Config, error) {
 		TargetName:   os.Getenv("TARGET_NAME"),
 		TargetType:   os.Getenv("TARGET_TYPE"),
 		WorkflowName: os.Getenv("WORKFLOW_NAME"),
-		WorkspaceDir: getEnvOrDefault("WORKSPACE_DIR", "/opt/orbit/workspace"),
+		WorkspaceDir: getEnvOrDefault("WORKSPACE_DIR", "/opt/lunafox/workspace"),
 		LogLevel:     getEnvOrDefault("LOG_LEVEL", "info"),
 	}
 

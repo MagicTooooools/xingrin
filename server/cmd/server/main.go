@@ -8,9 +8,9 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/yyhuni/orbit/server/internal/app"
-	"github.com/yyhuni/orbit/server/internal/config"
-	"github.com/yyhuni/orbit/server/internal/pkg"
+	"github.com/yyhuni/lunafox/server/internal/app"
+	"github.com/yyhuni/lunafox/server/internal/config"
+	"github.com/yyhuni/lunafox/server/internal/pkg"
 )
 
 //go:embed migrations/*.sql

@@ -4,7 +4,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yyhuni/orbit/agent/internal/domain"
+	"github.com/yyhuni/lunafox/agent/internal/domain"
 )
 
 // Status represents the agent health state reported in heartbeats.

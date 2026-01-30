@@ -10,7 +10,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/orbit/worker/internal/activity"
+	"github.com/yyhuni/lunafox/worker/internal/activity"
 	"github.com/santhosh-tekuri/jsonschema/v5"
 )
 

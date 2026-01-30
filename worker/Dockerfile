@@ -79,35 +79,35 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN ln -s /usr/bin/python3 /usr/bin/python
 
 # Directory conventions:
-# - /opt/orbit        data only (overridden by host mount)
-# - /opt/orbit-tools  tools only (from image, not overridden)
+# - /opt/lunafox        data only (overridden by host mount)
+# - /opt/lunafox-tools  tools only (from image, not overridden)
 RUN mkdir -p \
-    /opt/orbit/wordlists \
-    /opt/orbit/workspace \
-    /opt/orbit-tools/bin \
-    /opt/orbit-tools/share \
-    /opt/orbit-tools/pipx
+    /opt/lunafox/wordlists \
+    /opt/lunafox/workspace \
+    /opt/lunafox-tools/bin \
+    /opt/lunafox-tools/share \
+    /opt/lunafox-tools/pipx
 
 # Copy resolvers.txt (fixed DNS server list)
-COPY resources/resolvers.txt /opt/orbit/wordlists/resolvers.txt
+COPY resources/resolvers.txt /opt/lunafox/wordlists/resolvers.txt
 
 # pipx: install Python tools into project-specific directory
-ENV PIPX_HOME=/opt/orbit-tools/pipx
-ENV PIPX_BIN_DIR=/opt/orbit-tools/bin
-ENV PATH=/opt/orbit-tools/bin:$PATH
+ENV PIPX_HOME=/opt/lunafox-tools/pipx
+ENV PIPX_BIN_DIR=/opt/lunafox-tools/bin
+ENV PATH=/opt/lunafox-tools/bin:$PATH
 
 # Install Python scanning tools
 RUN pipx install uro && \
     pipx install waymore && \
     pipx install dnsgen
 
-# Install Sublist3r (directory-based tool under /opt/orbit-tools/share)
-RUN git clone https://github.com/aboul3la/Sublist3r.git /opt/orbit-tools/share/Sublist3r && \
-    pip3 install --no-cache-dir -r /opt/orbit-tools/share/Sublist3r/requirements.txt --break-system-packages
+# Install Sublist3r (directory-based tool under /opt/lunafox-tools/share)
+RUN git clone https://github.com/aboul3la/Sublist3r.git /opt/lunafox-tools/share/Sublist3r && \
+    pip3 install --no-cache-dir -r /opt/lunafox-tools/share/Sublist3r/requirements.txt --break-system-packages
 
-# Copy Go scanning tools (into /opt/orbit-tools/bin)
-COPY --from=tools-builder /go/bin/* /opt/orbit-tools/bin/
-COPY --from=tools-builder /usr/local/bin/massdns /opt/orbit-tools/bin/massdns
+# Copy Go scanning tools (into /opt/lunafox-tools/bin)
+COPY --from=tools-builder /go/bin/* /opt/lunafox-tools/bin/
+COPY --from=tools-builder /usr/local/bin/massdns /opt/lunafox-tools/bin/massdns
 
 # Copy Go Worker
 COPY --from=worker-builder /worker /usr/local/bin/worker

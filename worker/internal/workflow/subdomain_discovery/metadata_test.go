@@ -3,7 +3,7 @@ package subdomain_discovery
 import (
 	"testing"
 
-	"github.com/orbit/worker/internal/pkg"
+	"github.com/yyhuni/lunafox/worker/internal/pkg"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"

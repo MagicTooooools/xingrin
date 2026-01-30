@@ -9,10 +9,10 @@ import (
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/api/types/strslice"
-	"github.com/yyhuni/orbit/agent/internal/domain"
+	"github.com/yyhuni/lunafox/agent/internal/domain"
 )
 
-const workerImagePrefix = "yyhuni/orbit-worker:"
+const workerImagePrefix = "yyhuni/lunafox-worker:"
 
 // StartWorker starts a worker container for a task and returns the container ID.
 func (c *Client) StartWorker(ctx context.Context, t *domain.Task, serverURL, serverToken, agentVersion string) (string, error) {
@@ -36,7 +36,7 @@ func (c *Client) StartWorker(ctx context.Context, t *domain.Task, serverURL, ser
 	}
 
 	hostConfig := &container.HostConfig{
-		Binds:       []string{"/opt/orbit:/opt/orbit"},
+		Binds:       []string{"/opt/lunafox:/opt/lunafox"},
 		AutoRemove:  false,
 		OomScoreAdj: 500,
 	}

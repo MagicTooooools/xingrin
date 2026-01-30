@@ -2,8 +2,8 @@ package router
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/yyhuni/orbit/server/internal/handler"
-	"github.com/yyhuni/orbit/server/internal/middleware"
+	"github.com/yyhuni/lunafox/server/internal/handler"
+	"github.com/yyhuni/lunafox/server/internal/middleware"
 )
 
 func RegisterWorkerRoutes(

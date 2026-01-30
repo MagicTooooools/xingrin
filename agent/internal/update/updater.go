@@ -15,8 +15,8 @@ import (
 	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/api/types/strslice"
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
-	"github.com/yyhuni/orbit/agent/internal/config"
-	"github.com/yyhuni/orbit/agent/internal/domain"
+	"github.com/yyhuni/lunafox/agent/internal/config"
+	"github.com/yyhuni/lunafox/agent/internal/domain"
 )
 
 // Updater handles agent self-update.
@@ -182,14 +182,14 @@ func (u *Updater) startNewContainer(ctx context.Context, image, version string) 
 	hostConfig := &container.HostConfig{
 		Binds: []string{
 			"/var/run/docker.sock:/var/run/docker.sock",
-			"/opt/orbit:/opt/orbit",
+			"/opt/lunafox:/opt/lunafox",
 		},
 		RestartPolicy: container.RestartPolicy{Name: "unless-stopped"},
 		OomScoreAdj:   -500,
 	}
 
 	// Version is already validated, just normalize to lowercase for container name
-	name := fmt.Sprintf("orbit-agent-%s", strings.ToLower(version))
+	name := fmt.Sprintf("lunafox-agent-%s", strings.ToLower(version))
 	resp, err := u.docker.ContainerCreate(ctx, cfg, hostConfig, &network.NetworkingConfig{}, nil, name)
 	if err != nil {
 		return err

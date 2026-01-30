@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/orbit/worker/internal/activity"
-	"github.com/orbit/worker/internal/workflow"
+	"github.com/yyhuni/lunafox/worker/internal/activity"
+	"github.com/yyhuni/lunafox/worker/internal/workflow"
 	"github.com/stretchr/testify/require"
 )
 

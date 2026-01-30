@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/yyhuni/orbit/server/internal/config"
+	"github.com/yyhuni/lunafox/server/internal/config"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/schema"

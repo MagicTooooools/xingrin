@@ -3,7 +3,7 @@ package service
 import (
 	"testing"
 
-	"github.com/yyhuni/orbit/server/internal/dto"
+	"github.com/yyhuni/lunafox/server/internal/dto"
 )
 
 // Feature: go-snapshot-apis, Property 1: 快照和资产同步写入

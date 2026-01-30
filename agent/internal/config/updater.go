@@ -3,7 +3,7 @@ package config
 import (
 	"sync"
 
-	"github.com/yyhuni/orbit/agent/internal/domain"
+	"github.com/yyhuni/lunafox/agent/internal/domain"
 )
 
 // Update holds optional configuration updates.

@@ -150,7 +150,7 @@ func setDefaults(v *viper.Viper) {
 	v.SetDefault("DB_PORT", 5432)
 	v.SetDefault("DB_USER", "postgres")
 	v.SetDefault("DB_PASSWORD", "")
-	v.SetDefault("DB_NAME", "orbit")
+	v.SetDefault("DB_NAME", "lunafox")
 	v.SetDefault("DB_SSLMODE", "disable")
 	v.SetDefault("DB_MAX_OPEN_CONNS", 25)
 	v.SetDefault("DB_MAX_IDLE_CONNS", 5)
@@ -172,7 +172,7 @@ func setDefaults(v *viper.Viper) {
 	v.SetDefault("JWT_REFRESH_EXPIRE", "168h") // 7 days
 
 	// Storage defaults
-	v.SetDefault("WORDLISTS_BASE_PATH", "/opt/orbit/wordlists")
+	v.SetDefault("WORDLISTS_BASE_PATH", "/opt/lunafox/wordlists")
 
 	// Worker defaults
 	v.SetDefault("WORKER_TOKEN", "change-me-worker-token")
@@ -206,7 +206,7 @@ func GetDefaults() *Config {
 			Port:            5432,
 			User:            "postgres",
 			Password:        "",
-			Name:            "orbit",
+			Name:            "lunafox",
 			SSLMode:         "disable",
 			MaxOpenConns:    25,
 			MaxIdleConns:    5,
@@ -228,7 +228,7 @@ func GetDefaults() *Config {
 			RefreshExpire: 168 * time.Hour,
 		},
 		Storage: StorageConfig{
-			WordlistsBasePath: "/opt/orbit/wordlists",
+			WordlistsBasePath: "/opt/lunafox/wordlists",
 		},
 		Worker: WorkerConfig{
 			Token: "change-me-worker-token",

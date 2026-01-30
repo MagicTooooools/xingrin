@@ -5,8 +5,8 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/yyhuni/orbit/server/internal/dto"
-	"github.com/yyhuni/orbit/server/internal/service"
+	"github.com/yyhuni/lunafox/server/internal/dto"
+	"github.com/yyhuni/lunafox/server/internal/service"
 )
 
 // ScanLogHandler handles scan log HTTP requests

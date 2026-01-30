@@ -31,5 +31,5 @@ func (ScanTask) TableName() string {
 
 // WorkspaceDir returns the workspace path for this scan task.
 func (t *ScanTask) WorkspaceDir() string {
-	return fmt.Sprintf("/opt/orbit/results/scan_%d/task_%d", t.ScanID, t.ID)
+	return fmt.Sprintf("/opt/lunafox/results/scan_%d/task_%d", t.ScanID, t.ID)
 }

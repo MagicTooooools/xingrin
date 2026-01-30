@@ -3,7 +3,7 @@ package dto
 import (
 	"time"
 
-	"github.com/yyhuni/orbit/server/internal/agentproto"
+	"github.com/yyhuni/lunafox/server/internal/agentproto"
 )
 
 // RegistrationTokenResponse represents a created registration token.

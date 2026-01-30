@@ -1,4 +1,4 @@
-module github.com/yyhuni/orbit/server
+module github.com/yyhuni/lunafox/server
 
 go 1.24.0
 

@@ -8,8 +8,8 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/yyhuni/orbit/agent/internal/docker"
-	"github.com/yyhuni/orbit/agent/internal/domain"
+	"github.com/yyhuni/lunafox/agent/internal/docker"
+	"github.com/yyhuni/lunafox/agent/internal/domain"
 )
 
 const defaultMaxRuntime = 7 * 24 * time.Hour

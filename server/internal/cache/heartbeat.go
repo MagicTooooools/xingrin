@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/go-redis/redis/v8"
-	"github.com/yyhuni/orbit/server/internal/agentproto"
+	"github.com/yyhuni/lunafox/server/internal/agentproto"
 )
 
 // HeartbeatData represents agent heartbeat information

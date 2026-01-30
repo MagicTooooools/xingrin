@@ -36,7 +36,7 @@ services:
       retries: 5
 
   server:
-    image: yyhuni/orbit-server:${IMAGE_TAG:?IMAGE_TAG is required}
+    image: yyhuni/lunafox-server:${IMAGE_TAG:?IMAGE_TAG is required}
     restart: always
     env_file:
       - .env
@@ -47,7 +47,7 @@ services:
       redis:
         condition: service_healthy
     volumes:
-      - /opt/orbit:/opt/orbit
+      - /opt/lunafox:/opt/lunafox
       - /var/run/docker.sock:/var/run/docker.sock
       - ../VERSION:/app/VERSION:ro
     healthcheck:
@@ -58,14 +58,14 @@ services:
       start_period: 60s
 
   frontend:
-    image: yyhuni/orbit-frontend:${IMAGE_TAG:?IMAGE_TAG is required}
+    image: yyhuni/lunafox-frontend:${IMAGE_TAG:?IMAGE_TAG is required}
     restart: always
     depends_on:
       server:
         condition: service_healthy
 
   nginx:
-    image: yyhuni/orbit-nginx:${IMAGE_TAG:?IMAGE_TAG is required}
+    image: yyhuni/lunafox-nginx:${IMAGE_TAG:?IMAGE_TAG is required}
     restart: always
     depends_on:
       server:
@@ -82,4 +82,4 @@ volumes:
 
 networks:
   default:
-    name: orbit_network  # 固定网络名，不随目录名变化
+    name: lunafox_network  # 固定网络名，不随目录名变化

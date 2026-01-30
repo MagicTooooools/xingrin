@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yyhuni/orbit/agent/internal/domain"
+	"github.com/yyhuni/lunafox/agent/internal/domain"
 )
 
 type fakeReporter struct {

@@ -96,13 +96,13 @@ func TestMapConfigKeys_InternalParams(t *testing.T) {
 		BaseCommand: "tool",
 		CLIParams:   []Parameter{},
 		InternalParams: map[string]any{
-			"subdomain-wordlist-base-path-runtime": "/opt/orbit/wordlists",
+			"subdomain-wordlist-base-path-runtime": "/opt/lunafox/wordlists",
 		},
 	}
 
 	normalized, err := MapConfigKeys(tmpl, map[string]any{"enabled": true})
 	require.NoError(t, err)
-	require.Equal(t, "/opt/orbit/wordlists", normalized["subdomain-wordlist-base-path-runtime"])
+	require.Equal(t, "/opt/lunafox/wordlists", normalized["subdomain-wordlist-base-path-runtime"])
 }
 
 func TestMapConfigKeys_InternalParams_RejectOverride(t *testing.T) {
@@ -110,7 +110,7 @@ func TestMapConfigKeys_InternalParams_RejectOverride(t *testing.T) {
 		BaseCommand: "tool",
 		CLIParams:   []Parameter{},
 		InternalParams: map[string]any{
-			"subdomain-wordlist-base-path-runtime": "/opt/orbit/wordlists",
+			"subdomain-wordlist-base-path-runtime": "/opt/lunafox/wordlists",
 		},
 	}
 
@@ -125,13 +125,13 @@ func TestMapConfigKeys_NilRawReturnsInternal(t *testing.T) {
 		BaseCommand: "tool",
 		CLIParams:   []Parameter{},
 		InternalParams: map[string]any{
-			"subdomain-wordlist-base-path-runtime": "/opt/orbit/wordlists",
+			"subdomain-wordlist-base-path-runtime": "/opt/lunafox/wordlists",
 		},
 	}
 
 	normalized, err := MapConfigKeys(tmpl, nil)
 	require.NoError(t, err)
-	require.Equal(t, "/opt/orbit/wordlists", normalized["subdomain-wordlist-base-path-runtime"])
+	require.Equal(t, "/opt/lunafox/wordlists", normalized["subdomain-wordlist-base-path-runtime"])
 }
 
 func TestMapConfigKeys_MissingSemanticID(t *testing.T) {

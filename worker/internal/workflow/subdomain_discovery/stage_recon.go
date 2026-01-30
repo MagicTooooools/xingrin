@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"github.com/orbit/worker/internal/activity"
-	"github.com/orbit/worker/internal/pkg"
+	"github.com/yyhuni/lunafox/worker/internal/activity"
+	"github.com/yyhuni/lunafox/worker/internal/pkg"
 	"go.uber.org/zap"
 )
 

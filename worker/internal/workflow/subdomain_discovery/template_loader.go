@@ -3,7 +3,7 @@ package subdomain_discovery
 import (
 	"embed"
 
-	"github.com/orbit/worker/internal/activity"
+	"github.com/yyhuni/lunafox/worker/internal/activity"
 )
 
 //go:generate go run ../../../cmd/const-gen/main.go -input templates.yaml -output constants_generated.go -package subdomain_discovery

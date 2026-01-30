@@ -7,22 +7,22 @@ import (
 	"os"
 	"time"
 
-	"github.com/yyhuni/orbit/agent/internal/config"
-	"github.com/yyhuni/orbit/agent/internal/docker"
-	"github.com/yyhuni/orbit/agent/internal/domain"
-	"github.com/yyhuni/orbit/agent/internal/health"
-	"github.com/yyhuni/orbit/agent/internal/metrics"
-	"github.com/yyhuni/orbit/agent/internal/protocol"
-	"github.com/yyhuni/orbit/agent/internal/task"
-	"github.com/yyhuni/orbit/agent/internal/update"
-	agentws "github.com/yyhuni/orbit/agent/internal/websocket"
+	"github.com/yyhuni/lunafox/agent/internal/config"
+	"github.com/yyhuni/lunafox/agent/internal/docker"
+	"github.com/yyhuni/lunafox/agent/internal/domain"
+	"github.com/yyhuni/lunafox/agent/internal/health"
+	"github.com/yyhuni/lunafox/agent/internal/metrics"
+	"github.com/yyhuni/lunafox/agent/internal/protocol"
+	"github.com/yyhuni/lunafox/agent/internal/task"
+	"github.com/yyhuni/lunafox/agent/internal/update"
+	agentws "github.com/yyhuni/lunafox/agent/internal/websocket"
 )
 
 func Run(ctx context.Context, cfg config.Config, wsURL string) error {
 	configUpdater := config.NewUpdater(cfg)
 
 	version := cfg.AgentVersion
-	hostname := os.Getenv("ORBIT_HOSTNAME")
+	hostname := os.Getenv("LUNAFOX_HOSTNAME")
 	if hostname == "" {
 		var err error
 		hostname, err = os.Hostname()

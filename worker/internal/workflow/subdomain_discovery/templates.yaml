@@ -128,7 +128,7 @@ tools:
       description: Collect subdomains using multiple search engines
       stage: recon
 
-    base_command: python3 '/opt/orbit-tools/share/Sublist3r/sublist3r.py' -d {{.Domain}} -o {{quote .OutputFile}}
+    base_command: python3 '/opt/lunafox-tools/share/Sublist3r/sublist3r.py' -d {{.Domain}} -o {{quote .OutputFile}}
     runtime_params:
       - semantic_id: timeout-runtime
         var: Timeout
@@ -184,8 +184,8 @@ tools:
       description: DNS bruteforce domains using dictionaries
       stage: bruteforce
     internal_params:
-      subdomain-wordlist-base-path-runtime: /opt/orbit/wordlists
-      resolvers-path-cli: /opt/orbit/wordlists/resolvers.txt
+      subdomain-wordlist-base-path-runtime: /opt/lunafox/wordlists
+      resolvers-path-cli: /opt/lunafox/wordlists/resolvers.txt
 
     base_command: puredns bruteforce {{quote .Wordlist}} {{.Domain}} -r {{quote .Resolvers}} --write {{quote .OutputFile}} --quiet
     runtime_params:
@@ -274,7 +274,7 @@ tools:
       description: Resolve subdomain list to verify their validity
       stage: resolve
     internal_params:
-      resolvers-path-cli: /opt/orbit/wordlists/resolvers.txt
+      resolvers-path-cli: /opt/lunafox/wordlists/resolvers.txt
 
     base_command: puredns resolve {{quote .InputFile}} -r {{quote .Resolvers}} --write {{quote .OutputFile}} --quiet
     runtime_params:
@@ -324,7 +324,7 @@ tools:
       description: Generate new possible subdomains by permuting discovered subdomains and resolve them
       stage: permutation
     internal_params:
-      resolvers-path-cli: /opt/orbit/wordlists/resolvers.txt
+      resolvers-path-cli: /opt/lunafox/wordlists/resolvers.txt
 
     base_command: cat {{quote .InputFile}} | dnsgen - | puredns resolve -r {{quote .Resolvers}} --write {{quote .OutputFile}} --quiet
     runtime_params:
