@@ -7,14 +7,11 @@ import { useQueryClient } from "@tanstack/react-query"
 import { TerminalLogin } from "@/components/ui/terminal-login"
 import { useLogin, useAuth } from "@/hooks/use-auth"
 import { vulnerabilityKeys } from "@/hooks/use-vulnerabilities"
-import { useRoutePrefetch } from "@/hooks/use-route-prefetch"
 import { getAssetStatistics, getStatisticsHistory } from "@/services/dashboard.service"
 import { getScans } from "@/services/scan.service"
 import { VulnerabilityService } from "@/services/vulnerability.service"
 
 export default function LoginPage() {
-  // Preload all page components on login page
-  useRoutePrefetch()
   const router = useRouter()
   const queryClient = useQueryClient()
   const { data: auth, isLoading: authLoading } = useAuth()
@@ -28,15 +25,53 @@ export default function LoginPage() {
 
   // Hide the inline boot splash and show login content
   React.useEffect(() => {
-    // Small delay to ensure smooth transition
-    const timer = setTimeout(() => {
-      const splash = document.getElementById('boot-splash')
+    let cancelled = false
+
+    const splash = document.getElementById('boot-splash')
+
+    const waitForLoad = new Promise<void>((resolve) => {
+      if (typeof document === "undefined") {
+        resolve()
+        return
+      }
+      if (document.readyState === "complete") {
+        resolve()
+        return
+      }
+      const handleLoad = () => resolve()
+      window.addEventListener("load", handleLoad, { once: true })
+    })
+
+    const waitForPrefetch = new Promise<void>((resolve) => {
+      if (typeof window === "undefined") {
+        resolve()
+        return
+      }
+      const w = window as Window & { __lunafoxRoutePrefetchDone?: boolean }
+      if (w.__lunafoxRoutePrefetchDone) {
+        resolve()
+        return
+      }
+      const handlePrefetchDone = () => resolve()
+      window.addEventListener("lunafox:route-prefetch-done", handlePrefetchDone, { once: true })
+    })
+
+    const waitForPrefetchOrTimeout = Promise.race([
+      waitForPrefetch,
+      new Promise<void>((resolve) => setTimeout(resolve, 3000)),
+    ])
+
+    Promise.all([waitForLoad, waitForPrefetchOrTimeout]).then(() => {
+      if (cancelled) return
       if (splash) {
         splash.classList.add('hidden')
       }
       setIsReady(true)
-    }, 100)
-    return () => clearTimeout(timer)
+    })
+
+    return () => {
+      cancelled = true
+    }
   }, [])
 
   // 提取预加载逻辑为可复用函数

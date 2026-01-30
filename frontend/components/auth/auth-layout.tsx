@@ -44,13 +44,14 @@ export function AuthLayout({ children }: AuthLayoutProps) {
   // Check if it's a public route (login page)
   const isPublicRoute = isPublicPath(pathname)
 
-  // Hide the inline boot splash once app is ready
+  // Hide the inline boot splash once app is ready (non-login routes only)
   React.useEffect(() => {
+    if (isPublicRoute) return
     const splash = document.getElementById('boot-splash')
     if (splash) {
       splash.classList.add('hidden')
     }
-  }, [])
+  }, [isPublicRoute])
 
   // Redirect to login page if not authenticated (useEffect must be before all conditional returns)
   React.useEffect(() => {
@@ -69,33 +70,36 @@ export function AuthLayout({ children }: AuthLayoutProps) {
     )
   }
 
-  // Loading or not authenticated
-  if (isLoading || !auth?.authenticated) {
-    return <LoadingState message="loading..." />
-  }
+  const showLoading = isLoading || !auth?.authenticated
+  const canRenderApp = !isLoading && !!auth?.authenticated
 
   // Authenticated - show full layout (with sidebar)
   return (
-    <SidebarProvider
-      style={
-        {
-          "--sidebar-width": "calc(var(--spacing) * 62)",
-          "--header-height": "calc(var(--spacing) * 11)",
-        } as React.CSSProperties
-      }
-    >
-      <AppSidebar />
-      <SidebarInset className="flex min-h-0 flex-col h-svh">
-        <SiteHeader />
-        <div className="flex flex-col flex-1 min-h-0 overflow-y-auto">
-          <div className="@container/main flex-1 min-h-0 flex flex-col gap-2">
-            <Suspense fallback={<LoadingState message={tCommon("status.pageLoading")} />}>
-              {children}
-            </Suspense>
-            <Toaster />
-          </div>
-        </div>
-      </SidebarInset>
-    </SidebarProvider>
+    <>
+      <LoadingState active={showLoading} message="loading..." />
+      {canRenderApp ? (
+        <SidebarProvider
+          style={
+            {
+              "--sidebar-width": "calc(var(--spacing) * 62)",
+              "--header-height": "calc(var(--spacing) * 11)",
+            } as React.CSSProperties
+          }
+        >
+          <AppSidebar />
+          <SidebarInset className="flex min-h-0 flex-col h-svh">
+            <SiteHeader />
+            <div className="flex flex-col flex-1 min-h-0 overflow-y-auto">
+              <div className="@container/main flex-1 min-h-0 flex flex-col gap-2">
+                <Suspense fallback={<LoadingState message={tCommon("status.pageLoading")} />}>
+                  {children}
+                </Suspense>
+                <Toaster />
+              </div>
+            </div>
+          </SidebarInset>
+        </SidebarProvider>
+      ) : null}
+    </>
   )
 }

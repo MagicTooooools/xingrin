@@ -32,6 +32,8 @@ interface LoadingStateProps {
   message?: string
   size?: "sm" | "md" | "lg"
   className?: string
+  active?: boolean
+  fadeMs?: number
 }
 
 /**
@@ -42,10 +44,39 @@ interface LoadingStateProps {
 export function LoadingState({ 
   message, 
   size = "md", 
-  className 
+  className,
+  active = true,
+  fadeMs = 250,
 }: LoadingStateProps) {
+  const [shouldRender, setShouldRender] = React.useState(active)
+  const [visible, setVisible] = React.useState(active)
+
+  React.useEffect(() => {
+    if (active) {
+      setShouldRender(true)
+      const raf = requestAnimationFrame(() => setVisible(true))
+      return () => cancelAnimationFrame(raf)
+    }
+
+    setVisible(false)
+    const timer = window.setTimeout(() => {
+      setShouldRender(false)
+    }, fadeMs)
+
+    return () => window.clearTimeout(timer)
+  }, [active, fadeMs])
+
+  if (!shouldRender) return null
+
   return (
-    <div className={cn("flex items-center justify-center min-h-[200px] h-screen w-full", className)}>
+    <div
+      className={cn(
+        "flex items-center justify-center min-h-[200px] h-screen w-full transition-opacity",
+        visible ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none",
+        className
+      )}
+      style={{ transitionDuration: `${fadeMs}ms` }}
+    >
       <div className="flex flex-col items-center space-y-4">
         <ShieldLoader size={size} />
         {message ? <p className="text-sm text-muted-foreground">{message}</p> : null}

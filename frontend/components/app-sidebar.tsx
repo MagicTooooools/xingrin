@@ -1,7 +1,7 @@
 "use client" // Mark as client component, can use browser APIs and interactive features
 
 // Import React library
-import type * as React from "react"
+import React from "react"
 // Import various icons from Tabler Icons library
 import {
   IconDashboard, // Dashboard icon
@@ -64,6 +64,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname()
   const normalize = (p: string) => (p !== "/" && p.endsWith("/") ? p.slice(0, -1) : p)
   const current = normalize(pathname)
+  const handleNavClick = React.useCallback(() => {
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new Event("lunafox:route-progress-start"))
+    }
+  }, [])
 
   const logoSrc = "/images/icon-64.png"
 
@@ -212,7 +217,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   return (
                     <SidebarMenuItem key={item.title}>
                       <SidebarMenuButton asChild isActive={isActive}>
-                        <Link href={item.url}>
+                        <Link href={item.url} onClick={handleNavClick}>
                           <item.icon />
                           <span>{item.title}</span>
                         </Link>
@@ -246,7 +251,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                                   asChild
                                   isActive={isSubActive}
                                 >
-                                  <Link href={subItem.url}>
+                                  <Link href={subItem.url} onClick={handleNavClick}>
                                     <span>{subItem.title}</span>
                                   </Link>
                                 </SidebarMenuSubButton>

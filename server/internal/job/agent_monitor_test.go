@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yyhuni/orbit/server/internal/model"
-	"github.com/yyhuni/orbit/server/internal/repository"
+	"github.com/yyhuni/lunafox/server/internal/model"
+	"github.com/yyhuni/lunafox/server/internal/repository"
 )
 
 type fakeAgentRepo struct {
@@ -69,6 +69,14 @@ func (f *fakeScanTaskRepo) UpdateStatus(ctx context.Context, id int, status stri
 
 func (f *fakeScanTaskRepo) GetStatusCountsByScanID(ctx context.Context, scanID int) (pending, running, completed, failed, cancelled int, err error) {
 	return 0, 0, 1, 0, 0, nil
+}
+
+func (f *fakeScanTaskRepo) CountActiveByScanAndStage(ctx context.Context, scanID, stage int) (int, error) {
+	return 0, nil
+}
+
+func (f *fakeScanTaskRepo) UnlockNextStage(ctx context.Context, scanID, stage int) (int64, error) {
+	return 0, nil
 }
 
 func (f *fakeScanTaskRepo) CancelTasksByScanID(ctx context.Context, scanID int) ([]repository.CancelledTaskInfo, error) {

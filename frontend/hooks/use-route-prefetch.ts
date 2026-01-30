@@ -1,5 +1,6 @@
-import { useRouter } from 'next/navigation'
-import { useEffect } from 'react'
+import { useEffect, useCallback } from 'react'
+import { useLocale } from 'next-intl'
+import { useRouter } from '@/i18n/navigation'
 
 /**
  * 路由预加载 Hook
@@ -9,6 +10,12 @@ import { useEffect } from 'react'
  */
 export function useRoutePrefetch(currentPath?: string) {
   const router = useRouter()
+  const locale = useLocale()
+  const withLocale = useCallback((path: string) => {
+    if (path.startsWith(`/${locale}/`)) return path
+    const normalized = path.startsWith("/") ? path : `/${path}`
+    return `/${locale}${normalized}`
+  }, [locale])
 
   useEffect(() => {
     console.log('[START] 路由预加载 Hook 已挂载，开始预加载...')
@@ -51,7 +58,7 @@ export function useRoutePrefetch(currentPath?: string) {
 
       routes.forEach((route) => {
         console.log(`  -> 预加载: ${route}`)
-        router.prefetch(route)
+        router.prefetch(withLocale(route))
       })
 
       // 如果提供了当前路径，智能预加载相关动态路由
@@ -62,7 +69,7 @@ export function useRoutePrefetch(currentPath?: string) {
           const targetId = targetIdMatch[1]
           const subRoutes = ['subdomain', 'endpoints', 'websites', 'vulnerabilities', 'directories', 'ip-addresses']
           subRoutes.forEach(sub => {
-            router.prefetch(`/target/${targetId}/${sub}`)
+            router.prefetch(withLocale(`/target/${targetId}/${sub}`))
           })
           console.log(`  -> 智能预加载目标子路由: /target/${targetId}/*`)
         }
@@ -73,13 +80,19 @@ export function useRoutePrefetch(currentPath?: string) {
           const scanId = scanIdMatch[1]
           const subRoutes = ['subdomain', 'endpoints', 'websites', 'vulnerabilities', 'directories', 'ip-addresses']
           subRoutes.forEach(sub => {
-            router.prefetch(`/scan/history/${scanId}/${sub}`)
+            router.prefetch(withLocale(`/scan/history/${scanId}/${sub}`))
           })
           console.log(`  -> 智能预加载扫描子路由: /scan/history/${scanId}/*`)
         }
       }
 
       console.log('[DONE] 所有路由预加载请求已发送')
+
+      if (typeof window !== 'undefined') {
+        const w = window as Window & { __lunafoxRoutePrefetchDone?: boolean }
+        w.__lunafoxRoutePrefetchDone = true
+        window.dispatchEvent(new Event('lunafox:route-prefetch-done'))
+      }
     }
 
     // 使用 requestIdleCallback 在浏览器空闲时执行，如果不支持则立即执行
@@ -90,7 +103,7 @@ export function useRoutePrefetch(currentPath?: string) {
       prefetchRoutes()
       return
     }
-  }, [router, currentPath])
+  }, [router, currentPath, withLocale])
 }
 
 /**
@@ -100,16 +113,22 @@ export function useRoutePrefetch(currentPath?: string) {
  */
 export function useSmartRoutePrefetch(currentPath: string) {
   const router = useRouter()
+  const locale = useLocale()
+  const withLocale = useCallback((path: string) => {
+    if (path.startsWith(`/${locale}/`)) return path
+    const normalized = path.startsWith("/") ? path : `/${path}`
+    return `/${locale}${normalized}`
+  }, [locale])
 
   useEffect(() => {
     const timer = setTimeout(() => {
       if (currentPath.includes('/organization')) {
         // 在组织页面，预加载目标页面
-        router.prefetch('/target/')
+        router.prefetch(withLocale('/target/'))
       } else if (currentPath.includes('/target')) {
         // 在目标页面，预加载扫描和漏洞页面
-        router.prefetch('/scan/history/')
-        router.prefetch('/vulnerabilities/')
+        router.prefetch(withLocale('/scan/history/'))
+        router.prefetch(withLocale('/vulnerabilities/'))
 
         // 如果是目标详情页（如 /target/146），预加载子路由
         const targetIdMatch = currentPath.match(/\/target\/(\d+)$/)
@@ -117,21 +136,21 @@ export function useSmartRoutePrefetch(currentPath: string) {
           const targetId = targetIdMatch[1]
           const subRoutes = ['subdomain', 'endpoints', 'websites', 'vulnerabilities']
           subRoutes.forEach(sub => {
-            router.prefetch(`/target/${targetId}/${sub}`)
+            router.prefetch(withLocale(`/target/${targetId}/${sub}`))
           })
           console.log(`  -> 预加载目标子路由: /target/${targetId}/*`)
         }
       } else if (currentPath.includes('/scan/history')) {
         // 在扫描历史页面，预加载目标页面
-        router.prefetch('/target/')
-        router.prefetch('/vulnerabilities/')
+        router.prefetch(withLocale('/target/'))
+        router.prefetch(withLocale('/vulnerabilities/'))
       } else if (currentPath === '/') {
         // 在首页，预加载主要页面
-        router.prefetch('/dashboard/')
-        router.prefetch('/organization/')
+        router.prefetch(withLocale('/dashboard/'))
+        router.prefetch(withLocale('/organization/'))
       }
     }, 1500) // 1.5 秒后预加载
 
     return () => clearTimeout(timer)
-  }, [currentPath, router])
+  }, [currentPath, router, withLocale])
 }

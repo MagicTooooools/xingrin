@@ -17,8 +17,18 @@ export function RouteProgress() {
   const isFirstRender = useRef(true)
 
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
+  const manualTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const manualStartRef = useRef(false)
+
+  const clearManualTimeout = useCallback(() => {
+    if (manualTimeoutRef.current) {
+      clearTimeout(manualTimeoutRef.current)
+      manualTimeoutRef.current = null
+    }
+  }, [])
 
   const startProgress = useCallback(() => {
+    clearManualTimeout()
     setIsVisible(true)
     setProgress(0)
     
@@ -35,9 +45,10 @@ export function RouteProgress() {
       }
       setProgress(currentProgress)
     }, 100)
-  }, [])
+  }, [clearManualTimeout])
 
   const completeProgress = useCallback(() => {
+    clearManualTimeout()
     // Clear ongoing interval
     if (intervalRef.current) {
       clearInterval(intervalRef.current)
@@ -50,7 +61,7 @@ export function RouteProgress() {
       setIsVisible(false)
       setProgress(0)
     }, 300)
-  }, [])
+  }, [clearManualTimeout])
 
   useEffect(() => {
     // Skip first render
@@ -59,20 +70,46 @@ export function RouteProgress() {
       return
     }
 
-    // Trigger progress bar on route change
-    startProgress()
-    
-    // End progress bar after page load completes
-    const timer = setTimeout(() => completeProgress(), 300)
+    let timer: ReturnType<typeof setTimeout> | null = null
+
+    if (manualStartRef.current) {
+      manualStartRef.current = false
+      clearManualTimeout()
+      timer = setTimeout(() => completeProgress(), 300)
+    } else {
+      // Trigger progress bar on route change
+      startProgress()
+      // End progress bar after page load completes
+      timer = setTimeout(() => completeProgress(), 300)
+    }
     
     return () => {
-      clearTimeout(timer)
+      if (timer) {
+        clearTimeout(timer)
+      }
       if (intervalRef.current) {
         clearInterval(intervalRef.current)
         intervalRef.current = null
       }
     }
   }, [pathname, searchParams, startProgress, completeProgress])
+
+  useEffect(() => {
+    const handleStart = () => {
+      manualStartRef.current = true
+      startProgress()
+      manualTimeoutRef.current = setTimeout(() => {
+        manualStartRef.current = false
+        completeProgress()
+      }, 1200)
+    }
+
+    window.addEventListener("lunafox:route-progress-start", handleStart)
+    return () => {
+      window.removeEventListener("lunafox:route-progress-start", handleStart)
+      clearManualTimeout()
+    }
+  }, [startProgress, completeProgress, clearManualTimeout])
 
   if (!isVisible) return null
 
