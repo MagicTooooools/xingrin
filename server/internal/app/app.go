@@ -5,6 +5,8 @@ import (
 	"embed"
 	"fmt"
 	"net/http"
+	"os"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -32,7 +34,10 @@ func Run(ctx context.Context, cfg *config.Config, migrationsFS embed.FS) {
 		zap.String("mode", cfg.Server.Mode),
 	)
 
-	serverVersion := pkg.ReadVersion("VERSION")
+	serverVersion := strings.TrimSpace(os.Getenv("IMAGE_TAG"))
+	if serverVersion == "" {
+		pkg.Fatal("IMAGE_TAG environment variable is required")
+	}
 	agentImage := "yyhuni/lunafox-agent"
 
 	// Initialize custom validator with translations

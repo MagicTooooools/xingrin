@@ -87,6 +87,23 @@ const GROUP_ROW_GAP = 240
 const GROUP_PADDING_X = 24
 const GROUP_PADDING_TOP = 32
 const GROUP_PADDING_BOTTOM = 24
+const HANDLE_CLASS = "!h-2 !w-2 !border-0 !bg-transparent"
+const SOURCE_HANDLE_OFFSET = 6
+
+function getSourceHandleStyle(position: Position): CSSProperties {
+  switch (position) {
+    case Position.Left:
+      return { transform: `translateX(-${SOURCE_HANDLE_OFFSET}px)` }
+    case Position.Right:
+      return { transform: `translateX(${SOURCE_HANDLE_OFFSET}px)` }
+    case Position.Top:
+      return { transform: `translateY(-${SOURCE_HANDLE_OFFSET}px)` }
+    case Position.Bottom:
+      return { transform: `translateY(${SOURCE_HANDLE_OFFSET}px)` }
+    default:
+      return {}
+  }
+}
 
 const LABEL_STYLE: CSSProperties = {
   fontSize: 11,
@@ -100,18 +117,12 @@ const LABEL_BG_STYLE: CSSProperties = {
 }
 
 const ARROW_MARKER = {
-  type: MarkerType.Arrow,
-  width: 12,
-  height: 12,
+  type: MarkerType.ArrowClosed,
+  width: 16,
+  height: 16,
   color: "var(--primary)",
-}
-
-const ARROW_MARKER_FAINT = {
-  type: MarkerType.Arrow,
-  width: 10,
-  height: 10,
-  color: "var(--primary)",
-  opacity: 0.45,
+  markerUnits: "userSpaceOnUse",
+  strokeWidth: 1.4,
 }
 
 const EDGE_PRESETS: Record<
@@ -130,7 +141,6 @@ const EDGE_PRESETS: Record<
       strokeWidth: 2.5,
       strokeOpacity: 0.6,
     },
-    markerStart: ARROW_MARKER_FAINT,
     markerEnd: ARROW_MARKER,
   },
   local: {
@@ -369,49 +379,53 @@ function RoleNode({ data }: NodeProps<RoleNodeData>) {
         type="source"
         position={Position.Left}
         id="left-source"
-        className="!h-2 !w-2 !border-0 !bg-transparent"
+        className={HANDLE_CLASS}
+        style={getSourceHandleStyle(Position.Left)}
       />
       <Handle
         type="target"
         position={Position.Left}
         id="left-target"
-        className="!h-2 !w-2 !border-0 !bg-transparent"
+        className={HANDLE_CLASS}
       />
       <Handle
         type="target"
         position={Position.Right}
         id="right-target"
-        className="!h-2 !w-2 !border-0 !bg-transparent"
+        className={HANDLE_CLASS}
       />
       <Handle
         type="source"
         position={Position.Right}
         id="right-source"
-        className="!h-2 !w-2 !border-0 !bg-transparent"
+        className={HANDLE_CLASS}
+        style={getSourceHandleStyle(Position.Right)}
       />
       <Handle
         type="source"
         position={Position.Top}
         id="top-source"
-        className="!h-2 !w-2 !border-0 !bg-transparent"
+        className={HANDLE_CLASS}
+        style={getSourceHandleStyle(Position.Top)}
       />
       <Handle
         type="target"
         position={Position.Top}
         id="top-target"
-        className="!h-2 !w-2 !border-0 !bg-transparent"
+        className={HANDLE_CLASS}
       />
       <Handle
         type="target"
         position={Position.Bottom}
         id="bottom-target"
-        className="!h-2 !w-2 !border-0 !bg-transparent"
+        className={HANDLE_CLASS}
       />
       <Handle
         type="source"
         position={Position.Bottom}
         id="bottom-source"
-        className="!h-2 !w-2 !border-0 !bg-transparent"
+        className={HANDLE_CLASS}
+        style={getSourceHandleStyle(Position.Bottom)}
       />
       <BaseNodeHeader className="bg-muted/30 items-start mb-0">
         <div className="flex items-start gap-2 flex-1">
@@ -583,38 +597,51 @@ export function ArchitectureFlow() {
     [groupNodes, roleNodes]
   )
 
-  const edges: Edge[] = useMemo(
-    () =>
-      links.map((link) => {
-        const preset = EDGE_PRESETS[link.kind]
-        const handleIds = resolveEdgeHandles(
-          layout,
-          link.source,
-          link.target
-        )
-        const sourceHandle = link.sourceHandle ?? handleIds.sourceHandle
-        const targetHandle = link.targetHandle ?? handleIds.targetHandle
+  const edges: Edge[] = useMemo(() => {
+    const buildEdge = (
+      link: FlowLink,
+      source: string,
+      target: string,
+      id: string,
+      label?: string
+    ): Edge => {
+      const preset = EDGE_PRESETS[link.kind]
+      const handleIds = resolveEdgeHandles(layout, source, target)
+      const sourceHandle = link.sourceHandle ?? handleIds.sourceHandle
+      const targetHandle = link.targetHandle ?? handleIds.targetHandle
 
-        return {
-          id: link.id,
-          source: link.source,
-          target: link.target,
-          type: ConnectionLineType.SmoothStep,
-          sourceHandle,
-          targetHandle,
-          animated: preset.animated,
-          label: link.label,
-          labelStyle: LABEL_STYLE,
-          labelBgStyle: LABEL_BG_STYLE,
-          labelBgPadding: [4, 8] as [number, number],
-          labelBgBorderRadius: 4,
-          style: preset.style,
-          markerStart: preset.markerStart,
-          markerEnd: preset.markerEnd,
-        }
-      }),
-    [links, layout]
-  )
+      return {
+        id,
+        source,
+        target,
+        type: ConnectionLineType.SmoothStep,
+        sourceHandle,
+        targetHandle,
+        animated: preset.animated,
+        label,
+        labelStyle: LABEL_STYLE,
+        labelBgStyle: LABEL_BG_STYLE,
+        labelBgPadding: [4, 8] as [number, number],
+        labelBgBorderRadius: 4,
+        style: preset.style,
+        markerEnd: preset.markerEnd,
+      }
+    }
+
+    const result: Edge[] = []
+    links.forEach((link) => {
+      if (link.kind === "bidirectional") {
+        result.push(buildEdge(link, link.source, link.target, link.id, link.label))
+        result.push(
+          buildEdge(link, link.target, link.source, `${link.id}-reverse`)
+        )
+        return
+      }
+
+      result.push(buildEdge(link, link.source, link.target, link.id, link.label))
+    })
+    return result
+  }, [links, layout])
 
   return (
     <div
@@ -634,7 +661,7 @@ export function ArchitectureFlow() {
         }}
         minZoom={0.6}
         maxZoom={1.5}
-        nodesDraggable={true}
+        nodesDraggable={false}
         nodesConnectable={false}
         elementsSelectable={false}
         panOnDrag={true}
