@@ -1,0 +1,13 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check-generated:
+    uses: ./.github/workflows/check-generated-files.yml

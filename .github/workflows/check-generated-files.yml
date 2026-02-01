@@ -8,14 +8,14 @@ permissions:
 
 jobs:
   check:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04  # 固定版本，避免 runner 更新导致 CI 行为变化
     steps:
       - uses: actions/checkout@v4
 
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: 1.21
+          go-version: '1.24'  # 与 go.mod 保持一致
 
       - name: Generate files for all workflows
         working-directory: worker

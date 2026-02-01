@@ -28,6 +28,10 @@ test:
 # 运行元数据一致性测试
 test-metadata:
 	@echo "Running metadata consistency tests..."
+	@# 运行版本一致性检查（所有工作流）
+	@echo "Testing version consistency..."; \
+	go test -v ./internal/workflow -run TestWorkflowVersionConsistency || exit 1
+	@# 运行各工作流的元数据测试
 	@for workflow_dir in internal/workflow/*/; do \
 		workflow_name=$$(basename "$$workflow_dir"); \
 		echo "Testing $${workflow_name}..."; \
