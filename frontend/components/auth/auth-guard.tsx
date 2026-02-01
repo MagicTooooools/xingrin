@@ -2,6 +2,7 @@
 
 import React from "react"
 import { useRouter, usePathname } from "next/navigation"
+import { useLocale } from "next-intl"
 import { useAuth } from "@/hooks/use-auth"
 import { LoadingState } from "@/components/loading-spinner"
 
@@ -22,10 +23,12 @@ export function AuthGuard({ children }: AuthGuardProps) {
   const router = useRouter()
   const pathname = usePathname()
   const { data: auth, isLoading } = useAuth()
+  const locale = useLocale()
 
   // Check if it's a public route
+  const pathWithoutLocale = pathname.replace(/^\/[a-z]{2}(?=\/|$)/, '')
   const isPublicRoute = PUBLIC_ROUTES.some((route) => 
-    pathname.startsWith(route)
+    pathWithoutLocale === route || pathWithoutLocale.startsWith(`${route}/`)
   )
 
   React.useEffect(() => {
@@ -36,9 +39,11 @@ export function AuthGuard({ children }: AuthGuardProps) {
 
     // Redirect to login page if not authenticated
     if (!auth?.authenticated) {
-      router.push("/login/")
+      const normalized = "/login/"
+      const loginPath = `/${locale}${normalized}`
+      router.push(loginPath)
     }
-  }, [auth, isLoading, isPublicRoute, router])
+  }, [auth, isLoading, isPublicRoute, router, locale])
 
   // Skip auth mode
   if (SKIP_AUTH) {

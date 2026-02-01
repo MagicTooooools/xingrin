@@ -32,10 +32,10 @@ function AuthBootLog({
 
   const authLines = React.useMemo<BootLine[]>(
     () => [
-      { text: `> ${authenticatingLabel}`, className: "text-white/90" },
-      { text: "> initializing secure channel...", className: "text-white/60" },
-      { text: "> validating credentials...", className: "text-white/60" },
-      { text: "> checking session...", className: "text-white/90" },
+      { text: `> ${authenticatingLabel}`, className: "text-foreground/90" },
+      { text: "> initializing secure channel...", className: "text-muted-foreground" },
+      { text: "> validating credentials...", className: "text-muted-foreground" },
+      { text: "> checking session...", className: "text-foreground/90" },
     ],
     [authenticatingLabel]
   )
@@ -82,23 +82,24 @@ function AuthBootLog({
         ))}
 
         {/* Cursor */}
-        <div className="text-white/80">
-          <span className="inline-block h-4 w-2 align-middle bg-white/80 animate-pulse" />
+        <div className="text-foreground/80">
+          <span className="inline-block h-4 w-2 align-middle bg-foreground/80 animate-pulse" />
         </div>
       </div>
 
       {/* Progress bar */}
       <div className="mt-6">
-        <div className="h-1.5 w-full rounded bg-white/10 overflow-hidden">
+        <div className="h-1.5 w-full rounded bg-foreground/10 overflow-hidden">
           <div
-            className="h-full bg-gradient-to-r from-zinc-400 to-zinc-100 transition-all duration-300"
+            className="h-full bg-gradient-to-r from-primary/40 to-primary transition-all duration-300"
             style={{
               width: `${progress}%`,
-              boxShadow: "0 0 10px rgba(255, 255, 255, 0.3), 0 0 20px rgba(255, 255, 255, 0.1)",
+              boxShadow:
+                "0 0 10px hsl(var(--primary) / 0.35), 0 0 18px hsl(var(--primary) / 0.2)",
             }}
           />
         </div>
-        <div className="mt-2 text-xs text-zinc-500">{processingLabel}</div>
+        <div className="mt-2 text-xs text-muted-foreground">{processingLabel}</div>
       </div>
     </div>
   )
@@ -327,16 +328,16 @@ export function TerminalLogin({
     const cursorChar = after[0] || ""
 
     if (!isFocused) {
-      return <span className="text-zinc-100">{displayValue}</span>
+      return <span className="text-foreground">{displayValue}</span>
     }
 
     return (
       <>
-        <span className="text-zinc-100">{before}</span>
-        <span className="animate-blink inline-block min-w-[0.6em] bg-green-500 text-black">
+        <span className="text-foreground">{before}</span>
+        <span className="animate-blink inline-block min-w-[0.6em] bg-primary text-primary-foreground">
           {cursorChar || "\u00A0"}
         </span>
-        <span className="text-zinc-100">{after.slice(1)}</span>
+        <span className="text-foreground">{after.slice(1)}</span>
       </>
     )
   }
@@ -346,18 +347,18 @@ export function TerminalLogin({
       ref={containerRef}
       onClick={handleContainerClick}
       className={cn(
-        "border-zinc-700 bg-zinc-900/80 backdrop-blur-sm z-0 w-full max-w-xl rounded-xl border cursor-text",
+        "border-border bg-card/70 text-foreground backdrop-blur-sm z-0 w-full max-w-xl rounded-xl border cursor-text",
         className
       )}
     >
       {/* Terminal header */}
-      <div className="border-zinc-700 flex items-center gap-x-2 border-b px-4 py-3">
+      <div className="border-border flex items-center gap-x-2 border-b px-4 py-3">
         <div className="flex flex-row gap-x-2">
           <div className="h-3 w-3 rounded-full bg-red-500"></div>
           <div className="h-3 w-3 rounded-full bg-yellow-500"></div>
           <div className="h-3 w-3 rounded-full bg-green-500"></div>
         </div>
-        <span className="ml-2 text-xs text-zinc-400 font-mono">{t.title}</span>
+        <span className="ml-2 text-xs text-muted-foreground font-mono">{t.title}</span>
       </div>
 
       {/* Terminal content */}
@@ -367,7 +368,7 @@ export function TerminalLogin({
           <Shuffle
             ref={shuffleRef}
             text="LUNAFOX"
-            className="!text-4xl sm:!text-5xl md:!text-6xl !font-bold text-cyan-500"
+            className="!text-4xl sm:!text-5xl md:!text-6xl !font-bold text-primary"
             shuffleDirection="up"
             duration={0.5}
             stagger={0.04}
@@ -376,10 +377,10 @@ export function TerminalLogin({
             triggerOnce={false}
             autoPlay={true}
           />
-          <div className="mt-3 flex items-center gap-3 text-zinc-400 text-sm">
-            <span className="h-px flex-1 bg-zinc-700" />
+          <div className="mt-3 flex items-center gap-3 text-muted-foreground text-sm">
+            <span className="h-px flex-1 bg-border" />
             <span className="whitespace-nowrap">{t.subtitle}</span>
-            <span className="h-px flex-1 bg-zinc-700" />
+            <span className="h-px flex-1 bg-border" />
           </div>
         </div>
 
@@ -406,34 +407,34 @@ export function TerminalLogin({
               className="space-y-4"
             >
               <div>
-                <label className="text-green-500 text-xs mb-1 block">{t.usernamePrompt}</label>
+                <label className="text-primary text-xs mb-1 block">{t.usernamePrompt}</label>
                 <input
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   disabled={isInputDisabled}
-                  className="w-full bg-zinc-800 border border-zinc-600 rounded px-3 py-2 text-zinc-100 outline-none focus:border-green-500 font-mono text-sm"
+                  className="w-full bg-background/60 border border-border rounded px-3 py-2 text-foreground outline-none focus:border-primary font-mono text-sm"
                   autoComplete="username"
                 />
               </div>
               <div>
-                <label className="text-green-500 text-xs mb-1 block">{t.passwordPrompt}</label>
+                <label className="text-primary text-xs mb-1 block">{t.passwordPrompt}</label>
                 <input
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   disabled={isInputDisabled}
-                  className="w-full bg-zinc-800 border border-zinc-600 rounded px-3 py-2 text-zinc-100 outline-none focus:border-green-500 font-mono text-sm"
+                  className="w-full bg-background/60 border border-border rounded px-3 py-2 text-foreground outline-none focus:border-primary font-mono text-sm"
                   autoComplete="current-password"
                 />
               </div>
               {step === "error" && (
-                <p className="text-red-500 text-sm">{t.invalidCredentials}</p>
+                <p className="text-destructive text-sm">{t.invalidCredentials}</p>
               )}
               <button
                 type="submit"
                 disabled={isInputDisabled}
-                className="w-full py-2 px-4 bg-green-600 hover:bg-green-500 disabled:opacity-50 text-black font-mono text-sm rounded transition-colors"
+                className="w-full py-2 px-4 bg-primary hover:bg-primary/90 disabled:opacity-50 text-primary-foreground font-mono text-sm rounded transition-colors"
               >
                 {t.submit}
               </button>
@@ -445,7 +446,7 @@ export function TerminalLogin({
             </div>
           )}
           {step === "success" && (
-            <div className="text-green-500 text-center py-4">
+            <div className="text-primary text-center py-4">
               {t.accessGranted}
             </div>
           )}
@@ -459,12 +460,12 @@ export function TerminalLogin({
               key={index}
               className={cn(
                 "whitespace-pre-wrap",
-                line.type === "prompt" && "text-green-500",
-                line.type === "input" && "text-zinc-100",
-                line.type === "info" && "text-zinc-500",
-                line.type === "success" && "text-green-500",
-                line.type === "error" && "text-red-500",
-                line.type === "warning" && "text-yellow-500"
+                line.type === "prompt" && "text-primary",
+                line.type === "input" && "text-foreground",
+                line.type === "info" && "text-muted-foreground",
+                line.type === "success" && "text-primary",
+                line.type === "error" && "text-destructive",
+                line.type === "warning" && "text-amber-500"
               )}
             >
               {line.text}
@@ -475,7 +476,7 @@ export function TerminalLogin({
           {/* Current input line */}
           {(step === "username" || step === "password") && (
             <div className="flex items-center">
-              <span className="text-green-500">{getCurrentPrompt()}</span>
+              <span className="text-primary">{getCurrentPrompt()}</span>
               {renderInputWithCursor()}
               <input
                 ref={inputRef}
@@ -503,12 +504,12 @@ export function TerminalLogin({
 
           {/* Keyboard shortcuts hint */}
           {(step === "username" || step === "password") && (
-            <div className="mt-6 text-xs text-zinc-600">
-              <span className="text-zinc-500">{t.shortcuts}:</span>{" "}
-              <span className="text-cyan-600">Enter</span> {t.submit}{" "}
-              <span className="text-cyan-600">Ctrl+C</span> {t.cancel}{" "}
-              <span className="text-cyan-600">Ctrl+U</span> {t.clear}{" "}
-              <span className="text-cyan-600">Ctrl+A/E</span> {t.startEnd}
+            <div className="mt-6 text-xs text-muted-foreground">
+              <span className="text-muted-foreground">{t.shortcuts}:</span>{" "}
+              <span className="text-primary">Enter</span> {t.submit}{" "}
+              <span className="text-primary">Ctrl+C</span> {t.cancel}{" "}
+              <span className="text-primary">Ctrl+U</span> {t.clear}{" "}
+              <span className="text-primary">Ctrl+A/E</span> {t.startEnd}
             </div>
           )}
         </div>

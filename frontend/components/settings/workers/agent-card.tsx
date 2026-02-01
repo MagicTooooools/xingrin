@@ -137,7 +137,7 @@ export function AgentCard({
               <CardTitle className="text-base truncate">{agent.name}</CardTitle>
               {agent.version && (
                 <Badge variant="secondary" className="text-[10px] shrink-0">
-                  v{agent.version}
+                  {agent.version}
                 </Badge>
               )}
             </div>

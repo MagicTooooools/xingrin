@@ -2,7 +2,7 @@
 # Multi-stage build with BuildKit caching
 
 # ==================== Dependencies stage ====================
-FROM node:20-alpine AS deps
+FROM node:20.20.0-alpine AS deps
 WORKDIR /app
 
 # Install pnpm
@@ -16,7 +16,7 @@ RUN --mount=type=cache,target=/root/.local/share/pnpm/store \
     pnpm install --frozen-lockfile
 
 # ==================== Build stage ====================
-FROM node:20-alpine AS builder
+FROM node:20.20.0-alpine AS builder
 WORKDIR /app
 
 RUN corepack enable && corepack prepare pnpm@latest --activate
@@ -27,7 +27,7 @@ COPY frontend/ ./
 
 # Build-time env
 ARG IMAGE_TAG=unknown
-ENV NEXT_PUBLIC_VERSION=${IMAGE_TAG}
+ENV NEXT_PUBLIC_IMAGE_TAG=${IMAGE_TAG}
 # Use service name "server" inside Docker network
 ENV API_HOST=server
 
@@ -36,7 +36,7 @@ RUN --mount=type=cache,target=/app/.next/cache \
     pnpm build
 
 # ==================== Runtime stage ====================
-FROM node:20-alpine AS runner
+FROM node:20.20.0-alpine AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production

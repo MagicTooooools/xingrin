@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"log"
 	"math/rand"
 	"os"
 	"strings"
@@ -17,6 +16,8 @@ import (
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
 	"github.com/yyhuni/lunafox/agent/internal/config"
 	"github.com/yyhuni/lunafox/agent/internal/domain"
+	"github.com/yyhuni/lunafox/agent/internal/logger"
+	"go.uber.org/zap"
 )
 
 // Updater handles agent self-update.
@@ -89,7 +90,7 @@ func (u *Updater) HandleUpdateRequired(payload domain.UpdateRequiredPayload) {
 func (u *Updater) run(payload domain.UpdateRequiredPayload) {
 	defer func() {
 		if r := recover(); r != nil {
-			log.Printf("agent update panic: %v", r)
+			logger.Log.Error("agent update panic", zap.Any("panic", r))
 			u.health.Set("paused", "update_panic", fmt.Sprintf("%v", r))
 		}
 		u.mu.Lock()
@@ -133,11 +134,11 @@ func (u *Updater) updateOnce(payload domain.UpdateRequiredPayload) error {
 
 	// Strict validation: reject invalid data from server
 	if err := validateImageName(image); err != nil {
-		log.Printf("invalid image name from server: %s, error: %v", image, err)
+		logger.Log.Warn("invalid image name from server", zap.String("image", image), zap.Error(err))
 		return fmt.Errorf("invalid image name from server: %w", err)
 	}
 	if err := validateVersion(version); err != nil {
-		log.Printf("invalid version from server: %s, error: %v", version, err)
+		logger.Log.Warn("invalid version from server", zap.String("version", version), zap.Error(err))
 		return fmt.Errorf("invalid version from server: %w", err)
 	}
 
@@ -199,7 +200,7 @@ func (u *Updater) startNewContainer(ctx context.Context, image, version string) 
 		return err
 	}
 
-	log.Printf("agent update started new container: %s", resp.ID)
+	logger.Log.Info("agent update started new container", zap.String("containerId", resp.ID))
 	return nil
 }
 

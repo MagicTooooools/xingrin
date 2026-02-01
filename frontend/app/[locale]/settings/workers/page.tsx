@@ -1,6 +1,6 @@
 "use client"
 
-import { AgentList } from "@/components/settings/workers"
+import { AgentList, ArchitectureDialog } from "@/components/settings/workers"
 import { useTranslations } from "next-intl"
 
 export default function WorkersPage() {
@@ -15,6 +15,7 @@ export default function WorkersPage() {
             {t("description")}
           </p>
         </div>
+        <ArchitectureDialog />
       </div>
       <AgentList />
     </div>

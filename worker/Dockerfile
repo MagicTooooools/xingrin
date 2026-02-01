@@ -4,9 +4,13 @@
 # ============================================
 # Stage 1: Build Go scanning tools
 # ============================================
-FROM golang:1.24 AS tools-builder
+FROM golang:1.25.6 AS tools-builder
 
-ENV GOPROXY=https://goproxy.cn,direct
+ARG GO111MODULE=on
+ARG GOPROXY=https://goproxy.cn,direct
+
+ENV GO111MODULE=$GO111MODULE
+ENV GOPROXY=$GOPROXY
 ENV CGO_ENABLED=1
 
 # Install build dependencies (build stage, unpinned to get latest security updates)
@@ -38,9 +42,13 @@ RUN go install -v github.com/projectdiscovery/httpx/cmd/httpx@latest && \
 # ============================================
 # Stage 2: Build Go Worker
 # ============================================
-FROM golang:1.24 AS worker-builder
+FROM golang:1.25.6 AS worker-builder
 
-ENV GOPROXY=https://goproxy.cn,direct
+ARG GO111MODULE=on
+ARG GOPROXY=https://goproxy.cn,direct
+
+ENV GO111MODULE=$GO111MODULE
+ENV GOPROXY=$GOPROXY
 
 WORKDIR /src
 
@@ -55,7 +63,7 @@ RUN CGO_ENABLED=0 go build -o /worker ./cmd/worker
 # ============================================
 # Stage 3: Runtime image
 # ============================================
-FROM ubuntu:24.04
+FROM ubuntu:noble-20260113
 
 ENV DEBIAN_FRONTEND=noninteractive
 

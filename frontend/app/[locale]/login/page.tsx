@@ -2,9 +2,10 @@
 
 import React from "react"
 import { useRouter } from "next/navigation"
-import { useTranslations } from "next-intl"
+import { useLocale, useTranslations } from "next-intl"
 import { useQueryClient } from "@tanstack/react-query"
 import { TerminalLogin } from "@/components/ui/terminal-login"
+import { LoadingState } from "@/components/loading-spinner"
 import { useLogin, useAuth } from "@/hooks/use-auth"
 import { vulnerabilityKeys } from "@/hooks/use-vulnerabilities"
 import { getAssetStatistics, getStatisticsHistory } from "@/services/dashboard.service"
@@ -17,17 +18,27 @@ export default function LoginPage() {
   const { data: auth, isLoading: authLoading } = useAuth()
   const { mutateAsync: login, isPending } = useLogin()
   const t = useTranslations("auth.terminal")
+  const locale = useLocale()
 
   const loginStartedRef = React.useRef(false)
   const [loginReady, setLoginReady] = React.useState(false)
 
   const [isReady, setIsReady] = React.useState(false)
+  const [loginProcessing, setLoginProcessing] = React.useState(false)
+  const [isExiting, setIsExiting] = React.useState(false)
+  const exitStartedRef = React.useRef(false)
+  const showLoading = !isReady || loginProcessing
+  const showExitOverlay = isExiting
+
+  const withLocale = React.useCallback((path: string) => {
+    if (path.startsWith(`/${locale}/`)) return path
+    const normalized = path.startsWith("/") ? path : `/${path}`
+    return `/${locale}${normalized}`
+  }, [locale])
 
   // Hide the inline boot splash and show login content
   React.useEffect(() => {
     let cancelled = false
-
-    const splash = document.getElementById('boot-splash')
 
     const waitForLoad = new Promise<void>((resolve) => {
       if (typeof document === "undefined") {
@@ -63,9 +74,6 @@ export default function LoginPage() {
 
     Promise.all([waitForLoad, waitForPrefetchOrTimeout]).then(() => {
       if (cancelled) return
-      if (splash) {
-        splash.classList.add('hidden')
-      }
       setIsReady(true)
     })
 
@@ -125,32 +133,49 @@ export default function LoginPage() {
     if (loginStartedRef.current) return
 
     let cancelled = false
+    let timer: number | undefined
 
     void (async () => {
+      setLoginProcessing(true)
       await prefetchDashboardData()
 
       if (cancelled) return
-      router.replace("/dashboard/")
+      setLoginProcessing(false)
+      if (!exitStartedRef.current) {
+        exitStartedRef.current = true
+        setIsExiting(true)
+        timer = window.setTimeout(() => {
+          router.replace(withLocale("/dashboard/"))
+        }, 300)
+      }
     })()
 
     return () => {
       cancelled = true
+      if (timer) window.clearTimeout(timer)
     }
-  }, [auth?.authenticated, authLoading, prefetchDashboardData, router])
+  }, [auth?.authenticated, authLoading, prefetchDashboardData, router, withLocale])
 
   React.useEffect(() => {
     if (!loginReady) return
-    router.replace("/dashboard/")
-  }, [loginReady, router])
+    if (exitStartedRef.current) return
+    exitStartedRef.current = true
+    setIsExiting(true)
+    const timer = window.setTimeout(() => {
+      router.replace(withLocale("/dashboard/"))
+    }, 300)
+    return () => window.clearTimeout(timer)
+  }, [loginReady, router, withLocale])
 
   const handleLogin = async (username: string, password: string) => {
     loginStartedRef.current = true
     setLoginReady(false)
+    setLoginProcessing(true)
 
     // 并行执行独立操作：登录验证 + 预加载 dashboard bundle
     const [loginRes] = await Promise.all([
       login({ username, password }),
-      router.prefetch("/dashboard/"),
+      router.prefetch(withLocale("/dashboard/")),
     ])
 
     // 预加载 dashboard 数据
@@ -162,11 +187,22 @@ export default function LoginPage() {
       user: loginRes.user,
     })
 
+    setLoginProcessing(false)
     setLoginReady(true)
   }
 
   return (
-    <div className="relative flex min-h-svh flex-col bg-black">
+    <div className="relative flex min-h-svh flex-col bg-background text-foreground">
+      {showLoading && !showExitOverlay ? (
+        <LoadingState
+          active
+          message="loading..."
+          className="fixed inset-0 z-50 bg-background"
+        />
+      ) : null}
+      {showExitOverlay ? (
+        <div className="fixed inset-0 z-50 bg-background" />
+      ) : null}
       {/* Circuit Board Animation */}
       <div className={`fixed inset-0 z-0 transition-opacity duration-300 ${isReady ? "opacity-100" : "opacity-0"}`}>
         <div className="circuit-container">
@@ -220,22 +256,26 @@ export default function LoginPage() {
           .circuit-container {
             position: absolute;
             inset: 0;
-            background: #0a0a0a;
+            background: var(--background);
             overflow: hidden;
+            --login-grid: color-mix(in oklch, var(--foreground) 6%, transparent);
+            --login-trace: color-mix(in oklch, var(--foreground) 16%, transparent);
+            --login-glow: color-mix(in oklch, var(--primary) 65%, transparent);
+            --login-glow-muted: color-mix(in oklch, var(--foreground) 45%, transparent);
           }
           
           .circuit-grid {
             position: absolute;
             inset: 0;
             background-image: 
-              linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+              linear-gradient(var(--login-grid) 1px, transparent 1px),
+              linear-gradient(90deg, var(--login-grid) 1px, transparent 1px);
             background-size: 40px 40px;
           }
           
           .trace {
             position: absolute;
-            background: rgba(255, 255, 255, 0.15);
+            background: var(--login-trace);
             overflow: hidden;
           }
           
@@ -253,7 +293,7 @@ export default function LoginPage() {
             left: -20%;
             width: 30%;
             height: 6px;
-            background: linear-gradient(90deg, transparent, #fff, #aaa, transparent);
+            background: linear-gradient(90deg, transparent, var(--login-glow), var(--login-glow-muted), transparent);
             animation: traceFlow 3s linear infinite;
             filter: blur(2px);
           }
@@ -263,7 +303,7 @@ export default function LoginPage() {
             left: -2px;
             width: 6px;
             height: 30%;
-            background: linear-gradient(180deg, transparent, #fff, #aaa, transparent);
+            background: linear-gradient(180deg, transparent, var(--login-glow), var(--login-glow-muted), transparent);
             animation: traceFlowV 3s linear infinite;
           }
           
@@ -293,17 +333,20 @@ export default function LoginPage() {
           authDone={loginReady}
           isPending={isPending}
           translations={translations}
+          className={`transition-[opacity,transform] duration-300 ${
+            isExiting ? "opacity-0 scale-[0.98]" : "opacity-100 scale-100"
+          }`}
         />
       </div>
 
       {/* Version number - fixed at the bottom of the page */}
       <div
         className={`relative z-10 flex-shrink-0 text-center py-4 transition-opacity duration-300 ${
-          isReady ? "opacity-100" : "opacity-0"
+          isReady && !isExiting ? "opacity-100" : "opacity-0"
         }`}
       >
         <p className="text-xs text-muted-foreground">
-          {process.env.NEXT_PUBLIC_VERSION || "dev"}
+          {process.env.NEXT_PUBLIC_IMAGE_TAG || "dev"}
         </p>
       </div>
     </div>

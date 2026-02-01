@@ -171,7 +171,7 @@ export function AgentListItem({
             <span className="font-medium text-sm truncate">{agent.name}</span>
             {agent.version && (
               <Badge variant="secondary" className="text-[10px] shrink-0">
-                v{agent.version}
+                {agent.version}
               </Badge>
             )}
           </div>

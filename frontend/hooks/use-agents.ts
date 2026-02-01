@@ -39,10 +39,10 @@ export function useCreateRegistrationToken() {
   return useMutation({
     mutationFn: () => agentService.createRegistrationToken(),
     onSuccess: () => {
-      toastMessages.success('toast.agent.token.success')
+      toastMessages.success('toast.agent.token.success', {}, 'agent-token')
     },
     onError: (error: unknown) => {
-      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.agent.token.error')
+      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.agent.token.error', 'agent-token')
     },
   })
 }

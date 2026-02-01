@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "@xyflow/react/dist/style.css";
 @import "tw-animate-css";
 @import "@xterm/xterm/css/xterm.css";
 @import "../styles/themes/index.css";
@@ -417,20 +418,22 @@
   animation: border-flow 2s linear infinite;
 }
 
-/* Dashboard 淡入动画 - 纯 CSS 实现，避免 hydration mismatch */
-@keyframes dashboard-fade-in {
+/* 全局淡入动画 - 纯 CSS 实现，避免 hydration mismatch */
+@keyframes app-fade-in {
   from {
-    opacity: 0;
-    filter: blur(4px);
+    opacity: 0.85;
+    filter: blur(1px);
+    transform: translateY(2px);
   }
   to {
     opacity: 1;
     filter: blur(0);
+    transform: translateY(0);
   }
 }
 
-.animate-dashboard-fade-in {
-  animation: dashboard-fade-in 500ms ease-out forwards;
+.animate-app-fade-in {
+  animation: app-fade-in 280ms ease-out both;
 }
 
 /* 登录页 - Glitch Reveal（全屏开场） - 增强版赛博朋克风格 */

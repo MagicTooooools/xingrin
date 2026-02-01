@@ -19,6 +19,7 @@
  */
 
 import axios, { AxiosRequestConfig, AxiosError, InternalAxiosRequestConfig } from 'axios';
+import { defaultLocale, locales } from '@/i18n/config';
 
 // Token storage keys
 const ACCESS_TOKEN_KEY = 'accessToken';
@@ -34,6 +35,21 @@ let failedQueue: Array<{
 
 // Cache for localStorage reads to avoid expensive I/O operations
 const storageCache = new Map<string, string | null>();
+
+const resolveLocaleFromPath = (pathname: string): string | null => {
+  const match = pathname.match(/^\/([a-z]{2})(?=\/|$)/);
+  if (!match) return null;
+  const maybeLocale = match[1];
+  return (locales as readonly string[]).includes(maybeLocale) ? maybeLocale : null;
+};
+
+const getLoginPath = (): string => {
+  if (typeof window === 'undefined') {
+    return '/login/';
+  }
+  const locale = resolveLocaleFromPath(window.location.pathname) || defaultLocale;
+  return `/${locale}/login/`;
+};
 
 /**
  * Process the queue of failed requests after token refresh
@@ -239,7 +255,7 @@ apiClient.interceptors.response.use(
         // No refresh token, redirect to login
         tokenManager.clearTokens();
         if (typeof window !== 'undefined') {
-          window.location.href = '/login';
+          window.location.href = getLoginPath();
         }
         return Promise.reject(error);
       }
@@ -282,7 +298,7 @@ apiClient.interceptors.response.use(
         processQueue(refreshError, null);
         tokenManager.clearTokens();
         if (typeof window !== 'undefined') {
-          window.location.href = '/login';
+          window.location.href = getLoginPath();
         }
         return Promise.reject(refreshError);
       } finally {

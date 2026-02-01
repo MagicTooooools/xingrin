@@ -2,6 +2,7 @@
  * Authentication-related hooks
  */
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useLocale } from 'next-intl'
 import { useRouter } from 'next/navigation'
 import { login, logout, getMe, changePassword } from '@/services/auth.service'
 import { useToastMessages } from '@/lib/toast-helpers'
@@ -54,13 +55,14 @@ export function useLogout() {
   const queryClient = useQueryClient()
   const router = useRouter()
   const toastMessages = useToastMessages()
+  const locale = useLocale()
 
   return useMutation({
     mutationFn: logout,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['auth', 'me'] })
       toastMessages.success('toast.auth.logout.success')
-      router.push('/login/')
+      router.push(`/${locale}/login/`)
     },
     onError: (error: unknown) => {
       const errorCode = getErrorCode(getErrorResponseData(error))

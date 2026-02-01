@@ -3,12 +3,13 @@ package websocket
 import (
 	"context"
 	"encoding/json"
-	"log"
 	"time"
 
 	"github.com/yyhuni/lunafox/agent/internal/health"
+	"github.com/yyhuni/lunafox/agent/internal/logger"
 	"github.com/yyhuni/lunafox/agent/internal/metrics"
 	"github.com/yyhuni/lunafox/agent/internal/protocol"
+	"go.uber.org/zap"
 )
 
 // HeartbeatSender sends periodic heartbeat messages over WebSocket.
@@ -87,10 +88,10 @@ func (h *HeartbeatSender) sendOnce() {
 
 	data, err := json.Marshal(msg)
 	if err != nil {
-		log.Printf("failed to marshal heartbeat message: %v", err)
+		logger.Log.Warn("failed to marshal heartbeat message", zap.Error(err))
 		return
 	}
 	if !h.client.Send(data) {
-		log.Printf("failed to send heartbeat: client not connected")
+		logger.Log.Warn("failed to send heartbeat: client not connected")
 	}
 }

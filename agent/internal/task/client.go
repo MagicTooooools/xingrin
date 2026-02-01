@@ -3,6 +3,7 @@ package task
 import (
 	"bytes"
 	"context"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -21,11 +22,18 @@ type Client struct {
 
 // NewClient creates a new task client.
 func NewClient(serverURL, apiKey string) *Client {
+	transport := http.DefaultTransport
+	if base, ok := transport.(*http.Transport); ok {
+		clone := base.Clone()
+		clone.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+		transport = clone
+	}
 	return &Client{
 		baseURL: strings.TrimRight(serverURL, "/"),
 		apiKey:  apiKey,
 		http: &http.Client{
-			Timeout: 15 * time.Second,
+			Timeout:   15 * time.Second,
+			Transport: transport,
 		},
 	}
 }

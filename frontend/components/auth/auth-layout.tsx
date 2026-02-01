@@ -2,7 +2,7 @@
 
 import React from "react"
 import { usePathname } from "next/navigation"
-import { useTranslations } from "next-intl"
+import { useLocale, useTranslations } from "next-intl"
 import { AppSidebar } from "@/components/app-sidebar"
 import { SiteHeader } from "@/components/site-header"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
@@ -40,25 +40,19 @@ export function AuthLayout({ children }: AuthLayoutProps) {
   const router = useRouter()
   const { data: auth, isLoading } = useAuth()
   const tCommon = useTranslations("common")
+  const locale = useLocale()
 
   // Check if it's a public route (login page)
   const isPublicRoute = isPublicPath(pathname)
 
-  // Hide the inline boot splash once app is ready (non-login routes only)
-  React.useEffect(() => {
-    if (isPublicRoute) return
-    const splash = document.getElementById('boot-splash')
-    if (splash) {
-      splash.classList.add('hidden')
-    }
-  }, [isPublicRoute])
-
   // Redirect to login page if not authenticated (useEffect must be before all conditional returns)
   React.useEffect(() => {
     if (!isLoading && !auth?.authenticated && !isPublicRoute) {
-      router.push("/login/")
+      const normalized = "/login/"
+      const loginPath = `/${locale}${normalized}`
+      router.push(loginPath)
     }
-  }, [auth, isLoading, isPublicRoute, router])
+  }, [auth, isLoading, isPublicRoute, router, locale])
 
   // If it's login page, render content directly (without sidebar)
   if (isPublicRoute) {
@@ -79,6 +73,7 @@ export function AuthLayout({ children }: AuthLayoutProps) {
       <LoadingState active={showLoading} message="loading..." />
       {canRenderApp ? (
         <SidebarProvider
+          className="animate-app-fade-in"
           style={
             {
               "--sidebar-width": "calc(var(--spacing) * 62)",
@@ -94,12 +89,12 @@ export function AuthLayout({ children }: AuthLayoutProps) {
                 <Suspense fallback={<LoadingState message={tCommon("status.pageLoading")} />}>
                   {children}
                 </Suspense>
-                <Toaster />
               </div>
             </div>
           </SidebarInset>
         </SidebarProvider>
       ) : null}
+      <Toaster />
     </>
   )
 }

@@ -53,3 +53,8 @@ specs/
 AGENTS.md
 WARP.md
 .opencode/
+
+# SSL certificates
+docker/nginx/ssl/*.pem
+docker/nginx/ssl/*.key
+docker/nginx/ssl/*.crt

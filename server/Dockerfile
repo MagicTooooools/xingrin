@@ -3,7 +3,7 @@
 # ============================================
 # Go Server - build
 # ============================================
-FROM golang:1.24 AS builder
+FROM golang:1.25.6 AS builder
 
 WORKDIR /src
 
@@ -20,7 +20,7 @@ RUN CGO_ENABLED=0 go build -o /out/server ./cmd/server
 # ============================================
 # Go Server - runtime
 # ============================================
-FROM debian:bookworm-slim
+FROM debian:bookworm-20260112-slim
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \

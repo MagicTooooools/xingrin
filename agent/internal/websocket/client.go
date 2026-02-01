@@ -2,10 +2,13 @@ package websocket
 
 import (
 	"context"
+	"crypto/tls"
 	"net/http"
 	"time"
 
 	"github.com/gorilla/websocket"
+	"github.com/yyhuni/lunafox/agent/internal/logger"
+	"go.uber.org/zap"
 )
 
 const (
@@ -29,10 +32,12 @@ type Client struct {
 
 // NewClient creates a WebSocket client for the agent.
 func NewClient(wsURL, apiKey string) *Client {
+	dialer := *websocket.DefaultDialer
+	dialer.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 	return &Client{
 		wsURL:        wsURL,
 		apiKey:       apiKey,
-		dialer:       websocket.DefaultDialer,
+		dialer:       &dialer,
 		send:         make(chan []byte, 256),
 		backoff:      NewBackoff(1*time.Second, 60*time.Second),
 		pingInterval: defaultPingInterval,
@@ -63,8 +68,10 @@ func (c *Client) Run(ctx context.Context) error {
 			return ctx.Err()
 		}
 
+		logger.Log.Info("websocket connect attempt", zap.String("url", c.wsURL))
 		conn, err := c.connect(ctx)
 		if err != nil {
+			logger.Log.Warn("websocket connect failed", zap.Error(err))
 			if !sleepWithContext(ctx, c.backoff.Next()) {
 				return ctx.Err()
 			}
@@ -72,7 +79,11 @@ func (c *Client) Run(ctx context.Context) error {
 		}
 
 		c.backoff.Reset()
+		logger.Log.Info("websocket connected")
 		err = c.runConn(ctx, conn)
+		if err != nil && ctx.Err() == nil {
+			logger.Log.Warn("websocket connection closed", zap.Error(err))
+		}
 		if ctx.Err() != nil {
 			return ctx.Err()
 		}

@@ -1,11 +1,11 @@
 package metrics
 
 import (
-	"log"
-
 	"github.com/shirou/gopsutil/v3/cpu"
 	"github.com/shirou/gopsutil/v3/disk"
 	"github.com/shirou/gopsutil/v3/mem"
+	"github.com/yyhuni/lunafox/agent/internal/logger"
+	"go.uber.org/zap"
 )
 
 // Collector gathers system metrics.
@@ -20,15 +20,15 @@ func NewCollector() *Collector {
 func (c *Collector) Sample() (float64, float64, float64) {
 	cpuPercent, err := cpuUsagePercent()
 	if err != nil {
-		log.Printf("metrics: cpu percent error: %v", err)
+		logger.Log.Warn("metrics: cpu percent error", zap.Error(err))
 	}
 	memPercent, err := memUsagePercent()
 	if err != nil {
-		log.Printf("metrics: mem percent error: %v", err)
+		logger.Log.Warn("metrics: mem percent error", zap.Error(err))
 	}
 	diskPercent, err := diskUsagePercent("/")
 	if err != nil {
-		log.Printf("metrics: disk percent error: %v", err)
+		logger.Log.Warn("metrics: disk percent error", zap.Error(err))
 	}
 	return cpuPercent, memPercent, diskPercent
 }

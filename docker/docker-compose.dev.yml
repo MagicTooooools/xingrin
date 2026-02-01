@@ -1,8 +1,8 @@
 services:
   # Agent 请通过安装脚本注册启动（/api/agents/install.sh）
   postgres:
-    image: postgres:16-alpine
-    restart: unless-stopped
+    image: postgres:16.3-alpine
+    restart: "on-failure:3"
     environment:
       POSTGRES_DB: ${DB_NAME:-lunafox}
       POSTGRES_USER: ${DB_USER:-postgres}
@@ -18,8 +18,8 @@ services:
       retries: 5
 
   redis:
-    image: redis:7-alpine
-    restart: unless-stopped
+    image: redis:7.4.7-alpine
+    restart: "on-failure:3"
     ports:
       - "${REDIS_PORT:-6379}:6379"
     healthcheck:
@@ -29,8 +29,8 @@ services:
       retries: 5
 
   server:
-    image: golang:1.24
-    restart: unless-stopped
+    image: golang:1.25.6
+    restart: "on-failure:3"
     env_file:
       - .env
     environment:
@@ -38,6 +38,8 @@ services:
       - PUBLIC_URL=${PUBLIC_URL:-}
       - GOMODCACHE=/go/pkg/mod
       - GOCACHE=/root/.cache/go-build
+      - GO111MODULE=${GO111MODULE:-on}
+      - GOPROXY=${GOPROXY:-https://goproxy.cn,direct}
     ports:
       - "8080:8080"
     working_dir: /workspace/server
@@ -51,21 +53,22 @@ services:
       - /opt/lunafox:/opt/lunafox
       - /var/run/docker.sock:/var/run/docker.sock
       - ../server:/workspace/server
-      - ../VERSION:/workspace/server/VERSION:ro
       - go-mod-cache:/go/pkg/mod
       - go-build-cache:/root/.cache/go-build
 
   frontend:
-    image: node:20-alpine
-    restart: unless-stopped
+    image: node:20.20.0-alpine
+    restart: "on-failure:3"
     environment:
       - NODE_ENV=development
       - API_HOST=server
       - NEXT_PUBLIC_BACKEND_URL=${NEXT_PUBLIC_BACKEND_URL:-}
       - PORT=3000
       - HOSTNAME=0.0.0.0
+    ports:
+      - "3000:3000"
     working_dir: /app
-    command: sh -c "corepack enable && corepack prepare pnpm@latest --activate && pnpm install && pnpm dev"
+    command: sh -c "corepack enable && corepack prepare pnpm@latest --activate && if [ ! -d node_modules/.pnpm ]; then pnpm install; fi && pnpm dev"
     depends_on:
       server:
         condition: service_started
@@ -73,18 +76,24 @@ services:
       - ../frontend:/app
       - frontend_node_modules:/app/node_modules
       - frontend_pnpm_store:/root/.local/share/pnpm/store
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000',res=>process.exit(res.statusCode<500?0:1)).on('error',()=>process.exit(1))"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 20s
 
   nginx:
     build:
       context: ..
       dockerfile: docker/nginx/Dockerfile
     image: yyhuni/lunafox-nginx:${IMAGE_TAG:-dev}
-    restart: unless-stopped
+    restart: "on-failure:3"
     depends_on:
       server:
         condition: service_started
       frontend:
-        condition: service_started
+        condition: service_healthy
     ports:
       - "8083:8083"
     volumes:
@@ -93,8 +102,8 @@ services:
   # Worker: build image for task execution (not run in dev by default).
   worker:
     build:
-      context: ..
-      dockerfile: worker/Dockerfile
+      context: ../worker
+      dockerfile: Dockerfile
     image: yyhuni/lunafox-worker:${IMAGE_TAG:-dev}
     restart: "no"
     volumes:

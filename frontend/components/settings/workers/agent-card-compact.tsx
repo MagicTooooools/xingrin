@@ -29,7 +29,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Separator } from "@/components/ui/separator"
 import { Status, StatusIndicator } from "@/components/ui/shadcn-io/status"
-import { useFormatNumber, useFormatRelativeTime } from "@/lib/i18n-format"
+import { useFormatDate, useFormatNumber } from "@/lib/i18n-format"
 import { cn } from "@/lib/utils"
 import type { Agent } from "@/types/agent.types"
 
@@ -131,7 +131,7 @@ export function AgentCardCompact({
   onDelete,
 }: AgentCardCompactProps) {
   const t = useTranslations("settings.workers")
-  const formatRelativeTime = useFormatRelativeTime()
+  const { formatDateTime } = useFormatDate()
   const formatNumber = useFormatNumber()
 
 
@@ -169,7 +169,7 @@ export function AgentCardCompact({
   return (
     <Card className="transition-all duration-200 hover:shadow-md gap-0">
       <CardHeader className="pb-2">
-        <div className="flex items-start justify-between gap-2">
+        <div className="flex items-start justify-between gap-2 w-full min-w-0">
           <div className="flex items-center gap-2 min-w-0 flex-1">
             <Status status={getStatusVariant(agent.status)}>
               <StatusIndicator className={agent.status === "online" ? "animate-pulse" : ""} />
@@ -177,11 +177,6 @@ export function AgentCardCompact({
             <span className="font-medium truncate">{agent.name}</span>
           </div>
           <div className="flex items-center gap-2 shrink-0">
-            {agent.version && (
-              <Badge variant="secondary" className="text-[10px]">
-                v{agent.version}
-              </Badge>
-            )}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="h-7 w-7">
@@ -208,23 +203,34 @@ export function AgentCardCompact({
       <CardContent className="space-y-2.5 pt-0">
         {/* 基本信息区 */}
         <div className="space-y-2 text-xs">
-          <div className="flex items-center gap-2 text-muted-foreground">
+          <div className="flex items-center gap-2 text-muted-foreground min-w-0">
             <IconMapPin className="h-3.5 w-3.5 shrink-0" />
             <span className="truncate">{agent.hostname || t("unknownHost")}</span>
-            <span>·</span>
-            <span>{agent.ipAddress || t("unknownIp")}</span>
+          </div>
+          <div className="flex items-center gap-2 text-muted-foreground min-w-0">
+            <IconMapPin className="h-3.5 w-3.5 shrink-0 opacity-60" />
+            <span className="truncate">{agent.ipAddress || t("unknownIp")}</span>
           </div>
           <div className="flex items-center gap-2">
             <IconClock className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
             <span className="text-muted-foreground">{t("metrics.lastHeartbeat")}:</span>
             <span className={cn("font-medium", isHeartbeatStale && "text-red-600 dark:text-red-500")}>
-              {formatRelativeTime(agent.lastHeartbeat)}
+              {formatDateTime(agent.lastHeartbeat)}
             </span>
             {agent.status === "online" && !isHeartbeatStale && (
               <IconActivity className="h-3 w-3 text-green-500 animate-pulse" />
             )}
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap min-w-0">
+            {agent.version && (
+              <Badge
+                variant="secondary"
+                className="text-[10px] max-w-[12rem] truncate"
+                title={agent.version}
+              >
+                {agent.version}
+              </Badge>
+            )}
             <Badge variant="outline" className={cn("text-[10px]", getHealthStyle(healthState))}>
               {healthLabel}
             </Badge>
@@ -242,10 +248,6 @@ export function AgentCardCompact({
         {/* 系统资源区 */}
         {heartbeat ? (
           <div className="space-y-3">
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <IconChartBar className="h-3.5 w-3.5" />
-              <span className="font-medium">{t("card.systemMetrics")}</span>
-            </div>
             <div className="space-y-2.5">
               <MetricProgress
                 label={t("metrics.cpu")}

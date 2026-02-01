@@ -3,7 +3,13 @@
 # ============================================
 # Go Agent - build
 # ============================================
-FROM golang:1.24 AS builder
+FROM golang:1.25.6 AS builder
+
+ARG GO111MODULE=on
+ARG GOPROXY=https://goproxy.cn,direct
+
+ENV GO111MODULE=$GO111MODULE
+ENV GOPROXY=$GOPROXY
 
 WORKDIR /src
 
@@ -22,7 +28,7 @@ RUN CGO_ENABLED=0 go build -o /out/agent ./cmd/agent
 # ============================================
 # Go Agent - runtime
 # ============================================
-FROM debian:bookworm-slim
+FROM debian:bookworm-20260112-slim
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
