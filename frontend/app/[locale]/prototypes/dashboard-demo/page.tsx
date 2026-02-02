@@ -14,23 +14,34 @@ import {
 } from "lucide-react"
 
 const themeVars = {
-  "--bg": "#FFFFFF",
+  "--bg": "#F6F7F8",
   "--panel": "#FFFFFF",
-  "--panel-muted": "#F3F5F7",
-  "--border": "#E3E7EC",
-  "--border-strong": "#C9D1DA",
-  "--text": "#20252B",
-  "--text-2": "#6E7682",
-  "--muted": "#A0A7B2",
-  "--shadow": "rgba(18, 24, 32, 0.06)",
+  "--panel-muted": "#EEF1F4",
+  "--border": "#D9DEE4",
+  "--border-strong": "#B8C1CC",
+  "--text": "#1B2128",
+  "--text-2": "#616A75",
+  "--muted": "#98A1AC",
+  "--accent": "#0F1318",
+  "--accent-soft": "rgba(15, 19, 24, 0.14)",
+  "--grid": "rgba(15, 19, 24, 0.06)",
+  "--grid-strong": "rgba(15, 19, 24, 0.12)",
+  "--panel-rail": "rgba(15, 19, 24, 0.22)",
+  "--panel-rail-strong": "rgba(15, 19, 24, 0.34)",
+  "--panel-glass": "rgba(255, 255, 255, 0.86)",
+  "--panel-glass-strong": "rgba(255, 255, 255, 0.94)",
+  "--panel-muted-glass": "rgba(238, 241, 244, 0.88)",
+  "--sheen": "rgba(255, 255, 255, 0.7)",
+  "--sheen-soft": "rgba(255, 255, 255, 0.38)",
+  "--shadow": "rgba(15, 19, 24, 0.08)",
   "--cut": "10px",
 } as CSSProperties
 
 const stats = [
-  { label: "Active Assets", value: "1,284", delta: "+4.2%" },
-  { label: "Scan Throughput", value: "82%", delta: "+1.1%" },
-  { label: "Critical Alerts", value: "12", delta: "-3" },
-  { label: "Coverage", value: "96.8%", delta: "+0.6%" },
+  { label: "Active Assets", value: "1,284", delta: "+4.2%", meta: "ZONE-09", slot: "CORE-1" },
+  { label: "Scan Throughput", value: "82%", delta: "+1.1%", meta: "RX-102", slot: "PIPE-4" },
+  { label: "Critical Alerts", value: "12", delta: "-3", meta: "SIG-7", slot: "WARN-2" },
+  { label: "Coverage", value: "96.8%", delta: "+0.6%", meta: "GRID-12", slot: "LAYER-3" },
 ]
 
 const navItems = [
@@ -95,9 +106,14 @@ export default function DashboardDemoPage() {
                 <p className="kicker">Operations Dashboard</p>
                 <h1 className="text-xl font-semibold tracking-wide">System Overview</h1>
                 <p className="text-sm text-[var(--text-2)]">White/grey industrial minimal demo based on the current dashboard layout.</p>
+                <div className="meta-row">
+                  <span className="meta-chip">ZONE-09</span>
+                  <span className="meta-chip">OPERATOR READY</span>
+                  <span className="meta-chip">RX-102</span>
+                </div>
               </div>
               <div className="flex flex-wrap gap-3 text-xs text-[var(--text-2)]">
-                <span className="tag">Cycle · 14:32</span>
+                <span className="tag inverse">Cycle · 14:32</span>
                 <span className="tag">Nodes · 48</span>
                 <span className="tag">Runtime · Stable</span>
               </div>
@@ -108,6 +124,10 @@ export default function DashboardDemoPage() {
             <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
               {stats.map((item) => (
                 <div key={item.label} className="panel slab p-4">
+                  <div className="flex items-center justify-between">
+                    <span className="meta-chip subtle">{item.meta}</span>
+                    <span className="meta-code">{item.slot}</span>
+                  </div>
                   <p className="text-xs text-[var(--text-2)]">{item.label}</p>
                   <div className="mt-3 flex items-end justify-between">
                     <span className="text-2xl font-semibold">{item.value}</span>
@@ -128,12 +148,17 @@ export default function DashboardDemoPage() {
                   </div>
                   <span className="tag">Last 24h</span>
                 </div>
+                <div className="meta-row micro">
+                  <span className="meta-chip">SEQ-144</span>
+                  <span className="meta-chip">GATE-02</span>
+                  <span className="meta-chip">PRIORITY A</span>
+                </div>
                 <div className="mt-4 chart-frame">
                   <span className="chart-notch" aria-hidden />
                   <svg viewBox="0 0 400 140" className="h-full w-full">
                     <polyline
                       fill="none"
-                      stroke="var(--text)"
+                      stroke="var(--accent)"
                       strokeWidth="2"
                       points={lineSeries
                         .map((value, index) => `${index * 55},${140 - value}`)
@@ -156,6 +181,11 @@ export default function DashboardDemoPage() {
                     <h2 className="text-base font-semibold">Severity Mix</h2>
                   </div>
                   <span className="tag">Weekly</span>
+                </div>
+                <div className="meta-row micro">
+                  <span className="meta-chip">MODE-7</span>
+                  <span className="meta-chip">BATCH 02</span>
+                  <span className="meta-chip">CONF 98%</span>
                 </div>
                 <div className="mt-4 flex h-36 items-end gap-2">
                   {barSeries.map((value, index) => (
@@ -191,6 +221,11 @@ export default function DashboardDemoPage() {
                     <h2 className="text-base font-semibold">Recent Activity</h2>
                   </div>
                   <span className="tag">Updated 2m ago</span>
+                </div>
+                <div className="meta-row micro">
+                  <span className="meta-chip">QUEUE-12</span>
+                  <span className="meta-chip">SYNC OK</span>
+                  <span className="meta-chip">ARCHIVE 12H</span>
                 </div>
                 <div className="mt-4 overflow-hidden rounded-none border border-[var(--border)]">
                   <table className="w-full text-sm">
@@ -230,6 +265,11 @@ export default function DashboardDemoPage() {
                   </div>
                   <ShieldCheck className="h-5 w-5" />
                 </div>
+                <div className="meta-row micro">
+                  <span className="meta-chip">LOOP-7</span>
+                  <span className="meta-chip">AUTO</span>
+                  <span className="meta-chip">STABLE</span>
+                </div>
                 <div className="mt-4 space-y-3">
                   {timeline.map((item) => (
                     <div key={item.label} className="panel slab flex items-center justify-between px-4 py-3">
@@ -253,13 +293,18 @@ export default function DashboardDemoPage() {
 
       <style jsx>{`
         .demo-grid {
-          background-image: none;
+          background-image:
+            linear-gradient(to right, var(--grid) 1px, transparent 1px),
+            linear-gradient(to bottom, var(--grid) 1px, transparent 1px),
+            radial-gradient(circle at 20% 20%, rgba(15, 19, 24, 0.12), transparent 45%);
+          background-size: 160px 160px, 160px 160px, 100% 100%;
+          opacity: 0.55;
         }
 
         .demo-ring {
           border-radius: 999px;
           border: 2px solid var(--border-strong);
-          background: rgba(32, 37, 43, 0.02);
+          background: rgba(15, 19, 24, 0.04);
         }
 
         .demo-beam {
@@ -270,26 +315,71 @@ export default function DashboardDemoPage() {
 
         .panel {
           position: relative;
-          background: var(--panel);
+          background-color: var(--panel-glass);
+          backdrop-filter: blur(7px) saturate(1.06);
+          -webkit-backdrop-filter: blur(7px) saturate(1.06);
+          background-image:
+            linear-gradient(180deg, var(--sheen) 0%, rgba(255, 255, 255, 0.18) 12%, transparent 36%),
+            radial-gradient(circle at 12% 0%, rgba(255, 255, 255, 0.55), transparent 55%),
+            radial-gradient(circle at 90% 15%, rgba(15, 19, 24, 0.08), transparent 50%),
+            repeating-linear-gradient(
+              90deg,
+              rgba(15, 19, 24, 0.03) 0,
+              rgba(15, 19, 24, 0.03) 1px,
+              transparent 1px,
+              transparent 5px
+            ),
+            linear-gradient(to right, var(--panel-rail) 0 0),
+            linear-gradient(to bottom, var(--panel-rail-strong) 0 0),
+            repeating-linear-gradient(
+              to right,
+              rgba(15, 19, 24, 0.035) 0,
+              rgba(15, 19, 24, 0.035) 1px,
+              transparent 1px,
+              transparent 36px
+            ),
+            repeating-linear-gradient(
+              to bottom,
+              rgba(15, 19, 24, 0.03) 0,
+              rgba(15, 19, 24, 0.03) 1px,
+              transparent 1px,
+              transparent 36px
+            ),
+            radial-gradient(rgba(15, 19, 24, 0.04) 0.6px, transparent 0.7px);
+          background-size: 100% 100%, 100% 100%, 100% 100%, 5px 100%, 4px 100%, 100% 4px, 36px 36px, 36px 36px, 6px 6px;
+          background-position: left top, left top, left top, left top, left top, left top, left top, left top, left top;
+          background-repeat: no-repeat, no-repeat, no-repeat, repeat, no-repeat, no-repeat, repeat, repeat, repeat;
           border: 1px solid var(--border);
-          box-shadow: 0 6px 12px var(--shadow);
+          box-shadow:
+            0 6px 12px var(--shadow),
+            inset 0 1px 0 var(--sheen-soft),
+            inset 0 -1px 0 rgba(15, 19, 24, 0.08);
           clip-path: polygon(0 0, calc(100% - var(--cut)) 0, 100% var(--cut), 100% 100%, var(--cut) 100%, 0 calc(100% - var(--cut)));
         }
 
         .panel::before {
           content: "";
           position: absolute;
-          left: 0;
+          left: 12px;
           top: 0;
-          width: 6px;
-          height: 100%;
-          background: rgba(31, 37, 43, 0.2);
+          width: 86px;
+          height: 6px;
+          background: var(--accent);
+          opacity: 0.18;
           pointer-events: none;
         }
 
         .panel-hero::before {
-          width: 8px;
-          background: rgba(31, 37, 43, 0.3);
+          width: 120px;
+          opacity: 0.26;
+        }
+
+        .panel-hero {
+          box-shadow:
+            0 12px 22px rgba(15, 19, 24, 0.12),
+            0 0 26px rgba(15, 19, 24, 0.12),
+            inset 0 1px 0 var(--sheen),
+            inset 0 -1px 0 rgba(15, 19, 24, 0.12);
         }
 
         .panel-ornament {
@@ -320,7 +410,7 @@ export default function DashboardDemoPage() {
           bottom: 12px;
           width: 140px;
           height: 0;
-          border-top: 2px dashed rgba(32, 37, 43, 0.18);
+          border-top: 2px dashed rgba(15, 19, 24, 0.16);
           opacity: 0.6;
         }
 
@@ -331,7 +421,7 @@ export default function DashboardDemoPage() {
           top: -3px;
           width: 2px;
           height: 8px;
-          background: rgba(32, 37, 43, 0.2);
+          background: rgba(15, 19, 24, 0.22);
         }
 
         .demo-sidebar {
@@ -390,14 +480,34 @@ export default function DashboardDemoPage() {
           content: "";
           position: absolute;
           inset: 10px;
-          border: 1px solid rgba(32, 37, 43, 0.04);
+          border: 1px solid rgba(15, 19, 24, 0.05);
           pointer-events: none;
           clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
         }
 
         .slab {
           border-top: 2px solid var(--border-strong);
-          box-shadow: none;
+          background-color: var(--panel-glass-strong);
+          backdrop-filter: blur(5px) saturate(1.04);
+          -webkit-backdrop-filter: blur(5px) saturate(1.04);
+          box-shadow:
+            inset 0 1px 0 var(--sheen-soft),
+            inset 0 -1px 0 rgba(15, 19, 24, 0.05);
+          background-image:
+            linear-gradient(180deg, rgba(255, 255, 255, 0.45) 0%, transparent 45%),
+            repeating-linear-gradient(
+              90deg,
+              rgba(15, 19, 24, 0.025) 0,
+              rgba(15, 19, 24, 0.025) 1px,
+              transparent 1px,
+              transparent 5px
+            ),
+            linear-gradient(to right, var(--panel-rail) 0 0),
+            linear-gradient(to bottom, var(--panel-rail-strong) 0 0),
+            radial-gradient(rgba(15, 19, 24, 0.04) 0.6px, transparent 0.7px);
+          background-size: 100% 100%, 5px 100%, 3px 100%, 100% 3px, 6px 6px;
+          background-position: left top, left top, left top, left top, left top;
+          background-repeat: no-repeat, repeat, no-repeat, no-repeat, repeat;
           clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
         }
 
@@ -429,11 +539,74 @@ export default function DashboardDemoPage() {
           border-color: var(--border-strong);
         }
 
+        .tag.inverse {
+          background: var(--accent);
+          border-color: var(--accent);
+          color: #ffffff;
+        }
+
+        .meta-row {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px;
+          margin-top: 6px;
+        }
+
+        .meta-row.micro {
+          margin-top: 10px;
+        }
+
+        .meta-chip {
+          display: inline-flex;
+          align-items: center;
+          padding: 2px 6px;
+          border: 1px solid var(--border);
+          font-size: 9px;
+          letter-spacing: 0.18em;
+          text-transform: uppercase;
+          color: var(--text-2);
+          background: var(--panel-muted);
+          font-family: "IBM Plex Mono", "MiSans", sans-serif;
+        }
+
+        .meta-chip.subtle {
+          background: transparent;
+          border-color: var(--border-strong);
+          color: var(--muted);
+        }
+
+        .meta-code {
+          font-size: 9px;
+          letter-spacing: 0.2em;
+          text-transform: uppercase;
+          color: var(--muted);
+          font-family: "IBM Plex Mono", "MiSans", sans-serif;
+        }
+
         .chart-frame {
           height: 160px;
           border: 1px solid var(--border);
-          background: var(--panel-muted);
+          background-color: var(--panel-muted-glass);
+          backdrop-filter: blur(4px) saturate(1.05);
+          -webkit-backdrop-filter: blur(4px) saturate(1.05);
+          background-image:
+            linear-gradient(180deg, rgba(255, 255, 255, 0.5) 0%, transparent 55%),
+            repeating-linear-gradient(
+              90deg,
+              rgba(15, 19, 24, 0.02) 0,
+              rgba(15, 19, 24, 0.02) 1px,
+              transparent 1px,
+              transparent 5px
+            ),
+            linear-gradient(to right, var(--grid-strong) 1px, transparent 1px),
+            linear-gradient(to bottom, var(--grid-strong) 1px, transparent 1px),
+            radial-gradient(rgba(15, 19, 24, 0.04) 0.6px, transparent 0.7px);
+          background-size: 100% 100%, 5px 100%, 40px 40px, 40px 40px, 6px 6px;
+          background-repeat: no-repeat, repeat, repeat, repeat, repeat;
           position: relative;
+          box-shadow:
+            inset 0 1px 0 var(--sheen-soft),
+            inset 0 -1px 0 rgba(15, 19, 24, 0.08);
         }
 
         .chart-notch {
@@ -449,8 +622,8 @@ export default function DashboardDemoPage() {
 
         .bar {
           flex: 1;
-          background: var(--text);
-          opacity: 0.2;
+          background: var(--accent);
+          opacity: 0.18;
         }
       `}</style>
     </main>
