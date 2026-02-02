@@ -19,6 +19,7 @@ import {
   IconKey, // API Key icon
   IconBan, // Blacklist icon
   IconInfoCircle, // About icon
+  IconCircleDot, // Dev prototype icon
 } from "@tabler/icons-react"
 // Import internationalization hook
 import { useTranslations } from 'next-intl'
@@ -69,6 +70,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       window.dispatchEvent(new Event("lunafox:route-progress-start"))
     }
   }, [])
+  const showDevTools = process.env.NODE_ENV === "development"
 
   const logoSrc = "/images/icon-64.png"
 
@@ -180,6 +182,29 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     },
   ]
 
+  const devTools = [
+    {
+      title: t('uiPrototypes'),
+      url: "/prototypes/scan-dialogs/",
+      icon: IconCircleDot,
+    },
+    {
+      title: "Arknights UI Demo",
+      url: "/prototypes/arknights-ui/",
+      icon: IconCircleDot,
+    },
+    {
+      title: "Dashboard Demo",
+      url: "/prototypes/dashboard-demo/",
+      icon: IconCircleDot,
+    },
+    {
+      title: "Dashboard Demo Dark",
+      url: "/prototypes/dashboard-demo-dark/",
+      icon: IconCircleDot,
+    },
+  ]
+
   return (
     // collapsible="icon" means the sidebar can be collapsed to icon-only mode
     <Sidebar collapsible="icon" {...props}>
@@ -270,6 +295,29 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         
         {/* System settings navigation menu */}
         <NavSystem items={documents} />
+        {showDevTools && (
+          <SidebarGroup>
+            <SidebarGroupLabel>{t('devTools')}</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {devTools.map((item) => {
+                  const devUrl = normalize(item.url)
+                  const isActive = current === devUrl || current.startsWith(devUrl + "/")
+                  return (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton asChild isActive={isActive}>
+                        <Link href={item.url} onClick={handleNavClick}>
+                          <item.icon />
+                          <span>{item.title}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  )
+                })}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
         {/* About system button */}
         <SidebarGroup className="mt-auto">
           <SidebarGroupContent>

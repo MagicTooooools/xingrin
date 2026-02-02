@@ -15,12 +15,12 @@ export interface ScanEngine {
 }
 
 // Preset engine interface (system-defined, read from files)
+// Note: enabledFeatures is parsed by frontend from configuration using parseEngineCapabilities()
 export interface PresetEngine {
   id: string               // e.g., "full_scan", "quick_scan"
   name: string             // Display name
   description?: string     // Brief description
   configuration: string    // YAML configuration content
-  enabledFeatures: string[] // List of enabled workflow names
 }
 
 // Create engine request

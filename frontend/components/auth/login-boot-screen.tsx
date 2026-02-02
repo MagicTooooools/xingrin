@@ -62,15 +62,15 @@ export function LoginBootScreen({ className }: { className?: string; success?: b
       <div className="relative z-10 flex-1 flex items-center justify-center">
         <div className="text-center">
           {/* Logo container */}
-          <div className="relative w-[200px] h-[200px] mx-auto mb-10">
+          <div className="relative w-[240px] h-[240px] mx-auto mb-10">
             {/* Spinning rings */}
             <div className="logo-spinner" />
             {/* Logo image */}
             <Image
               src={logoSrc}
               alt="LunaFox Logo"
-              width={120}
-              height={120}
+              width={160}
+              height={160}
               className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10"
               unoptimized
               priority

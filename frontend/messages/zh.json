@@ -346,6 +346,8 @@
     "notifications": "通知设置",
     "apiKeys": "API 密钥",
     "globalBlacklist": "全局黑名单",
+    "devTools": "开发工具",
+    "uiPrototypes": "UI 原型",
     "about": "关于系统"
   },
   "search": {
@@ -696,7 +698,7 @@
       "orgDesc": "为组织",
       "selectEngine": "选择扫描引擎",
       "selectEngineTitle": "选择引擎",
-      "selectEngineHint": "选择左侧引擎查看配置详情",
+      "selectEngineHint": "请选择扫描引擎（单选）",
       "loading": "加载中...",
       "loadFailed": "加载失败",
       "noEngines": "暂无可用引擎",
@@ -707,6 +709,9 @@
       "selectedCount": "已选择 {count} 个引擎",
       "configTitle": "扫描配置",
       "configEdited": "已编辑",
+      "advancedConfig": "高级配置",
+      "quickStart": "快速启动",
+      "cancel": "取消",
       "stepIndicator": "步骤 {current}/{total}",
       "back": "上一步",
       "next": "下一步",
@@ -730,13 +735,33 @@
         "enginesCount": "个引擎",
         "capabilities": "涉及能力",
         "usedEngines": "使用引擎",
-        "noCapabilities": "请选择引擎"
+        "noCapabilities": "请选择引擎",
+        "loading": "加载扫描方案中...",
+        "noMatchingEngines": "暂无匹配的引擎",
+        "empty": "暂无预设引擎"
+      },
+      "mode": {
+        "preset": "预设引擎",
+        "custom": "自定义引擎"
       },
       "overwriteConfirm": {
         "title": "覆盖配置确认",
         "description": "您已手动编辑过配置，切换引擎将覆盖当前配置。是否继续？",
         "cancel": "取消",
         "confirm": "确认覆盖"
+      },
+      "validation": {
+        "title": "校验结果",
+        "yamlOk": "YAML 语法正常",
+        "yamlError": "YAML 语法有误，请检查",
+        "enginesOk": "已选择 {count} 个引擎",
+        "enginesMissing": "尚未选择扫描引擎",
+        "presetOk": "已选择预设：{name}",
+        "presetMissing": "尚未选择预设",
+        "configEdited": "已手动编辑配置",
+        "configFromPreset": "当前配置来自预设",
+        "configFromEngine": "当前配置来自所选引擎",
+        "configMissing": "配置不能为空"
       }
     },
     "cron": {
@@ -1641,7 +1666,9 @@
     "noScansCreated": "未创建任何扫描任务",
     "unknownError": "未知错误",
     "noEngineSelected": "请选择至少一个扫描引擎",
+    "noPresetSelected": "请先选择一个扫描方案",
     "emptyConfig": "扫描配置不能为空",
+    "invalidConfig": "配置格式无效，请检查 YAML 语法",
     "engineNameRequired": "请输入引擎名称",
     "configRequired": "配置内容不能为空",
     "yamlSyntaxError": "YAML 语法错误",

@@ -1,0 +1,50 @@
+# _example.yaml - 预设引擎模板示例（此文件不会被加载）
+# 复制此文件并重命名为 <id>.yaml 来创建新预设
+#
+# 字段说明：
+#   id:            唯一标识符，建议与文件名一致
+#   name:          显示名称，支持中文
+#   description:   描述，说明预设用途（可选）
+#   configuration: YAML 配置内容，使用 | 多行字符串
+#
+# 前端会从 configuration 自动解析出启用的功能（enabledFeatures）
+# 支持的功能: subdomain_discovery, port_scan, site_scan, fingerprint_detect,
+#            directory_scan, url_fetch, vuln_scan, waf_detection, screenshot, osint
+#
+# 注意：configuration 内容会在服务启动时用 JSON Schema 校验，请确保格式正确
+
+id: example_preset
+name: 示例预设
+description: 这是一个示例预设，包含子域名发现功能
+
+configuration: |
+  subdomain_discovery:
+    recon:
+      enabled: true
+      tools:
+        subfinder:
+          enabled: true
+          timeout-runtime: 3600
+          threads-cli: 10
+        sublist3r:
+          enabled: false
+        assetfinder:
+          enabled: false
+    bruteforce:
+      enabled: false
+      tools:
+        subdomain-bruteforce:
+          enabled: false
+    permutation:
+      enabled: false
+      tools:
+        subdomain-permutation-resolve:
+          enabled: false
+    resolve:
+      enabled: true
+      tools:
+        subdomain-resolve:
+          enabled: true
+          timeout-runtime: 3600
+          threads-cli: 50
+          rate-limit-cli: 1000

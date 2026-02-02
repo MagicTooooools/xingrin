@@ -44,8 +44,40 @@ export async function getScan(id: number): Promise<ScanRecord> {
  * @returns Scan task information
  */
 export async function initiateScan(data: InitiateScanRequest): Promise<InitiateScanResponse> {
-  const res = await api.post<InitiateScanResponse>('/scans/initiate/', data)
-  return res.data
+  // Convert InitiateScanRequest to CreateScanRequest format
+  // Backend expects: POST /api/scans with mode="normal"
+  if (!data.targetId) {
+    throw new Error('targetId is required')
+  }
+  
+  const createScanRequest = {
+    mode: 'normal' as const,
+    targetId: data.targetId,
+    engineIds: data.engineIds,
+    engineNames: data.engineNames,
+    configuration: data.configuration,
+  }
+  
+  // Backend returns ScanDetailResponse (wrapped in dto.Success), convert to InitiateScanResponse
+  const res = await api.post<ScanRecord>('/scans/', createScanRequest)
+  
+  // Convert response format: ScanRecord -> InitiateScanResponse
+  // Backend returns the scan record directly (via dto.Created)
+  const scan = res.data
+  
+  return {
+    message: 'Scan initiated successfully',
+    count: 1,
+    scans: [{
+      id: scan.id,
+      target: scan.targetId,
+      engineIds: scan.engineIds,
+      engineNames: scan.engineNames,
+      status: scan.status,
+      createdAt: scan.createdAt,
+      updatedAt: scan.stoppedAt || scan.createdAt, // Use stoppedAt if available, otherwise createdAt
+    }],
+  }
 }
 
 /**
@@ -54,7 +86,17 @@ export async function initiateScan(data: InitiateScanRequest): Promise<InitiateS
  * @returns Scan task information
  */
 export async function quickScan(data: QuickScanRequest): Promise<QuickScanResponse> {
-  const res = await api.post<QuickScanResponse>('/scans/quick/', data)
+  // Convert QuickScanRequest to CreateScanRequest format
+  // Backend expects: POST /api/scans with mode="quick"
+  const createScanRequest = {
+    mode: 'quick' as const,
+    targets: data.targets.map(t => t.name),
+    engineIds: data.engineIds,
+    engineNames: data.engineNames,
+    configuration: data.configuration,
+  }
+  
+  const res = await api.post<QuickScanResponse>('/scans/', createScanRequest)
   return res.data
 }
 

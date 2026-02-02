@@ -4,6 +4,36 @@
 @import "@xterm/xterm/css/xterm.css";
 @import "../styles/themes/index.css";
 
+@font-face {
+  font-family: "MiSans";
+  src:
+    local("MiSans"),
+    url("/fonts/misans/MiSans-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "MiSans";
+  src:
+    local("MiSans"),
+    url("/fonts/misans/MiSans-Medium.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "MiSans";
+  src:
+    local("MiSans"),
+    url("/fonts/misans/MiSans-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -42,7 +72,7 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
-  --font-sans: 'Noto Sans SC', system-ui, -apple-system, PingFang SC, sans-serif;
+  --font-sans: 'MiSans', system-ui, -apple-system, PingFang SC, Hiragino Sans GB, Microsoft YaHei, sans-serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
   --font-serif: Georgia, 'Noto Serif SC', serif;
   --tracking-tighter: calc(var(--tracking-normal) - 0.05em);
@@ -107,7 +137,7 @@
   --sidebar-accent-foreground: oklch(0 0 0);
   --sidebar-border: oklch(0.9400 0 0);
   --sidebar-ring: oklch(0 0 0);
-  --font-sans: 'Noto Sans SC', system-ui, -apple-system, PingFang SC, Hiragino Sans GB, Microsoft YaHei, sans-serif;
+  --font-sans: 'MiSans', system-ui, -apple-system, PingFang SC, Hiragino Sans GB, Microsoft YaHei, sans-serif;
   --font-serif: Georgia, serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
   --shadow-color: hsl(0 0% 0%);

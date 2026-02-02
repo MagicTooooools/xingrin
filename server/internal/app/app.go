@@ -20,6 +20,7 @@ import (
 	"github.com/yyhuni/lunafox/server/internal/middleware"
 	"github.com/yyhuni/lunafox/server/internal/pkg"
 	pkgvalidator "github.com/yyhuni/lunafox/server/internal/pkg/validator"
+	"github.com/yyhuni/lunafox/server/internal/preset"
 	"github.com/yyhuni/lunafox/server/internal/repository"
 	"github.com/yyhuni/lunafox/server/internal/router"
 	"github.com/yyhuni/lunafox/server/internal/service"
@@ -101,6 +102,13 @@ func Run(ctx context.Context, cfg *config.Config, migrationsFS embed.FS) {
 	wsHub := ws.NewHub()
 	go wsHub.Run()
 
+	// Initialize preset engine loader
+	presetLoader, err := preset.NewLoader()
+	if err != nil {
+		pkg.Fatal("Failed to load preset engines", zap.Error(err))
+	}
+	pkg.Info("Preset engines loaded", zap.Int("count", len(presetLoader.List())))
+
 	// Initialize JWT manager
 	jwtManager := auth.NewJWTManager(
 		cfg.JWT.Secret,
@@ -175,6 +183,7 @@ func Run(ctx context.Context, cfg *config.Config, migrationsFS embed.FS) {
 	hostPortSnapshotSvc := service.NewHostPortSnapshotService(hostPortSnapshotRepo, scanRepo, hostPortSvc)
 	screenshotSnapshotSvc := service.NewScreenshotSnapshotService(screenshotSnapshotRepo, scanRepo, screenshotSvc)
 	vulnerabilitySnapshotSvc := service.NewVulnerabilitySnapshotService(vulnerabilitySnapshotRepo, scanRepo, vulnerabilitySvc)
+	presetSvc := preset.NewService(presetLoader)
 
 	// Create handlers
 	healthHandler := handler.NewHealthHandler(db, redisClient)
@@ -204,6 +213,7 @@ func Run(ctx context.Context, cfg *config.Config, migrationsFS embed.FS) {
 	hostPortSnapshotHandler := handler.NewHostPortSnapshotHandler(hostPortSnapshotSvc)
 	screenshotSnapshotHandler := handler.NewScreenshotSnapshotHandler(screenshotSnapshotSvc)
 	vulnerabilitySnapshotHandler := handler.NewVulnerabilitySnapshotHandler(vulnerabilitySnapshotSvc)
+	presetHandler := handler.NewPresetHandler(presetSvc)
 
 	jobCtx, jobCancel := context.WithCancel(context.Background())
 	defer jobCancel()
@@ -235,6 +245,7 @@ func Run(ctx context.Context, cfg *config.Config, migrationsFS embed.FS) {
 		router.RegisterHostPortRoutes(protected, hostPortHandler, hostPortSnapshotHandler)
 		router.RegisterScreenshotRoutes(protected, screenshotHandler, screenshotSnapshotHandler)
 		router.RegisterVulnerabilityRoutes(protected, vulnerabilityHandler)
+		router.RegisterPresetRoutes(protected, presetHandler) // Must be before RegisterEngineRoutes
 		router.RegisterEngineRoutes(protected, engineHandler)
 		router.RegisterWordlistRoutes(protected, wordlistHandler)
 		router.RegisterScanRoutes(protected, scanHandler)

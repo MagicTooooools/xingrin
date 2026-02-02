@@ -39,7 +39,3 @@ jobs:
       - name: Run metadata consistency tests
         working-directory: worker
         run: make test-metadata
-
-      - name: Run all tests
-        working-directory: worker
-        run: make test

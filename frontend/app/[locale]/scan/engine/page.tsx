@@ -266,7 +266,7 @@ export default function ScanEnginePage() {
                         <span className="font-medium text-sm truncate">{preset.name}</span>
                       </div>
                       <div className="text-xs text-muted-foreground mt-0.5 ml-5.5">
-                        {tEngine("featuresEnabled", { count: preset.enabledFeatures.length })}
+                        {tEngine("featuresEnabled", { count: countEnabledFeatures(preset.configuration) })}
                       </div>
                     </button>
                   ))
@@ -375,9 +375,7 @@ export default function ScanEnginePage() {
                   </div>
                   <Badge variant="outline">
                     {tEngine("featuresCount", { 
-                      count: selection.type === 'preset' 
-                        ? selection.engine.enabledFeatures.length 
-                        : countEnabledFeatures(selection.engine.configuration) 
+                      count: countEnabledFeatures(selection.engine.configuration) 
                     })}
                   </Badge>
                 </div>

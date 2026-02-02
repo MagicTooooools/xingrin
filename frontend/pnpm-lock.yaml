@@ -20,9 +20,6 @@ importers:
       '@dnd-kit/utilities':
         specifier: ^3.2.2
         version: 3.2.2(react@19.1.2)
-      '@fontsource/noto-sans-sc':
-        specifier: ^5.2.8
-        version: 5.2.8
       '@gsap/react':
         specifier: ^2.1.2
         version: 2.1.2(gsap@3.14.2)(react@19.1.2)
@@ -413,8 +410,6 @@ packages:
   '@floating-ui/utils@0.2.10':
     resolution: {integrity: sha512-aGTxbpbg8/b5JfU1HXSrbH3wXZuLPJcNEcZQFMxLs3oSzgtVu6nFPkbbGGUvBcUjKV2YyB9Wxxabo+HEH9tcRQ==}
 
-  '@fontsource/noto-sans-sc@5.2.8':
-    resolution: {integrity: sha512-8T8HxIS3uAMCfaQawKRH/6yYZ1oRnJZB/CrGwfxGgJa+zAOBgx2lqZMiTY/WbQpLGlPRqX4zHXJYI09CI2q6tA==}
 
   '@formatjs/ecma402-abstract@2.3.6':
     resolution: {integrity: sha512-HJnTFeRM2kVFVr5gr5kH1XP6K0JcJtE7Lzvtr3FS/so5f1kpsqqqxy5JF+FRaO6H2qmcMfAUIox7AJteieRtVw==}
@@ -4140,7 +4135,6 @@ snapshots:
 
   '@floating-ui/utils@0.2.10': {}
 
-  '@fontsource/noto-sans-sc@5.2.8': {}
 
   '@formatjs/ecma402-abstract@2.3.6':
     dependencies:

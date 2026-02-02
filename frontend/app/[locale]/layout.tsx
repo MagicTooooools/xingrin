@@ -9,10 +9,7 @@ import { COLOR_THEME_COOKIE_KEY, isColorThemeId, DEFAULT_COLOR_THEME_ID, isDarkC
 
 // Import global style files
 import "../globals.css"
-// Import Noto Sans SC local font
-import "@fontsource/noto-sans-sc/400.css"
-import "@fontsource/noto-sans-sc/500.css"
-import "@fontsource/noto-sans-sc/700.css"
+// Font faces are declared in globals.css
 // Import color themes
 import "@/styles/themes/bubblegum.css"
 import "@/styles/themes/quantum-rose.css"
@@ -65,11 +62,11 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   }
 }
 
-// Use Noto Sans SC + system font fallback, fully loaded locally
+// Use MiSans + system font fallback, fully loaded locally
 const fontConfig = {
   className: "font-sans",
   style: {
-    fontFamily: "'Noto Sans SC', system-ui, -apple-system, PingFang SC, Hiragino Sans GB, Microsoft YaHei, sans-serif"
+    fontFamily: "'MiSans', system-ui, -apple-system, PingFang SC, Hiragino Sans GB, Microsoft YaHei, sans-serif"
   }
 }
 

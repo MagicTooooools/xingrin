@@ -1,13 +1,15 @@
 "use client"
 
 import React, { useMemo, useCallback } from "react"
-import { Play, Server, Settings, Zap } from "lucide-react"
+import { Check, Play, Server, Settings, Zap } from "lucide-react"
 import { useTranslations } from "next-intl"
 
 import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
 import { cn } from "@/lib/utils"
 import { CAPABILITY_CONFIG, parseEngineCapabilities, mergeEngineConfigurations } from "@/lib/engine-config"
+import { usePresetEngines } from "@/hooks/use-engines"
+import { LoadingSpinner } from "@/components/loading-spinner"
 
 import type { ScanEngine } from "@/types/engine.types"
 
@@ -28,6 +30,8 @@ interface EnginePresetSelectorProps {
   onConfigurationChange: (config: string) => void
   disabled?: boolean
   className?: string
+  showHeader?: boolean
+  contentClassName?: string
 }
 
 export function EnginePresetSelector({
@@ -39,67 +43,65 @@ export function EnginePresetSelector({
   onConfigurationChange,
   disabled = false,
   className,
+  showHeader = true,
+  contentClassName,
 }: EnginePresetSelectorProps) {
   const t = useTranslations("scan.initiate")
   const tStages = useTranslations("scan.progress.stages")
+  
+  // Get preset engines from backend
+  const { data: backendPresets, isLoading: isLoadingPresets } = usePresetEngines()
 
-  // Preset definitions with precise engine filtering
+  // Convert backend presets to component format
   const enginePresets = useMemo(() => {
-    if (!engines?.length) return []
+    const presets: EnginePreset[] = []
     
-    // Categorize engines by their capabilities
-    const fullScanEngines: number[] = []
-    const reconEngines: number[] = []
-    const vulnEngines: number[] = []
+    // Add backend presets
+    if (backendPresets && backendPresets.length > 0) {
+      backendPresets.forEach((preset) => {
+        // Parse capabilities from preset configuration
+        const caps = parseEngineCapabilities(preset.configuration || "")
+        
+        // Find matching engines based on capabilities
+        const matchingEngineIds: number[] = []
+        if (engines && engines.length > 0) {
+          engines.forEach((engine) => {
+            const engineCaps = parseEngineCapabilities(engine.configuration || "")
+            // Check if engine has all capabilities required by preset
+            const hasAllCaps = caps.every(cap => engineCaps.includes(cap))
+            if (hasAllCaps && caps.length > 0) {
+              matchingEngineIds.push(engine.id)
+            }
+          })
+        }
+        
+        // Choose icon based on capabilities
+        let Icon = Server
+        if (caps.includes("vuln_scan")) {
+          Icon = caps.some(c => ["subdomain_discovery", "port_scan", "site_scan"].includes(c)) ? Zap : Play
+        }
+        
+        presets.push({
+          id: preset.id,
+          label: preset.name,
+          description: preset.description || "",
+          icon: Icon,
+          engineIds: matchingEngineIds,
+        })
+      })
+    }
     
-    engines.forEach(e => {
-      const caps = parseEngineCapabilities(e.configuration || "")
-      const hasRecon = caps.includes("subdomain_discovery") || caps.includes("port_scan") || caps.includes("site_scan") || caps.includes("fingerprint_detect") || caps.includes("directory_scan") || caps.includes("url_fetch") || caps.includes("screenshot")
-      const hasVuln = caps.includes("vuln_scan")
-      
-      if (hasRecon && hasVuln) {
-        // Full capability engine - only for full scan
-        fullScanEngines.push(e.id)
-      } else if (hasRecon && !hasVuln) {
-        // Recon only engine
-        reconEngines.push(e.id)
-      } else if (hasVuln && !hasRecon) {
-        // Vuln only engine
-        vulnEngines.push(e.id)
-      }
+    // Add custom option at the end
+    presets.push({
+      id: "custom",
+      label: t("presets.custom"),
+      description: t("presets.customDesc"),
+      icon: Settings,
+      engineIds: [],
     })
     
-    return [
-      {
-        id: "full",
-        label: t("presets.fullScan"),
-        description: t("presets.fullScanDesc"),
-        icon: Zap,
-        engineIds: fullScanEngines,
-      },
-      {
-        id: "recon",
-        label: t("presets.recon"),
-        description: t("presets.reconDesc"),
-        icon: Server,
-        engineIds: reconEngines,
-      },
-      {
-        id: "vuln",
-        label: t("presets.vulnScan"),
-        description: t("presets.vulnScanDesc"),
-        icon: Play,
-        engineIds: vulnEngines,
-      },
-      {
-        id: "custom",
-        label: t("presets.custom"),
-        description: t("presets.customDesc"),
-        icon: Settings,
-        engineIds: [],
-      },
-    ]
-  }, [engines, t])
+    return presets
+  }, [backendPresets, engines, t])
 
   const selectedEngines = useMemo(() => {
     if (!selectedEngineIds.length || !engines) return []
@@ -121,10 +123,16 @@ export function EnginePresetSelector({
   }, [enginePresets, selectedPresetId])
 
   // Get engines for the selected preset
-  const presetEngines = useMemo(() => {
+  const matchingEngines = useMemo(() => {
     if (!selectedPreset || selectedPreset.id === "custom") return []
     return engines?.filter(e => selectedPreset.engineIds.includes(e.id)) || []
   }, [selectedPreset, engines])
+  
+  // Get selected preset configuration from backend
+  const selectedPresetConfig = useMemo(() => {
+    if (!selectedPresetId || selectedPresetId === "custom" || !backendPresets) return null
+    return backendPresets.find(p => p.id === selectedPresetId)?.configuration || null
+  }, [selectedPresetId, backendPresets])
 
   // Update configuration when engines change
   const updateConfigurationFromEngines = useCallback((engineIds: number[]) => {
@@ -137,15 +145,30 @@ export function EnginePresetSelector({
   const handlePresetSelect = useCallback((preset: EnginePreset) => {
     onPresetChange(preset.id)
     if (preset.id !== "custom") {
-      onEngineIdsChange(preset.engineIds)
-      updateConfigurationFromEngines(preset.engineIds)
+      // For backend presets, use preset configuration directly
+      const backendPreset = backendPresets?.find(p => p.id === preset.id)
+      if (backendPreset && backendPreset.configuration) {
+        // Use preset configuration directly
+        onConfigurationChange(backendPreset.configuration)
+        // Also select matching engines if available
+        if (preset.engineIds.length > 0) {
+          onEngineIdsChange(preset.engineIds)
+        } else {
+          // If no matching engines, clear engine selection
+          onEngineIdsChange([])
+        }
+      } else {
+        // Fallback to engine-based configuration
+        onEngineIdsChange(preset.engineIds)
+        updateConfigurationFromEngines(preset.engineIds)
+      }
     } else {
       // Custom mode - keep current selection or clear
       if (selectedEngineIds.length === 0) {
         onConfigurationChange("")
       }
     }
-  }, [onPresetChange, onEngineIdsChange, updateConfigurationFromEngines, selectedEngineIds.length, onConfigurationChange])
+  }, [onPresetChange, onEngineIdsChange, updateConfigurationFromEngines, selectedEngineIds.length, onConfigurationChange, backendPresets])
 
   const handleEngineToggle = useCallback((engineId: number, checked: boolean) => {
     let newEngineIds: number[]
@@ -158,11 +181,34 @@ export function EnginePresetSelector({
     updateConfigurationFromEngines(newEngineIds)
   }, [selectedEngineIds, onEngineIdsChange, updateConfigurationFromEngines])
 
+  // Show loading state while fetching presets
+  if (isLoadingPresets) {
+    return (
+      <div className={cn("flex flex-col h-full items-center justify-center", className)}>
+        <LoadingSpinner />
+        <p className="text-sm text-muted-foreground mt-4">{t("presets.loading")}</p>
+      </div>
+    )
+  }
+
   return (
-    <div className={cn("flex flex-col h-full", className)}>
-      <div className="flex-1 overflow-y-auto p-6">
+    <div className={cn("flex flex-col", className)}>
+      <div className={cn("p-6", contentClassName)}>
+        {showHeader && (
+          <div className="flex items-start justify-between gap-3 mb-4">
+            <div>
+              <p className="text-sm font-medium">{t("presets.title")}</p>
+              <p className="text-xs text-muted-foreground">{t("presets.selectHint")}</p>
+            </div>
+            {selectedEngineIds.length > 0 && (
+              <Badge variant="secondary" className="text-xs">
+                {t("selectedCount", { count: selectedEngineIds.length })}
+              </Badge>
+            )}
+          </div>
+        )}
         {/* Compact preset cards */}
-        <div className="grid grid-cols-4 gap-3 mb-4">
+        <div className="grid gap-3 mb-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
           {enginePresets.map((preset) => {
             const isActive = selectedPresetId === preset.id
             const PresetIcon = preset.icon
@@ -176,14 +222,20 @@ export function EnginePresetSelector({
                 type="button"
                 onClick={() => handlePresetSelect(preset)}
                 disabled={disabled}
+                aria-pressed={isActive}
                 className={cn(
-                  "flex flex-col items-center p-3 rounded-lg border-2 text-center transition-all",
+                  "relative flex flex-col items-center p-3 rounded-lg border-2 text-center transition-all",
                   isActive
-                    ? "border-primary bg-primary/5"
+                    ? "border-primary bg-primary/5 shadow-sm"
                     : "border-border hover:border-primary/50 hover:bg-muted/30",
                   disabled && "opacity-50 cursor-not-allowed"
                 )}
               >
+                {isActive && (
+                  <span className="absolute right-2 top-2 inline-flex h-5 w-5 items-center justify-center rounded-full bg-primary text-primary-foreground shadow">
+                    <Check className="h-3 w-3" />
+                  </span>
+                )}
                 <div className={cn(
                   "flex h-10 w-10 items-center justify-center rounded-lg mb-2",
                   isActive ? "bg-primary text-primary-foreground" : "bg-muted"
@@ -230,11 +282,15 @@ export function EnginePresetSelector({
             <div>
               <h4 className="text-xs font-medium text-muted-foreground mb-2">{t("presets.usedEngines")}</h4>
               <div className="flex flex-wrap gap-2">
-                {presetEngines.map((engine) => (
-                  <span key={engine.id} className="text-sm px-3 py-1.5 bg-background rounded-md border">
-                    {engine.name}
-                  </span>
-                ))}
+                {matchingEngines.length > 0 ? (
+                  matchingEngines.map((engine) => (
+                    <span key={engine.id} className="text-sm px-3 py-1.5 bg-background rounded-md border">
+                      {engine.name}
+                    </span>
+                  ))
+                ) : (
+                  <span className="text-xs text-muted-foreground">{t("presets.noMatchingEngines")}</span>
+                )}
               </div>
             </div>
           </div>
@@ -247,6 +303,7 @@ export function EnginePresetSelector({
               <div>
                 <h3 className="font-medium">{selectedPreset?.label}</h3>
                 <p className="text-sm text-muted-foreground mt-1">{selectedPreset?.description}</p>
+                <p className="text-xs text-muted-foreground mt-2">{t("presets.customHint")}</p>
               </div>
             </div>
             

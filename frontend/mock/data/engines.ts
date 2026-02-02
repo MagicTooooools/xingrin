@@ -6,17 +6,12 @@ export const mockPresetEngines: PresetEngine[] = [
     id: 'full_scan',
     name: '完整扫描',
     description: '执行所有扫描阶段，包括子域名发现、端口扫描、站点扫描、指纹识别、目录扫描、截图、URL抓取和漏洞扫描',
-    enabledFeatures: ['subdomain_discovery', 'port_scan', 'site_scan', 'fingerprint_detect', 'directory_scan', 'screenshot', 'url_fetch', 'vuln_scan'],
     configuration: `# 完整扫描配置
 subdomain_discovery:
   recon:
     enabled: true
     tools:
       subfinder:
-        enabled: true
-        timeout-runtime: 3600
-        threads-cli: 10
-      sublist3r:
         enabled: true
         timeout-runtime: 3600
         threads-cli: 10
@@ -85,7 +80,6 @@ vuln_scan:
     id: 'quick_scan',
     name: '快速扫描',
     description: '仅执行子域名发现和端口扫描，适合快速侦查',
-    enabledFeatures: ['subdomain_discovery', 'port_scan'],
     configuration: `# 快速扫描配置
 subdomain_discovery:
   recon:
@@ -127,17 +121,12 @@ port_scan:
     id: 'subdomain_only',
     name: '子域名发现',
     description: '专注于子域名枚举，包括被动收集、字典爆破和排列组合',
-    enabledFeatures: ['subdomain_discovery'],
     configuration: `# 子域名发现配置
 subdomain_discovery:
   recon:
     enabled: true
     tools:
       subfinder:
-        enabled: true
-        timeout-runtime: 3600
-        threads-cli: 10
-      sublist3r:
         enabled: true
         timeout-runtime: 3600
         threads-cli: 10
@@ -182,7 +171,6 @@ subdomain_discovery:
     id: 'vuln_only',
     name: '漏洞扫描',
     description: '仅执行漏洞扫描，适合对已知资产进行安全检测',
-    enabledFeatures: ['vuln_scan'],
     configuration: `# 漏洞扫描配置
 vuln_scan:
   enabled: true
@@ -196,7 +184,6 @@ vuln_scan:
     id: 'web_scan',
     name: 'Web应用扫描',
     description: '针对Web应用的安全扫描，包括站点发现、指纹识别、目录扫描和漏洞检测',
-    enabledFeatures: ['site_scan', 'fingerprint_detect', 'directory_scan', 'vuln_scan'],
     configuration: `# Web应用扫描配置
 site_scan:
   enabled: true
@@ -219,7 +206,6 @@ vuln_scan:
     id: 'api_scan',
     name: 'API安全扫描',
     description: '针对API端点的安全检测，包括端口扫描、URL抓取和漏洞扫描',
-    enabledFeatures: ['port_scan', 'url_fetch', 'vuln_scan'],
     configuration: `# API安全扫描配置
 port_scan:
   enabled: true
@@ -241,7 +227,6 @@ vuln_scan:
     id: 'recon_passive',
     name: '被动侦查',
     description: '仅使用被动收集技术进行侦查，不主动发送请求到目标',
-    enabledFeatures: ['subdomain_discovery'],
     configuration: `# 被动侦查配置
 subdomain_discovery:
   recon:
@@ -266,7 +251,6 @@ subdomain_discovery:
     id: 'port_full',
     name: '全端口扫描',
     description: '扫描所有65535个端口，适合深度端口发现',
-    enabledFeatures: ['port_scan'],
     configuration: `# 全端口扫描配置
 port_scan:
   enabled: true
@@ -279,7 +263,6 @@ port_scan:
     id: 'screenshot_only',
     name: '截图采集',
     description: '仅对目标进行截图采集，用于资产可视化',
-    enabledFeatures: ['screenshot'],
     configuration: `# 截图采集配置
 screenshot:
   enabled: true
@@ -293,7 +276,6 @@ screenshot:
     id: 'compliance_scan',
     name: '合规检测',
     description: '针对合规要求的安全检测，包括SSL/TLS配置、安全头部等',
-    enabledFeatures: ['site_scan', 'fingerprint_detect', 'vuln_scan'],
     configuration: `# 合规检测配置
 site_scan:
   enabled: true
@@ -311,7 +293,6 @@ vuln_scan:
     id: 'ci_scan',
     name: 'CI/CD集成扫描',
     description: '适用于CI/CD流水线的快速安全扫描，超时时间短',
-    enabledFeatures: ['port_scan', 'vuln_scan'],
     configuration: `# CI/CD集成扫描配置
 port_scan:
   enabled: true
@@ -475,10 +456,6 @@ subdomain_discovery:
     enabled: true
     tools:
       subfinder:
-        enabled: true
-        timeout-runtime: 7200
-        threads-cli: 20
-      sublist3r:
         enabled: true
         timeout-runtime: 7200
         threads-cli: 20

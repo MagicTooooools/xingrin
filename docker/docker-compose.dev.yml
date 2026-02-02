@@ -1,3 +1,5 @@
+name: lunafox
+
 services:
   # Agent 请通过安装脚本注册启动（/api/agents/install.sh）
   postgres:

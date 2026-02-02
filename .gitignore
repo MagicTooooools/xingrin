@@ -17,6 +17,7 @@ bin/
 # IDE
 .vscode/
 .idea/
+.cursor/
 *.swp
 *.swo
 *~

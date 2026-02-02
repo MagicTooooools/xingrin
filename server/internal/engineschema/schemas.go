@@ -5,6 +5,7 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	"strings"
 	"sync"
 
 	"github.com/santhosh-tekuri/jsonschema/v5"
@@ -106,4 +107,28 @@ func ValidateYAML(engine string, yamlBytes []byte) error {
 	}
 
 	return Validate(engine, config)
+}
+
+// ListEngines returns all available engine names by scanning embedded schema files.
+func ListEngines() ([]string, error) {
+	entries, err := schemasFS.ReadDir(".")
+	if err != nil {
+		return nil, fmt.Errorf("read schemas directory: %w", err)
+	}
+
+	var engines []string
+	for _, entry := range entries {
+		if entry.IsDir() {
+			continue
+		}
+
+		name := entry.Name()
+		// Extract engine name from filename: "subdomain_discovery.schema.json" -> "subdomain_discovery"
+		if strings.HasSuffix(name, ".schema.json") {
+			engine := strings.TrimSuffix(name, ".schema.json")
+			engines = append(engines, engine)
+		}
+	}
+
+	return engines, nil
 }

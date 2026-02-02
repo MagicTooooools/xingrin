@@ -332,6 +332,8 @@
     "notifications": "Notifications",
     "apiKeys": "API Keys",
     "globalBlacklist": "Global Blacklist",
+    "devTools": "Dev Tools",
+    "uiPrototypes": "UI Prototypes",
     "about": "About"
   },
   "search": {
@@ -682,7 +684,7 @@
       "orgDesc": "For organization",
       "selectEngine": "select scan engine",
       "selectEngineTitle": "Select Engine",
-      "selectEngineHint": "Select an engine on the left to view configuration",
+      "selectEngineHint": "Select one scan engine",
       "loading": "Loading...",
       "loadFailed": "Failed to load",
       "noEngines": "No engines available",
@@ -693,6 +695,9 @@
       "selectedCount": "{count} engines selected",
       "configTitle": "Scan Configuration",
       "configEdited": "Edited",
+      "advancedConfig": "Advanced Configuration",
+      "quickStart": "Quick Start",
+      "cancel": "Cancel",
       "stepIndicator": "Step {current}/{total}",
       "back": "Back",
       "next": "Next",
@@ -716,13 +721,33 @@
         "enginesCount": "engines",
         "capabilities": "Capabilities",
         "usedEngines": "Used Engines",
-        "noCapabilities": "Please select engines"
+        "noCapabilities": "Please select engines",
+        "loading": "Loading scan presets...",
+        "noMatchingEngines": "No matching engines",
+        "empty": "No preset engines"
+      },
+      "mode": {
+        "preset": "Preset Engines",
+        "custom": "Custom Engine"
       },
       "overwriteConfirm": {
         "title": "Overwrite Configuration",
         "description": "You have manually edited the configuration. Changing engines will overwrite your changes. Continue?",
         "cancel": "Cancel",
         "confirm": "Overwrite"
+      },
+      "validation": {
+        "title": "Validation",
+        "yamlOk": "YAML syntax looks good",
+        "yamlError": "YAML has errors, please review",
+        "enginesOk": "{count} engines selected",
+        "enginesMissing": "No scan engine selected",
+        "presetOk": "Preset selected: {name}",
+        "presetMissing": "No preset selected",
+        "configEdited": "Configuration edited manually",
+        "configFromPreset": "Configuration is from preset",
+        "configFromEngine": "Configuration is from selected engine",
+        "configMissing": "Configuration is required"
       }
     },
     "cron": {
@@ -1618,7 +1643,9 @@
     "noScansCreated": "No scan tasks were created",
     "unknownError": "Unknown error",
     "noEngineSelected": "Please select at least one scan engine",
+    "noPresetSelected": "Please select a scan preset first",
     "emptyConfig": "Scan configuration cannot be empty",
+    "invalidConfig": "Invalid configuration format, please check YAML syntax",
     "engineNameRequired": "Please enter engine name",
     "configRequired": "Configuration content is required",
     "yamlSyntaxError": "YAML syntax error",

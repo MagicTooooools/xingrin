@@ -59,13 +59,9 @@ subdomain_discovery:
       enabled: true
       timeout: 600      # 10 minutes (required)
       
-    sublist3r:
+    assetfinder:
       enabled: true
-      timeout: 900      # 15 minutes (required)
-      
-    oneforall:
-      enabled: true
-      timeout: 1200     # 20 minutes (required)
+      timeout: 600      # 10 minutes (required)
 
 
 # ==================== Port Scan ====================

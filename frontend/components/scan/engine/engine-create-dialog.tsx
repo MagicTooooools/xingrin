@@ -23,6 +23,7 @@ import { toast } from "sonner"
 import { useColorTheme } from "@/hooks/use-color-theme"
 import { usePresetEngines } from "@/hooks/use-engines"
 import { cn } from "@/lib/utils"
+import { parseEngineCapabilities } from "@/lib/engine-config"
 import type { PresetEngine } from "@/types/engine.types"
 
 interface EngineCreateDialogProps {
@@ -249,16 +250,23 @@ export function EngineCreateDialog({
                             {preset.description}
                           </p>
                           <div className="flex flex-wrap gap-1 mt-2">
-                            {preset.enabledFeatures.slice(0, 3).map((feature) => (
-                              <Badge key={feature} variant="secondary" className="text-[10px] px-1.5 py-0">
-                                {tEngine(`features.${feature}`)}
-                              </Badge>
-                            ))}
-                            {preset.enabledFeatures.length > 3 && (
-                              <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
-                                +{preset.enabledFeatures.length - 3}
-                              </Badge>
-                            )}
+                            {(() => {
+                              const features = parseEngineCapabilities(preset.configuration)
+                              return (
+                                <>
+                                  {features.slice(0, 3).map((feature) => (
+                                    <Badge key={feature} variant="secondary" className="text-[10px] px-1.5 py-0">
+                                      {tEngine(`features.${feature}`)}
+                                    </Badge>
+                                  ))}
+                                  {features.length > 3 && (
+                                    <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
+                                      +{features.length - 3}
+                                    </Badge>
+                                  )}
+                                </>
+                              )
+                            })()}
                           </div>
                         </div>
                       </div>
