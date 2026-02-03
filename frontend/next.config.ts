@@ -24,6 +24,7 @@ const nextConfig: NextConfig = {
     optimizePackageImports: [
       '@tabler/icons-react',
       'lucide-react',
+      '@radix-ui/react-*',
       '@radix-ui/react-select',
       '@radix-ui/react-dialog',
       '@radix-ui/react-dropdown-menu',
@@ -38,6 +39,7 @@ const nextConfig: NextConfig = {
       '@radix-ui/react-toggle-group',
       '@radix-ui/react-separator',
       '@radix-ui/react-collapsible',
+      'recharts',
     ],
   },
 

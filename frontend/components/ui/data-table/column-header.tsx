@@ -17,15 +17,16 @@ interface DataTableColumnHeaderProps<TData, TValue> {
  * Features:
  * - Supports sort indicators
  * - Click to toggle sort direction
- * - Unified styling
+ * - Unified styling (both sortable and non-sortable headers have consistent font size)
  */
 export function DataTableColumnHeader<TData, TValue>({
   column,
   title,
   className,
 }: DataTableColumnHeaderProps<TData, TValue>) {
+  // 不可排序的列：使用与可排序列相同的字体大小
   if (!column.getCanSort()) {
-    return <div className={cn("text-left", className)}>{title}</div>
+    return <div className={cn("text-left text-sm", className)}>{title}</div>
   }
 
   const sorted = column.getIsSorted()

@@ -3,8 +3,6 @@ import { Button } from "@/components/ui/button"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 // Import notification drawer component
 import { NotificationDrawer } from "@/components/notifications"
-// Import color theme switcher component
-import { ColorThemeSwitcher } from "@/components/color-theme-switcher"
 // Import quick scan component
 import { QuickScanDialog } from "@/components/scan/quick-scan-dialog"
 // Import language switcher component
@@ -17,7 +15,10 @@ import { LanguageSwitcher } from "@/components/language-switcher"
 export function SiteHeader() {
   return (
     // header element, uses flex layout to arrange content horizontally
-    <header className="flex h-(--header-height) shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height)">
+    <header
+      data-slot="site-header"
+      className="flex h-(--header-height) shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height)"
+    >
       {/* Content container, takes full width */}
       <div className="flex w-full items-center gap-1 px-4 lg:gap-2 lg:px-6">
         {/* Sidebar toggle button, with negative left margin for alignment */}
@@ -30,9 +31,6 @@ export function SiteHeader() {
           
           {/* Notification drawer button */}
           <NotificationDrawer />
-          
-          {/* Color theme switcher button */}
-          <ColorThemeSwitcher />
           
           {/* Language switcher button */}
           <LanguageSwitcher />

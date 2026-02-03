@@ -191,11 +191,8 @@
       "loading": "Loading editor...",
       "duplicateKey": "Duplicate key '{key}' found. Later values will override earlier ones. Please remove duplicates."
     },
-    "theme": {
-      "switchToLight": "Switch to light mode",
-      "switchToDark": "Switch to dark mode",
-      "switchLanguage": "Switch language",
-      "switchColor": "Switch theme color"
+    "language": {
+      "switchLanguage": "Switch language"
     },
     "download": {
       "all": "Download All",

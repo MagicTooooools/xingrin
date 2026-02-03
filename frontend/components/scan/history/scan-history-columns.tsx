@@ -97,27 +97,27 @@ function StatusBadge({
     cancelled: {
       icon: IconCircleX,
       variant: "outline",
-      className: "bg-[#848d97]/10 text-[#848d97] border-[#848d97]/20 hover:bg-[#848d97]/20 transition-colors",
+      className: "bg-muted/10 text-muted-foreground border-muted/20 hover:bg-muted/20 transition-colors",
     },
     completed: {
       icon: IconCircleCheck,
       variant: "outline",
-      className: "bg-[#238636]/10 text-[#238636] border-[#238636]/20 hover:bg-[#238636]/20 dark:text-[#3fb950] transition-colors",
+      className: "bg-[var(--success)]/10 text-[var(--success)] border-[var(--success)]/20 hover:bg-[var(--success)]/20 transition-colors",
     },
     failed: {
       icon: IconCircleX,
       variant: "outline",
-      className: "bg-[#da3633]/10 text-[#da3633] border-[#da3633]/20 hover:bg-[#da3633]/20 dark:text-[#f85149] transition-colors",
+      className: "bg-[var(--error)]/10 text-[var(--error)] border-[var(--error)]/20 hover:bg-[var(--error)]/20 transition-colors",
     },
     pending: {
       icon: IconClock,
       variant: "outline",
-      className: "bg-[#d29922]/10 text-[#d29922] border-[#d29922]/20 hover:bg-[#d29922]/20 transition-colors",
+      className: "bg-[var(--info)]/10 text-[var(--info)] border-[var(--info)]/20 hover:bg-[var(--info)]/20 transition-colors",
     },
     running: {
       icon: IconLoader,
       variant: "outline",
-      className: "bg-[#d29922]/10 text-[#d29922] border-[#d29922]/20 hover:bg-[#d29922]/20 transition-colors",
+      className: "bg-[var(--warning)]/10 text-[var(--warning)] border-[var(--warning)]/20 hover:bg-[var(--warning)]/20 transition-colors",
     },
   }
 
@@ -125,7 +125,7 @@ function StatusBadge({
   const label = labels[status]
 
   const badge = (
-    <Badge variant={variant} className={className}>
+    <Badge variant={variant} data-badge-type={status} className={className}>
       {(status === "running" || status === "pending") ? (
         <span className="relative flex h-2 w-2">
           <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-current opacity-75" />
@@ -264,7 +264,8 @@ export const createScanHistoryColumns = ({
               <TooltipTrigger asChild>
                 <Badge 
                   variant="outline"
-                  className="bg-blue-500/15 text-blue-600 border-blue-500/30 hover:bg-blue-500/25 dark:text-blue-400 transition-colors gap-1"
+                  data-badge-type="subdomain"
+                  className="bg-[var(--info)]/15 text-[var(--info)] border-[var(--info)]/30 hover:bg-[var(--info)]/25 transition-colors gap-1"
                 >
                   <IconWorld className="h-3 w-3" />
                   {subdomains}
@@ -285,7 +286,8 @@ export const createScanHistoryColumns = ({
               <TooltipTrigger asChild>
                 <Badge 
                   variant="outline"
-                  className="bg-emerald-500/15 text-emerald-600 border-emerald-500/30 hover:bg-emerald-500/25 dark:text-emerald-400 transition-colors gap-1"
+                  data-badge-type="website"
+                  className="bg-[var(--success)]/15 text-[var(--success)] border-[var(--success)]/30 hover:bg-[var(--success)]/25 transition-colors gap-1"
                 >
                   <IconBrowser className="h-3 w-3" />
                   {websites}
@@ -306,7 +308,8 @@ export const createScanHistoryColumns = ({
               <TooltipTrigger asChild>
                 <Badge 
                   variant="outline"
-                  className="bg-orange-500/15 text-orange-600 border-orange-500/30 hover:bg-orange-500/25 dark:text-orange-400 transition-colors gap-1"
+                  data-badge-type="ip"
+                  className="bg-[var(--warning)]/15 text-[var(--warning)] border-[var(--warning)]/30 hover:bg-[var(--warning)]/25 transition-colors gap-1"
                 >
                   <IconServer className="h-3 w-3" />
                   {ips}
@@ -327,7 +330,8 @@ export const createScanHistoryColumns = ({
               <TooltipTrigger asChild>
                 <Badge 
                   variant="outline"
-                  className="bg-violet-500/15 text-violet-600 border-violet-500/30 hover:bg-violet-500/25 dark:text-violet-400 transition-colors gap-1"
+                  data-badge-type="endpoint"
+                  className="bg-[var(--info)]/15 text-[var(--info)] border-[var(--info)]/30 hover:bg-[var(--info)]/25 transition-colors gap-1"
                 >
                   <IconLink className="h-3 w-3" />
                   {endpoints}
@@ -348,7 +352,8 @@ export const createScanHistoryColumns = ({
               <TooltipTrigger asChild>
                 <Badge 
                   variant="outline"
-                  className="gap-1 bg-red-500/15 text-red-600 border-red-500/30 hover:bg-red-500/25 dark:text-red-400 transition-colors"
+                  data-badge-type="vulnerability"
+                  className="gap-1 bg-[var(--error)]/15 text-[var(--error)] border-[var(--error)]/30 hover:bg-[var(--error)]/25 transition-colors"
                 >
                   <IconBug className="h-3 w-3" />
                   {vulns}
@@ -400,7 +405,7 @@ export const createScanHistoryColumns = ({
       return (
         <div className="flex flex-wrap gap-1">
           {engineNames.map((name, index) => (
-            <Badge key={index} variant="secondary">
+            <Badge key={index} variant="secondary" data-badge-type="engine">
               {name}
             </Badge>
           ))}
@@ -421,7 +426,7 @@ export const createScanHistoryColumns = ({
     cell: ({ row }) => {
       const workerName = row.getValue("workerName") as string | null | undefined
       return (
-        <Badge variant="outline">
+        <Badge variant="outline" data-badge-type="worker">
           {workerName || "-"}
         </Badge>
       )
@@ -486,11 +491,11 @@ export const createScanHistoryColumns = ({
           <div className="flex-1 h-2 bg-primary/10 rounded-full overflow-hidden border border-border">
             <div 
               className={`h-full transition-all ${
-                status === "completed" ? "bg-[#238636]" : 
-                status === "failed" ? "bg-[#da3633]" : 
-                status === "running" ? "bg-[#d29922] progress-striped" : 
-                status === "cancelled" ? "bg-[#848d97]" :
-                status === "pending" ? "bg-[#d29922] progress-striped" :
+                status === "completed" ? "bg-[var(--success)]" : 
+                status === "failed" ? "bg-[var(--error)]" : 
+                status === "running" ? "bg-[var(--warning)] progress-striped" : 
+                status === "cancelled" ? "bg-muted-foreground" :
+                status === "pending" ? "bg-[var(--warning)] progress-striped" :
                 "bg-muted-foreground/80"
               }`}
               style={{ width: `${displayProgress}%` }}

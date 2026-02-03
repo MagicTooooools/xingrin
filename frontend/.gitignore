@@ -42,3 +42,12 @@ yarn-error.log*
 next-env.d.ts
 
 certificates
+# agent skills & tool configs
+.agent/skills
+.agents/skills
+.codebuddy
+.codex
+.gemini
+.qoder
+.trae
+.windsurf

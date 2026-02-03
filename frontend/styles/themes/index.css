@@ -2,11 +2,4 @@
  * 主题文件索引
  * 所有颜色主题都在这里引入
  */
-@import "./vercel-dark.css";
-@import "./violet-bloom.css";
-@import "./bubblegum.css";
-@import "./quantum-rose.css";
-@import "./clean-slate.css";
-@import "./cosmic-night.css";
-@import "./cyberpunk-1.css";
-@import "./eva-01.css";
+@import "./bauhaus.css";

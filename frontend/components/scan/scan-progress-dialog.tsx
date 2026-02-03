@@ -58,13 +58,13 @@ interface ScanProgressDialogProps {
   data: ScanProgressData | null
 }
 
-/** Scan status style configuration */
+/** 扫描状态样式配置 - 使用语义 CSS 变量 */
 const SCAN_STATUS_STYLES: Record<string, string> = {
-  running: "bg-[#d29922]/10 text-[#d29922] border-[#d29922]/20",
-  cancelled: "bg-[#848d97]/10 text-[#848d97] border-[#848d97]/20",
-  completed: "bg-[#238636]/10 text-[#238636] border-[#238636]/20 dark:text-[#3fb950]",
-  failed: "bg-[#da3633]/10 text-[#da3633] border-[#da3633]/20 dark:text-[#f85149]",
-  initiated: "bg-[#d29922]/10 text-[#d29922] border-[#d29922]/20",
+  running: "bg-[var(--warning)]/10 text-[var(--warning)] border-[var(--warning)]/20",
+  cancelled: "bg-[var(--muted-foreground)]/10 text-[var(--muted-foreground)] border-[var(--muted-foreground)]/20",
+  completed: "bg-[var(--success)]/10 text-[var(--success)] border-[var(--success)]/20",
+  failed: "bg-[var(--error)]/10 text-[var(--error)] border-[var(--error)]/20",
+  initiated: "bg-[var(--warning)]/10 text-[var(--warning)] border-[var(--warning)]/20",
 }
 
 /**
@@ -85,15 +85,15 @@ function PulsingDot({ className }: { className?: string }) {
 function ScanStatusIcon({ status }: { status: string }) {
   switch (status) {
     case "running":
-      return <PulsingDot className="text-[#d29922]" />
+      return <PulsingDot className="text-[var(--warning)]" />
     case "completed":
-      return <IconCircleCheck className="h-5 w-5 text-[#238636] dark:text-[#3fb950]" />
+      return <IconCircleCheck className="h-5 w-5 text-[var(--success)]" />
     case "cancelled":
-      return <IconCircleX className="h-5 w-5 text-[#848d97]" />
+      return <IconCircleX className="h-5 w-5 text-[var(--muted-foreground)]" />
     case "failed":
-      return <IconCircleX className="h-5 w-5 text-[#da3633] dark:text-[#f85149]" />
+      return <IconCircleX className="h-5 w-5 text-[var(--error)]" />
     case "pending":
-      return <PulsingDot className="text-[#d29922]" />
+      return <PulsingDot className="text-[var(--warning)]" />
     default:
       return <PulsingDot className="text-muted-foreground" />
   }
@@ -118,13 +118,13 @@ function ScanStatusBadge({ status, t }: { status: string; t: (key: string) => st
 function StageStatusIcon({ status }: { status: StageStatus }) {
   switch (status) {
     case "completed":
-      return <IconCircleCheck className="h-5 w-5 text-[#238636] dark:text-[#3fb950]" />
+      return <IconCircleCheck className="h-5 w-5 text-[var(--success)]" />
     case "running":
-      return <PulsingDot className="text-[#d29922]" />
+      return <PulsingDot className="text-[var(--warning)]" />
     case "failed":
-      return <IconCircleX className="h-5 w-5 text-[#da3633] dark:text-[#f85149]" />
+      return <IconCircleX className="h-5 w-5 text-[var(--error)]" />
     case "cancelled":
-      return <IconCircleX className="h-5 w-5 text-[#d29922]" />
+      return <IconCircleX className="h-5 w-5 text-[var(--warning)]" />
     default:
       return <IconClock className="h-5 w-5 text-muted-foreground" />
   }
@@ -138,10 +138,10 @@ function StageRow({ stage, t }: { stage: StageDetail; t: (key: string) => string
     <div
       className={cn(
         "flex items-center justify-between py-3 px-4 rounded-lg transition-colors",
-        stage.status === "running" && "bg-[#d29922]/10 border border-[#d29922]/20",
+        stage.status === "running" && "bg-[var(--warning)]/10 border border-[var(--warning)]/20",
         stage.status === "completed" && "bg-muted/50",
-        stage.status === "failed" && "bg-[#da3633]/10",
-        stage.status === "cancelled" && "bg-[#d29922]/10",
+        stage.status === "failed" && "bg-[var(--error)]/10",
+        stage.status === "cancelled" && "bg-[var(--warning)]/10",
       )}
     >
       <div className="flex items-center gap-3">
@@ -159,7 +159,7 @@ function StageRow({ stage, t }: { stage: StageDetail; t: (key: string) => string
       <div className="flex items-center gap-3 text-right">
         {/* Status/Duration */}
         {stage.status === "running" && (
-          <Badge variant="outline" className="bg-[#d29922]/10 text-[#d29922] border-[#d29922]/20">
+          <Badge variant="outline" className="bg-[var(--warning)]/10 text-[var(--warning)] border-[var(--warning)]/20">
             {t("stage_running")}
           </Badge>
         )}
@@ -172,12 +172,12 @@ function StageRow({ stage, t }: { stage: StageDetail; t: (key: string) => string
           <span className="text-sm text-muted-foreground">{t("stage_pending")}</span>
         )}
         {stage.status === "failed" && (
-          <Badge variant="outline" className="bg-[#da3633]/10 text-[#da3633] border-[#da3633]/20 dark:text-[#f85149]">
+          <Badge variant="outline" className="bg-[var(--error)]/10 text-[var(--error)] border-[var(--error)]/20">
             {t("stage_failed")}
           </Badge>
         )}
         {stage.status === "cancelled" && (
-          <Badge variant="outline" className="bg-[#d29922]/10 text-[#d29922] border-[#d29922]/20">
+          <Badge variant="outline" className="bg-[var(--warning)]/10 text-[var(--warning)] border-[var(--warning)]/20">
             {t("stage_cancelled")}
           </Badge>
         )}

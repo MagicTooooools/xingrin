@@ -10,7 +10,6 @@ import {
   IconActivity,
   IconMapPin,
   IconClock,
-  IconChartBar,
 } from "@tabler/icons-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -36,13 +35,13 @@ import type { Agent } from "@/types/agent.types"
 function getHealthStyle(state: string) {
   const normalized = state.toLowerCase()
   if (normalized === "ok") {
-    return "bg-green-500/10 text-green-600 dark:text-green-500 border-green-500/20"
+    return "bg-[var(--success)]/10 text-[var(--success)] border-[var(--success)]/20"
   }
   if (normalized === "warning" || normalized === "warn") {
-    return "bg-yellow-500/10 text-yellow-600 dark:text-yellow-500 border-yellow-500/20"
+    return "bg-[var(--warning)]/10 text-[var(--warning)] border-[var(--warning)]/20"
   }
   if (normalized === "error" || normalized === "critical") {
-    return "bg-red-500/10 text-red-600 dark:text-red-500 border-red-500/20"
+    return "bg-[var(--error)]/10 text-[var(--error)] border-[var(--error)]/20"
   }
   return "bg-muted text-muted-foreground border-border"
 }
@@ -81,9 +80,9 @@ function MetricProgress({ label, value, threshold }: MetricProgressProps) {
   }, [percentage, threshold])
 
   const progressColor = useMemo(() => {
-    if (status === "critical") return "bg-red-500"
-    if (status === "warning") return "bg-yellow-500"
-    return "bg-green-500"
+    if (status === "critical") return "bg-[var(--error)]"
+    if (status === "warning") return "bg-[var(--warning)]"
+    return "bg-[var(--success)]"
   }, [status])
 
   return (
@@ -93,8 +92,8 @@ function MetricProgress({ label, value, threshold }: MetricProgressProps) {
         <div className="flex items-center gap-1">
           <span className={cn(
             "font-medium tabular-nums",
-            status === "critical" && "text-red-600 dark:text-red-500",
-            status === "warning" && "text-yellow-600 dark:text-yellow-500"
+            status === "critical" && "text-[var(--error)]",
+            status === "warning" && "text-[var(--warning)]"
           )}>
             {percentage.toFixed(0)}%
           </span>
@@ -104,7 +103,7 @@ function MetricProgress({ label, value, threshold }: MetricProgressProps) {
           {status !== "normal" && (
             <IconAlertTriangle className={cn(
               "h-3 w-3",
-              status === "critical" ? "text-red-600 dark:text-red-500" : "text-yellow-600 dark:text-yellow-500"
+              status === "critical" ? "text-[var(--error)]" : "text-[var(--warning)]"
             )} />
           )}
         </div>
@@ -214,11 +213,11 @@ export function AgentCardCompact({
           <div className="flex items-center gap-2">
             <IconClock className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
             <span className="text-muted-foreground">{t("metrics.lastHeartbeat")}:</span>
-            <span className={cn("font-medium", isHeartbeatStale && "text-red-600 dark:text-red-500")}>
+            <span className={cn("font-medium", isHeartbeatStale && "text-[var(--error)]")}>
               {formatDateTime(agent.lastHeartbeat)}
             </span>
             {agent.status === "online" && !isHeartbeatStale && (
-              <IconActivity className="h-3 w-3 text-green-500 animate-pulse" />
+              <IconActivity className="h-3.5 w-3.5 text-[var(--success)] animate-pulse" />
             )}
           </div>
           <div className="flex items-center gap-2 flex-wrap min-w-0">
@@ -235,7 +234,7 @@ export function AgentCardCompact({
               {healthLabel}
             </Badge>
             {hasWarnings && (
-              <Badge variant="outline" className="bg-yellow-500/10 text-yellow-600 dark:text-yellow-500 border-yellow-500/20 text-[10px]">
+              <Badge variant="outline" className="bg-[var(--warning)]/10 text-[var(--warning)] border-[var(--warning)]/20 text-[10px]">
                 <IconAlertTriangle className="h-3 w-3 mr-1" />
                 {t("card.warning")}
               </Badge>

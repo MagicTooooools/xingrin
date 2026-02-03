@@ -1,16 +1,15 @@
 "use client"
 
-import * as React from "react"
-import { ThemeProvider as NextThemesProvider } from "next-themes"
+import type React from "react"
+
+type ThemeProviderProps = {
+  children: React.ReactNode
+}
 
 /**
- * Theme provider component
- * Based on next-themes for automatic system theme switching
- * Supports light, dark, and system-follow modes
+ * Theme provider placeholder
+ * Bauhaus is the only theme, so no runtime theme switching is needed.
  */
-export function ThemeProvider({
-  children,
-  ...props
-}: React.ComponentProps<typeof NextThemesProvider>) {
-  return <NextThemesProvider {...props}>{children}</NextThemesProvider>
+export function ThemeProvider({ children }: ThemeProviderProps) {
+  return <>{children}</>
 }

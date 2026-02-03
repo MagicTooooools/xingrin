@@ -61,6 +61,7 @@ import {
   ChartContainer,
 } from "@/components/ui/chart"
 import { Skeleton } from "@/components/ui/skeleton"
+import { IconActivity } from "@tabler/icons-react"
 
 // Data series key type
 type SeriesKey = 'totalSubdomains' | 'totalIps' | 'totalEndpoints' | 'totalWebsites'
@@ -145,9 +146,14 @@ export function AssetTrendChart() {
   const displayData = useMemo(() => activeData || latest, [activeData, latest])
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{t("title")}</CardTitle>
+    <Card className="overflow-hidden [[data-theme=bauhaus]_&]:pt-0 [[data-theme=bauhaus]_&]:gap-0">
+      {/* Bauhaus 风格 Kicker 标题 */}
+      <div className="bauhaus-kicker hidden [[data-theme=bauhaus]_&]:flex">
+        <IconActivity className="size-4" />
+        <span>ASSET PULSE</span>
+      </div>
+      <CardHeader className="[[data-theme=bauhaus]_&]:pt-4">
+        <CardTitle className="[[data-theme=bauhaus]_&]:hidden">{t("title")}</CardTitle>
         <CardDescription>{t("description")}</CardDescription>
       </CardHeader>
       <CardContent>
@@ -244,7 +250,17 @@ export function AssetTrendChart() {
                 )}
               </LineChart>
             </ChartContainer>
-            <div className="mt-3 pt-3 border-t flex flex-wrap items-center justify-between gap-x-4 gap-y-1.5 text-sm">
+            {/* Bauhaus 风格图表底栏 - 仅在 Bauhaus 主题下显示 */}
+            <div className="bauhaus-chart-footer hidden [[data-theme=bauhaus]_&]:flex">
+              <span>MIN: 12ms</span>
+              <span>MAX: 52ms</span>
+              <span>AVG: 33ms</span>
+              <span className="bauhaus-signal-status">
+                <span className="pulse-dot" />
+                SIGNAL STABLE
+              </span>
+            </div>
+            <div className="mt-3 pt-3 border-t flex flex-wrap items-center justify-between gap-x-4 gap-y-1.5 text-sm [[data-theme=bauhaus]_&]:border-0 [[data-theme=bauhaus]_&]:pt-0">
               <span className="text-muted-foreground text-xs">
                 {activeData ? formatDate(activeData.date) : t("current")}
               </span>

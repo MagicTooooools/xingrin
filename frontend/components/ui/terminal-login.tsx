@@ -354,9 +354,9 @@ export function TerminalLogin({
       {/* Terminal header */}
       <div className="border-border flex items-center gap-x-2 border-b px-4 py-3">
         <div className="flex flex-row gap-x-2">
-          <div className="h-3 w-3 rounded-full bg-red-500"></div>
-          <div className="h-3 w-3 rounded-full bg-yellow-500"></div>
-          <div className="h-3 w-3 rounded-full bg-green-500"></div>
+          <div className="h-3 w-3 rounded-full bg-[var(--error)]"></div>
+          <div className="h-3 w-3 rounded-full bg-[var(--warning)]"></div>
+          <div className="h-3 w-3 rounded-full bg-[var(--success)]"></div>
         </div>
         <span className="ml-2 text-xs text-muted-foreground font-mono">{t.title}</span>
       </div>

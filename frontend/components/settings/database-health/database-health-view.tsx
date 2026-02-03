@@ -14,9 +14,9 @@ import { Status, StatusIndicator, StatusLabel } from "@/components/ui/shadcn-io/
 import { cn } from "@/lib/utils"
 
 const severityStyles: Record<DatabaseAlertSeverity, string> = {
-  info: "text-[#238636] border-[#238636]/20 bg-[#238636]/10",
-  warning: "text-[#d29922] border-[#d29922]/20 bg-[#d29922]/10",
-  critical: "text-[#da3633] border-[#da3633]/20 bg-[#da3633]/10",
+  info: "text-[var(--success)] border-[var(--success)]/20 bg-[var(--success)]/10",
+  warning: "text-[var(--warning)] border-[var(--warning)]/20 bg-[var(--warning)]/10",
+  critical: "text-[var(--error)] border-[var(--error)]/20 bg-[var(--error)]/10",
 }
 
 function statusFromThreshold(
@@ -211,7 +211,7 @@ export function DatabaseHealthView() {
             <SummaryItem
               label={t("overview.readOnly")}
               value={
-                <Badge variant="outline" className={data?.readOnly ? "text-[#d29922]" : undefined}>
+                <Badge variant="outline" className={data?.readOnly ? "text-[var(--warning)]" : undefined}>
                   {data?.readOnly ? t("overview.readOnlyYes") : t("overview.readOnlyNo")}
                 </Badge>
               }

@@ -33,7 +33,7 @@ export function LanguageSwitcher() {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="icon" className="h-8 w-8">
           <IconLanguage className="h-4 w-4" />
-          <span className="sr-only">{tCommon("theme.switchLanguage")}</span>
+          <span className="sr-only">{tCommon("language.switchLanguage")}</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">

@@ -32,14 +32,14 @@ export function MetricProgress({
   }, [percentage, threshold])
 
   const progressColor = useMemo(() => {
-    if (status === "critical") return "bg-red-500"
-    if (status === "warning") return "bg-amber-500"
-    return "bg-emerald-500"
+    if (status === "critical") return "bg-[var(--error)]"
+    if (status === "warning") return "bg-[var(--warning)]"
+    return "bg-[var(--success)]"
   }, [status])
 
   const textColor = useMemo(() => {
-    if (status === "critical") return "text-red-600"
-    if (status === "warning") return "text-amber-600"
+    if (status === "critical") return "text-[var(--error)]"
+    if (status === "warning") return "text-[var(--warning)]"
     return "text-foreground"
   }, [status])
 
@@ -49,7 +49,10 @@ export function MetricProgress({
         <span className="text-muted-foreground flex items-center gap-1">
           {label}
           {showWarning && status !== "normal" && (
-            <IconAlertTriangle className="h-3 w-3 text-amber-500" />
+            <IconAlertTriangle className={cn(
+              "h-3 w-3",
+              status === "critical" ? "text-[var(--error)]" : "text-[var(--warning)]"
+            )} />
           )}
         </span>
         <span className={cn("font-medium tabular-nums", textColor)}>
@@ -60,8 +63,8 @@ export function MetricProgress({
         value={percentage}
         className={cn(
           "h-1.5",
-          status === "critical" && "bg-red-500/20",
-          status === "warning" && "bg-amber-500/20"
+          status === "critical" && "bg-[var(--error)]/20",
+          status === "warning" && "bg-[var(--warning)]/20"
         )}
       >
         <div

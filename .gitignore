@@ -55,6 +55,9 @@ AGENTS.md
 WARP.md
 .opencode/
 
+# Playwright MCP screenshots
+.playwright-mcp/
+
 # SSL certificates
 docker/nginx/ssl/*.pem
 docker/nginx/ssl/*.key

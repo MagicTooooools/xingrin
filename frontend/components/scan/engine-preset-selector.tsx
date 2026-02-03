@@ -128,12 +128,6 @@ export function EnginePresetSelector({
     return engines?.filter(e => selectedPreset.engineIds.includes(e.id)) || []
   }, [selectedPreset, engines])
   
-  // Get selected preset configuration from backend
-  const selectedPresetConfig = useMemo(() => {
-    if (!selectedPresetId || selectedPresetId === "custom" || !backendPresets) return null
-    return backendPresets.find(p => p.id === selectedPresetId)?.configuration || null
-  }, [selectedPresetId, backendPresets])
-
   // Update configuration when engines change
   const updateConfigurationFromEngines = useCallback((engineIds: number[]) => {
     if (!engines) return

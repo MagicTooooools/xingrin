@@ -41,15 +41,15 @@ import { MetricProgress } from "./metric-progress"
 function getHealthStyle(state: string) {
   const normalized = state.toLowerCase()
   if (normalized === "ok") {
-    return "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
+    return "bg-[var(--success)]/10 text-[var(--success)] border-[var(--success)]/20"
   }
   if (normalized === "warning" || normalized === "warn") {
-    return "bg-amber-500/10 text-amber-600 border-amber-500/20"
+    return "bg-[var(--warning)]/10 text-[var(--warning)] border-[var(--warning)]/20"
   }
   if (normalized === "error" || normalized === "critical") {
-    return "bg-red-500/10 text-red-600 border-red-500/20"
+    return "bg-[var(--error)]/10 text-[var(--error)] border-[var(--error)]/20"
   }
-  return "bg-slate-500/10 text-slate-500 border-slate-500/20"
+  return "bg-muted text-muted-foreground border-border"
 }
 
 function getStatusVariant(status: string) {
@@ -126,7 +126,7 @@ export function AgentCard({
     <Card
       className={cn(
         "transition-all duration-200 hover:shadow-md",
-        agent.status === "online" && "border-emerald-500/20",
+        agent.status === "online" && "border-[var(--success)]/20",
         agent.status === "offline" && "border-slate-300/50 opacity-75"
       )}
     >
@@ -151,7 +151,7 @@ export function AgentCard({
                 {healthLabel}
               </Badge>
               {hasWarnings && (
-                <Badge variant="outline" className="bg-amber-500/10 text-amber-600 border-amber-500/20">
+                <Badge variant="outline" className="bg-[var(--warning)]/10 text-[var(--warning)] border-[var(--warning)]/20">
                   <IconAlertTriangle className="h-3 w-3 mr-1" />
                   {t("card.warning")}
                 </Badge>
@@ -193,11 +193,11 @@ export function AgentCard({
           <div className="rounded-lg border bg-muted/40 p-2.5">
             <p className="text-muted-foreground mb-1">{t("metrics.lastHeartbeat")}</p>
             <div className="flex items-center gap-1">
-              <p className={cn("font-medium", isHeartbeatStale && "text-amber-600")}>
+              <p className={cn("font-medium", isHeartbeatStale && "text-[var(--warning)]")}>
                 {formatRelativeTime(agent.lastHeartbeat)}
               </p>
               {agent.status === "online" && !isHeartbeatStale && (
-                <IconActivity className="h-3 w-3 text-emerald-500 animate-pulse" />
+                <IconActivity className="h-3 w-3 text-[var(--success)] animate-pulse" />
               )}
             </div>
           </div>

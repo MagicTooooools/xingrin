@@ -2,67 +2,63 @@
 
 import type { CSSProperties } from "react"
 import {
-  ArrowUpRight,
-  BarChart3,
+  Activity,
+  Box,
+  Hexagon,
   LayoutGrid,
   Layers,
-  Sliders,
-  ShieldCheck,
+  Settings,
+  Shield,
   ShieldAlert,
-  Activity,
-  Waves,
+  Signal,
+  Target,
+  Terminal,
+  Zap,
 } from "lucide-react"
 
+// 复用 Arknights UI 的主题变量
 const themeVars = {
-  "--bg": "#F6F7F8",
-  "--panel": "#FFFFFF",
-  "--panel-muted": "#EEF1F4",
-  "--border": "#D9DEE4",
-  "--border-strong": "#B8C1CC",
-  "--text": "#1B2128",
-  "--text-2": "#616A75",
-  "--muted": "#98A1AC",
-  "--accent": "#0F1318",
-  "--accent-soft": "rgba(15, 19, 24, 0.14)",
-  "--grid": "rgba(15, 19, 24, 0.06)",
-  "--grid-strong": "rgba(15, 19, 24, 0.12)",
-  "--panel-rail": "rgba(15, 19, 24, 0.22)",
-  "--panel-rail-strong": "rgba(15, 19, 24, 0.34)",
-  "--panel-glass": "rgba(255, 255, 255, 0.86)",
-  "--panel-glass-strong": "rgba(255, 255, 255, 0.94)",
-  "--panel-muted-glass": "rgba(238, 241, 244, 0.88)",
-  "--sheen": "rgba(255, 255, 255, 0.7)",
-  "--sheen-soft": "rgba(255, 255, 255, 0.38)",
-  "--shadow": "rgba(15, 19, 24, 0.08)",
-  "--cut": "10px",
+  "--ark-bg": "#F4F5F7",
+  "--ark-bg-2": "#FFFFFF",
+  "--ark-panel": "#FFFFFF",
+  "--ark-panel-2": "#F8F9FA",
+  "--ark-border": "#E1E5EA",
+  "--ark-border-strong": "#C5CBD3",
+  "--ark-text": "#1A1D21",
+  "--ark-text-2": "#6F7681",
+  "--ark-muted": "#9CA3AF",
+  "--ark-accent": "#1A1D21",     // 深黑作为主强调色
+  "--ark-accent-2": "#4C5159",   // 次级强调
+  "--ark-active": "#2563EB",     // 激活状态（可选蓝）
+  fontFamily: "\"MiSans\", \"IBM Plex Sans\", \"Segoe UI\", sans-serif",
 } as CSSProperties
 
 const stats = [
-  { label: "Active Assets", value: "1,284", delta: "+4.2%", meta: "ZONE-09", slot: "CORE-1" },
-  { label: "Scan Throughput", value: "82%", delta: "+1.1%", meta: "RX-102", slot: "PIPE-4" },
-  { label: "Critical Alerts", value: "12", delta: "-3", meta: "SIG-7", slot: "WARN-2" },
-  { label: "Coverage", value: "96.8%", delta: "+0.6%", meta: "GRID-12", slot: "LAYER-3" },
+  { id: "01", label: "Active Assets", value: "1,284", delta: "+4.2%", icon: Box },
+  { id: "02", label: "Scan Throughput", value: "82%", delta: "+1.1%", icon: Activity },
+  { id: "03", label: "Critical Alerts", value: "12", delta: "-3", icon: Zap },
+  { id: "04", label: "Coverage", value: "96.8%", delta: "+0.6%", icon: Target },
 ]
 
 const navItems = [
-  { label: "Overview", icon: LayoutGrid },
+  { label: "Overview", icon: LayoutGrid, active: true },
   { label: "Assets", icon: Layers },
   { label: "Scans", icon: Activity },
   { label: "Threats", icon: ShieldAlert },
-  { label: "Settings", icon: Sliders },
+  { label: "Settings", icon: Settings },
 ]
 
 const timeline = [
-  { label: "Ingestion", value: "02:14" },
-  { label: "Correlation", value: "04:32" },
-  { label: "Mitigation", value: "08:09" },
+  { label: "Ingestion", value: "02:14", status: "Done" },
+  { label: "Correlation", value: "04:32", status: "Done" },
+  { label: "Mitigation", value: "08:09", status: "Active" },
 ]
 
 const tableRows = [
-  { id: "OP-291", name: "Gateway Sweep", owner: "Ops-7", status: "Stable", score: "A" },
-  { id: "OP-377", name: "Credential Drift", owner: "Ops-3", status: "Observe", score: "B" },
-  { id: "OP-408", name: "Outbound Flux", owner: "Ops-2", status: "Investigate", score: "A-" },
-  { id: "OP-512", name: "Shadow Asset", owner: "Ops-1", status: "Monitor", score: "B+" },
+  { id: "OP-291", name: "Gateway Sweep", owner: "Ops-7", status: "STABLE", score: "A" },
+  { id: "OP-377", name: "Credential Drift", owner: "Ops-3", status: "OBSERVE", score: "B" },
+  { id: "OP-408", name: "Outbound Flux", owner: "Ops-2", status: "INVESTIGATE", score: "A-" },
+  { id: "OP-512", name: "Shadow Asset", owner: "Ops-1", status: "MONITOR", score: "B+" },
 ]
 
 const barSeries = [48, 62, 54, 68, 76, 58, 64]
@@ -70,184 +66,241 @@ const lineSeries = [12, 24, 18, 36, 30, 44, 38, 52]
 
 export default function DashboardDemoPage() {
   return (
-    <main className="relative min-h-screen bg-[var(--bg)] text-[var(--text)]" style={themeVars}>
-      <div className="pointer-events-none absolute inset-0 demo-grid" aria-hidden />
-      <div className="pointer-events-none absolute left-6 top-10 h-24 w-24 demo-ring" aria-hidden />
-      <div className="pointer-events-none absolute right-10 top-16 h-10 w-56 demo-beam" aria-hidden />
-
-      <div className="relative mx-auto w-full max-w-7xl px-6 py-8">
-        <div className="grid gap-6 lg:grid-cols-[220px_1fr]">
-          <aside className="panel demo-sidebar p-4 lg:sticky lg:top-8">
-            <div className="space-y-1 border-b border-[var(--border)] pb-4">
-              <p className="kicker">LunaFox</p>
-              <p className="text-sm font-semibold">Control Hub</p>
+    <main className="relative min-h-screen bg-[var(--ark-bg)] text-[var(--ark-text)] overflow-hidden" style={themeVars}>
+      {/* 工业风背景网格与装饰 */}
+      <div className="pointer-events-none absolute inset-0 ark-grid" aria-hidden />
+      
+      {/* 顶部装饰条 */}
+      <div className="fixed top-0 left-0 right-0 h-1 bg-[var(--ark-accent)] z-50 opacity-80" />
+      
+      <div className="relative mx-auto w-full max-w-[1600px] p-6 lg:p-8">
+        <div className="grid gap-6 lg:grid-cols-[240px_1fr]">
+          
+          {/* 侧边栏 */}
+          <aside className="flex flex-col gap-6 lg:sticky lg:top-8 lg:h-[calc(100vh-4rem)]">
+            <div className="ark-panel p-4 flex items-center gap-3">
+              <div className="h-10 w-10 flex items-center justify-center bg-[var(--ark-text)] text-white">
+                <Hexagon className="h-6 w-6" />
+              </div>
+              <div>
+                <div className="text-[10px] tracking-widest text-[var(--ark-text-2)] uppercase">Console</div>
+                <div className="font-bold tracking-tight">LUNAFOX</div>
+              </div>
             </div>
-            <nav className="mt-4 space-y-2">
-              {navItems.map((item, index) => (
+
+            <nav className="flex-1 space-y-2">
+              {navItems.map((item) => (
                 <button
                   key={item.label}
-                  className={`sidebar-item ${index === 0 ? "active" : ""}`}
-                  type="button"
+                  className={`ark-nav-item w-full ${item.active ? "active" : ""}`}
                 >
                   <item.icon className="h-4 w-4" />
                   <span>{item.label}</span>
+                  {item.active && <span className="ml-auto w-1.5 h-1.5 bg-[var(--ark-active)] rounded-full" />}
                 </button>
               ))}
             </nav>
-            <div className="mt-6 panel slab px-3 py-3 text-xs text-[var(--text-2)]">
-              <p className="text-[var(--text)]">System Health</p>
-              <p className="mt-2">Nominal · 99.1%</p>
+
+            <div className="ark-panel mt-auto p-4 space-y-3">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-[var(--ark-text-2)]">SYSTEM STATUS</span>
+                <span className="h-2 w-2 rounded-full bg-[var(--success)] animate-pulse" />
+              </div>
+              <div className="space-y-1">
+                <div className="flex justify-between text-xs font-mono">
+                  <span>CPU</span>
+                  <span>12%</span>
+                </div>
+                <div className="h-1 w-full bg-[var(--ark-border)] overflow-hidden">
+                  <div className="h-full bg-[var(--ark-text)] w-[12%]" />
+                </div>
+              </div>
+              <div className="space-y-1">
+                <div className="flex justify-between text-xs font-mono">
+                  <span>MEM</span>
+                  <span>48%</span>
+                </div>
+                <div className="h-1 w-full bg-[var(--ark-border)] overflow-hidden">
+                  <div className="h-full bg-[var(--ark-text)] w-[48%]" />
+                </div>
+              </div>
             </div>
           </aside>
 
+          {/* 主内容区 */}
           <div className="flex flex-col gap-6">
-            <header className="panel panel-hero flex flex-col gap-4 p-5 md:flex-row md:items-center md:justify-between">
+            
+            {/* Header */}
+            <header className="ark-panel p-5 flex flex-col md:flex-row md:items-end justify-between gap-4">
               <div className="space-y-2">
-                <p className="kicker">Operations Dashboard</p>
-                <h1 className="text-xl font-semibold tracking-wide">System Overview</h1>
-                <p className="text-sm text-[var(--text-2)]">White/grey industrial minimal demo based on the current dashboard layout.</p>
-                <div className="meta-row">
-                  <span className="meta-chip">ZONE-09</span>
-                  <span className="meta-chip">OPERATOR READY</span>
-                  <span className="meta-chip">RX-102</span>
+                <div className="flex items-center gap-2">
+                  <span className="px-1.5 py-0.5 text-[10px] font-mono bg-[var(--ark-text)] text-white">DASH-01</span>
+                  <p className="text-xs tracking-[0.2em] text-[var(--ark-text-2)] uppercase">Operations Command</p>
+                </div>
+                <h1 className="text-2xl font-bold tracking-tight uppercase">System Overview</h1>
+              </div>
+              <div className="flex gap-2">
+                <div className="ark-slab px-3 py-1.5 flex items-center gap-2 text-xs font-mono">
+                  <span className="w-1.5 h-1.5 bg-[var(--success)] rounded-sm" />
+                  NETWORK: ONLINE
+                </div>
+                <div className="ark-slab px-3 py-1.5 flex items-center gap-2 text-xs font-mono">
+                  <span className="text-[var(--ark-text-2)]">CYCLE:</span>
+                  14:32:09
                 </div>
               </div>
-              <div className="flex flex-wrap gap-3 text-xs text-[var(--text-2)]">
-                <span className="tag inverse">Cycle · 14:32</span>
-                <span className="tag">Nodes · 48</span>
-                <span className="tag">Runtime · Stable</span>
-              </div>
-              <span className="panel-ornament" aria-hidden />
-              <span className="panel-seam" aria-hidden />
             </header>
 
-            <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            {/* Stats Grid */}
+            <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {stats.map((item) => (
-                <div key={item.label} className="panel slab p-4">
-                  <div className="flex items-center justify-between">
-                    <span className="meta-chip subtle">{item.meta}</span>
-                    <span className="meta-code">{item.slot}</span>
+                <div key={item.label} className="ark-panel group relative overflow-hidden transition-all hover:-translate-y-1">
+                  <div className="absolute top-0 left-0 p-2 text-[10px] font-mono text-[var(--ark-muted)] opacity-50">
+                    {item.id} {"//"}
                   </div>
-                  <p className="text-xs text-[var(--text-2)]">{item.label}</p>
-                  <div className="mt-3 flex items-end justify-between">
-                    <span className="text-2xl font-semibold">{item.value}</span>
-                    <span className="text-xs text-[var(--text-2)]">{item.delta}</span>
+                  <div className="p-5 pt-8 space-y-4">
+                    <div className="flex justify-between items-start">
+                      <div className="p-2 bg-[var(--ark-panel-2)] border border-[var(--ark-border)]">
+                        <item.icon className="h-5 w-5 text-[var(--ark-text-2)]" />
+                      </div>
+                      <span className={`text-xs font-mono px-1.5 py-0.5 border ${item.delta.startsWith('+') ? 'border-[var(--success)]/30 bg-[var(--success)]/5 text-[var(--success)]' : 'border-[var(--error)]/30 bg-[var(--error)]/5 text-[var(--error)]'}`}>
+                        {item.delta}
+                      </span>
+                    </div>
+                    <div>
+                      <div className="text-2xl font-bold tracking-tight">{item.value}</div>
+                      <div className="text-xs text-[var(--ark-text-2)] uppercase tracking-wider mt-1">{item.label}</div>
+                    </div>
                   </div>
+                  <div className="absolute bottom-0 right-0 h-8 w-8 bg-[linear-gradient(135deg,transparent_50%,var(--ark-border)_50%)] opacity-20" />
                 </div>
               ))}
             </section>
 
-            <section className="grid gap-4 lg:grid-cols-[1.4fr_1fr]">
-              <div className="panel p-5">
-                <span className="panel-ornament" aria-hidden />
-                <span className="panel-seam" aria-hidden />
-                <div className="flex items-center justify-between">
-                  <div className="space-y-1">
-                    <p className="kicker">Signal Trend</p>
-                    <h2 className="text-base font-semibold">Asset Pulse</h2>
+            {/* Charts Section */}
+            <section className="grid gap-6 lg:grid-cols-[1.6fr_1fr]">
+              <div className="ark-panel flex flex-col">
+                <div className="border-b border-[var(--ark-border)] p-4 flex items-center justify-between bg-[var(--ark-panel-2)]">
+                  <div className="flex items-center gap-2">
+                    <Signal className="h-4 w-4" />
+                    <span className="ark-kicker">ASSET PULSE</span>
                   </div>
-                  <span className="tag">Last 24h</span>
+                  <div className="flex gap-2">
+                    <button className="text-xs px-2 py-1 bg-white border border-[var(--ark-border)] hover:border-[var(--ark-text)] transition-colors">24H</button>
+                    <button className="text-xs px-2 py-1 bg-transparent border border-transparent text-[var(--ark-text-2)] hover:text-[var(--ark-text)]">7D</button>
+                  </div>
                 </div>
-                <div className="meta-row micro">
-                  <span className="meta-chip">SEQ-144</span>
-                  <span className="meta-chip">GATE-02</span>
-                  <span className="meta-chip">PRIORITY A</span>
+                <div className="p-6 flex-1 min-h-[240px] relative">
+                  {/* 网格背景装饰 */}
+                  <div className="absolute inset-6 border-l border-b border-[var(--ark-border)] opacity-50 pointer-events-none" />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                     <svg viewBox="0 0 400 140" className="h-[70%] w-full max-w-2xl overflow-visible">
+                        {/* 装饰性网格线 */}
+                        <pattern id="grid" width="40" height="140" patternUnits="userSpaceOnUse">
+                          <line x1="0" y1="0" x2="0" y2="140" stroke="var(--ark-border)" strokeWidth="1" strokeDasharray="2 2" />
+                        </pattern>
+                        <rect width="400" height="140" fill="url(#grid)" opacity="0.3" />
+                        
+                        <polyline
+                          fill="none"
+                          stroke="var(--ark-text)"
+                          strokeWidth="2"
+                          points={lineSeries
+                            .map((value, index) => `${index * 55},${140 - value}`)
+                            .join(" ")}
+                          vectorEffect="non-scaling-stroke"
+                        />
+                        {/* 数据点 */}
+                        {lineSeries.map((value, index) => (
+                           <g key={index}>
+                             <circle cx={index * 55} cy={140 - value} r="3" fill="var(--ark-bg)" stroke="var(--ark-text)" strokeWidth="2" />
+                           </g>
+                        ))}
+                      </svg>
+                  </div>
                 </div>
-                <div className="mt-4 chart-frame">
-                  <span className="chart-notch" aria-hidden />
-                  <svg viewBox="0 0 400 140" className="h-full w-full">
-                    <polyline
-                      fill="none"
-                      stroke="var(--accent)"
-                      strokeWidth="2"
-                      points={lineSeries
-                        .map((value, index) => `${index * 55},${140 - value}`)
-                        .join(" ")}
-                    />
-                  </svg>
-                </div>
-                <div className="mt-4 flex items-center gap-3 text-xs text-[var(--text-2)]">
-                  <Waves className="h-4 w-4" />
-                  <span>Variance within expected band.</span>
+                <div className="border-t border-[var(--ark-border)] p-3 px-6 flex items-center gap-4 text-xs font-mono text-[var(--ark-text-2)]">
+                  <span>MIN: 12ms</span>
+                  <span>MAX: 52ms</span>
+                  <span>AVG: 33ms</span>
+                  <span className="ml-auto text-[var(--success)] flex items-center gap-1">
+                    <div className="w-1.5 h-1.5 bg-[var(--success)] rounded-full animate-pulse" />
+                    SIGNAL STABLE
+                  </span>
                 </div>
               </div>
 
-              <div className="panel p-5">
-                <span className="panel-ornament" aria-hidden />
-                <span className="panel-seam" aria-hidden />
-                <div className="flex items-center justify-between">
-                  <div className="space-y-1">
-                    <p className="kicker">Distribution</p>
-                    <h2 className="text-base font-semibold">Severity Mix</h2>
+              <div className="ark-panel flex flex-col">
+                <div className="border-b border-[var(--ark-border)] p-4 flex items-center justify-between bg-[var(--ark-panel-2)]">
+                  <div className="flex items-center gap-2">
+                    <Shield className="h-4 w-4" />
+                    <span className="ark-kicker">SEVERITY MIX</span>
                   </div>
-                  <span className="tag">Weekly</span>
                 </div>
-                <div className="meta-row micro">
-                  <span className="meta-chip">MODE-7</span>
-                  <span className="meta-chip">BATCH 02</span>
-                  <span className="meta-chip">CONF 98%</span>
-                </div>
-                <div className="mt-4 flex h-36 items-end gap-2">
-                  {barSeries.map((value, index) => (
-                    <span
-                      key={`bar-${index}`}
-                      className="bar"
-                      style={{ height: `${value}%` }}
-                    />
-                  ))}
-                </div>
-                <div className="mt-4 grid grid-cols-3 gap-2 text-xs text-[var(--text-2)]">
-                  {[
-                    { label: "High", value: "12" },
-                    { label: "Medium", value: "38" },
-                    { label: "Low", value: "74" },
-                  ].map((item) => (
-                    <div key={item.label} className="panel slab flex items-center justify-between px-3 py-2">
-                      <span>{item.label}</span>
-                      <span className="text-[var(--text)]">{item.value}</span>
-                    </div>
-                  ))}
+                <div className="p-6 flex-1 flex flex-col justify-end gap-4 min-h-[240px]">
+                  <div className="flex items-end gap-2 h-40">
+                    {barSeries.map((value, index) => (
+                      <div key={index} className="flex-1 flex flex-col justify-end group h-full gap-2">
+                        <div 
+                          className="w-full bg-[var(--ark-text-2)] opacity-20 group-hover:opacity-40 transition-opacity relative"
+                          style={{ height: `${value}%` }}
+                        >
+                           {/* 顶部装饰线 */}
+                           <div className="absolute top-0 left-0 right-0 h-[2px] bg-[var(--ark-text)] opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="grid grid-cols-3 gap-2 pt-4 border-t border-[var(--ark-border)]">
+                    {[
+                      { l: "HIGH", v: 12, c: "text-[var(--error)]" },
+                      { l: "MED", v: 38, c: "text-[var(--warning)]" },
+                      { l: "LOW", v: 74, c: "text-[var(--info)]" }
+                    ].map((item) => (
+                      <div key={item.l} className="ark-slab p-2 text-center">
+                        <div className={`text-xs font-bold ${item.c}`}>{item.v}</div>
+                        <div className="text-[10px] text-[var(--ark-text-2)]">{item.l}</div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             </section>
 
-            <section className="grid gap-4 lg:grid-cols-[1.4fr_0.8fr]">
-              <div className="panel p-5">
-                <span className="panel-ornament" aria-hidden />
-                <span className="panel-seam" aria-hidden />
-                <div className="flex items-center justify-between">
-                  <div className="space-y-1">
-                    <p className="kicker">Operations</p>
-                    <h2 className="text-base font-semibold">Recent Activity</h2>
+            {/* Bottom Section */}
+            <section className="grid gap-6 lg:grid-cols-[2fr_1fr]">
+              <div className="ark-panel p-0">
+                <div className="p-4 border-b border-[var(--ark-border)] flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Terminal className="h-4 w-4" />
+                    <span className="ark-kicker">RECENT OPERATIONS</span>
                   </div>
-                  <span className="tag">Updated 2m ago</span>
+                  <div className="flex items-center gap-2 text-xs text-[var(--ark-text-2)]">
+                     <span className="w-2 h-2 border border-[var(--ark-text-2)] opacity-50" />
+                     LIVE FEED
+                  </div>
                 </div>
-                <div className="meta-row micro">
-                  <span className="meta-chip">QUEUE-12</span>
-                  <span className="meta-chip">SYNC OK</span>
-                  <span className="meta-chip">ARCHIVE 12H</span>
-                </div>
-                <div className="mt-4 overflow-hidden rounded-none border border-[var(--border)]">
-                  <table className="w-full text-sm">
-                    <thead className="bg-[var(--panel-muted)] text-xs text-[var(--text-2)]">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm text-left">
+                    <thead className="bg-[var(--ark-panel-2)] text-xs text-[var(--ark-text-2)] font-mono border-b border-[var(--ark-border)]">
                       <tr>
-                        <th className="px-4 py-3 text-left">ID</th>
-                        <th className="px-4 py-3 text-left">Task</th>
-                        <th className="px-4 py-3 text-left">Owner</th>
-                        <th className="px-4 py-3 text-left">Status</th>
-                        <th className="px-4 py-3 text-right">Score</th>
+                        <th className="px-6 py-3 font-medium">ID</th>
+                        <th className="px-6 py-3 font-medium">TASK</th>
+                        <th className="px-6 py-3 font-medium">OWNER</th>
+                        <th className="px-6 py-3 font-medium">STATUS</th>
+                        <th className="px-6 py-3 text-right font-medium">SCORE</th>
                       </tr>
                     </thead>
-                    <tbody>
+                    <tbody className="divide-y divide-[var(--ark-border)]">
                       {tableRows.map((row) => (
-                        <tr key={row.id} className="border-t border-[var(--border)]">
-                          <td className="px-4 py-3 text-xs text-[var(--text-2)]">{row.id}</td>
-                          <td className="px-4 py-3">{row.name}</td>
-                          <td className="px-4 py-3 text-xs text-[var(--text-2)]">{row.owner}</td>
-                          <td className="px-4 py-3 text-xs">
-                            <span className="tag muted">{row.status}</span>
+                        <tr key={row.id} className="hover:bg-[var(--ark-bg)] transition-colors group">
+                          <td className="px-6 py-3 font-mono text-xs text-[var(--ark-text-2)] group-hover:text-[var(--ark-active)] transition-colors">{row.id}</td>
+                          <td className="px-6 py-3 font-medium">{row.name}</td>
+                          <td className="px-6 py-3 text-xs text-[var(--ark-text-2)]">{row.owner}</td>
+                          <td className="px-6 py-3">
+                            <span className="ark-chip text-[10px]">{row.status}</span>
                           </td>
-                          <td className="px-4 py-3 text-right">{row.score}</td>
+                          <td className="px-6 py-3 text-right font-mono">{row.score}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -255,35 +308,23 @@ export default function DashboardDemoPage() {
                 </div>
               </div>
 
-              <div className="panel p-5">
-                <span className="panel-ornament" aria-hidden />
-                <span className="panel-seam" aria-hidden />
-                <div className="flex items-center justify-between">
-                  <div className="space-y-1">
-                    <p className="kicker">Response Loop</p>
-                    <h2 className="text-base font-semibold">Cycle Timing</h2>
-                  </div>
-                  <ShieldCheck className="h-5 w-5" />
+              <div className="ark-panel flex flex-col">
+                <div className="p-4 border-b border-[var(--ark-border)]">
+                  <span className="ark-kicker">CYCLE TIMING</span>
                 </div>
-                <div className="meta-row micro">
-                  <span className="meta-chip">LOOP-7</span>
-                  <span className="meta-chip">AUTO</span>
-                  <span className="meta-chip">STABLE</span>
-                </div>
-                <div className="mt-4 space-y-3">
-                  {timeline.map((item) => (
-                    <div key={item.label} className="panel slab flex items-center justify-between px-4 py-3">
-                      <span className="text-sm">{item.label}</span>
-                      <span className="text-sm text-[var(--text-2)]">{item.value}</span>
+                <div className="p-4 flex-1 space-y-4">
+                  {timeline.map((item, i) => (
+                    <div key={item.label} className="relative pl-6 pb-4 last:pb-0 border-l border-[var(--ark-border)] last:border-0">
+                      <div className={`absolute left-[-5px] top-0 h-2.5 w-2.5 rounded-full border-2 border-[var(--ark-bg)] ${i===2 ? 'bg-[var(--info)] animate-pulse' : 'bg-[var(--ark-text-2)]'}`} />
+                      <div className="ark-slab p-3 flex justify-between items-center -mt-2">
+                        <span className="text-sm font-medium">{item.label}</span>
+                        <span className="text-xs font-mono text-[var(--ark-text-2)]">{item.value}</span>
+                      </div>
                     </div>
                   ))}
                 </div>
-                <div className="mt-4 panel slab flex items-center justify-between px-4 py-3 text-xs text-[var(--text-2)]">
-                  <span className="flex items-center gap-2">
-                    <BarChart3 className="h-4 w-4" />
-                    Output band stable
-                  </span>
-                  <ArrowUpRight className="h-4 w-4" />
+                <div className="p-3 border-t border-[var(--ark-border)] text-xs text-center text-[var(--ark-text-2)] font-mono">
+                  ALL SYSTEMS NOMINAL
                 </div>
               </div>
             </section>
@@ -292,338 +333,65 @@ export default function DashboardDemoPage() {
       </div>
 
       <style jsx>{`
-        .demo-grid {
+        .ark-grid {
           background-image:
-            linear-gradient(to right, var(--grid) 1px, transparent 1px),
-            linear-gradient(to bottom, var(--grid) 1px, transparent 1px),
-            radial-gradient(circle at 20% 20%, rgba(15, 19, 24, 0.12), transparent 45%);
-          background-size: 160px 160px, 160px 160px, 100% 100%;
-          opacity: 0.55;
+            linear-gradient(var(--ark-border) 1px, transparent 1px),
+            linear-gradient(90deg, var(--ark-border) 1px, transparent 1px);
+          background-size: 40px 40px;
+          opacity: 0.15;
         }
 
-        .demo-ring {
-          border-radius: 999px;
-          border: 2px solid var(--border-strong);
-          background: rgba(15, 19, 24, 0.04);
+        .ark-panel {
+          background: var(--ark-panel);
+          border: 1px solid var(--ark-border);
+          border-top: 2px solid var(--ark-text); /* Top Accent Border */
+          box-shadow: 0 1px 3px rgba(0,0,0,0.02);
         }
 
-        .demo-beam {
-          border-top: 2px solid var(--border-strong);
-          border-bottom: 1px solid var(--border);
-          opacity: 0.7;
+        .ark-slab {
+          background: var(--ark-panel-2);
+          border: 1px solid var(--ark-border);
         }
 
-        .panel {
-          position: relative;
-          background-color: var(--panel-glass);
-          backdrop-filter: blur(7px) saturate(1.06);
-          -webkit-backdrop-filter: blur(7px) saturate(1.06);
-          background-image:
-            linear-gradient(180deg, var(--sheen) 0%, rgba(255, 255, 255, 0.18) 12%, transparent 36%),
-            radial-gradient(circle at 12% 0%, rgba(255, 255, 255, 0.55), transparent 55%),
-            radial-gradient(circle at 90% 15%, rgba(15, 19, 24, 0.08), transparent 50%),
-            repeating-linear-gradient(
-              90deg,
-              rgba(15, 19, 24, 0.03) 0,
-              rgba(15, 19, 24, 0.03) 1px,
-              transparent 1px,
-              transparent 5px
-            ),
-            linear-gradient(to right, var(--panel-rail) 0 0),
-            linear-gradient(to bottom, var(--panel-rail-strong) 0 0),
-            repeating-linear-gradient(
-              to right,
-              rgba(15, 19, 24, 0.035) 0,
-              rgba(15, 19, 24, 0.035) 1px,
-              transparent 1px,
-              transparent 36px
-            ),
-            repeating-linear-gradient(
-              to bottom,
-              rgba(15, 19, 24, 0.03) 0,
-              rgba(15, 19, 24, 0.03) 1px,
-              transparent 1px,
-              transparent 36px
-            ),
-            radial-gradient(rgba(15, 19, 24, 0.04) 0.6px, transparent 0.7px);
-          background-size: 100% 100%, 100% 100%, 100% 100%, 5px 100%, 4px 100%, 100% 4px, 36px 36px, 36px 36px, 6px 6px;
-          background-position: left top, left top, left top, left top, left top, left top, left top, left top, left top;
-          background-repeat: no-repeat, no-repeat, no-repeat, repeat, no-repeat, no-repeat, repeat, repeat, repeat;
-          border: 1px solid var(--border);
-          box-shadow:
-            0 6px 12px var(--shadow),
-            inset 0 1px 0 var(--sheen-soft),
-            inset 0 -1px 0 rgba(15, 19, 24, 0.08);
-          clip-path: polygon(0 0, calc(100% - var(--cut)) 0, 100% var(--cut), 100% 100%, var(--cut) 100%, 0 calc(100% - var(--cut)));
-        }
-
-        .panel::before {
-          content: "";
-          position: absolute;
-          left: 12px;
-          top: 0;
-          width: 86px;
-          height: 6px;
-          background: var(--accent);
-          opacity: 0.18;
-          pointer-events: none;
-        }
-
-        .panel-hero::before {
-          width: 120px;
-          opacity: 0.26;
-        }
-
-        .panel-hero {
-          box-shadow:
-            0 12px 22px rgba(15, 19, 24, 0.12),
-            0 0 26px rgba(15, 19, 24, 0.12),
-            inset 0 1px 0 var(--sheen),
-            inset 0 -1px 0 rgba(15, 19, 24, 0.12);
-        }
-
-        .panel-ornament {
-          position: absolute;
-          right: 14px;
-          top: 14px;
-          width: 28px;
-          height: 14px;
-          border-top: 2px solid var(--border-strong);
-          border-right: 2px solid var(--border-strong);
-          opacity: 0.6;
-          pointer-events: none;
-        }
-
-        .panel-ornament::after {
-          content: "";
-          position: absolute;
-          right: -6px;
-          top: 6px;
-          width: 12px;
-          height: 2px;
-          background: var(--border-strong);
-        }
-
-        .panel-seam {
-          position: absolute;
-          left: 16px;
-          bottom: 12px;
-          width: 140px;
-          height: 0;
-          border-top: 2px dashed rgba(15, 19, 24, 0.16);
-          opacity: 0.6;
-        }
-
-        .panel-seam::after {
-          content: "";
-          position: absolute;
-          right: -10px;
-          top: -3px;
-          width: 2px;
-          height: 8px;
-          background: rgba(15, 19, 24, 0.22);
-        }
-
-        .demo-sidebar {
-          display: flex;
-          flex-direction: column;
-          gap: 16px;
-          min-height: 520px;
-        }
-
-        .sidebar-item {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          width: 100%;
-          padding: 8px 10px;
-          border: 1px solid transparent;
-          color: var(--text-2);
-          background: transparent;
-          font-size: 12px;
-          letter-spacing: 0.12em;
-          text-transform: uppercase;
-          font-family: "IBM Plex Mono", "MiSans", sans-serif;
-          transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
-          clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
-          position: relative;
-        }
-
-        .sidebar-item::after {
-          content: "";
-          position: absolute;
-          right: 10px;
-          top: 50%;
-          width: 6px;
-          height: 6px;
-          background: var(--border-strong);
-          transform: translateY(-50%) rotate(45deg);
-        }
-
-        .sidebar-item:hover {
-          border-color: var(--border);
-          color: var(--text);
-          background: var(--panel-muted);
-        }
-
-        .sidebar-item.active {
-          border-color: var(--border-strong);
-          color: var(--text);
-          background: var(--panel-muted);
-        }
-
-        .sidebar-item.active::after {
-          background: var(--text);
-        }
-
-        .panel::after {
-          content: "";
-          position: absolute;
-          inset: 10px;
-          border: 1px solid rgba(15, 19, 24, 0.05);
-          pointer-events: none;
-          clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
-        }
-
-        .slab {
-          border-top: 2px solid var(--border-strong);
-          background-color: var(--panel-glass-strong);
-          backdrop-filter: blur(5px) saturate(1.04);
-          -webkit-backdrop-filter: blur(5px) saturate(1.04);
-          box-shadow:
-            inset 0 1px 0 var(--sheen-soft),
-            inset 0 -1px 0 rgba(15, 19, 24, 0.05);
-          background-image:
-            linear-gradient(180deg, rgba(255, 255, 255, 0.45) 0%, transparent 45%),
-            repeating-linear-gradient(
-              90deg,
-              rgba(15, 19, 24, 0.025) 0,
-              rgba(15, 19, 24, 0.025) 1px,
-              transparent 1px,
-              transparent 5px
-            ),
-            linear-gradient(to right, var(--panel-rail) 0 0),
-            linear-gradient(to bottom, var(--panel-rail-strong) 0 0),
-            radial-gradient(rgba(15, 19, 24, 0.04) 0.6px, transparent 0.7px);
-          background-size: 100% 100%, 5px 100%, 3px 100%, 100% 3px, 6px 6px;
-          background-position: left top, left top, left top, left top, left top;
-          background-repeat: no-repeat, repeat, no-repeat, no-repeat, repeat;
-          clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
-        }
-
-        .kicker {
-          font-size: 10px;
-          letter-spacing: 0.3em;
-          text-transform: uppercase;
-          color: var(--text-2);
+        .ark-kicker {
+          font-size: 11px;
+          letter-spacing: 0.15em;
           font-weight: 600;
-          font-family: "IBM Plex Mono", "MiSans", sans-serif;
-        }
-
-        .tag {
-          display: inline-flex;
-          align-items: center;
-          border: 1px solid var(--border);
-          padding: 2px 10px;
-          font-size: 10px;
-          letter-spacing: 0.2em;
+          color: var(--ark-text-2);
           text-transform: uppercase;
-          color: var(--text-2);
-          background: var(--panel-muted);
-          font-family: "IBM Plex Mono", "MiSans", sans-serif;
-          clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
         }
 
-        .tag.muted {
-          background: transparent;
-          border-color: var(--border-strong);
-        }
-
-        .tag.inverse {
-          background: var(--accent);
-          border-color: var(--accent);
-          color: #ffffff;
-        }
-
-        .meta-row {
+        .ark-nav-item {
           display: flex;
-          flex-wrap: wrap;
-          gap: 8px;
-          margin-top: 6px;
-        }
-
-        .meta-row.micro {
-          margin-top: 10px;
-        }
-
-        .meta-chip {
-          display: inline-flex;
           align-items: center;
-          padding: 2px 6px;
-          border: 1px solid var(--border);
-          font-size: 9px;
-          letter-spacing: 0.18em;
-          text-transform: uppercase;
-          color: var(--text-2);
-          background: var(--panel-muted);
-          font-family: "IBM Plex Mono", "MiSans", sans-serif;
+          gap: 12px;
+          padding: 10px 16px;
+          font-size: 13px;
+          font-weight: 500;
+          color: var(--ark-text-2);
+          transition: all 0.2s;
+          border-left: 2px solid transparent;
         }
 
-        .meta-chip.subtle {
-          background: transparent;
-          border-color: var(--border-strong);
-          color: var(--muted);
+        .ark-nav-item:hover {
+          color: var(--ark-text);
+          background: var(--ark-panel-2);
         }
 
-        .meta-code {
-          font-size: 9px;
-          letter-spacing: 0.2em;
-          text-transform: uppercase;
-          color: var(--muted);
-          font-family: "IBM Plex Mono", "MiSans", sans-serif;
+        .ark-nav-item.active {
+          color: var(--ark-text);
+          background: var(--ark-panel-2);
+          border-left-color: var(--ark-active);
         }
 
-        .chart-frame {
-          height: 160px;
-          border: 1px solid var(--border);
-          background-color: var(--panel-muted-glass);
-          backdrop-filter: blur(4px) saturate(1.05);
-          -webkit-backdrop-filter: blur(4px) saturate(1.05);
-          background-image:
-            linear-gradient(180deg, rgba(255, 255, 255, 0.5) 0%, transparent 55%),
-            repeating-linear-gradient(
-              90deg,
-              rgba(15, 19, 24, 0.02) 0,
-              rgba(15, 19, 24, 0.02) 1px,
-              transparent 1px,
-              transparent 5px
-            ),
-            linear-gradient(to right, var(--grid-strong) 1px, transparent 1px),
-            linear-gradient(to bottom, var(--grid-strong) 1px, transparent 1px),
-            radial-gradient(rgba(15, 19, 24, 0.04) 0.6px, transparent 0.7px);
-          background-size: 100% 100%, 5px 100%, 40px 40px, 40px 40px, 6px 6px;
-          background-repeat: no-repeat, repeat, repeat, repeat, repeat;
-          position: relative;
-          box-shadow:
-            inset 0 1px 0 var(--sheen-soft),
-            inset 0 -1px 0 rgba(15, 19, 24, 0.08);
-        }
-
-        .chart-notch {
-          position: absolute;
-          right: 10px;
-          top: 10px;
-          width: 14px;
-          height: 14px;
-          border-top: 2px solid var(--border-strong);
-          border-right: 2px solid var(--border-strong);
-          opacity: 0.6;
-        }
-
-        .bar {
-          flex: 1;
-          background: var(--accent);
-          opacity: 0.18;
+        .ark-chip {
+          display: inline-block;
+          padding: 2px 8px;
+          border: 1px solid var(--ark-border);
+          background: var(--ark-panel-2);
+          color: var(--ark-text);
+          font-family: var(--font-mono);
+          letter-spacing: 0.05em;
         }
       `}</style>
     </main>

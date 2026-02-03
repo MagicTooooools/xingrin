@@ -205,11 +205,8 @@
       "loading": "加载编辑器...",
       "duplicateKey": "发现重复的配置项 '{key}'，后面的配置会覆盖前面的，请删除重复项"
     },
-    "theme": {
-      "switchToLight": "切换到亮色模式",
-      "switchToDark": "切换到暗色模式",
-      "switchLanguage": "切换语言",
-      "switchColor": "切换主题色"
+    "language": {
+      "switchLanguage": "切换语言"
     },
     "download": {
       "all": "下载全部",

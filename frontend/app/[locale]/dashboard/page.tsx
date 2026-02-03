@@ -2,6 +2,7 @@ import { DashboardStatCards } from "@/components/dashboard/dashboard-stat-cards"
 import { AssetTrendChart } from "@/components/dashboard/asset-trend-chart"
 import { VulnSeverityChart } from "@/components/dashboard/vuln-severity-chart"
 import { DashboardDataTable } from "@/components/dashboard/dashboard-data-table"
+import { BauhausDashboardHeader } from "@/components/dashboard/bauhaus-dashboard-header"
 
 /**
  * Dashboard page component
@@ -12,6 +13,9 @@ export default function Page() {
   return (
     // Content area containing cards, charts and data tables
     <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
+      {/* Bauhaus 风格 Dashboard Header - 仅在 Bauhaus 主题下显示 */}
+      <BauhausDashboardHeader />
+
       {/* Top statistics cards */}
       <DashboardStatCards />
 

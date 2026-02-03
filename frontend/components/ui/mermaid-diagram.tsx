@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from "react"
 import mermaid from "mermaid"
-import { useTheme } from "next-themes"
 
 interface MermaidDiagramProps {
   chart: string
@@ -12,7 +11,6 @@ interface MermaidDiagramProps {
 export function MermaidDiagram({ chart, className = "" }: MermaidDiagramProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [svg, setSvg] = useState<string>("")
-  const { theme } = useTheme()
 
   useEffect(() => {
     const renderDiagram = async () => {
@@ -48,7 +46,7 @@ export function MermaidDiagram({ chart, className = "" }: MermaidDiagramProps) {
         // 配置 Mermaid
         mermaid.initialize({
           startOnLoad: false,
-          theme: theme === "dark" ? "dark" : "base",
+          theme: "base",
           themeVariables: {
             fontFamily:
               "var(--font-sans, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif)",
@@ -90,7 +88,7 @@ export function MermaidDiagram({ chart, className = "" }: MermaidDiagramProps) {
     }
 
     renderDiagram()
-  }, [chart, theme])
+  }, [chart])
 
   return (
     <div

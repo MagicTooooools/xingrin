@@ -504,7 +504,7 @@ export function UnifiedDataTable<TData>({
       )}
 
       {/* Table - Following TanStack Table official recommendations using CSS variables */}
-      <div className={cn("rounded-md border overflow-x-auto", tableClassName)}>
+      <div data-slot="data-table" className={cn("rounded-md border overflow-x-auto", tableClassName)}>
         <table 
           className="w-full caption-bottom text-sm"
           style={{ 

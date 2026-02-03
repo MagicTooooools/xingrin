@@ -19,6 +19,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton"
 import { useTranslations } from "next-intl"
 import { SEVERITY_COLORS } from "@/lib/severity-config"
+import { IconShield } from "@tabler/icons-react"
 
 export function VulnSeverityChart() {
   const { data, isLoading } = useAssetStatistics()
@@ -65,9 +66,14 @@ export function VulnSeverityChart() {
   const total = allData.reduce((sum, item) => sum + item.count, 0)
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{t("title")}</CardTitle>
+    <Card className="overflow-hidden [[data-theme=bauhaus]_&]:pt-0 [[data-theme=bauhaus]_&]:gap-0">
+      {/* Bauhaus 风格 Kicker 标题 */}
+      <div className="bauhaus-kicker hidden [[data-theme=bauhaus]_&]:flex">
+        <IconShield className="size-4" />
+        <span>SEVERITY MIX</span>
+      </div>
+      <CardHeader className="[[data-theme=bauhaus]_&]:pt-4">
+        <CardTitle className="[[data-theme=bauhaus]_&]:hidden">{t("title")}</CardTitle>
         <CardDescription>{t("description")}</CardDescription>
       </CardHeader>
       <CardContent>

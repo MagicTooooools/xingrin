@@ -27,15 +27,15 @@ import type { Agent } from "@/types/agent.types"
 function getHealthStyle(state: string) {
   const normalized = state.toLowerCase()
   if (normalized === "ok") {
-    return "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
+    return "bg-[var(--success)]/10 text-[var(--success)] border-[var(--success)]/20"
   }
   if (normalized === "warning" || normalized === "warn") {
-    return "bg-amber-500/10 text-amber-600 border-amber-500/20"
+    return "bg-[var(--warning)]/10 text-[var(--warning)] border-[var(--warning)]/20"
   }
   if (normalized === "error" || normalized === "critical") {
-    return "bg-red-500/10 text-red-600 border-red-500/20"
+    return "bg-[var(--error)]/10 text-[var(--error)] border-[var(--error)]/20"
   }
-  return "bg-slate-500/10 text-slate-500 border-slate-500/20"
+  return "bg-muted text-muted-foreground border-border"
 }
 
 function getStatusVariant(status: string) {
@@ -73,9 +73,9 @@ function MetricBar({ label, value, threshold, className }: MetricBarProps) {
   }, [percentage, threshold])
 
   const progressColor = useMemo(() => {
-    if (status === "critical") return "bg-red-500"
-    if (status === "warning") return "bg-amber-500"
-    return "bg-emerald-500"
+    if (status === "critical") return "bg-[var(--error)]"
+    if (status === "warning") return "bg-[var(--warning)]"
+    return "bg-[var(--success)]"
   }, [status])
 
   return (
@@ -89,8 +89,8 @@ function MetricBar({ label, value, threshold, className }: MetricBarProps) {
       </div>
       <span className={cn(
         "text-[10px] font-medium tabular-nums text-right",
-        status === "critical" && "text-red-600",
-        status === "warning" && "text-amber-600"
+        status === "critical" && "text-[var(--error)]",
+        status === "warning" && "text-[var(--warning)]"
       )}>
         {percentage.toFixed(0)}%
         {threshold && (
@@ -98,7 +98,7 @@ function MetricBar({ label, value, threshold, className }: MetricBarProps) {
         )}
       </span>
       {status !== "normal" && (
-        <IconAlertTriangle className="h-3 w-3 text-amber-500 shrink-0" />
+        <IconAlertTriangle className="h-3 w-3 text-[var(--warning)] shrink-0" />
       )}
     </div>
   )
@@ -156,7 +156,7 @@ export function AgentListItem({
       className={cn(
         "group relative rounded-lg border bg-card transition-all duration-200",
         "hover:shadow-md hover:border-primary/20",
-        agent.status === "online" && "border-emerald-500/20",
+        agent.status === "online" && "border-[var(--success)]/20",
         agent.status === "offline" && "border-slate-300/50 opacity-75"
       )}
     >
@@ -181,7 +181,7 @@ export function AgentListItem({
           </Badge>
 
           {hasWarnings && (
-            <Badge variant="outline" className="bg-amber-500/10 text-amber-600 border-amber-500/20 text-[10px] shrink-0">
+            <Badge variant="outline" className="bg-[var(--warning)]/10 text-[var(--warning)] border-[var(--warning)]/20 text-[10px] shrink-0">
               <IconAlertTriangle className="h-3 w-3 mr-1" />
               {t("card.warning")}
             </Badge>
@@ -197,11 +197,11 @@ export function AgentListItem({
 
           <div className="text-xs text-muted-foreground flex items-center gap-1">
             <span className="hidden md:inline">{t("metrics.lastHeartbeat")}:</span>
-            <span className={cn("font-medium", isHeartbeatStale && "text-amber-600")}>
+            <span className={cn("font-medium", isHeartbeatStale && "text-[var(--warning)]")}>
               {formatRelativeTime(agent.lastHeartbeat)}
             </span>
             {agent.status === "online" && !isHeartbeatStale && (
-              <IconActivity className="h-3 w-3 text-emerald-500 animate-pulse" />
+              <IconActivity className="h-3 w-3 text-[var(--success)] animate-pulse" />
             )}
           </div>
 

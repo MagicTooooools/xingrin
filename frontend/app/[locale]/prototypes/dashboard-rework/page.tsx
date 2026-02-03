@@ -3,19 +3,14 @@
 import type { CSSProperties } from "react"
 import {
   Activity,
-  ArrowUpRight,
   BarChart3,
-  Box,
   ChevronRight,
-  Circle,
-  Database,
   Hexagon,
   LayoutGrid,
   Layers,
   Radar,
   Search,
   Settings,
-  Shield,
   ShieldAlert,
   Sliders,
   Terminal,
@@ -96,7 +91,7 @@ export default function DashboardReworkPage() {
               </div>
               
               <nav className="flex flex-col gap-1">
-                {navItems.map((item, index) => (
+                {navItems.map((item) => (
                   <button
                     key={item.label}
                     className={`ark-nav-item ${item.active ? "active" : ""}`}

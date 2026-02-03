@@ -3,22 +3,14 @@ import type { Metadata } from "next"
 import { NextIntlClientProvider } from 'next-intl'
 import { getMessages, setRequestLocale, getTranslations } from 'next-intl/server'
 import { notFound } from 'next/navigation'
-import { cookies } from "next/headers"
 import { locales, localeHtmlLang, type Locale } from '@/i18n/config'
-import { COLOR_THEME_COOKIE_KEY, isColorThemeId, DEFAULT_COLOR_THEME_ID, isDarkColorTheme } from "@/lib/color-themes"
+import { DEFAULT_COLOR_THEME_ID } from "@/lib/color-themes"
 
 // Import global style files
 import "../globals.css"
 // Font faces are declared in globals.css
 // Import color themes
-import "@/styles/themes/bubblegum.css"
-import "@/styles/themes/quantum-rose.css"
-import "@/styles/themes/clean-slate.css"
-import "@/styles/themes/cosmic-night.css"
-import "@/styles/themes/vercel.css"
-import "@/styles/themes/vercel-dark.css"
-import "@/styles/themes/violet-bloom.css"
-import "@/styles/themes/cyberpunk-1.css"
+import "@/styles/themes/bauhaus.css"
 import { Suspense } from "react"
 import Script from "next/script"
 import { QueryProvider } from "@/components/providers/query-provider"
@@ -101,16 +93,12 @@ export default async function LocaleLayout({
   // Load translation messages
   const messages = await getMessages()
 
-  const cookieStore = await cookies()
-  const cookieTheme = cookieStore.get(COLOR_THEME_COOKIE_KEY)?.value
-  const themeId = isColorThemeId(cookieTheme) ? cookieTheme : DEFAULT_COLOR_THEME_ID
-  const isDark = isDarkColorTheme(themeId)
+  const themeId = DEFAULT_COLOR_THEME_ID
 
   return (
     <html
       lang={localeHtmlLang[locale as Locale]}
       data-theme={themeId}
-      className={isDark ? "dark" : undefined}
       suppressHydrationWarning
     >
       <body className={fontConfig.className} style={fontConfig.style}>
@@ -126,12 +114,7 @@ export default async function LocaleLayout({
           <RouteProgress />
         </Suspense>
         {/* ThemeProvider provides theme switching functionality */}
-        <ThemeProvider
-          attribute="class"
-          defaultTheme={isDark ? "dark" : "light"}
-          enableSystem
-          disableTransitionOnChange
-        >
+        <ThemeProvider>
           {/* NextIntlClientProvider provides internationalization context */}
           <NextIntlClientProvider messages={messages}>
             {/* QueryProvider provides React Query functionality */}

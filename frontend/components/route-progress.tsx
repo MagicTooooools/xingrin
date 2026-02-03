@@ -92,7 +92,7 @@ export function RouteProgress() {
         intervalRef.current = null
       }
     }
-  }, [pathname, searchParams, startProgress, completeProgress])
+  }, [pathname, searchParams, startProgress, completeProgress, clearManualTimeout])
 
   useEffect(() => {
     const handleStart = () => {
@@ -121,13 +121,13 @@ export function RouteProgress() {
       )}
     >
       {/* Progress bar background */}
-      <div className="absolute inset-0 bg-primary/10" />
+      <div className="absolute inset-0 bg-transparent" />
       
       {/* Progress bar */}
       <div
         className={cn(
-          "h-full bg-primary transition-all duration-200 ease-out",
-          "shadow-[0_0_10px_rgba(99,102,241,0.5)]"
+          "h-full bg-[var(--highlight)] transition-all duration-200 ease-out",
+          "shadow-[0_0_10px_var(--highlight)]"
         )}
         style={{ width: `${progress}%` }}
       />
@@ -136,7 +136,7 @@ export function RouteProgress() {
       <div
         className={cn(
           "absolute top-0 right-0 h-full w-24",
-          "bg-gradient-to-r from-transparent to-primary/50",
+          "bg-gradient-to-r from-transparent to-[var(--highlight)]",
           "opacity-50 blur-sm",
           "transition-all duration-200"
         )}

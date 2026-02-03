@@ -67,13 +67,13 @@ function PulsingDot({ className }: { className?: string }) {
 function StageStatusIcon({ status }: { status: StageStatus }) {
   switch (status) {
     case "completed":
-      return <IconCircleCheck className="h-5 w-5 text-[#238636] dark:text-[#3fb950]" />
+      return <IconCircleCheck className="h-5 w-5 text-[var(--success)]" />
     case "running":
-      return <PulsingDot className="text-[#d29922]" />
+      return <PulsingDot className="text-[var(--warning)]" />
     case "failed":
-      return <IconCircleX className="h-5 w-5 text-[#da3633] dark:text-[#f85149]" />
+      return <IconCircleX className="h-5 w-5 text-[var(--error)]" />
     case "cancelled":
-      return <IconCircleX className="h-5 w-5 text-[#848d97]" />
+      return <IconCircleX className="h-5 w-5 text-muted-foreground" />
     default:
       return <IconClock className="h-5 w-5 text-muted-foreground" />
   }
@@ -100,11 +100,11 @@ const STAGE_STATUS_PRIORITY: Record<StageStatus, number> = {
 
 // Status style configuration (consistent with scan-history-columns)
 const SCAN_STATUS_STYLES: Record<string, string> = {
-  running: "bg-[#d29922]/10 text-[#d29922] border-[#d29922]/20",
-  cancelled: "bg-[#848d97]/10 text-[#848d97] border-[#848d97]/20",
-  completed: "bg-[#238636]/10 text-[#238636] border-[#238636]/20 dark:text-[#3fb950]",
-  failed: "bg-[#da3633]/10 text-[#da3633] border-[#da3633]/20 dark:text-[#f85149]",
-  pending: "bg-[#d29922]/10 text-[#d29922] border-[#d29922]/20",
+  running: "bg-[var(--warning)]/10 text-[var(--warning)] border-[var(--warning)]/20",
+  cancelled: "bg-muted/10 text-muted-foreground border-muted/20",
+  completed: "bg-[var(--success)]/10 text-[var(--success)] border-[var(--success)]/20",
+  failed: "bg-[var(--error)]/10 text-[var(--error)] border-[var(--error)]/20",
+  pending: "bg-[var(--info)]/10 text-[var(--info)] border-[var(--info)]/20",
 }
 
 /**
@@ -420,9 +420,9 @@ export function ScanOverview({ scanId }: ScanOverviewProps) {
                           key={stageName}
                           className={cn(
                             "flex items-center justify-between py-2 px-2 rounded-md transition-colors text-sm",
-                            isRunning && "bg-[#d29922]/10 border border-[#d29922]/30",
+                            isRunning && "bg-[var(--warning)]/10 border border-[var(--warning)]/30",
                             stageProgress.status === "completed" && "text-muted-foreground",
-                            stageProgress.status === "failed" && "bg-[#da3633]/10 text-[#da3633]",
+                            stageProgress.status === "failed" && "bg-[var(--error)]/10 text-[var(--error)]",
                             stageProgress.status === "cancelled" && "text-muted-foreground",
                           )}
                         >
@@ -463,19 +463,19 @@ export function ScanOverview({ scanId }: ScanOverviewProps) {
               <CardContent className="pt-0">
                 <div className="flex items-center gap-3 flex-wrap">
                   <div className="flex items-center gap-1.5">
-                    <div className="w-2.5 h-2.5 rounded-full bg-red-500" />
+                    <div className="w-2.5 h-2.5 rounded-full bg-[var(--error)]" />
                     <span className="text-sm font-medium">{vulnSummary.critical}</span>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <div className="w-2.5 h-2.5 rounded-full bg-orange-500" />
+                    <div className="w-2.5 h-2.5 rounded-full bg-[var(--error)]/70" />
                     <span className="text-sm font-medium">{vulnSummary.high}</span>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <div className="w-2.5 h-2.5 rounded-full bg-yellow-500" />
+                    <div className="w-2.5 h-2.5 rounded-full bg-[var(--warning)]" />
                     <span className="text-sm font-medium">{vulnSummary.medium}</span>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <div className="w-2.5 h-2.5 rounded-full bg-blue-500" />
+                    <div className="w-2.5 h-2.5 rounded-full bg-[var(--info)]" />
                     <span className="text-sm font-medium">{vulnSummary.low}</span>
                   </div>
                   <span className="text-xs text-muted-foreground ml-auto">
@@ -543,7 +543,7 @@ export function ScanOverview({ scanId }: ScanOverviewProps) {
                 <>
                   <Separator orientation="vertical" className="h-3 mx-3" />
                   <span className="flex items-center gap-1.5">
-                    <span className="size-1.5 rounded-full bg-green-500 animate-pulse" />
+                    <span className="size-1.5 rounded-full bg-[var(--success)] animate-pulse" />
                     每 3 秒刷新
                   </span>
                 </>

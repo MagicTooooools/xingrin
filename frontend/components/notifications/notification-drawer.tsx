@@ -58,12 +58,12 @@ function getTimeGroup(dateStr?: string): 'today' | 'yesterday' | 'earlier' {
   return 'earlier'
 }
 
-/** Severity icon class mapping */
+/** Severity icon class mapping - 使用语义 CSS 变量 */
 const SEVERITY_ICON_CLASS_MAP: Record<NotificationSeverity, string> = {
-  critical: "text-[#da3633] dark:text-[#f85149]",
-  high: "text-[#d29922]",
-  medium: "text-[#d4a72c]",
-  low: "text-[#848d97]",
+  critical: "text-[var(--error)]",
+  high: "text-[var(--warning)]",
+  medium: "text-[var(--warning)]",
+  low: "text-[var(--muted-foreground)]",
 }
 
 /** Severity card class mapping */

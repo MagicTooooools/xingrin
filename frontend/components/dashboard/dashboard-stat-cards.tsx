@@ -17,8 +17,8 @@ const TrendBadge = memo(function TrendBadge({ change }: { change: number }) {
     <Badge 
       variant="outline" 
       className={isPositive 
-        ? "text-[#238636] dark:text-[#3fb950] border-[#238636]/20 bg-[#238636]/10" 
-        : "text-[#da3633] dark:text-[#f85149] border-[#da3633]/20 bg-[#da3633]/10"
+        ? "text-[var(--success)] border-[var(--success)]/20 bg-[var(--success)]/10" 
+        : "text-[var(--error)] border-[var(--error)]/20 bg-[var(--error)]/10"
       }
     >
       {isPositive ? <IconTrendingUp className="size-3 mr-1" /> : <IconTrendingDown className="size-3 mr-1" />}
@@ -34,6 +34,7 @@ const StatCard = memo(function StatCard({
   icon,
   footer,
   loading,
+  index,
 }: {
   title: string
   value: string | number
@@ -41,10 +42,17 @@ const StatCard = memo(function StatCard({
   icon: React.ReactNode
   footer: string
   loading?: boolean
+  index?: number
 }) {
+  // 格式化序号为两位数 (01, 02, 03, 04)
+  const formattedIndex = index !== undefined ? String(index).padStart(2, '0') : undefined
+  
   return (
-    <Card className="@container/card">
-      <CardHeader>
+    <Card 
+      className="@container/card bauhaus-stat-card" 
+      data-card-index={formattedIndex}
+    >
+      <CardHeader className="pt-7">
         <CardDescription className="flex items-center gap-2">
           {icon}
           {title}
@@ -87,7 +95,8 @@ export function DashboardStatCards() {
 
   return (
     <div className="flex flex-col gap-2 px-4 lg:px-6">
-      <div className="grid grid-cols-1 gap-4 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
+      {/* Bauhaus 主题下使用 1x4 横排布局，其他主题使用响应式网格 */}
+      <div className="grid grid-cols-1 gap-4 @xl/main:grid-cols-2 @5xl/main:grid-cols-4 bauhaus-stats-row">
         <StatCard
           title={t("assetsFound")}
           value={data?.totalAssets ?? 0}
@@ -95,6 +104,7 @@ export function DashboardStatCards() {
           icon={<IconStack2 className="size-4" />}
           loading={isLoading}
           footer={t("assetsFooter")}
+          index={1}
         />
         <StatCard
           title={t("vulnsFound")}
@@ -103,6 +113,7 @@ export function DashboardStatCards() {
           icon={<IconBug className="size-4" />}
           loading={isLoading}
           footer={t("vulnsFooter")}
+          index={2}
         />
         <StatCard
           title={t("monitoredTargets")}
@@ -111,6 +122,7 @@ export function DashboardStatCards() {
           icon={<IconTarget className="size-4" />}
           loading={isLoading}
           footer={t("targetsFooter")}
+          index={3}
         />
         <StatCard
           title={t("runningScans")}
@@ -118,6 +130,7 @@ export function DashboardStatCards() {
           icon={<IconPlayerPlay className="size-4" />}
           loading={isLoading}
           footer={t("scansFooter")}
+          index={4}
         />
       </div>
       <div className="flex items-center gap-3 mt-1 -mb-2 text-xs text-muted-foreground">
