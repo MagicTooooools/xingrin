@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { type DialogProps } from "@radix-ui/react-dialog"
-import { MagnifyingGlassIcon } from "@radix-ui/react-icons"
+import { MagnifyingGlassIcon } from "@/components/icons"
 import { Command as CommandPrimitive } from "cmdk"
 import { useTranslations } from "next-intl"
 

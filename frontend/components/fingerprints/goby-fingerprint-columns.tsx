@@ -5,7 +5,7 @@ import { ColumnDef } from "@tanstack/react-table"
 import { Checkbox } from "@/components/ui/checkbox"
 import { DataTableColumnHeader } from "@/components/ui/data-table/column-header"
 import { ExpandableCell, ExpandableMonoCell } from "@/components/ui/data-table/expandable-cell"
-import { ChevronDown, ChevronUp } from "lucide-react"
+import { ChevronDown, ChevronUp } from "@/components/icons"
 import { useTranslations } from "next-intl"
 import type { GobyFingerprint, GobyRule } from "@/types/fingerprint.types"
 

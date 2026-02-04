@@ -9,7 +9,7 @@ import {
   IconPlayerPlay, 
   IconBug,
   IconStack2
-} from "@tabler/icons-react"
+} from "@/components/icons"
 import { useScanStatistics } from "@/hooks/use-scans"
 
 function StatCard({

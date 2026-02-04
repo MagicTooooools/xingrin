@@ -17,7 +17,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { MoreHorizontal, Eye, Trash2, Play, Calendar, Copy, Check } from "lucide-react"
+import { MoreHorizontal, Eye, Trash2, Play, Calendar, Copy, Check } from "@/components/icons"
 import { toast } from "sonner"
 import { DataTableColumnHeader } from "@/components/ui/data-table/column-header"
 import { ExpandableBadgeList } from "@/components/ui/data-table/expandable-cell"

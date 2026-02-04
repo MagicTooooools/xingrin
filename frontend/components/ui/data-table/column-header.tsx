@@ -1,7 +1,7 @@
 "use client"
 
 import type { Column } from "@tanstack/react-table"
-import { ChevronUp, ChevronDown, ChevronsUpDown } from "lucide-react"
+import { ChevronUp, ChevronDown, ChevronsUpDown } from "@/components/icons"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 

@@ -7,36 +7,26 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import type { ScanRecord, ScanStatus } from "@/types/scan.types"
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { 
-  MoreHorizontal, 
-  Eye, 
-  Trash2, 
-  StopCircle,
-} from "lucide-react"
+import { Eye, Trash2 } from "@/components/icons"
 import { DataTableColumnHeader } from "@/components/ui/data-table/column-header"
 import {
   IconClock,
   IconCircleCheck,
   IconCircleX,
-  IconLoader,
+  IconLoader2,
   IconWorld,
   IconBrowser,
   IconServer,
   IconLink,
   IconBug,
-} from "@tabler/icons-react"
+} from "@/components/icons"
+import { ScanStatusBadge } from "@/components/scan/scan-status-badge"
+import { cn } from "@/lib/utils"
 
 // Translation type definitions
 export interface ScanHistoryTranslations {
@@ -51,9 +41,9 @@ export interface ScanHistoryTranslations {
   }
   actions: {
     snapshot: string
-    stopScan: string
+    stop: string
+    stopScanPending: string
     delete: string
-    openMenu: string
     selectAll: string
     selectRow: string
   }
@@ -77,81 +67,8 @@ export interface ScanHistoryTranslations {
   }
 }
 
-/**
- * Status badge component
- */
-function StatusBadge({ 
-  status, 
-  onClick,
-  labels,
-}: { 
-  status: ScanStatus
-  onClick?: () => void
-  labels: Record<ScanStatus, string>
-}) {
-  const config: Record<ScanStatus, {
-    icon: React.ComponentType<{ className?: string }>
-    variant: "secondary" | "default" | "outline" | "destructive"
-    className?: string
-  }> = {
-    cancelled: {
-      icon: IconCircleX,
-      variant: "outline",
-      className: "bg-muted/10 text-muted-foreground border-muted/20 hover:bg-muted/20 transition-colors",
-    },
-    completed: {
-      icon: IconCircleCheck,
-      variant: "outline",
-      className: "bg-[var(--success)]/10 text-[var(--success)] border-[var(--success)]/20 hover:bg-[var(--success)]/20 transition-colors",
-    },
-    failed: {
-      icon: IconCircleX,
-      variant: "outline",
-      className: "bg-[var(--error)]/10 text-[var(--error)] border-[var(--error)]/20 hover:bg-[var(--error)]/20 transition-colors",
-    },
-    pending: {
-      icon: IconClock,
-      variant: "outline",
-      className: "bg-[var(--info)]/10 text-[var(--info)] border-[var(--info)]/20 hover:bg-[var(--info)]/20 transition-colors",
-    },
-    running: {
-      icon: IconLoader,
-      variant: "outline",
-      className: "bg-[var(--warning)]/10 text-[var(--warning)] border-[var(--warning)]/20 hover:bg-[var(--warning)]/20 transition-colors",
-    },
-  }
-
-  const { icon: Icon, variant, className } = config[status]
-  const label = labels[status]
-
-  const badge = (
-    <Badge variant={variant} data-badge-type={status} className={className}>
-      {(status === "running" || status === "pending") ? (
-        <span className="relative flex h-2 w-2">
-          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-current opacity-75" />
-          <span className="relative inline-flex h-2 w-2 rounded-full bg-current" />
-        </span>
-      ) : (
-        <Icon className="h-3.5 w-3.5" />
-      )}
-      {label}
-      {onClick && <span className="ml-0.5 text-xs opacity-60">›</span>}
-    </Badge>
-  )
-
-  if (onClick) {
-    return (
-      <button 
-        onClick={onClick}
-        className="cursor-pointer hover:scale-105 transition-transform"
-      >
-        {badge}
-      </button>
-    )
-  }
-
-  return badge
-}
+// StatusBadge component removed in favor of ScanStatusBadge in separate file
+// function StatusBadge({ ... }) { ... }
 
 // Column creation function parameter types
 interface CreateColumnsProps {
@@ -259,113 +176,61 @@ export const createScanHistoryColumns = ({
 
       if (subdomains > 0) {
         badges.push(
-          <TooltipProvider delayDuration={300} key="subdomains">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Badge 
-                  variant="outline"
-                  data-badge-type="subdomain"
-                  className="bg-[var(--info)]/15 text-[var(--info)] border-[var(--info)]/30 hover:bg-[var(--info)]/25 transition-colors gap-1"
-                >
-                  <IconWorld className="h-3 w-3" />
-                  {subdomains}
-                </Badge>
-              </TooltipTrigger>
-              <TooltipContent side="top">
-                <p className="text-xs">{t.summary.subdomains}</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <Badge 
+            key="subdomains"
+            variant="outline"
+            data-badge-type="subdomain"
+          >
+            {subdomains} SUB
+          </Badge>
         )
       }
 
       if (websites > 0) {
         badges.push(
-          <TooltipProvider delayDuration={300} key="websites">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Badge 
-                  variant="outline"
-                  data-badge-type="website"
-                  className="bg-[var(--success)]/15 text-[var(--success)] border-[var(--success)]/30 hover:bg-[var(--success)]/25 transition-colors gap-1"
-                >
-                  <IconBrowser className="h-3 w-3" />
-                  {websites}
-                </Badge>
-              </TooltipTrigger>
-              <TooltipContent side="top">
-                <p className="text-xs">{t.summary.websites}</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <Badge 
+            key="websites"
+            variant="outline"
+            data-badge-type="website"
+          >
+            {websites} WEB
+          </Badge>
         )
       }
 
       if (ips > 0) {
         badges.push(
-          <TooltipProvider delayDuration={300} key="ips">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Badge 
-                  variant="outline"
-                  data-badge-type="ip"
-                  className="bg-[var(--warning)]/15 text-[var(--warning)] border-[var(--warning)]/30 hover:bg-[var(--warning)]/25 transition-colors gap-1"
-                >
-                  <IconServer className="h-3 w-3" />
-                  {ips}
-                </Badge>
-              </TooltipTrigger>
-              <TooltipContent side="top">
-                <p className="text-xs">{t.summary.ipAddresses}</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <Badge 
+            key="ips"
+            variant="outline"
+            data-badge-type="ip"
+          >
+            {ips} IP
+          </Badge>
         )
       }
 
       if (endpoints > 0) {
         badges.push(
-          <TooltipProvider delayDuration={300} key="endpoints">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Badge 
-                  variant="outline"
-                  data-badge-type="endpoint"
-                  className="bg-[var(--info)]/15 text-[var(--info)] border-[var(--info)]/30 hover:bg-[var(--info)]/25 transition-colors gap-1"
-                >
-                  <IconLink className="h-3 w-3" />
-                  {endpoints}
-                </Badge>
-              </TooltipTrigger>
-              <TooltipContent side="top">
-                <p className="text-xs">{t.summary.endpoints}</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <Badge 
+            key="endpoints"
+            variant="outline"
+            data-badge-type="endpoint"
+          >
+            {endpoints} URL
+          </Badge>
         )
       }
 
       if (vulns > 0) {
         badges.push(
-          <TooltipProvider delayDuration={300} key="vulnerabilities">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Badge 
-                  variant="outline"
-                  data-badge-type="vulnerability"
-                  className="gap-1 bg-[var(--error)]/15 text-[var(--error)] border-[var(--error)]/30 hover:bg-[var(--error)]/25 transition-colors"
-                >
-                  <IconBug className="h-3 w-3" />
-                  {vulns}
-                </Badge>
-              </TooltipTrigger>
-              <TooltipContent side="top">
-                <p className="text-xs font-medium">
-                  {row.original.cachedStats?.vulnsCritical ?? 0} Critical, {row.original.cachedStats?.vulnsHigh ?? 0} High, {row.original.cachedStats?.vulnsMedium ?? 0} Medium {t.summary.vulnerabilities}
-                </p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <Badge 
+            key="vulnerabilities"
+            variant="outline"
+            data-badge-type="vulnerability"
+          >
+            {vulns} VULN
+          </Badge>
         )
       }
 
@@ -453,9 +318,9 @@ export const createScanHistoryColumns = ({
   },
   {
     accessorKey: "status",
-    size: 110,
-    minSize: 90,
-    maxSize: 130,
+    size: 140, // Increased size for the dual-line badge
+    minSize: 130,
+    maxSize: 160,
     enableResizing: false,
     meta: { title: t.columns.status },
     header: ({ column }) => (
@@ -463,52 +328,28 @@ export const createScanHistoryColumns = ({
     ),
     cell: ({ row }) => {
       const status = row.getValue("status") as ScanStatus
-      return (
-        <StatusBadge 
-          status={status} 
-          onClick={handleViewProgress ? () => handleViewProgress(row.original) : undefined}
-          labels={t.status}
-        />
-      )
-    },
-  },
-  {
-    accessorKey: "progress",
-    meta: { title: t.columns.progress },
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title={t.columns.progress} />
-    ),
-    size: 150,
-    minSize: 120,
-    maxSize: 200,
-    cell: ({ row }) => {
-      const progress = row.getValue("progress") as number
-      const status = row.original.status
-      const displayProgress = status === "completed" ? 100 : progress
+      const progress = row.original.progress
       
       return (
-        <div className="flex items-center gap-2 min-w-[120px]">
-          <div className="flex-1 h-2 bg-primary/10 rounded-full overflow-hidden border border-border">
-            <div 
-              className={`h-full transition-all ${
-                status === "completed" ? "bg-[var(--success)]" : 
-                status === "failed" ? "bg-[var(--error)]" : 
-                status === "running" ? "bg-[var(--warning)] progress-striped" : 
-                status === "cancelled" ? "bg-muted-foreground" :
-                status === "pending" ? "bg-[var(--warning)] progress-striped" :
-                "bg-muted-foreground/80"
-              }`}
-              style={{ width: `${displayProgress}%` }}
-            />
-          </div>
-          <span className="text-xs text-muted-foreground font-mono w-10">
-            {displayProgress}%
-          </span>
+        <div 
+          onClick={handleViewProgress ? () => handleViewProgress(row.original) : undefined}
+          className={cn("cursor-pointer", !handleViewProgress && "pointer-events-none")}
+        >
+          <ScanStatusBadge 
+            status={status}
+            progress={progress}
+            labels={t.status}
+            variant="inline" // Using F2 variant (Inline Block)
+          />
         </div>
       )
     },
-    enableSorting: false,
   },
+  // Progress column removed as it's integrated into status
+  // {
+  //   accessorKey: "progress", 
+  //   ... 
+  // },
   {
     id: "actions",
     size: 120,
@@ -521,48 +362,55 @@ export const createScanHistoryColumns = ({
       
       return (
         <div className="flex items-center gap-1">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-8 px-2 text-xs"
-            onClick={() => navigate(`/scan/history/${scan.id}/`)}
-          >
-            <Eye className="h-3.5 w-3.5 mr-1" />
-            {t.actions.snapshot}
-          </Button>
-          
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                className="flex h-8 w-8 p-0 data-[state=open]:bg-muted"
-              >
-                <MoreHorizontal className="h-4 w-4" />
-                <span className="sr-only">{t.actions.openMenu}</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              {canStop && (
-                <>
-                  <DropdownMenuItem
+          <TooltipProvider delayDuration={300}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={() => navigate(`/scan/history/${scan.id}/`)}
+                >
+                  <Eye className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>{t.actions.snapshot}</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+
+          {canStop && (
+            <TooltipProvider delayDuration={300}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
                     onClick={() => handleStop(scan)}
-                    className="text-primary focus:text-primary"
                   >
-                    <StopCircle />
-                    {t.actions.stopScan}
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                </>
-              )}
-              <DropdownMenuItem
-                onClick={() => handleDelete(scan)}
-                className="text-destructive focus:text-destructive"
-              >
-                <Trash2 />
-                {t.actions.delete}
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+                    <IconCircleX className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>{t.actions.stop}</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
+
+          <TooltipProvider delayDuration={300}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                  onClick={() => handleDelete(scan)}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>{t.actions.delete}</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
       )
     },

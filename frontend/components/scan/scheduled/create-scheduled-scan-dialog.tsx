@@ -46,7 +46,7 @@ import {
   IconSearch,
   IconSettings,
   IconCode,
-} from "@tabler/icons-react"
+} from "@/components/icons"
 import { CronExpressionParser } from "cron-parser"
 import cronstrue from "cronstrue/i18n"
 import { useStep } from "@/hooks/use-step"

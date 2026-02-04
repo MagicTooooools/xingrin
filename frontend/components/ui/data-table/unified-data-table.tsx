@@ -24,7 +24,7 @@ import {
   IconPlus,
   IconTrash,
   IconDownload,
-} from "@tabler/icons-react"
+} from "@/components/icons"
 
 import { Button } from "@/components/ui/button"
 import {

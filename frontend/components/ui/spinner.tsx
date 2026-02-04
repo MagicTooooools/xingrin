@@ -1,6 +1,6 @@
 "use client"
 
-import { Loader2Icon } from "lucide-react"
+import { Loader2Icon } from "@/components/icons"
 import { useTranslations } from "next-intl"
 
 import { cn } from "@/lib/utils"

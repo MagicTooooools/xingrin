@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useMemo } from "react"
-import { FileText, Search, Trash2, Pencil } from "lucide-react"
+import { Search, Trash2, Pencil, FileText } from "@/components/icons"
 import { useTranslations, useLocale } from "next-intl"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -100,7 +100,12 @@ export default function WordlistsPage() {
     <div className="flex flex-col h-full">
       {/* Top: Title + Search + Upload button */}
       <div className="flex items-center justify-between gap-4 px-4 py-4 lg:px-6">
-        <h1 className="text-2xl font-bold shrink-0">{t("title")}</h1>
+        <div className="flex items-center gap-3 shrink-0">
+          <span className="px-1.5 py-0.5 text-[10px] font-mono bg-primary text-primary-foreground tracking-wider">
+            WDL-01
+          </span>
+          <h1 className="text-2xl font-bold">{t("title")}</h1>
+        </div>
         <div className="flex items-center gap-2 flex-1 max-w-md">
           <div className="relative flex-1">
             <Search className="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />

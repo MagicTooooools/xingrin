@@ -15,7 +15,7 @@ import {
   IconCircleCheck,
   IconClock,
   IconCircleX,
-} from "@tabler/icons-react"
+} from "@/components/icons"
 import { cn } from "@/lib/utils"
 import { useTranslations, useLocale } from "next-intl"
 import type { ScanStage, ScanRecord, StageStatus } from "@/types/scan.types"

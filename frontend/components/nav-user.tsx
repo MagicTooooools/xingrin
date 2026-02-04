@@ -6,7 +6,7 @@ import {
   IconDotsVertical,  // Vertical three-dot icon
   IconKey,           // Key icon
   IconLogout,        // Logout icon
-} from "@tabler/icons-react"
+} from "@/components/icons"
 
 // Import avatar related components
 import {

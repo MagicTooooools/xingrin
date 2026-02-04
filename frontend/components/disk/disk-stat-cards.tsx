@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl"
 import { useDiskStats } from '@/hooks/use-disk'
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
-import { IconDatabase } from '@tabler/icons-react'
+import { IconDatabase } from "@/components/icons"
 import { formatBytes } from '@/lib/utils'
 
 function StatCard({ title, value, icon, loading }: { title: string; value: string | number; icon: React.ReactNode; loading?: boolean }) {

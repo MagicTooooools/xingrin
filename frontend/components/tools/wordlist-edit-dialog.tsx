@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useEffect, useRef } from "react"
-import { FileText, Save, X, AlertTriangle } from "lucide-react"
+import { FileText, Save, X, AlertTriangle } from "@/components/icons"
 import Editor from "@monaco-editor/react"
 import type { editor } from "monaco-editor"
 import { useTranslations } from "next-intl"

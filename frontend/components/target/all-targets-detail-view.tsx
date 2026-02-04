@@ -29,7 +29,19 @@ import type { Organization } from "@/types/organization.types"
  * All targets detail view component
  * Displays a list of all targets in the system, supports search, pagination, delete operations
  */
-export function AllTargetsDetailView() {
+interface AllTargetsDetailViewProps {
+  className?: string
+  tableClassName?: string
+  hideToolbar?: boolean
+  hidePagination?: boolean
+}
+
+export function AllTargetsDetailView({
+  className,
+  tableClassName,
+  hideToolbar,
+  hidePagination,
+}: AllTargetsDetailViewProps) {
   const router = useRouter()
   const tColumns = useTranslations("columns")
   const tTooltips = useTranslations("tooltips")
@@ -219,6 +231,11 @@ export function AllTargetsDetailView() {
         // 类型筛选
         typeFilter={typeFilter}
         onTypeFilterChange={handleTypeFilterChange}
+        // Styling
+        className={className}
+        tableClassName={tableClassName}
+        hideToolbar={hideToolbar}
+        hidePagination={hidePagination}
       />
 
       {/* Add target dialog */}

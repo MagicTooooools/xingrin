@@ -24,7 +24,7 @@ import {
   RefreshCw,
   Tag,
   User,
-} from "lucide-react"
+} from "@/components/icons"
 import { useColorTheme } from "@/hooks/use-color-theme"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Button } from "@/components/ui/button"

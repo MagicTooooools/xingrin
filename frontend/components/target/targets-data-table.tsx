@@ -1,8 +1,8 @@
 "use client"
 
 import * as React from "react"
-import { IconSearch, IconLoader2 } from "@tabler/icons-react"
-import { Filter } from "lucide-react"
+import { IconSearch, IconLoader2 } from "@/components/icons"
+import { Filter } from "@/components/icons"
 import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -38,6 +38,11 @@ interface TargetsDataTableProps {
   // Type filter
   typeFilter?: string
   onTypeFilterChange?: (value: string) => void
+  // Styling
+  className?: string
+  tableClassName?: string
+  hideToolbar?: boolean
+  hidePagination?: boolean
 }
 
 /**
@@ -62,6 +67,10 @@ export function TargetsDataTable({
   manualPagination = false,
   typeFilter,
   onTypeFilterChange,
+  className,
+  tableClassName,
+  hideToolbar = false,
+  hidePagination = false,
 }: TargetsDataTableProps) {
   const t = useTranslations("common.status")
   const tActions = useTranslations("common.actions")
@@ -166,6 +175,11 @@ export function TargetsDataTable({
           )}
         </div>
       }
+      // Styling
+      className={className}
+      tableClassName={tableClassName}
+      hideToolbar={hideToolbar}
+      hidePagination={hidePagination}
     />
   )
 }

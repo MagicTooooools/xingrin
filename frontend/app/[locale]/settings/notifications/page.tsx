@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form'
 import { useTranslations } from 'next-intl'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
-import { IconBrandDiscord, IconMail, IconBrandSlack, IconScan, IconShieldCheck, IconWorld, IconSettings } from '@tabler/icons-react'
+import { IconBrandDiscord, IconMail, IconBrandSlack, IconScan, IconShieldCheck, IconWorld, IconSettings } from "@/components/icons"
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -16,6 +16,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Separator } from '@/components/ui/separator'
 import { Badge } from '@/components/ui/badge'
 import { useNotificationSettings, useUpdateNotificationSettings } from '@/hooks/use-notification-settings'
+import { PageHeader } from '@/components/common/page-header'
 
 export default function NotificationSettingsPage() {
   const t = useTranslations("settings.notifications")
@@ -111,10 +112,12 @@ export default function NotificationSettingsPage() {
 
   return (
     <div className="p-4 md:p-6 space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold">{t("pageTitle")}</h1>
-        <p className="text-muted-foreground mt-1">{t("pageDesc")}</p>
-      </div>
+      <PageHeader
+        code="NTF-01"
+        title={t("pageTitle")}
+        description={t("pageDesc")}
+        className="px-0"
+      />
 
       <Tabs defaultValue="channels" className="w-full">
         <TabsList>

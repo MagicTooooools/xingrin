@@ -1,8 +1,8 @@
 "use client"
 
 import React, { useState } from "react"
-import { Wrench } from "lucide-react"
-import { IconPlus } from "@tabler/icons-react"
+import { Wrench } from "@/components/icons"
+import { IconPlus } from "@/components/icons"
 import { useTranslations } from "next-intl"
 
 // Import UI components
@@ -21,7 +21,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { LoadingSpinner } from "@/components/loading-spinner"
-import { IconX } from "@tabler/icons-react"
+import { IconX } from "@/components/icons"
 import { CategoryNameMap, type Tool } from "@/types/tool.types"
 import { useCreateTool, useUpdateTool } from "@/hooks/use-tools"
 

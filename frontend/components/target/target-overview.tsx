@@ -18,7 +18,7 @@ import {
   CheckCircle2,
   PauseCircle,
   Play,
-} from "lucide-react"
+} from "@/components/icons"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Button } from "@/components/ui/button"

@@ -3,7 +3,7 @@
 import { useState, useCallback, useMemo, useEffect } from "react"
 import { useSearchParams } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
-import { Search, AlertCircle, History, X, Download } from "lucide-react"
+import { Search, AlertCircle, History, X, Download } from "@/components/icons"
 import { useTranslations } from "next-intl"
 import { toast } from "sonner"
 import { SmartFilterInput, type FilterField } from "@/components/common/smart-filter-input"

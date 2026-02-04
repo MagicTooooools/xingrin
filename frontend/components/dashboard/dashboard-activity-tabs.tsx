@@ -3,7 +3,7 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { VulnerabilitiesDetailView } from "@/components/vulnerabilities/vulnerabilities-detail-view"
 import { ScanHistoryList } from "@/components/scan/history"
-import { IconBug, IconRadar } from "@tabler/icons-react"
+import { IconBug, IconRadar } from "@/components/icons"
 
 export function DashboardActivityTabs() {
   return (

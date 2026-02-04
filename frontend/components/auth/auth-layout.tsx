@@ -4,7 +4,7 @@ import React from "react"
 import { usePathname } from "next/navigation"
 import { useLocale, useTranslations } from "next-intl"
 import { AppSidebar } from "@/components/app-sidebar"
-import { SiteHeader } from "@/components/site-header"
+import { UnifiedHeader } from "@/components/unified-header"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import { Toaster } from "@/components/ui/sonner"
 import { LoadingState } from "@/components/loading-spinner"
@@ -34,6 +34,14 @@ function isPublicPath(pathname: string): boolean {
 /**
  * Authentication layout component
  * Decides whether to show sidebar based on login status and route
+ * 
+ * 新布局结构：
+ * ┌─────────────────────────────────────────────────────────┐
+ * │  Logo区域 (固定宽度)  │  顶栏内容 (搜索/通知/语言等)     │
+ * ├──────────────────────┼──────────────────────────────────┤
+ * │  侧边栏菜单          │  主内容区域                       │
+ * │  (无Logo)            │                                  │
+ * └──────────────────────┴──────────────────────────────────┘
  */
 export function AuthLayout({ children }: AuthLayoutProps) {
   const pathname = usePathname()
@@ -67,31 +75,43 @@ export function AuthLayout({ children }: AuthLayoutProps) {
   const showLoading = isLoading || !auth?.authenticated
   const canRenderApp = !isLoading && !!auth?.authenticated
 
-  // Authenticated - show full layout (with sidebar)
+  // Authenticated - show full layout with unified header
+  // 布局结构：
+  // ┌─────────────────────────────────────────────────────────┐
+  // │  Logo区域 (固定宽度)  │  顶栏内容 (搜索/通知/语言等)     │
+  // ├──────────────────────┼──────────────────────────────────┤
+  // │  侧边栏菜单          │  主内容区域                       │
+  // │  (无Logo)            │                                  │
+  // └──────────────────────┴──────────────────────────────────┘
   return (
     <>
       <LoadingState active={showLoading} message="loading..." />
       {canRenderApp ? (
         <SidebarProvider
-          className="animate-app-fade-in"
+          className="animate-app-fade-in !min-h-0 flex flex-col h-svh"
           style={
             {
               "--sidebar-width": "calc(var(--spacing) * 62)",
-              "--header-height": "calc(var(--spacing) * 11)",
+              "--header-height": "calc(var(--spacing) * 12)",
             } as React.CSSProperties
           }
         >
-          <AppSidebar />
-          <SidebarInset className="flex min-h-0 flex-col h-svh">
-            <SiteHeader />
-            <div className="flex flex-col flex-1 min-h-0 overflow-y-auto">
-              <div className="@container/main flex-1 min-h-0 flex flex-col gap-2">
-                <Suspense fallback={<LoadingState message={tCommon("status.pageLoading")} />}>
-                  {children}
-                </Suspense>
+          {/* 统一顶栏 - 横跨整个页面，包含 Logo */}
+          <UnifiedHeader />
+          
+          {/* 下方内容区：侧边栏 + 主内容 */}
+          <div className="flex flex-1 min-h-0">
+            <AppSidebar />
+            <SidebarInset className="flex min-h-0 flex-col flex-1">
+              <div className="flex flex-col flex-1 min-h-0 overflow-y-auto">
+                <div className="@container/main flex-1 min-h-0 flex flex-col gap-2">
+                  <Suspense fallback={<LoadingState message={tCommon("status.pageLoading")} />}>
+                    {children}
+                  </Suspense>
+                </div>
               </div>
-            </div>
-          </SidebarInset>
+            </SidebarInset>
+          </div>
         </SidebarProvider>
       ) : null}
       <Toaster />

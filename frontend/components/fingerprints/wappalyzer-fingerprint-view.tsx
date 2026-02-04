@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useMemo } from "react"
-import { AlertTriangle } from "lucide-react"
+import { AlertTriangle } from "@/components/icons"
 import { toast } from "sonner"
 import { useTranslations, useLocale } from "next-intl"
 import {

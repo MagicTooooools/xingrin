@@ -1,7 +1,7 @@
 "use client"
 
 import { ColumnDef } from "@tanstack/react-table"
-import { Eye, Circle, CheckCircle2 } from "lucide-react"
+import { Eye, Circle, CheckCircle2 } from "@/components/icons"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"

@@ -10,8 +10,8 @@ import {
   Camera,
   Search,
   Cpu,
-} from "lucide-react"
-import type { LucideIcon } from "lucide-react"
+} from "@/components/icons"
+import type { LucideIcon } from "@/components/icons"
 
 /** Unified capability tag color (using global CSS variables) */
 const CAPABILITY_COLOR = "bg-primary/10 text-primary border-primary/20"

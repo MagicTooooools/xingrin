@@ -5,7 +5,7 @@ import { useTranslations, useLocale } from "next-intl"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { IconEdit, IconTrash, IconFolder } from "@tabler/icons-react"
+import { IconEdit, IconTrash, IconFolder } from "@/components/icons"
 import { AddCustomToolDialog } from "@/components/tools/config/add-custom-tool-dialog"
 import {
   AlertDialog,

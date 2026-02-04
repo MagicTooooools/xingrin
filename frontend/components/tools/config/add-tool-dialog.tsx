@@ -1,8 +1,8 @@
 "use client"
 
 import React, { useState, useEffect } from "react"
-import { Wrench, AlertTriangle } from "lucide-react"
-import { IconPlus } from "@tabler/icons-react"
+import { Wrench, AlertTriangle } from "@/components/icons"
+import { IconPlus } from "@/components/icons"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
@@ -23,7 +23,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { LoadingSpinner } from "@/components/loading-spinner"
-import { IconX } from "@tabler/icons-react"
+import { IconX } from "@/components/icons"
 import {
   Form,
   FormControl,

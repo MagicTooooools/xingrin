@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { MoreHorizontal, Play, Calendar, Edit, Trash2, Eye } from "lucide-react"
+import { MoreHorizontal, Play, Calendar, Edit, Trash2, Eye } from "@/components/icons"
 import { DataTableColumnHeader } from "@/components/ui/data-table/column-header"
 import { ExpandableCell } from "@/components/ui/data-table/expandable-cell"
 import {

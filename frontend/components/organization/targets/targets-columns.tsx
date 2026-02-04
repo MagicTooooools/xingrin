@@ -11,7 +11,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { Eye, Trash2, Copy, Check } from "lucide-react"
+import { Eye, Trash2, Copy, Check } from "@/components/icons"
 import { DataTableColumnHeader } from "@/components/ui/data-table/column-header"
 import type { Target } from "@/types/target.types"
 import { toast } from "sonner"

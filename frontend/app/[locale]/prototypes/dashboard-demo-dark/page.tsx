@@ -11,7 +11,7 @@ import {
   ShieldAlert,
   Activity,
   Waves,
-} from "lucide-react"
+} from "@/components/icons"
 
 const themeVars = {
   "--bg": "#0F1114",

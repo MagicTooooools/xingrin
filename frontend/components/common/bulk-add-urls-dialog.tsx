@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useRef } from "react"
-import { Plus, Link } from "lucide-react"
+import { Plus, Link } from "@/components/icons"
 import { useTranslations } from "next-intl"
 
 import { Button } from "@/components/ui/button"

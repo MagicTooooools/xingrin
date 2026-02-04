@@ -6,7 +6,7 @@ import {
   IconChevronRight,
   IconChevronsLeft,
   IconChevronsRight,
-} from "@tabler/icons-react"
+} from "@/components/icons"
 import { useTranslations } from 'next-intl'
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"

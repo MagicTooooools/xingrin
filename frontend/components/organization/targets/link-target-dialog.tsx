@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useRef, useMemo } from "react"
-import { Plus, Target, Building2 } from "lucide-react"
+import { Plus, Target, Building2 } from "@/components/icons"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"

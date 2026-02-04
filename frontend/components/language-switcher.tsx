@@ -10,7 +10,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
-import { IconLanguage, IconCheck } from '@tabler/icons-react'
+import { IconLanguage, IconCheck } from "@/components/icons"
 
 /**
  * Language switcher component

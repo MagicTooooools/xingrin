@@ -19,7 +19,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton"
 import { useTranslations } from "next-intl"
 import { SEVERITY_COLORS } from "@/lib/severity-config"
-import { IconShield } from "@tabler/icons-react"
+import { IconShield } from "@/components/icons"
 
 export function VulnSeverityChart() {
   const { data, isLoading } = useAssetStatistics()

@@ -69,9 +69,9 @@ export function ScanHistoryList({ hideToolbar = false, targetId, pageSize: custo
     },
     actions: {
       snapshot: tCommon("actions.snapshot"),
-      stopScan: tScan("stopScan"),
+      stop: tCommon("actions.stop"),
+      stopScanPending: tScan("stopScanPending"),
       delete: tCommon("actions.delete"),
-      openMenu: tCommon("actions.openMenu"),
       selectAll: tCommon("actions.selectAll"),
       selectRow: tCommon("actions.selectRow"),
     },

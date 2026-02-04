@@ -18,7 +18,7 @@ import {
   Edit,
   Building2,
   Target,
-} from "lucide-react"
+} from "@/components/icons"
 import { DataTableColumnHeader } from "@/components/ui/data-table/column-header"
 import type { ScheduledScan } from "@/types/scheduled-scan.types"
 

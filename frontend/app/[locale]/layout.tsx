@@ -12,7 +12,6 @@ import "../globals.css"
 // Import color themes
 import "@/styles/themes/bauhaus.css"
 import { Suspense } from "react"
-import Script from "next/script"
 import { QueryProvider } from "@/components/providers/query-provider"
 import { ThemeProvider } from "@/components/providers/theme-provider"
 import { UiI18nProvider } from "@/components/providers/ui-i18n-provider"
@@ -103,12 +102,6 @@ export default async function LocaleLayout({
     >
       <body className={fontConfig.className} style={fontConfig.style}>
         <ColorThemeInit />
-        {/* Load external scripts */}
-        <Script
-          src="https://tweakcn.com/live-preview.min.js"
-          strategy="beforeInteractive"
-          crossOrigin="anonymous"
-        />
         {/* Route loading progress bar */}
         <Suspense fallback={null}>
           <RouteProgress />

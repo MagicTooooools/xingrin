@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState } from "react"
-import { FileCode, Save, X, AlertCircle, CheckCircle2, ArrowLeft, ArrowRight, Lock, Check } from "lucide-react"
+import { FileCode, Save, X, AlertCircle, CheckCircle2, ArrowLeft, ArrowRight, Lock, Check } from "@/components/icons"
 import Editor from "@monaco-editor/react"
 import type { editor } from "monaco-editor"
 import * as yaml from "js-yaml"

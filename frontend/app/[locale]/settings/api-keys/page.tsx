@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useEffect } from 'react'
-import { IconEye, IconEyeOff, IconWorldSearch, IconRadar2 } from '@tabler/icons-react'
+import { IconEye, IconEyeOff, IconWorldSearch, IconRadar2 } from "@/components/icons"
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -11,6 +11,7 @@ import { Separator } from '@/components/ui/separator'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useApiKeySettings, useUpdateApiKeySettings } from '@/hooks/use-api-key-settings'
+import { PageHeader } from '@/components/common/page-header'
 import type {
   ApiKeySettings,
   ProviderKey,
@@ -186,6 +187,9 @@ const DEFAULT_SETTINGS: ApiKeySettings = {
 }
 
 export default function ApiKeysSettingsPage() {
+  const pageTitle = 'API 密钥配置'
+  const pageDescription =
+    '配置第三方数据源的 API 密钥，用于增强子域名发现能力。启用后将在 subfinder 扫描时自动使用。'
   const { data: settings, isLoading } = useApiKeySettings()
   const updateMutation = useUpdateApiKeySettings()
   
@@ -229,6 +233,12 @@ export default function ApiKeysSettingsPage() {
   if (isLoading) {
     return (
       <div className="p-4 md:p-6 space-y-6">
+        <PageHeader
+          code="API-01"
+          title={pageTitle}
+          description={pageDescription}
+          className="px-0"
+        />
         <div>
           <Skeleton className="h-8 w-48" />
           <Skeleton className="h-4 w-96 mt-2" />
@@ -244,18 +254,12 @@ export default function ApiKeysSettingsPage() {
 
   return (
     <div className="p-4 md:p-6 space-y-6">
-      {/* 页面标题 */}
-      <div>
-        <div className="flex items-center gap-2">
-          <h1 className="text-2xl font-semibold">API 密钥配置</h1>
-          {enabledCount > 0 && (
-            <Badge variant="secondary">{enabledCount} 个已启用</Badge>
-          )}
-        </div>
-        <p className="text-muted-foreground mt-1">
-          配置第三方数据源的 API 密钥，用于增强子域名发现能力。启用后将在 subfinder 扫描时自动使用。
-        </p>
-      </div>
+      <PageHeader
+        code="API-01"
+        title={pageTitle}
+        description={pageDescription}
+        className="px-0"
+      />
 
       {/* Provider 卡片列表 */}
       <div className="grid gap-4">

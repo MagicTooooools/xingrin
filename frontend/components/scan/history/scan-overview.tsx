@@ -20,12 +20,12 @@ import {
   Loader2,
   Cpu,
   HardDrive,
-} from "lucide-react"
+} from "@/components/icons"
 import {
   IconCircleCheck,
   IconCircleX,
   IconClock,
-} from "@tabler/icons-react"
+} from "@/components/icons"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"

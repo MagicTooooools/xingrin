@@ -18,7 +18,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { IconRocket, IconEye, IconTrash, IconRefresh } from "@tabler/icons-react"
+import { IconRocket, IconEye, IconTrash, IconRefresh } from "@/components/icons"
 import type { WorkerNode } from "@/types/worker.types"
 
 interface DeployTerminalDialogProps {

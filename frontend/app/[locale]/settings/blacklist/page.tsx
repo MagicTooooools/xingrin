@@ -2,12 +2,13 @@
 
 import React, { useState, useEffect } from "react"
 import { useTranslations } from "next-intl"
-import { AlertTriangle, Loader2, Ban } from "lucide-react"
+import { AlertTriangle, Loader2, Ban } from "@/components/icons"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useGlobalBlacklist, useUpdateGlobalBlacklist } from "@/hooks/use-global-blacklist"
+import { PageHeader } from "@/components/common/page-header"
 
 /**
  * Global blacklist settings page
@@ -75,11 +76,12 @@ export default function GlobalBlacklistPage() {
 
   return (
     <div className="flex flex-1 flex-col gap-4 p-4">
-      {/* Page header */}
-      <div>
-        <h1 className="text-2xl font-bold">{t("title")}</h1>
-        <p className="text-muted-foreground">{t("description")}</p>
-      </div>
+      <PageHeader
+        code="BLK-01"
+        title={t("title")}
+        description={t("description")}
+        className="px-0"
+      />
 
       {/* Blacklist card */}
       <Card>

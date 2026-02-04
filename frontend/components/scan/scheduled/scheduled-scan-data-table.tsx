@@ -3,7 +3,7 @@
 import * as React from "react"
 import type { ColumnDef } from "@tanstack/react-table"
 import { useTranslations } from "next-intl"
-import { IconSearch, IconLoader2 } from "@tabler/icons-react"
+import { IconSearch, IconLoader2 } from "@/components/icons"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { UnifiedDataTable } from "@/components/ui/data-table"

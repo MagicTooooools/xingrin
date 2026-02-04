@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo, useCallback, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { Trash2 } from "lucide-react"
+import { Trash2 } from "@/components/icons"
 import { useTranslations, useLocale } from "next-intl"
 import { getDateLocale } from "@/lib/date-utils"
 

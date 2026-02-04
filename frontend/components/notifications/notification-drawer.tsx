@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { useTranslations } from "next-intl"
-import { Bell, AlertTriangle, Activity, Info, Server, BellOff, Loader2 } from "lucide-react"
+import { Bell, AlertTriangle, Activity, Info, Server, BellOff, Loader2 } from "@/components/icons"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"

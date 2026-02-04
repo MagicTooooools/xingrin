@@ -15,7 +15,7 @@ import {
   Sliders,
   Terminal,
   Zap,
-} from "lucide-react"
+} from "@/components/icons"
 
 // 终末地/明日方舟风格主题变量
 const themeVars = {

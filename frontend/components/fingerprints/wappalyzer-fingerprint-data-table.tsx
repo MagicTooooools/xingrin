@@ -10,7 +10,7 @@ import {
   IconUpload,
   IconPlus,
   IconSettings,
-} from "@tabler/icons-react"
+} from "@/components/icons"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,

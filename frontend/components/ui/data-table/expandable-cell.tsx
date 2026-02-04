@@ -3,7 +3,7 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
-import { ChevronDown, ChevronUp } from "lucide-react"
+import { ChevronDown, ChevronUp } from "@/components/icons"
 
 // ============================================================================
 // i18n Context for expandable components

@@ -25,7 +25,7 @@ import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { LoadingSpinner } from "@/components/loading-spinner"
 import { toast } from "sonner"
-import { Zap, AlertCircle, ChevronRight, ChevronLeft, Target, Server, Settings } from "lucide-react"
+import { Zap, AlertCircle, ChevronRight, ChevronLeft, Target, Server, Settings } from "@/components/icons"
 import { quickScan } from "@/services/scan.service"
 import { TargetValidator } from "@/lib/target-validator"
 import { useEngines } from "@/hooks/use-engines"
@@ -203,15 +203,27 @@ export function QuickScanDialog({ trigger }: QuickScanDialogProps) {
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogTrigger asChild>
         {trigger || (
-          <div className="relative group">
-            <div className="absolute -inset-[1px] rounded-md overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary to-transparent animate-border-flow" />
+          <Button 
+            variant="outline"
+            size="sm"
+            className="
+              relative group border-0
+              bg-secondary/50
+              px-4 overflow-hidden
+            "
+          >
+            {/* Style B Variant 2: Mechanical Construct Filled - Highlight Version */}
+            <div className="absolute inset-0 border border-highlight/0 group-hover:border-highlight/100 transition-colors duration-300 scale-95 group-hover:scale-100" />
+            <div className="absolute top-0 left-0 w-1 h-1 bg-highlight opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <div className="absolute top-0 right-0 w-1 h-1 bg-highlight opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <div className="absolute bottom-0 left-0 w-1 h-1 bg-highlight opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <div className="absolute bottom-0 right-0 w-1 h-1 bg-highlight opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            
+            <span className="mr-2 text-xs font-mono text-highlight opacity-0 group-hover:opacity-100 absolute left-2 transition-all duration-300 -translate-x-2 group-hover:translate-x-0">{">"}</span>
+            <div className="flex items-center transition-transform duration-300 group-hover:translate-x-2">
+              <span className="font-medium">{t("title")}</span>
             </div>
-            <Button variant="outline" size="sm" className="gap-1.5 relative bg-background border-primary/20">
-              <Zap className="h-4 w-4 text-primary" />
-              {t("title")}
-            </Button>
-          </div>
+          </Button>
         )}
       </DialogTrigger>
       <DialogContent className="max-w-[90vw] sm:max-w-[900px] p-0 gap-0">

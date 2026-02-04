@@ -17,7 +17,7 @@ import {
   Check,
   Edit,
   X as XIcon,
-} from "lucide-react"
+} from "@/components/icons"
 import { DataTableColumnHeader } from "@/components/ui/data-table/column-header"
 import * as yaml from "js-yaml"
 import type { ScanEngine } from "@/types/engine.types"

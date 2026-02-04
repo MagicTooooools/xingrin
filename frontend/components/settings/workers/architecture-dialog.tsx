@@ -1,7 +1,7 @@
 "use client"
 
 import { useTranslations } from "next-intl"
-import { IconInfoCircle } from "@tabler/icons-react"
+import { IconInfoCircle } from "@/components/icons"
 import {
   Dialog,
   DialogContent,

@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useMemo } from "react"
-import { Settings, Search, Pencil, Trash2, Check, Plus, Lock, AlertTriangle, ChevronDown, ChevronRight } from "lucide-react"
+import { Settings, Search, Pencil, Trash2, Check, Plus, Lock, AlertTriangle, ChevronDown, ChevronRight } from "@/components/icons"
 import * as yaml from "js-yaml"
 import Editor from "@monaco-editor/react"
 import { useTranslations } from "next-intl"
@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { EngineEditDialog, EngineCreateDialog } from "@/components/scan/engine"
 import { useEngines, usePresetEngines, useCreateEngine, useUpdateEngine, useDeleteEngine } from "@/hooks/use-engines"
+import { PageHeader } from "@/components/common/page-header"
 import { cn } from "@/lib/utils"
 import type { ScanEngine, PresetEngine } from "@/types/engine.types"
 import { MasterDetailSkeleton } from "@/components/ui/master-detail-skeleton"
@@ -206,7 +207,12 @@ export default function ScanEnginePage() {
     <div className="flex flex-col h-full">
       {/* Top: Title + Search + Create button */}
       <div className="flex items-center justify-between gap-4 px-4 py-4 lg:px-6">
-        <h1 className="text-2xl font-bold shrink-0">{tNav("scanEngine")}</h1>
+        <div className="flex items-center gap-3 shrink-0">
+          <span className="px-1.5 py-0.5 text-[10px] font-mono bg-primary text-primary-foreground tracking-wider">
+            ENG-01
+          </span>
+          <h1 className="text-2xl font-bold">{tNav("scanEngine")}</h1>
+        </div>
         <div className="flex items-center gap-2 flex-1 max-w-md">
           <div className="relative flex-1">
             <Search className="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />

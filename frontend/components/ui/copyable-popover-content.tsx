@@ -2,7 +2,7 @@
 
 import React from "react"
 import { Button } from "@/components/ui/button"
-import { Copy, Check } from "lucide-react"
+import { Copy, Check } from "@/components/icons"
 import { toast } from "sonner"
 import { useTranslations } from "next-intl"
 

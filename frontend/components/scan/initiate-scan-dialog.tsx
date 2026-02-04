@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useMemo, useCallback } from "react"
-import { AlertTriangle, CheckCircle2, ChevronRight, Play, Settings } from "lucide-react"
+import { AlertTriangle, CheckCircle2, ChevronRight, Play, Settings } from "@/components/icons"
 import { useTranslations } from "next-intl"
 
 import { Badge } from "@/components/ui/badge"

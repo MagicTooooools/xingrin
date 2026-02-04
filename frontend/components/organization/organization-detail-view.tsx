@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo, useCallback } from "react"
 import { useRouter } from "next/navigation"
-import { Building2, AlertTriangle } from "lucide-react"
+import { Building2, AlertTriangle } from "@/components/icons"
 import { useTranslations, useLocale } from "next-intl"
 import { TargetsDataTable } from "./targets/targets-data-table"
 import { createTargetColumns } from "./targets/targets-columns"

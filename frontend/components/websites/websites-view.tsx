@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useCallback, useMemo, useState, useEffect } from "react"
-import { AlertTriangle } from "lucide-react"
+import { AlertTriangle } from "@/components/icons"
 import { useTranslations, useLocale } from "next-intl"
 import { WebSitesDataTable } from "./websites-data-table"
 import { createWebSiteColumns } from "./websites-columns"

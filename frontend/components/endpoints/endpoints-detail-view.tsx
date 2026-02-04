@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useMemo } from "react"
-import { AlertTriangle } from "lucide-react"
+import { AlertTriangle } from "@/components/icons"
 import { useTranslations, useLocale } from "next-intl"
 import { useTargetEndpoints, useTarget } from "@/hooks/use-targets"
 import { useDeleteEndpoint, useScanEndpoints } from "@/hooks/use-endpoints"

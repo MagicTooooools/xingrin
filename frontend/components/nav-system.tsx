@@ -1,6 +1,6 @@
 "use client"
 
-import { type Icon } from "@tabler/icons-react"
+import { type Icon } from "@/components/icons"
 import { useTranslations } from "next-intl"
 
 import { Link, usePathname } from "@/i18n/navigation"

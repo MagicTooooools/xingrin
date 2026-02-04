@@ -10,7 +10,7 @@ import {
   IconChevronUp,
   IconAlertTriangle,
   IconActivity,
-} from "@tabler/icons-react"
+} from "@/components/icons"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import {

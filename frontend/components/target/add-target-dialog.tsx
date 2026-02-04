@@ -1,8 +1,8 @@
 "use client"
 
 import React, { useState, useRef } from "react"
-import { Plus, Target as TargetIcon, Building2, Loader2, Check, ChevronsUpDown } from "lucide-react"
-import { IconChevronLeft, IconChevronRight, IconChevronsLeft, IconChevronsRight } from "@tabler/icons-react"
+import { Plus, Target as TargetIcon, Building2, Loader2, Check, ChevronsUpDown } from "@/components/icons"
+import { IconChevronLeft, IconChevronRight, IconChevronsLeft, IconChevronsRight } from "@/components/icons"
 import { useTranslations } from "next-intl"
 
 // Import UI components

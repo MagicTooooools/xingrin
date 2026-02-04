@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { useState, useMemo, type FormEvent } from "react"
-import { GitBranch, Search, RefreshCw, Settings, Trash2, FolderOpen, Plus } from "lucide-react"
+import { GitBranch, Search, RefreshCw, Settings, Trash2, FolderOpen, Plus } from "@/components/icons"
 import { useTranslations, useLocale } from "next-intl"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -168,7 +168,12 @@ export default function NucleiReposPage() {
     <div className="flex flex-col h-full">
       {/* Top: Title + Search + Add button */}
       <div className="flex items-center justify-between gap-4 px-4 py-4 lg:px-6">
-        <h1 className="text-2xl font-bold shrink-0">{t("title")}</h1>
+        <div className="flex items-center gap-3 shrink-0">
+          <span className="px-1.5 py-0.5 text-[10px] font-mono bg-primary text-primary-foreground tracking-wider">
+            NCL-01
+          </span>
+          <h1 className="text-2xl font-bold">{t("title")}</h1>
+        </div>
         <div className="flex items-center gap-2 flex-1 max-w-md">
           <div className="relative flex-1">
             <Search className="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />

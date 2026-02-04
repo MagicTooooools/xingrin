@@ -1,6 +1,6 @@
 'use client'
 
-import { UploadIcon } from 'lucide-react'
+import { UploadIcon } from "@/components/icons"
 import type { ReactNode } from 'react'
 import { createContext, useContext } from 'react'
 import type { DropEvent, DropzoneOptions, FileRejection } from 'react-dropzone'

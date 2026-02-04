@@ -19,8 +19,7 @@ import {
   IconKey, // API Key icon
   IconBan, // Blacklist icon
   IconInfoCircle, // About icon
-  IconCircleDot, // Dev prototype icon
-} from "@tabler/icons-react"
+} from "@/components/icons"
 // Import internationalization hook
 import { useTranslations } from 'next-intl'
 // Import internationalization navigation components
@@ -35,17 +34,16 @@ import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
-  SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
+  SidebarTrigger,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
-  SidebarRail,
 } from "@/components/ui/sidebar"
 // Import collapsible component
 import {
@@ -72,13 +70,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   }, [])
   const showDevTools = process.env.NODE_ENV === "development"
 
-  const logoSrc = "/images/icon-64.png"
-
   // User information
   const user = {
     name: "admin",
     email: "admin@admin.com",
-    avatar: logoSrc,
+    avatar: "/images/icon-64.png",
   }
 
   // Main navigation menu items - using translations
@@ -182,55 +178,59 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     },
   ]
 
-  const devTools = [
+  const devToolGroups = [
     {
-      title: t('uiPrototypes'),
-      url: "/prototypes/scan-dialogs/",
-      icon: IconCircleDot,
+      title: "组件演示",
+      icon: IconTool,
+      items: [
+        { title: "Button Demo", url: "/tools/button-demo/" },
+        { title: "Badge Demo", url: "/tools/badge-demo/" },
+        { title: "Badge Variants", url: "/prototypes/badge-variants/" },
+        { title: "Status Progress Variants", url: "/prototypes/status-progress-variants/" },
+      ],
     },
     {
-      title: "Arknights UI Demo",
-      url: "/prototypes/arknights-ui/",
-      icon: IconCircleDot,
+      title: "布局与导航",
+      icon: IconListDetails,
+      items: [
+        { title: "Demo A: Unified Card", url: "/prototypes/header-demo-a/" },
+        { title: "Demo B: Ghost Header", url: "/prototypes/header-demo-b/" },
+        { title: "Demo C: Docked UI", url: "/prototypes/header-demo-c/" },
+        { title: "Sidebar Variants", url: "/prototypes/sidebar-variants/" },
+      ],
     },
     {
-      title: "Dashboard Demo",
-      url: "/prototypes/dashboard-demo/",
-      icon: IconCircleDot,
+      title: "仪表盘",
+      icon: IconDashboard,
+      items: [
+        { title: "Dashboard Demo", url: "/prototypes/dashboard-demo/" },
+        { title: "Dashboard Demo Dark", url: "/prototypes/dashboard-demo-dark/" },
+        { title: "Dashboard Rework", url: "/prototypes/dashboard-rework/" },
+      ],
     },
     {
-      title: "Dashboard Demo Dark",
-      url: "/prototypes/dashboard-demo-dark/",
-      icon: IconCircleDot,
+      title: "流程与风格",
+      icon: IconRadar,
+      items: [
+        { title: "Scan Dialogs", url: "/prototypes/scan-dialogs/" },
+        { title: "Arknights UI Demo", url: "/prototypes/arknights-ui/" },
+      ],
     },
   ]
 
   return (
     // collapsible="icon" means the sidebar can be collapsed to icon-only mode
     <Sidebar collapsible="icon" {...props}>
-      {/* Sidebar header */}
-      <SidebarHeader>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton 
-              asChild
-              className="data-[slot=sidebar-menu-button]:!p-1.5"
-            >
-              <Link href="/" className="flex items-center gap-2">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={logoSrc} alt="Logo" className="!size-5" />
-                <span className="text-base font-semibold">{t('appName')}</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarHeader>
-
-      {/* Sidebar main content area */}
+      {/* Sidebar main content area - Logo 已移至顶栏 */}
       <SidebarContent>
         {/* Main navigation menu */}
         <SidebarGroup>
-          <SidebarGroupLabel>{t('mainFeatures')}</SidebarGroupLabel>
+          <div className="flex h-8 items-center justify-between gap-2 px-2 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:gap-0">
+            <span className="text-sidebar-foreground/70 ring-sidebar-ring text-xs font-medium transition-[max-width,opacity] duration-200 ease-linear whitespace-nowrap overflow-hidden max-w-full group-data-[collapsible=icon]:max-w-0 group-data-[collapsible=icon]:opacity-0">
+              {t('mainFeatures')}
+            </span>
+            <SidebarTrigger className="size-8 text-muted-foreground hover:text-foreground [&>svg]:size-4" />
+          </div>
           <SidebarGroupContent>
             <SidebarMenu>
               {navMain.map((item) => {
@@ -300,18 +300,44 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <SidebarGroupLabel>{t('devTools')}</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                {devTools.map((item) => {
-                  const devUrl = normalize(item.url)
-                  const isActive = current === devUrl || current.startsWith(devUrl + "/")
+                {devToolGroups.map((group) => {
+                  const isGroupActive = group.items.some((item) => {
+                    const devUrl = normalize(item.url)
+                    return current === devUrl || current.startsWith(devUrl + "/")
+                  })
                   return (
-                    <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton asChild isActive={isActive}>
-                        <Link href={item.url} onClick={handleNavClick}>
-                          <item.icon />
-                          <span>{item.title}</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
+                    <Collapsible
+                      key={group.title}
+                      defaultOpen={isGroupActive}
+                      className="group/collapsible"
+                    >
+                      <SidebarMenuItem>
+                        <CollapsibleTrigger asChild>
+                          <SidebarMenuButton isActive={isGroupActive}>
+                            <group.icon />
+                            <span>{group.title}</span>
+                            <IconChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                          </SidebarMenuButton>
+                        </CollapsibleTrigger>
+                        <CollapsibleContent>
+                          <SidebarMenuSub>
+                            {group.items.map((item) => {
+                              const devUrl = normalize(item.url)
+                              const isActive = current === devUrl || current.startsWith(devUrl + "/")
+                              return (
+                                <SidebarMenuSubItem key={item.title}>
+                                  <SidebarMenuSubButton asChild isActive={isActive}>
+                                    <Link href={item.url} onClick={handleNavClick}>
+                                      <span>{item.title}</span>
+                                    </Link>
+                                  </SidebarMenuSubButton>
+                                </SidebarMenuSubItem>
+                              )
+                            })}
+                          </SidebarMenuSub>
+                        </CollapsibleContent>
+                      </SidebarMenuItem>
+                    </Collapsible>
                   )
                 })}
               </SidebarMenu>
@@ -339,7 +365,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarFooter>
         <NavUser user={user} />
       </SidebarFooter>
-      <SidebarRail />
     </Sidebar>
   )
 }

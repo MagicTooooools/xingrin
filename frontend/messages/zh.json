@@ -684,6 +684,7 @@
     "title": "扫描",
     "startScan": "开始扫描",
     "stopScan": "停止扫描",
+    "stopScanPending": "停止中...",
     "scanType": "扫描类型",
     "scanStatus": "扫描状态",
     "scanProgress": "扫描进度",

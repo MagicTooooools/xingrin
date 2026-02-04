@@ -3,7 +3,7 @@
 import * as React from "react"
 import type { ColumnDef } from "@tanstack/react-table"
 import { useTranslations } from "next-intl"
-import { CheckCircle, Circle, X, Filter } from "lucide-react"
+import { CheckCircle, Circle, X, Filter } from "@/components/icons"
 import { UnifiedDataTable } from "@/components/ui/data-table"
 import { SmartFilterInput, PREDEFINED_FIELDS, type FilterField, type ParsedFilter } from "@/components/common/smart-filter-input"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"

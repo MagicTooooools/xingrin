@@ -5,7 +5,7 @@ import { useAssetStatistics } from "@/hooks/use-dashboard"
 import { Card, CardAction, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
-import { IconTarget, IconStack2, IconBug, IconPlayerPlay, IconTrendingUp, IconTrendingDown } from "@tabler/icons-react"
+import { IconTarget, IconStack2, IconBug, IconPlayerPlay, IconTrendingUp, IconTrendingDown } from "@/components/icons"
 import { useTranslations } from "next-intl"
 import { useLocale } from "next-intl"
 

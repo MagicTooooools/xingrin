@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { useTranslations } from "next-intl"
-import { Download } from "lucide-react"
+import { Download } from "@/components/icons"
 
 import { Separator } from "@/components/ui/separator"
 import { Switch } from "@/components/ui/switch"
@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button"
 import { useSystemLogs, useLogFiles } from "@/hooks/use-system-logs"
 import { LogToolbar, type LogLevel } from "./log-toolbar"
 import { AnsiLogViewer } from "./ansi-log-viewer"
+import { PageHeader } from "@/components/common/page-header"
 
 const DEFAULT_FILE = "lunafox.log"
 const DEFAULT_LINES = 500
@@ -68,10 +69,15 @@ export function SystemLogsView() {
 
   return (
     <div className="flex flex-col gap-3 flex-1 min-h-0">
-      {/* 紧凑单行工具栏 - 标题融入 */}
+      <PageHeader
+        code="LOG-01"
+        title={t("title")}
+        description={t("description")}
+        className="px-0"
+      />
+
+      {/* 紧凑单行工具栏 */}
       <div className="flex items-center gap-4 flex-wrap">
-        <h1 className="text-lg font-semibold whitespace-nowrap">{t("title")}</h1>
-        <Separator orientation="vertical" className="h-5" />
         <LogToolbar
           files={files}
           selectedFile={selectedFile}

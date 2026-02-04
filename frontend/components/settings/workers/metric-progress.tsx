@@ -3,7 +3,7 @@
 import { useMemo } from "react"
 import { cn } from "@/lib/utils"
 import { Progress } from "@/components/ui/progress"
-import { IconAlertTriangle } from "@tabler/icons-react"
+import { IconAlertTriangle } from "@/components/icons"
 
 interface MetricProgressProps {
   label: string

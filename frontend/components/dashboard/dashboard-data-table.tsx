@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { IconBug, IconRadar } from "@tabler/icons-react"
+import { IconBug, IconRadar } from "@/components/icons"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Skeleton } from "@/components/ui/skeleton"
 import { UnifiedDataTable } from "@/components/ui/data-table"

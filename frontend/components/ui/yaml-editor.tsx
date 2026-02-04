@@ -3,7 +3,7 @@
 import React, { useState, useCallback, useEffect } from "react"
 import Editor from "@monaco-editor/react"
 import * as yaml from "js-yaml"
-import { AlertCircle } from "lucide-react"
+import { AlertCircle } from "@/components/icons"
 import { useColorTheme } from "@/hooks/use-color-theme"
 import { useTranslations } from "next-intl"
 import { cn } from "@/lib/utils"

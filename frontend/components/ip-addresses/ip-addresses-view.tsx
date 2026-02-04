@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useCallback, useMemo, useState } from "react"
-import { AlertTriangle } from "lucide-react"
+import { AlertTriangle } from "@/components/icons"
 import { useTranslations, useLocale } from "next-intl"
 import { IPAddressesDataTable } from "./ip-addresses-data-table"
 import { createIPAddressColumns } from "./ip-addresses-columns"

@@ -1,8 +1,8 @@
 "use client"
 
 import * as React from "react"
-import { IconSearch, IconLoader2 } from "@tabler/icons-react"
-import { Filter } from "lucide-react"
+import { IconSearch, IconLoader2 } from "@/components/icons"
+import { Filter } from "@/components/icons"
 import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"

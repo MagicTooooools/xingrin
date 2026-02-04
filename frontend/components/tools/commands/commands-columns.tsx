@@ -12,7 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { MoreHorizontal, Eye, Trash2, Copy } from "lucide-react"
+import { MoreHorizontal, Eye, Trash2, Copy } from "@/components/icons"
 import { DataTableColumnHeader } from "@/components/ui/data-table/column-header"
 import { ExpandableCell } from "@/components/ui/data-table/expandable-cell"
 import { Badge } from "@/components/ui/badge"

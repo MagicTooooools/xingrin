@@ -14,7 +14,7 @@ import {
   Target,
   Terminal,
   Zap,
-} from "lucide-react"
+} from "@/components/icons"
 
 // 复用 Arknights UI 的主题变量
 const themeVars = {

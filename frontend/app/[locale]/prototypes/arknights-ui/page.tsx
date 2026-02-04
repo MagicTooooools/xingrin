@@ -12,7 +12,7 @@ import {
   Shield,
   Target,
   Zap,
-} from "lucide-react"
+} from "@/components/icons"
 
 const themeVars = {
   "--ark-bg": "#FFFFFF",

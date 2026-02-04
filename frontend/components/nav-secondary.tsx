@@ -3,7 +3,7 @@
 // Import React library
 import * as React from "react"
 // Import icon type
-import { type Icon } from "@tabler/icons-react"
+import { type Icon } from "@/components/icons"
 
 // Import sidebar related components
 import {

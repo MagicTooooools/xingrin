@@ -3,7 +3,7 @@
 import React from "react"
 import { usePathname } from "next/navigation"
 import Link from "next/link"
-import { Fingerprint, HelpCircle } from "lucide-react"
+import { HelpCircle } from "@/components/icons"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -80,13 +80,19 @@ export default function FingerprintsLayout({
   return (
     <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
       {/* Page header */}
-      <div className="flex items-center justify-between px-4 lg:px-6">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight flex items-center gap-2">
-            <Fingerprint className="h-6 w-6" />
-            {t("title")}
-          </h2>
-          <p className="text-muted-foreground">{t("pageDescription")}</p>
+      <div className="px-4 lg:px-6">
+        <div className="space-y-1">
+          <div className="flex items-center gap-3">
+            <span className="px-1.5 py-0.5 text-[10px] font-mono bg-primary text-primary-foreground tracking-wider">
+              FPR-01
+            </span>
+            <h1 className="text-2xl font-bold tracking-tight">
+              {t("title")}
+            </h1>
+          </div>
+          <p className="text-sm text-muted-foreground pl-[calc(3rem+0.75rem)]">
+            {t("pageDescription")}
+          </p>
         </div>
       </div>
 

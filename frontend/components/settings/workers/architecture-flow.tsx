@@ -22,7 +22,7 @@ import {
   type XYPosition,
 } from "@xyflow/react"
 import { useTranslations } from "next-intl"
-import { IconServer, IconCloud, IconCpu } from "@tabler/icons-react"
+import { IconServer, IconCloud, IconCpu } from "@/components/icons"
 import {
   BaseNode,
   BaseNodeHeader,

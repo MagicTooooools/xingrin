@@ -3,7 +3,7 @@
 import React from "react"
 import { usePathname, useParams } from "next/navigation"
 import Link from "next/link"
-import { Target, LayoutDashboard, Package, FolderSearch, Image as ImageIcon, ShieldAlert, Settings, HelpCircle } from "lucide-react"
+import { Target, LayoutDashboard, Package, FolderSearch, Image as ImageIcon, ShieldAlert, Settings, HelpCircle } from "@/components/icons"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"

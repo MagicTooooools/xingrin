@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useTranslations } from "next-intl"
-import { IconChevronDown, IconChevronUp, IconLoader2 } from "@tabler/icons-react"
+import { IconChevronDown, IconChevronUp, IconLoader2 } from "@/components/icons"
 import { toast } from "sonner"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react"
 import { useTranslations, useLocale } from "next-intl"
-import { AlertTriangle, Loader2, Ban, Clock } from "lucide-react"
+import { AlertTriangle, Loader2, Ban, Clock } from "@/components/icons"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Skeleton } from "@/components/ui/skeleton"

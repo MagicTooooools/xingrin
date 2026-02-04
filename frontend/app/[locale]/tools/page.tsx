@@ -1,8 +1,9 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
+import { PageHeader } from "@/components/common/page-header"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { PackageOpen, Settings, ArrowRight } from "lucide-react"
+import { PackageOpen, Settings, ArrowRight } from "@/components/icons"
 import Link from "next/link"
 import { useTranslations } from "next-intl"
 
@@ -41,15 +42,11 @@ export default function ToolsPage() {
 
   return (
     <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-      {/* Page header */}
-      <div className="flex items-center justify-between px-4 lg:px-6">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight">{t("title")}</h2>
-          <p className="text-muted-foreground">
-            {t("description")}
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        code="TLS-01"
+        title={t("title")}
+        description={t("description")}
+      />
 
       {/* Statistics cards */}
       <div className="px-4 lg:px-6">

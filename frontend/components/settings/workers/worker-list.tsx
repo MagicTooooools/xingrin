@@ -7,7 +7,7 @@ import {
   IconCloud,
   IconCloudOff,
   IconHeartbeat,
-} from "@tabler/icons-react"
+} from "@/components/icons"
 import { Button } from "@/components/ui/button"
 import {
   Card,

@@ -3,7 +3,7 @@
 import React, { useEffect } from "react"
 import { useForm, useFieldArray } from "react-hook-form"
 import { toast } from "sonner"
-import { IconPlus, IconTrash } from "@tabler/icons-react"
+import { IconPlus, IconTrash } from "@/components/icons"
 import {
   Dialog,
   DialogContent,

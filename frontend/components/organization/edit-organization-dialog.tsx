@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useEffect } from "react"
-import { Edit, Building2 } from "lucide-react"
+import { Edit, Building2 } from "@/components/icons"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"

@@ -12,7 +12,7 @@ import {
   IconFileText,
   IconCheck,
   IconArrowUp,
-} from '@tabler/icons-react'
+} from "@/components/icons"
 
 import {
   Dialog,

@@ -670,6 +670,7 @@
     "title": "Scan",
     "startScan": "Start Scan",
     "stopScan": "Stop Scan",
+    "stopScanPending": "Stopping...",
     "scanType": "Scan Type",
     "scanStatus": "Scan Status",
     "scanProgress": "Scan Progress",

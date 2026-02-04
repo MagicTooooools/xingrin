@@ -3,7 +3,7 @@
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { IconBrandGithub, IconRefresh, IconEdit, IconTrash } from "@tabler/icons-react"
+import { IconBrandGithub, IconRefresh, IconEdit, IconTrash } from "@/components/icons"
 import type { Tool } from "@/types/tool.types"
 import { CategoryNameMap } from "@/types/tool.types"
 import Link from "next/link"

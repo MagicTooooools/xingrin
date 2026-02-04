@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useCallback, useMemo } from "react"
-import { AlertTriangle, Image as ImageIcon, ExternalLink, Trash2, X, ChevronLeft, ChevronRight, Search } from "lucide-react"
+import { AlertTriangle, Image as ImageIcon, ExternalLink, Trash2, X, ChevronLeft, ChevronRight, Search } from "@/components/icons"
 import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"

@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useMemo, useCallback } from "react"
-import { Check, Play, Server, Settings, Zap } from "lucide-react"
+import { Check, Play, Server, Settings, Zap } from "@/components/icons"
 import { useTranslations } from "next-intl"
 
 import { Badge } from "@/components/ui/badge"

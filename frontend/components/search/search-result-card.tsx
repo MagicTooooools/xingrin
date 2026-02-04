@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
-import { ChevronDown, ChevronUp, Eye } from "lucide-react"
+import { ChevronDown, ChevronUp, Eye } from "@/components/icons"
 import { useTranslations } from "next-intl"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"

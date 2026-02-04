@@ -1,50 +1,52 @@
-/* Bauhaus / Industrial Theme (Arknights Endfield Style) */
+/* Modern Industrial Theme - 现代工业风格 */
+/* 灵感来源：2025 科技产品设计趋势 */
+/* 核心理念：克制优雅、冷蓝灰阶、柔和对比 */
 [data-theme="bauhaus"] {
-  /* 基础颜色 - 冷峻的黑白灰 */
-  --background: oklch(0.96 0.01 260); /* #F4F5F7 - 冷灰背景 */
-  --foreground: oklch(0.12 0.03 260); /* #13161A - 更深邃的冷黑文字 */
+  /* 基础颜色 - 柔和的黑白（带冷蓝调） */
+  --background: oklch(0.985 0.008 260);  /* 奶白冷蓝 */
+  --foreground: oklch(0.145 0.02 260);   /* 墨灰冷蓝 */
   
-  --card: oklch(1 0 0);               /* #FFFFFF */
-  --card-foreground: oklch(0.12 0.03 260);
+  --card: oklch(1 0 0);                  /* #FFFFFF - 纯白卡片 */
+  --card-foreground: oklch(0.145 0.02 260);
   
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.12 0.03 260);
+  --popover-foreground: oklch(0.145 0.02 260);
   
-  --primary: oklch(0.12 0.03 260);    /* #13161A - 黑色主色调 */
-  --primary-foreground: oklch(1 0 0); /* #FFFFFF */
+  --primary: oklch(0.205 0.02 260);      /* 深墨灰冷蓝 */
+  --primary-foreground: oklch(0.985 0.008 260);
   
-  --secondary: oklch(0.97 0.01 260);  /* #F8F9FA - 浅灰次级背景 */
-  --secondary-foreground: oklch(0.12 0.03 260);
+  --secondary: oklch(0.965 0.01 260);    /* 浅冷蓝灰 */
+  --secondary-foreground: oklch(0.205 0.02 260);
   
-  --muted: oklch(0.88 0.02 260);      /* #E1E5EA - 边框/分割线颜色 */
-  --muted-foreground: oklch(0.55 0.03 260); /* #6F7681 - 次级文字 */
+  --muted: oklch(0.925 0.012 260);       /* 中冷蓝灰 */
+  --muted-foreground: oklch(0.52 0.02 260); /* 次级文字冷蓝 */
   
-  --accent: oklch(0.97 0.01 260);
-  --accent-foreground: oklch(0.12 0.03 260);
+  --accent: oklch(0.965 0.01 260);
+  --accent-foreground: oklch(0.205 0.02 260);
   
-  --destructive: oklch(0.57 0.25 27);
-  --destructive-foreground: oklch(0.98 0 0);
+  --destructive: oklch(0.60 0.20 25);    /* #EF4444 - 珊瑚红 */
+  --destructive-foreground: oklch(0.985 0.008 260);
 
-  --border: oklch(0.88 0.02 260);     /* #E1E5EA - 浅灰边框 */
-  --input: oklch(0.88 0.02 260);
-  --ring: oklch(0.56 0.2 261);        /* #2563EB - 更接近 demo 的高亮蓝 */
+  --border: oklch(0.90 0.012 260);       /* 冷蓝边框 */
+  --input: oklch(0.925 0.012 260);
+  --ring: oklch(0.78 0.16 75);           /* 琥珀黄高亮 - 与强调色一致 */
 
-  /* 图表颜色 - 保持工业风的克制 */
-  --chart-1: oklch(0.15 0.02 260);    /* 黑色 */
-  --chart-2: oklch(0.45 0.05 260);    /* 深灰 */
-  --chart-3: oklch(0.65 0.15 250);    /* 工业蓝 */
-  --chart-4: oklch(0.65 0.18 30);     /* 警示橙 */
-  --chart-5: oklch(0.65 0.18 150);    /* 状态绿 */
+  /* 图表颜色 - 现代调和色 */
+  --chart-1: oklch(0.205 0.02 260);      /* 墨灰冷蓝 */
+  --chart-2: oklch(0.60 0.02 260);       /* 中灰冷蓝 */
+  --chart-3: oklch(0.60 0.18 260);       /* 冷蓝 */
+  --chart-4: oklch(0.65 0.18 25);        /* 珊瑚橙 */
+  --chart-5: oklch(0.70 0.17 160);       /* 薄荷绿 */
 
-  /* 侧边栏 - 纯白 */
-  --sidebar: oklch(1 0 0);
-  --sidebar-foreground: oklch(0.15 0.02 260);
-  --sidebar-primary: oklch(0.15 0.02 260);
-  --sidebar-primary-foreground: oklch(1 0 0);
-  --sidebar-accent: oklch(0.97 0.01 260);
-  --sidebar-accent-foreground: oklch(0.15 0.02 260);
-  --sidebar-border: oklch(0.88 0.02 260);
-  --sidebar-ring: oklch(0.15 0.02 260);
+  /* 侧边栏 - 微冷蓝 */
+  --sidebar: oklch(0.99 0.005 260);
+  --sidebar-foreground: oklch(0.205 0.02 260);
+  --sidebar-primary: oklch(0.205 0.02 260);
+  --sidebar-primary-foreground: oklch(0.985 0.008 260);
+  --sidebar-accent: oklch(0.96 0.01 260);
+  --sidebar-accent-foreground: oklch(0.205 0.02 260);
+  --sidebar-border: oklch(0.92 0.012 260);
+  --sidebar-ring: oklch(0.205 0.02 260);
 
   /* 核心特征 - 直角 */
   --radius: 0rem;
@@ -71,28 +73,28 @@
   --tracking-normal: 0em;
   --spacing: 0.25rem;
 
-  /* Demo 风格的语义变量（便于复用） */
+  /* 语义变量 */
   --ark-bg: var(--background);
   --ark-bg-2: var(--secondary);
   --ark-panel: var(--card);
   --ark-panel-2: var(--secondary);
   --ark-border: var(--border);
-  --ark-border-strong: oklch(0.78 0.02 260);
+  --ark-border-strong: oklch(0.82 0.015 260);
   --ark-text: var(--foreground);
   --ark-text-2: var(--muted-foreground);
   --ark-muted: var(--muted-foreground);
   --ark-accent: var(--primary);
-  --ark-active: oklch(0.56 0.2 261);
-  --bauhaus-grid: oklch(0.88 0.02 260 / 0.15);
+  --ark-active: oklch(0.60 0.18 260); /* 冷蓝高亮 */
+  --bauhaus-grid: oklch(0.205 0.02 260 / 0.04); /* 冷蓝网格 */
   
-  /* 点缀色 - 工业黄 (Industrial Yellow) */
-  --highlight: oklch(0.75 0.18 80);
+  /* 点缀色 - 现代琥珀黄 */
+  --highlight: oklch(0.78 0.16 75);   /* #F59E0B - 琥珀黄 */
   
-  /* 语义状态色 - 统一赛博工业风色值 */
-  --success: oklch(0.85 0.25 145); /* 更亮的电光绿 */
-  --warning: var(--highlight);     /* 工业黄 (复用点缀色) */
-  --error: oklch(0.70 0.25 30);    /* 更亮的信号红 */
-  --info: oklch(0.75 0.15 260);    /* 更亮的全息蓝 */
+  /* 语义状态色 - 现代调和色系 */
+  --success: oklch(0.65 0.18 160);    /* #10B981 - 翡翠绿 */
+  --warning: oklch(0.78 0.16 75);     /* #F59E0B - 琥珀黄 */
+  --error: oklch(0.60 0.20 25);       /* #EF4444 - 珊瑚红 */
+  --info: oklch(0.60 0.16 250);       /* #3B82F6 - 天际蓝 */
 }
 
 /* 
@@ -140,8 +142,8 @@
 }
 
 /* ============================================
- * Badge 统一样式 - 单色调工业风设计
- * 方案 A：深灰/黑色背景 + 白色文字
+ * Badge 统一样式 - 透明背景 + 边框
+ * 所有 Badge 统一使用透明背景，通过边框颜色区分类型
  * ============================================ */
 [data-theme="bauhaus"] [data-slot="badge"],
 [data-theme="bauhaus"] span[data-slot="badge"],
@@ -154,40 +156,39 @@
   font-weight: 600;
   padding: 4px 8px;
   line-height: 1.2;
-  /* 默认样式 - 浅灰背景深灰文字（用于无特定类型的 Badge） */
-  background: var(--muted) !important;
-  color: var(--muted-foreground) !important;
+  /* 统一透明背景 + 边框 */
+  background: transparent !important;
+  color: var(--foreground) !important;
   border: 1px solid var(--border) !important;
 }
 
-/* 所有摘要列 Badge - 统一深色风格 */
+/* 资产类型 Badge - 透明背景 + 浅边框 (与 engine/worker 统一) */
 [data-theme="bauhaus"] [data-slot="badge"][data-badge-type="subdomain"],
 [data-theme="bauhaus"] [data-slot="badge"][data-badge-type="website"],
 [data-theme="bauhaus"] [data-slot="badge"][data-badge-type="ip"],
 [data-theme="bauhaus"] [data-slot="badge"][data-badge-type="endpoint"],
 [data-theme="bauhaus"] [data-slot="badge"][data-badge-type="vulnerability"] {
-  background: var(--foreground) !important;
-  color: var(--background) !important;
-  border: none !important;
+  background: transparent !important;
+  color: var(--muted-foreground) !important;
+  border: 1px solid var(--border) !important;
 }
 
-/* 状态 Badge - 无背景样式，通过左侧边框区分状态 */
+/* 状态 Badge - 透明背景 + 左侧彩色边框 */
 [data-theme="bauhaus"] [data-slot="badge"][data-badge-type="cancelled"],
 [data-theme="bauhaus"] [data-slot="badge"][data-badge-type="completed"],
 [data-theme="bauhaus"] [data-slot="badge"][data-badge-type="failed"],
 [data-theme="bauhaus"] [data-slot="badge"][data-badge-type="pending"],
 [data-theme="bauhaus"] [data-slot="badge"][data-badge-type="running"] {
   background: transparent !important;
-  color: var(--foreground) !important;
-  border: 1px solid oklch(0.3 0 0 / 0.4) !important;
+  border: 1px solid var(--border) !important;
   border-left: 3px solid transparent !important;
   padding-left: 8px !important;
 }
 
-/* 状态指示 - 通过左侧边框颜色区分 */
+/* 状态指示 - 通过左侧边框颜色和文字颜色区分 */
 [data-theme="bauhaus"] [data-slot="badge"][data-badge-type="completed"] {
   border-left-color: var(--success) !important;
-  color: var(--success) !important; /* 强制文字颜色一致 */
+  color: var(--success) !important;
 }
 
 [data-theme="bauhaus"] [data-slot="badge"][data-badge-type="running"] {
@@ -207,13 +208,14 @@
 
 [data-theme="bauhaus"] [data-slot="badge"][data-badge-type="cancelled"] {
   border-left-color: var(--muted-foreground) !important;
+  color: var(--muted-foreground) !important;
 }
 
-/* Secondary Badge - 引擎名称、Worker 等使用浅灰背景 */
+/* 辅助 Badge - 透明背景 + 浅边框 */
 [data-theme="bauhaus"] [data-slot="badge"][data-badge-type="engine"],
 [data-theme="bauhaus"] [data-slot="badge"][data-badge-type="worker"] {
-  background: var(--secondary) !important;
-  color: var(--foreground) !important;
+  background: transparent !important;
+  color: var(--muted-foreground) !important;
   border: 1px solid var(--border) !important;
 }
 
@@ -281,6 +283,16 @@
   background: var(--card);
 }
 
+/* 统一顶栏布局下，侧边栏固定区域下移以避开顶栏 */
+[data-theme="bauhaus"] [data-slot="sidebar-container"] {
+  top: var(--header-height);
+  height: calc(100svh - var(--header-height));
+}
+
+[data-theme="bauhaus"] [data-slot="sidebar-gap"] {
+  height: calc(100svh - var(--header-height));
+}
+
 [data-theme="bauhaus"] [data-slot="sidebar-group-label"] {
   font-size: 10px;
   letter-spacing: 0.2em;
@@ -304,7 +316,10 @@
   color: var(--muted-foreground);
   transition: all 0.15s ease;
   margin: 0 !important;
+  position: relative;
+  overflow: hidden; /* 约束伪元素，避免覆盖子菜单 */
 }
+
 
 /* 确保所有圆角都被移除 */
 [data-theme="bauhaus"] .rounded-md,
@@ -322,25 +337,107 @@
 
 [data-theme="bauhaus"] [data-slot="sidebar-menu-button"][data-active="true"],
 [data-theme="bauhaus"] [data-sidebar="menu-button"][data-active="true"] {
-  background: oklch(0.96 0.01 260); /* 极淡的冷灰背景 */
+  background: transparent; /* 移除默认背景，改用伪元素 */
   color: var(--foreground);
-  border-left-color: var(--highlight);
+  border-left: none; /* 移除旧边框 */
   font-weight: 600;
-  position: relative;
+  border-top-left-radius: 0 !important; /* 确保左侧线是直角 */
+  border-bottom-left-radius: 0 !important;
 }
 
-/* 选中项的右侧圆点指示器 */
+/* 一级菜单：背景滑块 (使用伪元素模拟) */
+[data-theme="bauhaus"] [data-slot="sidebar-menu-button"]::before,
+[data-theme="bauhaus"] [data-sidebar="menu-button"]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--secondary);
+  transform: translateX(-101%);
+  opacity: 0; /* 默认完全透明，防止边缘阴影 */
+  transition: transform 0.3s cubic-bezier(0.2, 0.0, 0.2, 1), opacity 0.2s ease;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* 一级菜单：文字/图标容器提升层级 */
+[data-theme="bauhaus"] [data-slot="sidebar-menu-button"] > span,
+[data-theme="bauhaus"] [data-slot="sidebar-menu-button"] > svg,
+[data-theme="bauhaus"] [data-sidebar="menu-button"] > span,
+[data-theme="bauhaus"] [data-sidebar="menu-button"] > svg {
+  position: relative;
+  z-index: 1;
+  transition: transform 0.2s ease;
+}
+
+/* 一级菜单：Hover 状态 */
+[data-theme="bauhaus"] [data-slot="sidebar-menu-button"]:hover,
+[data-theme="bauhaus"] [data-sidebar="menu-button"]:hover {
+  background: transparent;
+  color: var(--foreground);
+}
+
+/* 一级菜单：Hover 时背景滑入 */
+[data-theme="bauhaus"] [data-slot="sidebar-menu-button"]:hover::before,
+[data-theme="bauhaus"] [data-sidebar="menu-button"]:hover::before {
+  transform: translateX(0);
+  opacity: 1; /* 显示滑块 */
+}
+
+/* 一级菜单：Hover 时内容右移 */
+[data-theme="bauhaus"] [data-slot="sidebar-menu-button"]:hover > span,
+[data-theme="bauhaus"] [data-slot="sidebar-menu-button"]:hover > svg,
+[data-theme="bauhaus"] [data-sidebar="menu-button"]:hover > span,
+[data-theme="bauhaus"] [data-sidebar="menu-button"]:hover > svg {
+  transform: translateX(4px);
+}
+
+/* 一级菜单：选中状态背景常驻 */
+[data-theme="bauhaus"] [data-slot="sidebar-menu-button"][data-active="true"]::before,
+[data-theme="bauhaus"] [data-sidebar="menu-button"][data-active="true"]::before {
+  transform: translateX(0);
+  opacity: 1; /* 显示滑块 */
+  background: var(--secondary); /* 保持一致的背景色 */
+  /* 移除 box-shadow，改用 ::after */
+}
+
+/* 一级菜单：左侧橙色长方形指示条 (使用 ::after) */
 [data-theme="bauhaus"] [data-slot="sidebar-menu-button"][data-active="true"]::after,
 [data-theme="bauhaus"] [data-sidebar="menu-button"][data-active="true"]::after {
   content: "";
+  display: block !important; /* 强制显示 */
   position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
   background: var(--highlight);
+  z-index: 2; /* 在背景和内容之上 */
+  border-radius: 0; /* 确保是直角的长方形 */
+}
+
+/* 一级菜单：选中状态内容保持位移 */
+[data-theme="bauhaus"] [data-slot="sidebar-menu-button"][data-active="true"] > span,
+[data-theme="bauhaus"] [data-slot="sidebar-menu-button"][data-active="true"] > svg,
+[data-theme="bauhaus"] [data-sidebar="menu-button"][data-active="true"] > span,
+[data-theme="bauhaus"] [data-sidebar="menu-button"][data-active="true"] > svg {
+  transform: translateX(4px);
+}
+
+/* 收起模式：去掉滑入与位移动画 */
+[data-theme="bauhaus"] [data-collapsible="icon"] [data-slot="sidebar-menu-button"]::before,
+[data-theme="bauhaus"] [data-collapsible="icon"] [data-sidebar="menu-button"]::before {
+  display: none;
+}
+
+[data-theme="bauhaus"] [data-collapsible="icon"] [data-slot="sidebar-menu-button"]:hover > span,
+[data-theme="bauhaus"] [data-collapsible="icon"] [data-slot="sidebar-menu-button"]:hover > svg,
+[data-theme="bauhaus"] [data-collapsible="icon"] [data-sidebar="menu-button"]:hover > span,
+[data-theme="bauhaus"] [data-collapsible="icon"] [data-sidebar="menu-button"]:hover > svg,
+[data-theme="bauhaus"] [data-collapsible="icon"] [data-slot="sidebar-menu-button"][data-active="true"] > span,
+[data-theme="bauhaus"] [data-collapsible="icon"] [data-slot="sidebar-menu-button"][data-active="true"] > svg,
+[data-theme="bauhaus"] [data-collapsible="icon"] [data-sidebar="menu-button"][data-active="true"] > span,
+[data-theme="bauhaus"] [data-collapsible="icon"] [data-sidebar="menu-button"][data-active="true"] > svg {
+  transform: none;
 }
 
 /* 侧边栏菜单项容器 - 移除默认间距 */
@@ -356,24 +453,95 @@
 
 /* 子菜单按钮 */
 [data-theme="bauhaus"] [data-slot="sidebar-menu-sub-button"] {
-  border-radius: 0 !important;
+  border-radius: 4px !important;
+  border-top-left-radius: 0 !important; /* 左侧直角，保证橙色线是长方形 */
+  border-bottom-left-radius: 0 !important; /* 左侧直角 */
   color: var(--muted-foreground);
   padding-left: 36px !important;
-  font-size: 12px;
-  border-left: 2px solid transparent;
+  font-size: 13px; /* 稍微调大字体增加可读性 */
+  border-left: none; /* 移除原来的左侧边框 */
   margin-left: 0 !important;
+  position: relative;
+  overflow: hidden; /* 确保背景滑块不溢出 */
+  transition: color 0.2s ease;
+  background: transparent; /* 默认无背景 */
 }
 
+/* 背景滑块 (使用伪元素模拟) */
+[data-theme="bauhaus"] [data-slot="sidebar-menu-sub-button"]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--secondary); /* 滑块颜色 */
+  transform: translateX(-101%); /* 初始在左侧外 */
+  opacity: 0; /* 默认完全透明 */
+  transition: transform 0.3s cubic-bezier(0.2, 0.0, 0.2, 1), opacity 0.2s ease; /* 平滑的缓动 */
+  z-index: 0; /* 在文字下方 */
+  pointer-events: none;
+}
+
+/* 文字容器需要相对定位以浮在背景之上 */
+[data-theme="bauhaus"] [data-slot="sidebar-menu-sub-button"] > span,
+[data-theme="bauhaus"] [data-slot="sidebar-menu-sub-button"] > svg {
+  position: relative;
+  z-index: 1;
+  transition: transform 0.2s ease;
+}
+
+/* Hover 状态 */
 [data-theme="bauhaus"] [data-slot="sidebar-menu-sub-button"]:hover {
-  background: var(--secondary);
   color: var(--foreground);
+  background: transparent; /* 禁用默认背景 */
 }
 
+/* Hover 时背景滑入 */
+[data-theme="bauhaus"] [data-slot="sidebar-menu-sub-button"]:hover::before {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+/* Hover 时文字轻微右移 */
+[data-theme="bauhaus"] [data-slot="sidebar-menu-sub-button"]:hover > span {
+  transform: translateX(4px);
+}
+
+/* Active (选中) 状态 */
 [data-theme="bauhaus"] [data-slot="sidebar-menu-sub-button"][data-active="true"] {
   color: var(--foreground);
-  background: var(--secondary);
-  border-left-color: var(--ark-active);
+  background: transparent;
   font-weight: 500;
+}
+
+/* 选中状态背景常驻 */
+[data-theme="bauhaus"] [data-slot="sidebar-menu-sub-button"][data-active="true"]::before {
+  transform: translateX(0);
+  opacity: 1;
+  background: var(--secondary);
+  /* 移除 box-shadow */
+}
+
+/* 子菜单：左侧橙色长方形指示条 (使用 ::after) */
+[data-theme="bauhaus"] [data-slot="sidebar-menu-sub-button"][data-active="true"]::after {
+  content: "";
+  display: block !important;
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--highlight);
+  z-index: 2;
+  border-radius: 0; /* 确保是直角的长方形 */
+}
+
+/* 选中状态文字保持位移 (可选，或者归位) - 这里保持位移更有确认感 */
+[data-theme="bauhaus"] [data-slot="sidebar-menu-sub-button"][data-active="true"] > span {
+  transform: translateX(4px);
+}
+
+/* 移除之前的圆点代码 */
+[data-theme="bauhaus"] [data-slot="sidebar-menu-sub-button"][data-active="true"]::after {
+  display: none;
 }
 
 /* 子菜单容器 */
@@ -396,7 +564,13 @@
   padding: 0 8px;
 }
 
-/* 5. 顶部栏 - 贴近 demo 的黑色强调线 */
+/* 5. 统一顶栏样式 */
+[data-theme="bauhaus"] [data-slot="unified-header"] {
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+}
+
+/* 旧顶栏样式（保留兼容性） */
 [data-theme="bauhaus"] [data-slot="site-header"] {
   background: var(--card);
   border-bottom: 1px solid var(--border);

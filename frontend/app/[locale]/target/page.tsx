@@ -1,7 +1,7 @@
 "use client"
 
 import { AllTargetsDetailView } from "@/components/target/all-targets-detail-view"
-import { Target } from "lucide-react"
+import { PageHeader } from "@/components/common/page-header"
 import { useTranslations } from "next-intl"
 
 export default function AllTargetsPage() {
@@ -9,20 +9,13 @@ export default function AllTargetsPage() {
 
   return (
     <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-      {/* Page header */}
-      <div className="flex items-center justify-between px-4 lg:px-6">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight flex items-center gap-2">
-            <Target />
-            {t("title")}
-          </h2>
-          <p className="text-muted-foreground">
-            {t("description")}
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        code="TGT-01"
+        title={t("title")}
+        description={t("description")}
+      />
 
-      {/* Content area */}
+      {/* Target list */}
       <div className="px-4 lg:px-6">
         <AllTargetsDetailView />
       </div>

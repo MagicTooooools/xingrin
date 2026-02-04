@@ -23,6 +23,7 @@ import {
 } from "@/hooks/use-scheduled-scans"
 import type { ScheduledScan } from "@/types/scheduled-scan.types"
 import { DataTableSkeleton } from "@/components/ui/data-table-skeleton"
+import { PageHeader } from "@/components/common/page-header"
 
 /**
  * Scheduled scan page
@@ -174,12 +175,11 @@ export default function ScheduledScanPage() {
   if (isLoading) {
     return (
       <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-        <div className="flex items-center justify-between px-4 lg:px-6">
-          <div>
-            <h1 className="text-3xl font-bold">{tScan("scheduled.title")}</h1>
-            <p className="text-muted-foreground mt-1">{tScan("scheduled.description")}</p>
-          </div>
-        </div>
+        <PageHeader
+          code="SCH-01"
+          title={tScan("scheduled.title")}
+          description={tScan("scheduled.description")}
+        />
         <DataTableSkeleton
           toolbarButtonCount={2}
           rows={5}
@@ -191,13 +191,11 @@ export default function ScheduledScanPage() {
 
   return (
     <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-      {/* Page title */}
-      <div className="px-4 lg:px-6">
-        <div>
-          <h1 className="text-3xl font-bold">{tScan("scheduled.title")}</h1>
-          <p className="text-muted-foreground mt-1">{tScan("scheduled.description")}</p>
-        </div>
-      </div>
+      <PageHeader
+        code="SCH-01"
+        title={tScan("scheduled.title")}
+        description={tScan("scheduled.description")}
+      />
 
       {/* Data table */}
       <div className="px-4 lg:px-6">

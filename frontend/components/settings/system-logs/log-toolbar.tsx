@@ -2,7 +2,7 @@
 
 import { useMemo } from "react"
 import { useTranslations } from "next-intl"
-import { FileText, Search } from "lucide-react"
+import { FileText, Search } from "@/components/icons"
 
 import {
   Select,

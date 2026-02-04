@@ -2,7 +2,7 @@
 
 import { useMemo, useCallback, type ReactNode } from "react"
 import { useLocale, useTranslations } from "next-intl"
-import { IconDatabase, IconServer, IconTrendingUp, IconUsers } from "@tabler/icons-react"
+import { IconDatabase, IconServer, IconTrendingUp, IconUsers } from "@/components/icons"
 
 import { useDatabaseHealth } from "@/hooks/use-database-health"
 import type { DatabaseAlertSeverity, DatabaseHealthStatus } from "@/types/database-health.types"
@@ -12,6 +12,7 @@ import { Progress } from "@/components/ui/progress"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Status, StatusIndicator, StatusLabel } from "@/components/ui/shadcn-io/status"
 import { cn } from "@/lib/utils"
+import { PageHeader } from "@/components/common/page-header"
 
 const severityStyles: Record<DatabaseAlertSeverity, string> = {
   info: "text-[var(--success)] border-[var(--success)]/20 bg-[var(--success)]/10",
@@ -176,10 +177,12 @@ export function DatabaseHealthView() {
   return (
     <div className="p-4 md:p-6 space-y-6">
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold">{tPage("title")}</h1>
-          <p className="text-muted-foreground mt-1">{tPage("description")}</p>
-        </div>
+        <PageHeader
+          code="DBH-01"
+          title={tPage("title")}
+          description={tPage("description")}
+          className="px-0"
+        />
         {loading ? (
           <Skeleton className="h-7 w-28" />
         ) : (

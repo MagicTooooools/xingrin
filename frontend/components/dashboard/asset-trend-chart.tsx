@@ -61,7 +61,7 @@ import {
   ChartContainer,
 } from "@/components/ui/chart"
 import { Skeleton } from "@/components/ui/skeleton"
-import { IconActivity } from "@tabler/icons-react"
+import { IconActivity } from "@/components/icons"
 
 // Data series key type
 type SeriesKey = 'totalSubdomains' | 'totalIps' | 'totalEndpoints' | 'totalWebsites'

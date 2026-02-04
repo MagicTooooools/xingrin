@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, type FormEvent } from "react"
-import { Upload, X, FileText } from "lucide-react"
+import { Upload, X, FileText } from "@/components/icons"
 import { useTranslations } from "next-intl"
 import {
   Dialog,

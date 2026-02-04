@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { IconSearch } from "@tabler/icons-react"
+import { IconSearch } from "@/components/icons"
 import { useTranslations } from "next-intl"
 import {
   Command,
