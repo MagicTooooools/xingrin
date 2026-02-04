@@ -105,7 +105,7 @@ import { Terminal, TypingAnimation } from "@/components/ui/terminal"
 import { TerminalLogin } from "@/components/ui/terminal-login"
 import { YamlEditor } from "@/components/ui/yaml-editor"
 import { Toaster } from "@/components/ui/sonner"
-import { Banner, BannerAction, BannerContent, BannerDescription, BannerIcon, BannerTitle } from "@/components/ui/shadcn-io/banner"
+import { Banner, BannerAction, BannerIcon, BannerTitle } from "@/components/ui/shadcn-io/banner"
 import { Status, StatusIndicator, StatusLabel } from "@/components/ui/shadcn-io/status"
 import {
   Sidebar,
@@ -702,7 +702,7 @@ export function ComponentGallery({ componentGroups }: ComponentGalleryProps) {
                 <CommandSeparator />
                 <CommandGroup heading="工具">
                   <CommandItem>
-                    <Tool className="mr-2 size-4" />
+                    <Wrench className="mr-2 size-4" />
                     快速扫描
                   </CommandItem>
                 </CommandGroup>
@@ -825,10 +825,10 @@ export function ComponentGallery({ componentGroups }: ComponentGalleryProps) {
           <DemoCard title="Banner" description="顶部提示横条">
             <Banner>
               <BannerIcon icon={Info} />
-              <BannerContent>
+              <div className="flex flex-1 flex-col gap-0.5">
                 <BannerTitle>系统维护</BannerTitle>
-                <BannerDescription>预计 5 分钟后恢复。</BannerDescription>
-              </BannerContent>
+                <p className="text-xs text-primary-foreground/80">预计 5 分钟后恢复。</p>
+              </div>
               <BannerAction>查看详情</BannerAction>
             </Banner>
           </DemoCard>

@@ -361,12 +361,18 @@
 
 /* 一级菜单：文字/图标容器提升层级 */
 [data-theme="bauhaus"] [data-slot="sidebar-menu-button"] > span,
-[data-theme="bauhaus"] [data-slot="sidebar-menu-button"] > svg,
+[data-theme="bauhaus"] [data-slot="sidebar-menu-button"] > svg:not(.ml-auto),
 [data-theme="bauhaus"] [data-sidebar="menu-button"] > span,
-[data-theme="bauhaus"] [data-sidebar="menu-button"] > svg {
+[data-theme="bauhaus"] [data-sidebar="menu-button"] > svg:not(.ml-auto) {
   position: relative;
   z-index: 1;
   transition: transform 0.2s ease;
+}
+
+[data-theme="bauhaus"] [data-slot="sidebar-menu-button"] > svg.ml-auto,
+[data-theme="bauhaus"] [data-sidebar="menu-button"] > svg.ml-auto {
+  position: relative;
+  z-index: 1; /* 保持箭头在滑块之上 */
 }
 
 /* 一级菜单：Hover 状态 */
@@ -385,9 +391,9 @@
 
 /* 一级菜单：Hover 时内容右移 */
 [data-theme="bauhaus"] [data-slot="sidebar-menu-button"]:hover > span,
-[data-theme="bauhaus"] [data-slot="sidebar-menu-button"]:hover > svg,
+[data-theme="bauhaus"] [data-slot="sidebar-menu-button"]:hover > svg:not(.ml-auto),
 [data-theme="bauhaus"] [data-sidebar="menu-button"]:hover > span,
-[data-theme="bauhaus"] [data-sidebar="menu-button"]:hover > svg {
+[data-theme="bauhaus"] [data-sidebar="menu-button"]:hover > svg:not(.ml-auto) {
   transform: translateX(4px);
 }
 
@@ -417,9 +423,9 @@
 
 /* 一级菜单：选中状态内容保持位移 */
 [data-theme="bauhaus"] [data-slot="sidebar-menu-button"][data-active="true"] > span,
-[data-theme="bauhaus"] [data-slot="sidebar-menu-button"][data-active="true"] > svg,
+[data-theme="bauhaus"] [data-slot="sidebar-menu-button"][data-active="true"] > svg:not(.ml-auto),
 [data-theme="bauhaus"] [data-sidebar="menu-button"][data-active="true"] > span,
-[data-theme="bauhaus"] [data-sidebar="menu-button"][data-active="true"] > svg {
+[data-theme="bauhaus"] [data-sidebar="menu-button"][data-active="true"] > svg:not(.ml-auto) {
   transform: translateX(4px);
 }
 
@@ -430,13 +436,13 @@
 }
 
 [data-theme="bauhaus"] [data-collapsible="icon"] [data-slot="sidebar-menu-button"]:hover > span,
-[data-theme="bauhaus"] [data-collapsible="icon"] [data-slot="sidebar-menu-button"]:hover > svg,
+[data-theme="bauhaus"] [data-collapsible="icon"] [data-slot="sidebar-menu-button"]:hover > svg:not(.ml-auto),
 [data-theme="bauhaus"] [data-collapsible="icon"] [data-sidebar="menu-button"]:hover > span,
-[data-theme="bauhaus"] [data-collapsible="icon"] [data-sidebar="menu-button"]:hover > svg,
+[data-theme="bauhaus"] [data-collapsible="icon"] [data-sidebar="menu-button"]:hover > svg:not(.ml-auto),
 [data-theme="bauhaus"] [data-collapsible="icon"] [data-slot="sidebar-menu-button"][data-active="true"] > span,
-[data-theme="bauhaus"] [data-collapsible="icon"] [data-slot="sidebar-menu-button"][data-active="true"] > svg,
+[data-theme="bauhaus"] [data-collapsible="icon"] [data-slot="sidebar-menu-button"][data-active="true"] > svg:not(.ml-auto),
 [data-theme="bauhaus"] [data-collapsible="icon"] [data-sidebar="menu-button"][data-active="true"] > span,
-[data-theme="bauhaus"] [data-collapsible="icon"] [data-sidebar="menu-button"][data-active="true"] > svg {
+[data-theme="bauhaus"] [data-collapsible="icon"] [data-sidebar="menu-button"][data-active="true"] > svg:not(.ml-auto) {
   transform: none;
 }
 
