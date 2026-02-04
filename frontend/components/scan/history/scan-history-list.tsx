@@ -292,6 +292,7 @@ export function ScanHistoryList({ hideToolbar = false, targetId, pageSize: custo
         handleDelete: handleDeleteScan,
         handleStop: handleStopScan,
         handleViewProgress,
+        statusClickable: false,
         t: translations,
         hideTargetColumn,
       }),

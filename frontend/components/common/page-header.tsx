@@ -34,7 +34,7 @@ export function PageHeader({
             /{code}
           </span>
         </div>
-        <div className="flex-1 h-1.5 bg-[repeating-linear-gradient(45deg,transparent,transparent_4px,currentColor_4px,currentColor_5px)] text-primary/10 mb-0.5" />
+        <div className="flex-1 h-1.5 bg-[repeating-linear-gradient(45deg,transparent,transparent_4px,currentColor_4px,currentColor_5px)] text-primary/10" />
       </div>
       {description && (
         <p className="text-sm text-muted-foreground">

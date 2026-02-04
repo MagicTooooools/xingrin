@@ -1,35 +1,37 @@
 "use client"
 
+import { memo } from "react"
 import { useTranslations } from "next-intl"
-import { Card, CardAction, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
+import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
-import { 
-  IconRadar, 
-  IconPlayerPlay, 
+import {
+  IconRadar,
+  IconPlayerPlay,
   IconBug,
-  IconStack2
+  IconStack2,
 } from "@/components/icons"
 import { useScanStatistics } from "@/hooks/use-scans"
 
-function StatCard({
+const StatCard = memo(function StatCard({
   title,
   value,
   icon,
-  loading,
   footer,
-  badgeText,
+  loading,
+  index,
 }: {
   title: string
   value: string | number
   icon: React.ReactNode
-  loading?: boolean
   footer: string
-  badgeText: string
+  loading?: boolean
+  index?: number
 }) {
+  const formattedIndex = index !== undefined ? String(index).padStart(2, "0") : undefined
+
   return (
-    <Card className="@container/card">
-      <CardHeader>
+    <Card className="@container/card bauhaus-stat-card" data-card-index={formattedIndex}>
+      <CardHeader className="pt-7">
         <CardDescription className="flex items-center gap-2">
           {icon}
           {title}
@@ -38,33 +40,30 @@ function StatCard({
           <Skeleton className="h-8 w-24" />
         ) : (
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            {value}
+            {typeof value === "number" ? value.toLocaleString() : value}
           </CardTitle>
         )}
-        <CardAction>
-          <Badge variant="outline">{badgeText}</Badge>
-        </CardAction>
       </CardHeader>
       <CardFooter className="flex-col items-start gap-1.5 text-sm">
         <div className="text-muted-foreground">{footer}</div>
       </CardFooter>
     </Card>
   )
-}
+})
 
 export function ScanHistoryStatCards() {
   const { data, isLoading } = useScanStatistics()
   const t = useTranslations("scan.history.stats")
 
   return (
-    <div className="*:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card grid grid-cols-1 gap-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:shadow-xs @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
+    <div className="grid grid-cols-1 gap-4 @xl/main:grid-cols-2 @5xl/main:grid-cols-4 bauhaus-stats-row">
       <StatCard
         title={t("totalScans")}
         value={data?.total ?? 0}
         icon={<IconRadar className="size-4" />}
         loading={isLoading}
         footer={t("allScanTasks")}
-        badgeText={t("all")}
+        index={1}
       />
       <StatCard
         title={t("running")}
@@ -72,7 +71,7 @@ export function ScanHistoryStatCards() {
         icon={<IconPlayerPlay className="size-4" />}
         loading={isLoading}
         footer={t("runningScans")}
-        badgeText={t("all")}
+        index={2}
       />
       <StatCard
         title={t("vulnsFound")}
@@ -80,7 +79,7 @@ export function ScanHistoryStatCards() {
         icon={<IconBug className="size-4" />}
         loading={isLoading}
         footer={t("completedScansFound")}
-        badgeText={t("all")}
+        index={3}
       />
       <StatCard
         title={t("assetsFound")}
@@ -88,7 +87,7 @@ export function ScanHistoryStatCards() {
         icon={<IconStack2 className="size-4" />}
         loading={isLoading}
         footer={t("assetTypes")}
-        badgeText={t("all")}
+        index={4}
       />
     </div>
   )

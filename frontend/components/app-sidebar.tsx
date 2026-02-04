@@ -184,6 +184,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       icon: IconTool,
       items: [
         { title: "组件总览", url: "/tools/component-gallery/" },
+        { title: "组件 Demo 索引", url: "/tools/component-demos/" },
         { title: "Button Demo", url: "/tools/button-demo/" },
         { title: "Badge Demo", url: "/tools/badge-demo/" },
         { title: "Badge Variants", url: "/prototypes/badge-variants/" },

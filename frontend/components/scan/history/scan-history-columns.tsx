@@ -77,6 +77,7 @@ interface CreateColumnsProps {
   handleDelete: (scan: ScanRecord) => void
   handleStop: (scan: ScanRecord) => void
   handleViewProgress?: (scan: ScanRecord) => void
+  statusClickable?: boolean
   t: ScanHistoryTranslations
   hideTargetColumn?: boolean
 }
@@ -90,6 +91,7 @@ export const createScanHistoryColumns = ({
   handleDelete,
   handleStop,
   handleViewProgress,
+  statusClickable = true,
   t,
   hideTargetColumn = false,
 }: CreateColumnsProps): ColumnDef<ScanRecord>[] => {
@@ -329,11 +331,12 @@ export const createScanHistoryColumns = ({
     cell: ({ row }) => {
       const status = row.getValue("status") as ScanStatus
       const progress = row.original.progress
+      const isClickable = Boolean(handleViewProgress) && statusClickable
       
       return (
         <div 
-          onClick={handleViewProgress ? () => handleViewProgress(row.original) : undefined}
-          className={cn("cursor-pointer", !handleViewProgress && "pointer-events-none")}
+          onClick={isClickable ? () => handleViewProgress?.(row.original) : undefined}
+          className={cn(isClickable ? "cursor-pointer" : "cursor-default")}
         >
           <ScanStatusBadge 
             status={status}
