@@ -66,7 +66,7 @@ export function VulnSeverityChart() {
   const total = allData.reduce((sum, item) => sum + item.count, 0)
 
   return (
-    <Card className="overflow-hidden [[data-theme=bauhaus]_&]:pt-0 [[data-theme=bauhaus]_&]:gap-0">
+    <Card className="flex flex-col h-[300px] overflow-hidden [[data-theme=bauhaus]_&]:pt-0 [[data-theme=bauhaus]_&]:gap-0">
       {/* Bauhaus 风格 Kicker 标题 */}
       <div className="bauhaus-kicker hidden [[data-theme=bauhaus]_&]:flex">
         <IconShield className="size-4" />

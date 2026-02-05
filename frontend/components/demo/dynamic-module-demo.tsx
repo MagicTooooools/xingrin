@@ -8,8 +8,8 @@ import { cn } from "@/lib/utils"
 import { Link } from "@/i18n/navigation"
 
 type DynamicModuleDemoProps = {
-  loader: () => Promise<Record<string, any>>
-  props?: Record<string, any>
+  loader: () => Promise<Record<string, unknown>>
+  props?: Record<string, unknown>
   title?: string
   description?: string
   fallbackRoute?: string
@@ -42,10 +42,10 @@ class DemoErrorBoundary extends React.Component<React.PropsWithChildren, ErrorBo
   }
 }
 
-const pickComponent = (mod: Record<string, any>) => {
-  const isReactComponent = (value: any) =>
+const pickComponent = (mod: Record<string, unknown>) => {
+  const isReactComponent = (value: unknown): value is React.ComponentType<Record<string, unknown>> =>
     typeof value === "function" ||
-    (typeof value === "object" && value && value.$$typeof)
+    (typeof value === "object" && value !== null && "$$typeof" in (value as Record<string, unknown>))
 
   if (isReactComponent(mod.default)) return mod.default
 
@@ -68,7 +68,7 @@ export function DynamicModuleDemo({
         const Component = pickComponent(mod)
 
         if (!Component) {
-          return () => (
+          const MissingExport = () => (
             <Alert>
               <AlertTitle>无可渲染导出</AlertTitle>
               <AlertDescription className="text-xs text-muted-foreground">
@@ -76,11 +76,15 @@ export function DynamicModuleDemo({
               </AlertDescription>
             </Alert>
           )
+          MissingExport.displayName = "MissingExport"
+          return MissingExport
         }
 
-        return (componentProps: Record<string, any>) => (
+        const WrappedComponent = (componentProps: Record<string, unknown>) => (
           <Component {...componentProps} />
         )
+        WrappedComponent.displayName = Component.displayName ?? Component.name ?? "DynamicModule"
+        return WrappedComponent
       }, {
         ssr: false,
         loading: () => (

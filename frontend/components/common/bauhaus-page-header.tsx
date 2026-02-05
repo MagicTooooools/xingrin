@@ -57,9 +57,43 @@ export function BauhausPageHeader({
         })
       )
     }
-    updateTime()
-    const interval = setInterval(updateTime, 1000)
-    return () => clearInterval(interval)
+
+    let intervalId: ReturnType<typeof setInterval> | null = null
+
+    const shouldRun = () =>
+      !document.hidden && document.documentElement.getAttribute("data-theme") === "bauhaus"
+
+    const start = () => {
+      updateTime()
+      intervalId = window.setInterval(updateTime, 1000)
+    }
+
+    const stop = () => {
+      if (intervalId) {
+        clearInterval(intervalId)
+        intervalId = null
+      }
+    }
+
+    const sync = () => {
+      if (shouldRun()) {
+        if (!intervalId) start()
+      } else {
+        stop()
+      }
+    }
+
+    sync()
+
+    const observer = new MutationObserver(sync)
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] })
+    document.addEventListener("visibilitychange", sync)
+
+    return () => {
+      document.removeEventListener("visibilitychange", sync)
+      observer.disconnect()
+      stop()
+    }
   }, [])
 
   return (

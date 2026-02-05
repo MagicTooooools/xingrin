@@ -27,7 +27,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Separator } from "@/components/ui/separator"
-import { Status, StatusIndicator } from "@/components/ui/shadcn-io/status"
 import { useFormatDate, useFormatNumber } from "@/lib/i18n-format"
 import { cn } from "@/lib/utils"
 import type { Agent } from "@/types/agent.types"
@@ -170,9 +169,11 @@ export function AgentCardCompact({
       <CardHeader className="pb-2">
         <div className="flex items-start justify-between gap-2 w-full min-w-0">
           <div className="flex items-center gap-2 min-w-0 flex-1">
-            <Status status={getStatusVariant(agent.status)}>
-              <StatusIndicator className={agent.status === "online" ? "animate-pulse" : ""} />
-            </Status>
+            <div className={cn(
+              "h-2 w-2 mr-2 shrink-0 rounded-[1px]",
+              agent.status === "online" ? "bg-[var(--success)] shadow-[0_0_4px_var(--success)]" : 
+              agent.status === "offline" ? "bg-[var(--error)]" : "bg-muted-foreground"
+            )} />
             <span className="font-medium truncate">{agent.name}</span>
           </div>
           <div className="flex items-center gap-2 shrink-0">

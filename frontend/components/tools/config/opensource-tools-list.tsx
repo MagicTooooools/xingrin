@@ -50,15 +50,12 @@ export function OpensourceToolsList() {
   const handleCheckUpdate = async (toolId: number) => {
     try {
       setCheckingToolId(toolId)
-      console.log("Checking tool update:", toolId)
       
       // TODO: Call backend API to check update
       // Simulate async operation
       await new Promise(resolve => setTimeout(resolve, 2000))
       
-      console.log("Check complete:", toolId)
     } catch {
-      console.error("Check update failed:", error)
     } finally {
       setCheckingToolId(null)
     }

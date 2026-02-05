@@ -150,8 +150,7 @@ export function IPAddressesView({
       a.click()
       a.remove()
       URL.revokeObjectURL(url)
-    } catch (error) {
-      console.error("Failed to download IP address list", error)
+    } catch {
       toast.error(tToast("downloadFailed"))
     }
   }
@@ -232,8 +231,7 @@ export function IPAddressesView({
       a.click()
       a.remove()
       URL.revokeObjectURL(url)
-    } catch (error) {
-      console.error("Failed to download selected IP addresses", error)
+    } catch {
       toast.error(tToast("downloadFailed"))
     }
   }
@@ -251,8 +249,7 @@ export function IPAddressesView({
       setSelectedIPAddresses([])
       setDeleteDialogOpen(false)
       refetch()
-    } catch (error) {
-      console.error("Failed to delete IP addresses", error)
+    } catch {
       toast.error(tToast("deleteFailed"))
     } finally {
       setIsDeleting(false)

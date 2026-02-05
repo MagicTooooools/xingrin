@@ -1,10 +1,33 @@
 "use client"
 
-import { useState, useMemo } from "react"
-import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts"
+import { useState, useMemo, useEffect } from "react"
+import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
 import { useStatisticsHistory } from "@/hooks/use-dashboard"
 import type { StatisticsHistoryItem } from "@/types/dashboard.types"
 import { useTranslations } from "next-intl"
+import { IconTrendingUp, IconActivity } from "@/components/icons"
+import { cn } from "@/lib/utils"
+import { Skeleton } from "@/components/ui/skeleton"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import { motion, useSpring, useTransform } from "framer-motion"
+
+function NumberTicker({ value }: { value: number }) {
+  // Initialize from 0 to create a "count up" effect on mount
+  const spring = useSpring(0, { mass: 0.8, stiffness: 75, damping: 15 });
+  const display = useTransform(spring, (current) => Math.round(current).toLocaleString());
+
+  useEffect(() => {
+    spring.set(value);
+  }, [value, spring]);
+
+  return <motion.span>{display}</motion.span>;
+}
 
 /**
  * Fill missing date data, ensure always returning complete days
@@ -13,13 +36,8 @@ import { useTranslations } from "next-intl"
 function fillMissingDates(data: StatisticsHistoryItem[] | undefined, days: number): StatisticsHistoryItem[] {
   if (!data || data.length === 0) return []
   
-  // Build mapping from date to data
   const dataMap = new Map(data.map(item => [item.date, item]))
-  
-  // Find the earliest date
   const earliestDate = new Date(data[0].date)
-  
-  // Generate complete date list (starting from days-1 days before earliest date)
   const result: StatisticsHistoryItem[] = []
   const startDate = new Date(earliestDate)
   startDate.setDate(startDate.getDate() - (days - data.length))
@@ -33,7 +51,6 @@ function fillMissingDates(data: StatisticsHistoryItem[] | undefined, days: numbe
     if (existing) {
       result.push(existing)
     } else {
-      // Fill missing dates with 0
       result.push({
         date: dateStr,
         totalTargets: 0,
@@ -46,286 +63,215 @@ function fillMissingDates(data: StatisticsHistoryItem[] | undefined, days: numbe
       })
     }
   }
-  
   return result
 }
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import {
-  ChartConfig,
-  ChartContainer,
-} from "@/components/ui/chart"
-import { Skeleton } from "@/components/ui/skeleton"
-import { IconActivity } from "@/components/icons"
-
-// Data series key type
-type SeriesKey = 'totalSubdomains' | 'totalIps' | 'totalEndpoints' | 'totalWebsites'
-
-// All series
-const ALL_SERIES: SeriesKey[] = ['totalSubdomains', 'totalIps', 'totalEndpoints', 'totalWebsites']
 
 export function AssetTrendChart() {
-  const { data: rawData, isLoading } = useStatisticsHistory(7)
-  const [activeData, setActiveData] = useState<StatisticsHistoryItem | null>(null)
+  const { data: rawData, isLoading } = useStatisticsHistory(14)
   const t = useTranslations("dashboard.assetTrend")
-  
-  // Dynamically configure chartConfig using translations
-  const chartConfig = useMemo(() => ({
-    totalSubdomains: {
-      label: t("subdomains"),
-      color: "#3b82f6", // Blue
-    },
-    totalIps: {
-      label: t("ips"),
-      color: "#f97316", // Orange
-    },
-    totalEndpoints: {
-      label: t("endpoints"),
-      color: "#eab308", // Yellow
-    },
-    totalWebsites: {
-      label: t("websites"),
-      color: "#22c55e", // Green
-    },
-  } satisfies ChartConfig), [t])
-  
-  // Visible series state (show all by default)
-  const [visibleSeries, setVisibleSeries] = useState<Set<SeriesKey>>(() => new Set(ALL_SERIES))
-  
-  // Currently hovered line
-  const [hoveredLine, setHoveredLine] = useState<SeriesKey | null>(null)
-  
-  // Toggle series visibility
-  const toggleSeries = (key: SeriesKey) => {
-    setVisibleSeries(prev => {
-      const next = new Set(prev)
-      if (next.has(key)) {
-        // Keep at least one visible
-        if (next.size > 1) {
-          next.delete(key)
-        }
-      } else {
-        next.add(key)
-      }
-      return next
+  const [activeTab, setActiveTab] = useState<'sub' | 'ip' | 'url' | 'site'>('sub')
+
+  // Prepare data with deltas
+  const processedData = useMemo(() => {
+    if (!rawData || rawData.length === 0) return []
+    const filled = fillMissingDates(rawData, 14)
+    
+    return filled.map((curr, i) => {
+       const prev = filled[i-1] || curr
+       return {
+          ...curr,
+          newSub: Math.max(0, curr.totalSubdomains - prev.totalSubdomains),
+          newIp: Math.max(0, curr.totalIps - prev.totalIps),
+          newUrl: Math.max(0, curr.totalEndpoints - prev.totalEndpoints),
+          newSite: Math.max(0, curr.totalWebsites - prev.totalWebsites),
+       }
     })
+  }, [rawData])
+
+  const latest = useMemo(() => 
+    processedData.length > 0 ? processedData[processedData.length - 1] : null
+  , [processedData])
+
+  // Bauhaus Colors configuration
+  const config = {
+     sub: { 
+       label: t('subdomains'), 
+       totalKey: 'totalSubdomains', 
+       deltaKey: 'newSub', 
+       color: "var(--foreground)", 
+       bg: "bg-foreground",
+       text: "text-foreground"
+     },
+     ip: { 
+       label: t('ips'), 
+       totalKey: 'totalIps', 
+       deltaKey: 'newIp', 
+       color: "var(--foreground)", 
+       bg: "bg-foreground",
+       text: "text-foreground"
+     },
+     url: { 
+       label: t('endpoints'), 
+       totalKey: 'totalEndpoints', 
+       deltaKey: 'newUrl', 
+       color: "var(--foreground)", 
+       bg: "bg-foreground",
+       text: "text-foreground"
+     },
+     site: { 
+       label: t('websites'), 
+       totalKey: 'totalWebsites', 
+       deltaKey: 'newSite', 
+       color: "var(--foreground)", 
+       bg: "bg-foreground",
+       text: "text-foreground"
+     },
+  } as const
+
+  const activeConfig = config[activeTab]
+
+  if (isLoading) {
+    return (
+      <Card className="w-full flex flex-col">
+         <div className="bauhaus-kicker hidden [[data-theme=bauhaus]_&]:flex">
+            <IconActivity className="size-4" />
+            <span>ASSET PULSE</span>
+         </div>
+         <Skeleton className="h-[300px] m-4" />
+      </Card>
+    )
   }
 
-  // Fill missing dates, ensure always showing 7 days
-  const data = useMemo(() => fillMissingDates(rawData, 7), [rawData])
-
-  // Format date display
-  const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr)
-    return `${date.getMonth() + 1}/${date.getDate()}`
+  if (!latest) {
+    return (
+      <Card className="h-[300px] w-full flex items-center justify-center">
+        <div className="flex flex-col items-center gap-2 text-muted-foreground">
+          <IconActivity className="w-8 h-8 opacity-20" />
+          <span className="text-sm opacity-50">{t("noData")}</span>
+        </div>
+      </Card>
+    )
   }
-
-  // Format large numbers (1K, 1M etc.)
-  const formatNumber = (value: number) => {
-    if (value >= 1000000) {
-      return `${(value / 1000000).toFixed(1)}M`
-    }
-    if (value >= 1000) {
-      return `${(value / 1000).toFixed(1)}K`
-    }
-    return value.toString()
-  }
-
-  // Get latest data (use latest value from raw data)
-  const latest = useMemo(() =>
-    rawData && rawData.length > 0 ? rawData[rawData.length - 1] : null,
-    [rawData]
-  )
-
-  // Display data: show hovered data when hovering, otherwise show latest data
-  const displayData = useMemo(() => activeData || latest, [activeData, latest])
 
   return (
-    <Card className="overflow-hidden [[data-theme=bauhaus]_&]:pt-0 [[data-theme=bauhaus]_&]:gap-0">
-      {/* Bauhaus 风格 Kicker 标题 */}
-      <div className="bauhaus-kicker hidden [[data-theme=bauhaus]_&]:flex">
-        <IconActivity className="size-4" />
-        <span>ASSET PULSE</span>
-      </div>
-      <CardHeader className="[[data-theme=bauhaus]_&]:pt-4">
-        <CardTitle className="[[data-theme=bauhaus]_&]:hidden">{t("title")}</CardTitle>
-        <CardDescription>{t("description")}</CardDescription>
-      </CardHeader>
-      <CardContent>
-        {isLoading ? (
-          <div className="space-y-4">
-            <Skeleton className="h-[180px] w-full" />
+    <Card className="flex flex-col h-[300px] overflow-hidden pb-0 [[data-theme=bauhaus]_&]:pt-0 [[data-theme=bauhaus]_&]:gap-0">
+       {/* Bauhaus Kicker (Consistent with other cards) */}
+       <div className="bauhaus-kicker hidden [[data-theme=bauhaus]_&]:flex">
+          <IconActivity className="size-4" />
+          <span>ASSET PULSE // {activeConfig.label.toUpperCase()}</span>
+       </div>
+
+       <CardHeader className="pb-2 [[data-theme=bauhaus]_&]:pt-4">
+          <div className="flex items-center justify-between">
+             <div className="space-y-1">
+                <CardTitle className="[[data-theme=bauhaus]_&]:hidden">{t("title")}</CardTitle>
+                <CardDescription>{t("description")}</CardDescription>
+             </div>
+             {/* Mini Sparkline Logic */}
+             {latest && (
+                <div className="flex items-center gap-2 text-sm bg-muted/30 px-2 py-1 rounded">
+                   <span className="text-muted-foreground font-mono text-xs uppercase">{t('current')}:</span>
+                   <span className={cn("font-bold font-mono", activeConfig.text)}>
+                      <NumberTicker value={latest[activeConfig.totalKey as keyof typeof latest] as number} />
+                   </span>
+                   <div className="h-4 w-[1px] bg-border mx-1"></div>
+                   <span className="flex items-center gap-1 font-mono text-xs text-muted-foreground">
+                      <IconTrendingUp className="w-3 h-3" />
+                      +{latest[activeConfig.deltaKey as keyof typeof latest]?.toLocaleString()}
+                   </span>
+                </div>
+             )}
           </div>
-        ) : !rawData || rawData.length === 0 ? (
-          <div className="flex items-center justify-center h-[180px] text-muted-foreground">
-            {t("noData")}
+       </CardHeader>
+
+       {/* Main Content Area */}
+       <CardContent className="flex-1 flex flex-col p-0 pb-2 min-h-0">
+          <div className="flex-1 w-full h-full">
+             <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={processedData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
+                   <XAxis 
+                      dataKey="date" 
+                      tickLine={false} 
+                      axisLine={false} 
+                      tick={{fontSize: 10}} 
+                      tickMargin={8}
+                      tickFormatter={(d) => {
+                         const date = new Date(d);
+                         return `${date.getMonth() + 1}/${date.getDate()}`;
+                      }} 
+                   />
+                   <YAxis 
+                      tickLine={false} 
+                      axisLine={false} 
+                      tick={{fontSize: 10}} 
+                      tickMargin={8}
+                      tickFormatter={(value) => {
+                         if (value >= 1000) return `${(value / 1000).toFixed(1)}k`;
+                         return value;
+                      }}
+                   />
+                   <Tooltip 
+                      contentStyle={{ 
+                        backgroundColor: 'var(--card)', 
+                        borderColor: 'var(--border)', 
+                        color: 'var(--foreground)', 
+                        borderRadius: 'var(--radius)',
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                      }}
+                      itemStyle={{ fontFamily: 'monospace', fontWeight: 'bold', color: activeConfig.color }}
+                      cursor={{ stroke: activeConfig.color, strokeWidth: 1, strokeDasharray: '4 4' }}
+                      formatter={(value: number) => [value.toLocaleString(), activeConfig.label]}
+                      labelFormatter={(label) => new Date(label).toLocaleDateString()}
+                   />
+                   <Line 
+                      type="monotone" 
+                      dataKey={activeConfig.totalKey} 
+                      stroke="var(--foreground)" 
+                      strokeWidth={2} 
+                      dot={{ r: 3, fill: "var(--card)", stroke: "var(--foreground)", strokeWidth: 2 }}
+                      activeDot={{ r: 6, fill: activeConfig.color, stroke: "var(--card)", strokeWidth: 2 }}
+                   />
+                </LineChart>
+             </ResponsiveContainer>
           </div>
-        ) : (
-          <>
-            <ChartContainer config={chartConfig} className="aspect-auto h-[160px] w-full">
-              <LineChart
-                accessibilityLayer
-                data={data}
-                margin={{ left: 0, right: 12, top: 12, bottom: 0 }}
-                onMouseMove={(state) => {
-                  if (state?.activePayload?.[0]?.payload) {
-                    setActiveData(state.activePayload[0].payload)
-                  }
-                }}
-                onMouseLeave={() => setActiveData(null)}
-              >
-                <CartesianGrid vertical={false} strokeDasharray="3 3" />
-                <XAxis
-                  dataKey="date"
-                  tickLine={false}
-                  axisLine={false}
-                  tickMargin={8}
-                  tickFormatter={formatDate}
-                  fontSize={12}
-                />
-                <YAxis
-                  tickLine={false}
-                  axisLine={false}
-                  tickMargin={8}
-                  width={45}
-                  fontSize={12}
-                  tickFormatter={formatNumber}
-                />
-                {visibleSeries.has('totalSubdomains') && (
-                  <Line
-                    dataKey="totalSubdomains"
-                    type="monotone"
-                    stroke="var(--color-totalSubdomains)"
-                    strokeWidth={hoveredLine === 'totalSubdomains' ? 4 : 2}
-                    dot={{ r: 3, fill: "var(--color-totalSubdomains)" }}
-                    style={{ cursor: 'pointer', transition: 'stroke-width 0.15s' }}
-                    onClick={() => toggleSeries('totalSubdomains')}
-                    onMouseEnter={() => setHoveredLine('totalSubdomains')}
-                    onMouseLeave={() => setHoveredLine(null)}
-                  />
-                )}
-                {visibleSeries.has('totalIps') && (
-                  <Line
-                    dataKey="totalIps"
-                    type="monotone"
-                    stroke="var(--color-totalIps)"
-                    strokeWidth={hoveredLine === 'totalIps' ? 4 : 2}
-                    dot={{ r: 3, fill: "var(--color-totalIps)" }}
-                    style={{ cursor: 'pointer', transition: 'stroke-width 0.15s' }}
-                    onClick={() => toggleSeries('totalIps')}
-                    onMouseEnter={() => setHoveredLine('totalIps')}
-                    onMouseLeave={() => setHoveredLine(null)}
-                  />
-                )}
-                {visibleSeries.has('totalEndpoints') && (
-                  <Line
-                    dataKey="totalEndpoints"
-                    type="monotone"
-                    stroke="var(--color-totalEndpoints)"
-                    strokeWidth={hoveredLine === 'totalEndpoints' ? 4 : 2}
-                    dot={{ r: 3, fill: "var(--color-totalEndpoints)" }}
-                    style={{ cursor: 'pointer', transition: 'stroke-width 0.15s' }}
-                    onClick={() => toggleSeries('totalEndpoints')}
-                    onMouseEnter={() => setHoveredLine('totalEndpoints')}
-                    onMouseLeave={() => setHoveredLine(null)}
-                  />
-                )}
-                {visibleSeries.has('totalWebsites') && (
-                  <Line
-                    dataKey="totalWebsites"
-                    type="monotone"
-                    stroke="var(--color-totalWebsites)"
-                    strokeWidth={hoveredLine === 'totalWebsites' ? 4 : 2}
-                    dot={{ r: 3, fill: "var(--color-totalWebsites)" }}
-                    style={{ cursor: 'pointer', transition: 'stroke-width 0.15s' }}
-                    onClick={() => toggleSeries('totalWebsites')}
-                    onMouseEnter={() => setHoveredLine('totalWebsites')}
-                    onMouseLeave={() => setHoveredLine(null)}
-                  />
-                )}
-              </LineChart>
-            </ChartContainer>
-            {/* Bauhaus 风格图表底栏 - 仅在 Bauhaus 主题下显示 */}
-            <div className="bauhaus-chart-footer hidden [[data-theme=bauhaus]_&]:flex">
-              <span>MIN: 12ms</span>
-              <span>MAX: 52ms</span>
-              <span>AVG: 33ms</span>
-              <span className="bauhaus-signal-status">
-                <span className="pulse-dot" />
-                SIGNAL STABLE
-              </span>
-            </div>
-            <div className="mt-3 pt-3 border-t flex flex-wrap items-center justify-between gap-x-4 gap-y-1.5 text-sm [[data-theme=bauhaus]_&]:border-0 [[data-theme=bauhaus]_&]:pt-0">
-              <span className="text-muted-foreground text-xs">
-                {activeData ? formatDate(activeData.date) : t("current")}
-              </span>
-              <div className="flex items-center gap-3">
+       </CardContent>
+
+       {/* Tabs Navigation (Footer) */}
+       <div className="mt-auto border-t border-border divide-x divide-border flex">
+          {(Object.keys(config) as Array<keyof typeof config>).map(key => {
+             const conf = config[key]
+             const isActive = activeTab === key
+             
+             return (
                 <button
-                  type="button"
-                  onClick={() => toggleSeries('totalSubdomains')}
-                  className={`flex items-center gap-1.5 px-2 py-1 rounded-md transition-all hover:bg-muted ${
-                    !visibleSeries.has('totalSubdomains') ? 'opacity-40' : ''
-                  }`}
+                   key={key}
+                   onClick={() => setActiveTab(key)}
+                   className={cn(
+                      "flex-1 pt-0.5 pb-1 px-2 flex flex-col items-center justify-end gap-0.5 transition-all relative group hover:bg-muted/50 h-10",
+                      isActive ? "bg-muted/30" : "bg-card"
+                   )}
                 >
-                  <div 
-                    className={`h-2.5 w-2.5 rounded-full ${!visibleSeries.has('totalSubdomains') ? 'bg-muted-foreground' : ''}`} 
-                    style={{ backgroundColor: visibleSeries.has('totalSubdomains') ? "#3b82f6" : undefined }} 
-                  />
-                  <span className={`text-muted-foreground ${!visibleSeries.has('totalSubdomains') ? 'line-through' : ''}`}>{t("subdomains")}</span>
-                  <span className="font-medium">{displayData?.totalSubdomains ?? 0}</span>
+                   {isActive && (
+                      <motion.div 
+                        layoutId="activeTabIndicator"
+                        className={cn("absolute top-0 left-0 w-full h-0.5", conf.bg)}
+                        transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                      />
+                   )}
+                   <div 
+                      className={cn("w-2 h-2 rounded-full", isActive ? conf.bg : "bg-muted-foreground")}
+                   />
+                   <span className={cn(
+                      "text-[10px] font-bold uppercase tracking-wider",
+                      isActive ? "text-foreground" : "text-muted-foreground"
+                   )}>
+                      {conf.label}
+                   </span>
                 </button>
-                <button
-                  type="button"
-                  onClick={() => toggleSeries('totalIps')}
-                  className={`flex items-center gap-1.5 px-2 py-1 rounded-md transition-all hover:bg-muted ${
-                    !visibleSeries.has('totalIps') ? 'opacity-40' : ''
-                  }`}
-                >
-                  <div 
-                    className={`h-2.5 w-2.5 rounded-full ${!visibleSeries.has('totalIps') ? 'bg-muted-foreground' : ''}`} 
-                    style={{ backgroundColor: visibleSeries.has('totalIps') ? "#f97316" : undefined }} 
-                  />
-                  <span className={`text-muted-foreground ${!visibleSeries.has('totalIps') ? 'line-through' : ''}`}>{t("ips")}</span>
-                  <span className="font-medium">{displayData?.totalIps ?? 0}</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => toggleSeries('totalEndpoints')}
-                  className={`flex items-center gap-1.5 px-2 py-1 rounded-md transition-all hover:bg-muted ${
-                    !visibleSeries.has('totalEndpoints') ? 'opacity-40' : ''
-                  }`}
-                >
-                  <div 
-                    className={`h-2.5 w-2.5 rounded-full ${!visibleSeries.has('totalEndpoints') ? 'bg-muted-foreground' : ''}`} 
-                    style={{ backgroundColor: visibleSeries.has('totalEndpoints') ? "#eab308" : undefined }} 
-                  />
-                  <span className={`text-muted-foreground ${!visibleSeries.has('totalEndpoints') ? 'line-through' : ''}`}>{t("endpoints")}</span>
-                  <span className="font-medium">{displayData?.totalEndpoints ?? 0}</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => toggleSeries('totalWebsites')}
-                  className={`flex items-center gap-1.5 px-2 py-1 rounded-md transition-all hover:bg-muted ${
-                    !visibleSeries.has('totalWebsites') ? 'opacity-40' : ''
-                  }`}
-                >
-                  <div 
-                    className={`h-2.5 w-2.5 rounded-full ${!visibleSeries.has('totalWebsites') ? 'bg-muted-foreground' : ''}`} 
-                    style={{ backgroundColor: visibleSeries.has('totalWebsites') ? "#22c55e" : undefined }} 
-                  />
-                  <span className={`text-muted-foreground ${!visibleSeries.has('totalWebsites') ? 'line-through' : ''}`}>{t("websites")}</span>
-                  <span className="font-medium">{displayData?.totalWebsites ?? 0}</span>
-                </button>
-              </div>
-            </div>
-          </>
-        )}
-      </CardContent>
+             )
+          })}
+       </div>
     </Card>
   )
 }

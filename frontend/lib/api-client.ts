@@ -165,7 +165,7 @@ const apiClient = axios.create({
  * 
  * Workflow:
  * 1. Add Authorization header with JWT token
- * 2. Log request (for development debugging)
+ * 2. (Removed) Log request for debugging
  */
 apiClient.interceptors.request.use(
   (config) => {
@@ -175,25 +175,9 @@ apiClient.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
 
-    // Only output debug logs in development environment
-    if (process.env.NODE_ENV === 'development') {
-      console.log('[REQUEST] API Request:', {
-        method: config.method?.toUpperCase(),
-        url: config.url,
-        baseURL: config.baseURL,
-        fullURL: `${config.baseURL}${config.url}`,
-        data: config.data,
-        params: config.params,
-        hasToken: !!token
-      });
-    }
-
     return config;
   },
   (error) => {
-    if (process.env.NODE_ENV === 'development') {
-      console.error('[ERROR] Request Error:', error);
-    }
     return Promise.reject(error);
   }
 );
@@ -202,39 +186,15 @@ apiClient.interceptors.request.use(
  * Response interceptor: Handle response data and auto-refresh token
  * 
  * Workflow:
- * 1. Log response (for development debugging)
- * 2. On 401 error, try to refresh token and retry the request
- * 3. Return response data
+ * 1. On 401 error, try to refresh token and retry the request
+ * 2. Return response data
  */
 apiClient.interceptors.response.use(
   (response) => {
-    // Only output debug logs in development environment
-    if (process.env.NODE_ENV === 'development') {
-      console.log('[RESPONSE] API Response:', {
-        status: response.status,
-        statusText: response.statusText,
-        url: response.config.url,
-        data: response.data
-      });
-    }
-
     return response;
   },
   async (error: AxiosError) => {
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
-
-    // Only output error logs in development environment
-    if (process.env.NODE_ENV === 'development') {
-      console.error('[ERROR] API Error:', {
-        status: error.response?.status,
-        statusText: error.response?.statusText,
-        url: error.config?.url,
-        method: error.config?.method,
-        data: error.response?.data,
-        message: error.message,
-        code: error.code
-      });
-    }
 
     // Handle 401 Unauthorized with auto-refresh
     if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {

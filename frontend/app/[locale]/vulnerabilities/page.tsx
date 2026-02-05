@@ -2,7 +2,7 @@
 
 import React from "react"
 import { useTranslations } from "next-intl"
-import { VulnerabilitiesDetailView } from "@/components/vulnerabilities"
+import { VulnerabilitiesDetailView } from "@/components/vulnerabilities/vulnerabilities-detail-view"
 import { PageHeader } from "@/components/common/page-header"
 
 /**

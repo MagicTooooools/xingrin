@@ -5,12 +5,11 @@ export default function StatusProgressVariantsPage() {
   return (
     <div className="flex h-full flex-col">
       <BauhausPageHeader 
+        code="PRT-STATUS"
+        subtitle="Prototypes"
         title="Status & Progress Variants" 
         description="Exploration of combined status and progress indicators"
-        breadcrumbs={[
-          { label: "Prototypes", href: "/prototypes" },
-          { label: "Status & Progress", href: "#" },
-        ]}
+        showDescription
       />
       
       <div className="flex-1 overflow-auto p-6">

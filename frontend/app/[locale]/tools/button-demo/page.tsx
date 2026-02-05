@@ -5,13 +5,13 @@ import { PageHeader } from "@/components/common/page-header"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { 
-  Scan, ShieldAlert, Radio, Terminal, ArrowRight, Loader2, 
+  Scan, ShieldAlert, Radio, Terminal, Loader2, 
   Database, Activity, Lock, Cpu, Search, Zap
 } from "@/components/icons"
 
 export default function ButtonDemoPage() {
   return (
-    <div className="flex flex-col gap-6 py-6 animate-in fade-in zoom-in duration-500">
+    <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6 animate-in fade-in zoom-in duration-500">
       <PageHeader
         code="UI-DEMO"
         title="Industrial UI Kit"
@@ -19,7 +19,9 @@ export default function ButtonDemoPage() {
       />
 
       {/* Section 1: Buttons */}
-      <h2 className="px-6 text-lg font-semibold tracking-tight">Interactive Buttons</h2>
+      <div className="px-4 lg:px-6">
+        <h2 className="text-lg font-semibold tracking-tight">Interactive Buttons</h2>
+      </div>
       <div className="grid gap-6 md:grid-cols-2 px-4 lg:px-6">
         
         {/* Style A: Scanner Sweep */}
@@ -30,7 +32,7 @@ export default function ButtonDemoPage() {
               Style A: Scanner Sweep
             </CardTitle>
             <CardDescription>
-              Simulates a laser scanner sweeping across the button. Best for "Scan", "Search" or "Analyze" actions.
+              Simulates a laser scanner sweeping across the button. Best for &quot;Scan&quot;, &quot;Search&quot; or &quot;Analyze&quot; actions.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -139,7 +141,7 @@ export default function ButtonDemoPage() {
               Style C: Signal Pulse
             </CardTitle>
             <CardDescription>
-              Square pulse indicator. Good for "Live", "Connect" or showing active state.
+              Square pulse indicator. Good for &quot;Live&quot;, &quot;Connect&quot; or showing active state.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -195,14 +197,17 @@ export default function ButtonDemoPage() {
                   hover:bg-destructive hover:text-destructive-foreground
                   transition-colors duration-200
                   min-w-[140px]
+                  px-3
                 "
               >
                 <div className="
                   absolute inset-0 bg-[repeating-linear-gradient(45deg,transparent,transparent_10px,#00000010_10px,#00000010_20px)]
                   opacity-0 group-hover:opacity-100 transition-opacity duration-300
                 " />
-                <ShieldAlert className="mr-2 h-4 w-4 transition-transform duration-200 group-hover:rotate-12" />
-                <span className="font-mono font-bold tracking-tight">PURGE</span>
+                <span className="relative z-10 flex items-center gap-2">
+                  <ShieldAlert className="h-4 w-4 transition-transform duration-200 group-hover:rotate-12" />
+                  <span className="font-mono font-bold tracking-tight">PURGE</span>
+                </span>
               </Button>
 
               <Button 
@@ -211,14 +216,17 @@ export default function ButtonDemoPage() {
                   bg-background border border-destructive/50 text-destructive
                   hover:border-destructive
                   min-w-[140px]
+                  px-3
                 "
               >
                 <span className="absolute inset-y-0 left-0 w-[2px] bg-destructive transition-all duration-300 group-hover:w-full opacity-10" />
                 <span className="absolute bottom-0 right-0 h-[2px] w-0 bg-destructive transition-all duration-300 group-hover:w-full" />
                 <span className="relative z-10 flex items-center gap-2">
-                    <Loader2 className="h-4 w-4 animate-spin hidden group-hover:block" />
-                    <span className="group-hover:hidden">Stop Service</span>
-                    <span className="hidden group-hover:block">Stopping...</span>
+                    <Loader2 className="h-4 w-4 animate-spin opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+                    <span className="inline-grid">
+                      <span className="col-start-1 row-start-1 transition-opacity duration-200 group-hover:opacity-0">Stop Service</span>
+                      <span className="col-start-1 row-start-1 opacity-0 transition-opacity duration-200 group-hover:opacity-100">Stopping...</span>
+                    </span>
                 </span>
               </Button>
             </div>
@@ -436,41 +444,128 @@ export default function ButtonDemoPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="p-8 border border-dashed rounded-lg flex items-center justify-center gap-4 bg-secondary/20">
-              
-              <div className="
-                group relative w-full max-w-[200px] h-24 
-                bg-card border border-border p-4
-                hover:border-purple-500 transition-colors duration-300
-                cursor-pointer overflow-hidden
-              ">
-                {/* Background Grid - Revealed on Hover */}
-                <div className="
-                  absolute inset-0 
-                  bg-[linear-gradient(rgba(168,85,247,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(168,85,247,0.05)_1px,transparent_1px)] 
-                  bg-[size:10px_10px]
-                  opacity-0 group-hover:opacity-100 transition-opacity duration-500
-                " />
-
-                <div className="relative z-10 flex flex-col justify-between h-full">
-                  <div className="flex justify-between items-start">
-                    <Database className="w-5 h-5 text-muted-foreground group-hover:text-purple-500 transition-colors" />
-                    <span className="text-[10px] font-mono text-muted-foreground group-hover:text-purple-500">DB-01</span>
+            <div className="p-8 border border-dashed rounded-lg bg-secondary/20">
+              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                {/* Variant 1: Grid Sweep */}
+                <div
+                  className="
+                    group relative w-full h-28 
+                    bg-card border border-border p-4
+                    hover:border-purple-500 transition-colors duration-300
+                    cursor-pointer overflow-hidden
+                  "
+                >
+                  <div className="
+                    absolute inset-0 
+                    bg-[linear-gradient(rgba(168,85,247,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(168,85,247,0.05)_1px,transparent_1px)] 
+                    bg-[size:10px_10px]
+                    opacity-0 group-hover:opacity-100 transition-opacity duration-500
+                  " />
+                  <div className="relative z-10 flex flex-col justify-between h-full">
+                    <div className="flex justify-between items-start">
+                      <Database className="w-5 h-5 text-muted-foreground group-hover:text-purple-500 transition-colors" />
+                      <span className="text-[10px] font-mono text-muted-foreground group-hover:text-purple-500">DB-01</span>
+                    </div>
+                    <div>
+                      <div className="text-2xl font-bold font-mono">98.2%</div>
+                      <div className="text-[10px] text-muted-foreground uppercase tracking-wider">Uptime</div>
+                    </div>
                   </div>
-                  <div>
-                    <div className="text-2xl font-bold font-mono">98.2%</div>
-                    <div className="text-[10px] text-muted-foreground uppercase tracking-wider">Uptime</div>
+                  <div className="
+                    absolute top-0 left-0 w-full h-[1px] bg-purple-500/50
+                    -translate-y-full group-hover:translate-y-[7rem]
+                    transition-transform duration-1000 ease-linear
+                  " />
+                </div>
+
+                {/* Variant 2: Access Layer */}
+                <div
+                  className="
+                    group relative w-full h-28 
+                    bg-card border border-border p-4
+                    hover:border-blue-500/60 transition-colors duration-300
+                    cursor-pointer overflow-hidden
+                  "
+                >
+                  <div className="
+                    absolute inset-0 
+                    bg-[linear-gradient(120deg,transparent_0%,rgba(59,130,246,0.12)_45%,transparent_70%)]
+                    opacity-0 group-hover:opacity-100 transition-opacity duration-500
+                  " />
+                  <div className="absolute inset-x-0 bottom-0 h-[2px] bg-blue-500/60 scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-500" />
+                  <div className="relative z-10 flex flex-col justify-between h-full">
+                    <div className="flex justify-between items-start">
+                      <Lock className="w-5 h-5 text-muted-foreground group-hover:text-blue-500 transition-colors" />
+                      <span className="text-[10px] font-mono text-muted-foreground group-hover:text-blue-500">AUTH-07</span>
+                    </div>
+                    <div>
+                      <div className="text-2xl font-bold font-mono">99.6%</div>
+                      <div className="text-[10px] text-muted-foreground uppercase tracking-wider">Access Pass</div>
+                    </div>
                   </div>
                 </div>
 
-                {/* Scanning Line */}
-                <div className="
-                  absolute top-0 left-0 w-full h-[1px] bg-purple-500/50
-                  -translate-y-full group-hover:translate-y-[6rem]
-                  transition-transform duration-1000 ease-linear
-                " />
-              </div>
+                {/* Variant 3: Processor Rail */}
+                <div
+                  className="
+                    group relative w-full h-28 
+                    bg-card border border-border p-4
+                    hover:border-emerald-500/60 transition-colors duration-300
+                    cursor-pointer overflow-hidden
+                  "
+                >
+                  <div className="absolute inset-y-0 left-0 w-[3px] bg-emerald-500/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <div className="relative z-10 flex flex-col justify-between h-full">
+                    <div className="flex justify-between items-start">
+                      <Cpu className="w-5 h-5 text-muted-foreground group-hover:text-emerald-500 transition-colors" />
+                      <span className="text-[10px] font-mono text-muted-foreground group-hover:text-emerald-500">CPU-11</span>
+                    </div>
+                    <div>
+                      <div className="text-2xl font-bold font-mono">62%</div>
+                      <div className="text-[10px] text-muted-foreground uppercase tracking-wider">Load</div>
+                    </div>
+                  </div>
+                  <div className="absolute bottom-3 left-4 right-4 grid grid-cols-8 gap-1">
+                    {Array.from({ length: 8 }).map((_, i) => (
+                      <span
+                        key={i}
+                        className={
+                          i < 6
+                            ? "h-1 rounded-sm bg-emerald-500/50 group-hover:bg-emerald-500/80 transition-colors"
+                            : "h-1 rounded-sm bg-border/70 transition-colors"
+                        }
+                      />
+                    ))}
+                  </div>
+                </div>
 
+                {/* Variant 4: Alert Core */}
+                <div
+                  className="
+                    group relative w-full h-28 
+                    bg-card border border-border p-4
+                    hover:border-amber-500/60 transition-colors duration-300
+                    cursor-pointer overflow-hidden
+                  "
+                >
+                  <div className="
+                    absolute inset-0 
+                    bg-[radial-gradient(circle_at_20%_20%,rgba(245,158,11,0.18),transparent_60%)]
+                    opacity-0 group-hover:opacity-100 transition-opacity duration-500
+                  " />
+                  <div className="relative z-10 flex flex-col justify-between h-full">
+                    <div className="flex justify-between items-start">
+                      <Zap className="w-5 h-5 text-muted-foreground group-hover:text-amber-500 transition-colors" />
+                      <span className="text-[10px] font-mono text-muted-foreground group-hover:text-amber-500">ALRT-3</span>
+                    </div>
+                    <div>
+                      <div className="text-2xl font-bold font-mono">14</div>
+                      <div className="text-[10px] text-muted-foreground uppercase tracking-wider">Active Signals</div>
+                    </div>
+                  </div>
+                  <div className="absolute top-3 right-3 h-2 w-2 rounded-full bg-amber-500/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                </div>
+              </div>
             </div>
           </CardContent>
         </Card>

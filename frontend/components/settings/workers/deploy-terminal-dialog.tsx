@@ -207,7 +207,10 @@ export function DeployTerminalDialog({
       }
     }
     
-    terminal.onResize?.(handleResize)
+    const resizeDisposable = terminal.onResize?.(handleResize)
+    return () => {
+      resizeDisposable?.dispose?.()
+    }
   }, [isConnected])
 
   // Initialize when opened

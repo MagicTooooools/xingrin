@@ -1,9 +1,7 @@
 "use client"
 
-import React, { useState, useEffect, useRef } from "react"
+import React, { useState, useEffect } from "react"
 import { FileText, Save, X, AlertTriangle } from "@/components/icons"
-import Editor from "@monaco-editor/react"
-import type { editor } from "monaco-editor"
 import { useTranslations } from "next-intl"
 import {
   Dialog,
@@ -15,7 +13,7 @@ import {
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
-import { useColorTheme } from "@/hooks/use-color-theme"
+import { CodeEditor } from "@/components/ui/code-editor"
 import { useWordlistContent, useUpdateWordlistContent } from "@/hooks/use-wordlists"
 import type { Wordlist } from "@/types/wordlist.types"
 
@@ -34,9 +32,6 @@ export function WordlistEditDialog({
   
   const [content, setContent] = useState("")
   const [hasChanges, setHasChanges] = useState(false)
-  const [isEditorReady, setIsEditorReady] = useState(false)
-  const { currentTheme } = useColorTheme()
-  const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null)
 
   const { data: originalContent, isLoading } = useWordlistContent(
     open && wordlist ? wordlist.id : null
@@ -54,19 +49,12 @@ export function WordlistEditDialog({
     if (!open) {
       setContent("")
       setHasChanges(false)
-      setIsEditorReady(false)
     }
   }, [open])
 
-  const handleEditorChange = (value: string | undefined) => {
-    const newValue = value || ""
-    setContent(newValue)
-    setHasChanges(newValue !== originalContent)
-  }
-
-  const handleEditorDidMount = (editorInstance: editor.IStandaloneCodeEditor) => {
-    editorRef.current = editorInstance
-    setIsEditorReady(true)
+  const handleEditorChange = (value: string) => {
+    setContent(value)
+    setHasChanges(value !== originalContent)
   }
 
   const handleSave = async () => {
@@ -119,46 +107,23 @@ export function WordlistEditDialog({
                 </div>
               </div>
 
-              <div className="border rounded-md overflow-hidden h-full">
-                {isLoading ? (
-                  <div className="flex items-center justify-center h-full">
-                    <div className="flex flex-col items-center gap-2">
-                      <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-                      <p className="text-sm text-muted-foreground">{t("loading")}</p>
-                    </div>
+              {isLoading ? (
+                <div className="flex items-center justify-center h-full border rounded-md">
+                  <div className="flex flex-col items-center gap-2">
+                    <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+                    <p className="text-sm text-muted-foreground">{t("loading")}</p>
                   </div>
-                ) : (
-                  <Editor
-                    height="100%"
-                    defaultLanguage="plaintext"
-                    value={content}
-                    onChange={handleEditorChange}
-                    onMount={handleEditorDidMount}
-                    theme={currentTheme.isDark ? "vs-dark" : "light"}
-                    options={{
-                      minimap: { enabled: false },
-                      fontSize: 13,
-                      lineNumbers: "on",
-                      wordWrap: "off",
-                      scrollBeyondLastLine: false,
-                      automaticLayout: true,
-                      tabSize: 2,
-                      insertSpaces: true,
-                      folding: false,
-                      padding: { top: 16, bottom: 16 },
-                      readOnly: updateMutation.isPending,
-                    }}
-                    loading={
-                      <div className="flex items-center justify-center h-full">
-                        <div className="flex flex-col items-center gap-2">
-                          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-                          <p className="text-sm text-muted-foreground">{t("loadingEditor")}</p>
-                        </div>
-                      </div>
-                    }
-                  />
-                )}
-              </div>
+                </div>
+              ) : (
+                <CodeEditor
+                  value={content}
+                  onChange={handleEditorChange}
+                  language="plaintext"
+                  readOnly={updateMutation.isPending}
+                  showLineNumbers
+                  showFoldGutter={false}
+                />
+              )}
 
               {hasChanges && (
                 <p className="flex items-center gap-1 text-xs text-amber-600 dark:text-amber-400">
@@ -182,7 +147,7 @@ export function WordlistEditDialog({
             <Button
               type="button"
               onClick={handleSave}
-              disabled={updateMutation.isPending || !hasChanges || !isEditorReady}
+              disabled={updateMutation.isPending || !hasChanges}
             >
               {updateMutation.isPending ? (
                 <>

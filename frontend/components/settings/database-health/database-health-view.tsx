@@ -175,23 +175,24 @@ export function DatabaseHealthView() {
   )
 
   return (
-    <div className="p-4 md:p-6 space-y-6">
-      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-        <PageHeader
-          code="DBH-01"
-          title={tPage("title")}
-          description={tPage("description")}
-          className="px-0"
-        />
-        {loading ? (
-          <Skeleton className="h-7 w-28" />
-        ) : (
-          <Status status={data?.status ?? "offline"} className="px-2 py-1">
-            <StatusIndicator />
-            <StatusLabel>{t(`status.${data?.status ?? "offline"}`)}</StatusLabel>
-          </Status>
-        )}
-      </div>
+    <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
+      <PageHeader
+        code="DBH-01"
+        title={tPage("title")}
+        description={tPage("description")}
+      />
+
+      <div className="px-4 lg:px-6 space-y-6">
+        <div className="flex items-center justify-end">
+          {loading ? (
+            <Skeleton className="h-7 w-28" />
+          ) : (
+            <Status status={data?.status ?? "offline"} className="px-2 py-1">
+              <StatusIndicator />
+              <StatusLabel>{t(`status.${data?.status ?? "offline"}`)}</StatusLabel>
+            </Status>
+          )}
+        </div>
 
       <Card>
         <CardHeader>
@@ -340,5 +341,6 @@ export function DatabaseHealthView() {
         </Card>
       </div>
     </div>
+  </div>
   )
 }

@@ -1,7 +1,7 @@
 "use client"
 
 import React from "react"
-import { FingerPrintHubFingerprintView } from "@/components/fingerprints"
+import { FingerPrintHubFingerprintView } from "@/components/fingerprints/fingerprinthub-fingerprint-view"
 
 export default function FingerPrintHubFingerprintPage() {
   return (

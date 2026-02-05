@@ -272,6 +272,7 @@ export default function FaultyTerminal({
   const smoothMouseRef = useRef({ x: 0.5, y: 0.5 });
   const frozenTimeRef = useRef(0);
   const rafRef = useRef(0);
+  const inViewRef = useRef(true);
   const loadAnimationStartRef = useRef(0);
   const timeOffsetRef = useRef(Math.random() * 100);
 
@@ -347,7 +348,18 @@ export default function FaultyTerminal({
     resizeObserver.observe(ctn);
     resize();
 
+    const stopAnimation = () => {
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = 0;
+      }
+    };
+
     const update = (t: number) => {
+      if (document.hidden || !inViewRef.current) {
+        rafRef.current = 0;
+        return;
+      }
       rafRef.current = requestAnimationFrame(update);
 
       if (pageLoadAnimation && loadAnimationStartRef.current === 0) {
@@ -383,13 +395,46 @@ export default function FaultyTerminal({
 
       renderer.render({ scene: mesh });
     };
-    rafRef.current = requestAnimationFrame(update);
+    const startAnimation = () => {
+      if (!rafRef.current) {
+        rafRef.current = requestAnimationFrame(update);
+      }
+    };
+
+    const syncAnimationState = () => {
+      if (document.hidden || !inViewRef.current) {
+        stopAnimation();
+      } else {
+        startAnimation();
+      }
+    };
+
+    const handleVisibility = () => {
+      syncAnimationState();
+    };
+
+    let observer: IntersectionObserver | null = null;
+    if ("IntersectionObserver" in window) {
+      observer = new IntersectionObserver(
+        (entries) => {
+          inViewRef.current = entries[0]?.isIntersecting ?? true;
+          syncAnimationState();
+        },
+        { threshold: 0.01 }
+      );
+      observer.observe(ctn);
+    }
+
+    document.addEventListener("visibilitychange", handleVisibility);
+    syncAnimationState();
     ctn.appendChild(gl.canvas);
 
     if (mouseReact) window.addEventListener('mousemove', handleMouseMove);
 
     return () => {
-      cancelAnimationFrame(rafRef.current);
+      document.removeEventListener("visibilitychange", handleVisibility);
+      observer?.disconnect();
+      stopAnimation();
       resizeObserver.disconnect();
       if (mouseReact) window.removeEventListener('mousemove', handleMouseMove);
       if (gl.canvas.parentElement === ctn) ctn.removeChild(gl.canvas);

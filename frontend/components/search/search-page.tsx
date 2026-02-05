@@ -2,14 +2,12 @@
 
 import { useState, useCallback, useMemo, useEffect } from "react"
 import { useSearchParams } from "next/navigation"
-import { motion, AnimatePresence } from "framer-motion"
+import dynamic from "next/dynamic"
 import { Search, AlertCircle, History, X, Download } from "@/components/icons"
 import { useTranslations } from "next-intl"
 import { toast } from "sonner"
-import { SmartFilterInput, type FilterField } from "@/components/common/smart-filter-input"
-import { SearchPagination } from "./search-pagination"
+import type { FilterField } from "@/components/common/smart-filter-input"
 import { useAssetSearch } from "@/hooks/use-search"
-import { VulnerabilityDetailDialog } from "@/components/vulnerabilities/vulnerability-detail-dialog"
 import { VulnerabilityService } from "@/services/vulnerability.service"
 import { SearchService } from "@/services/search.service"
 import type { SearchParams, SearchState, Vulnerability as SearchVuln, AssetType } from "@/types/search.types"
@@ -17,10 +15,43 @@ import type { Vulnerability } from "@/types/vulnerability.types"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { SearchResultsTable } from "./search-results-table"
-import { SearchResultCard } from "./search-result-card"
+import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
+
+const SearchResultCard = dynamic(
+  () => import("./search-result-card").then((mod) => mod.SearchResultCard),
+  {
+    ssr: false,
+    loading: () => <Skeleton className="h-32 w-full" />,
+  }
+)
+
+const SearchResultsTable = dynamic(
+  () => import("./search-results-table").then((mod) => mod.SearchResultsTable),
+  {
+    ssr: false,
+    loading: () => <Skeleton className="h-64 w-full" />,
+  }
+)
+
+const VulnerabilityDetailDialog = dynamic(
+  () => import("@/components/vulnerabilities/vulnerability-detail-dialog").then((mod) => mod.VulnerabilityDetailDialog),
+  { ssr: false }
+)
+
+const SmartFilterInput = dynamic(
+  () => import("@/components/common/smart-filter-input").then((mod) => mod.SmartFilterInput),
+  {
+    ssr: false,
+    loading: () => <Skeleton className="h-10 w-full" />,
+  }
+)
+
+const SearchPagination = dynamic(
+  () => import("./search-pagination").then((mod) => mod.SearchPagination),
+  { ssr: false }
+)
 
 // Website 搜索示例
 const WEBSITE_SEARCH_EXAMPLES = [
@@ -200,8 +231,7 @@ export function SearchPage() {
     try {
       await SearchService.exportCSV(searchParams.q, assetType)
       toast.success(t('exportSuccess'))
-    } catch (error) {
-      console.error('Export failed:', error)
+    } catch {
       toast.error(t('exportFailed'))
     } finally {
       setIsExporting(false)
@@ -209,9 +239,11 @@ export function SearchPage() {
   }, [searchParams.q, assetType, t])
 
   // 当数据加载完成时更新状态
-  if (searchState === "searching" && data && !isLoading) {
-    setSearchState("results")
-  }
+  useEffect(() => {
+    if (searchState === "searching" && data && !isLoading) {
+      setSearchState("results")
+    }
+  }, [searchState, data, isLoading])
 
   const handleAssetTypeChange = useCallback((value: AssetType) => {
     setAssetType(value)
@@ -262,16 +294,10 @@ export function SearchPage() {
 
   return (
     <div className="flex-1 w-full flex flex-col">
-      <AnimatePresence mode="wait">
-        {searchState === "initial" && (
-          <motion.div
-            key="initial"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -50 }}
-            transition={{ duration: 0.3 }}
-            className="flex-1 flex flex-col items-center justify-center px-4 relative overflow-hidden"
-          >
+      {searchState === "initial" && (
+        <div
+          className="flex-1 flex flex-col items-center justify-center px-4 relative overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-300"
+        >
             {/* 背景装饰 */}
             <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
               <div className="absolute left-1/2 top-1/4 -translate-x-1/2 h-[400px] w-[600px] rounded-full bg-primary/5 blur-3xl" />
@@ -321,12 +347,7 @@ export function SearchPage() {
 
               {/* 最近搜索 */}
               {recentSearches.length > 0 && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.3 }}
-                  className="w-full max-w-xl mt-2"
-                >
+                <div className="w-full max-w-xl mt-2 animate-in fade-in duration-300 delay-300">
                   <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
                     <History className="h-3.5 w-3.5" />
                     <span>{t('recentSearches')}</span>
@@ -352,43 +373,25 @@ export function SearchPage() {
                       </Badge>
                     ))}
                   </div>
-                </motion.div>
+                </div>
               )}
             </div>
-          </motion.div>
-        )}
+        </div>
+      )}
 
-        {searchState === "searching" && isLoading && (
-          <motion.div
-            key="searching"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="h-full flex flex-col items-center justify-center"
-          >
+      {searchState === "searching" && isLoading && (
+        <div className="h-full flex flex-col items-center justify-center animate-in fade-in duration-200">
             <div className="flex flex-col items-center gap-4">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
               <span className="text-muted-foreground">{t('searching')}</span>
             </div>
-          </motion.div>
-        )}
+        </div>
+      )}
 
-        {(searchState === "results" || (searchState === "searching" && !isLoading)) && (
-          <motion.div
-            key="results"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.3 }}
-            className="h-full flex flex-col"
-          >
+      {(searchState === "results" || (searchState === "searching" && !isLoading)) && (
+        <div className="h-full flex flex-col animate-in fade-in duration-300">
             {/* 顶部搜索栏 */}
-            <motion.div
-              initial={{ y: -20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ duration: 0.3, delay: 0.1 }}
-              className="sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b px-4 py-3"
-            >
+            <div className="sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b px-4 py-3 animate-in fade-in slide-in-from-top-2 duration-300 delay-100">
               <div className="flex items-center gap-3">
                 {AssetTypeSelector}
                 <SmartFilterInput
@@ -412,7 +415,7 @@ export function SearchPage() {
                   {isExporting ? t('exporting') : t('export')}
                 </Button>
               </div>
-            </motion.div>
+            </div>
 
             {/* 错误提示 */}
             {error && (
@@ -477,16 +480,17 @@ export function SearchPage() {
                 </div>
               </>
             )}
-          </motion.div>
-        )}
-      </AnimatePresence>
+        </div>
+      )}
 
       {/* 漏洞详情弹窗 - 复用现有组件 */}
-      <VulnerabilityDetailDialog
-        vulnerability={selectedVuln}
-        open={vulnDialogOpen}
-        onOpenChange={setVulnDialogOpen}
-      />
+      {vulnDialogOpen ? (
+        <VulnerabilityDetailDialog
+          vulnerability={selectedVuln}
+          open={vulnDialogOpen}
+          onOpenChange={setVulnDialogOpen}
+        />
+      ) : null}
     </div>
   )
 }

@@ -20,15 +20,24 @@ export function LoginBootScreen({ className }: { className?: string; success?: b
 
   // Status text rotation
   React.useEffect(() => {
+    let timeoutId: ReturnType<typeof setTimeout> | null = null
     const interval = setInterval(() => {
       setStatusVisible(false)
-      setTimeout(() => {
+      if (timeoutId) {
+        clearTimeout(timeoutId)
+      }
+      timeoutId = setTimeout(() => {
         setStatusIndex((prev) => (prev + 1) % STATUS_MESSAGES.length)
         setStatusVisible(true)
       }, 200)
     }, 3000)
 
-    return () => clearInterval(interval)
+    return () => {
+      clearInterval(interval)
+      if (timeoutId) {
+        clearTimeout(timeoutId)
+      }
+    }
   }, [])
 
   return (

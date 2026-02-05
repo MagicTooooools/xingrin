@@ -11,6 +11,8 @@ interface PageHeaderProps {
   description?: string
   /** 外层容器的自定义 class */
   className?: string
+  /** 右侧操作区域（可选） */
+  action?: React.ReactNode
 }
 
 /**
@@ -22,6 +24,7 @@ export function PageHeader({
   title,
   description,
   className,
+  action,
 }: PageHeaderProps) {
   return (
     <div className={cn("px-4 lg:px-6 mb-2", className)}>
@@ -35,6 +38,7 @@ export function PageHeader({
           </span>
         </div>
         <div className="flex-1 h-1.5 bg-[repeating-linear-gradient(45deg,transparent,transparent_4px,currentColor_4px,currentColor_5px)] text-primary/10" />
+        {action}
       </div>
       {description && (
         <p className="text-sm text-muted-foreground">

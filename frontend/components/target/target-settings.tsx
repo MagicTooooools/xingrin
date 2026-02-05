@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useState, useEffect } from "react"
+import dynamic from "next/dynamic"
 import { useTranslations, useLocale } from "next-intl"
 import { AlertTriangle, Loader2, Ban, Clock } from "@/components/icons"
 import { Button } from "@/components/ui/button"
@@ -19,12 +20,35 @@ import {
 } from "@/components/ui/alert-dialog"
 import { useTargetBlacklist, useUpdateTargetBlacklist, useTarget } from "@/hooks/use-targets"
 import { useScheduledScans, useToggleScheduledScan, useDeleteScheduledScan } from "@/hooks/use-scheduled-scans"
-import { ScheduledScanDataTable } from "@/components/scan/scheduled/scheduled-scan-data-table"
 import { createScheduledScanColumns } from "@/components/scan/scheduled/scheduled-scan-columns"
-import { CreateScheduledScanDialog } from "@/components/scan/scheduled/create-scheduled-scan-dialog"
-import { EditScheduledScanDialog } from "@/components/scan/scheduled/edit-scheduled-scan-dialog"
 import { DataTableSkeleton } from "@/components/ui/data-table-skeleton"
 import type { ScheduledScan } from "@/types/scheduled-scan.types"
+
+const ScheduledScanDataTable = dynamic(
+  () =>
+    import("@/components/scan/scheduled/scheduled-scan-data-table").then(
+      (mod) => mod.ScheduledScanDataTable
+    ),
+  {
+    loading: () => <DataTableSkeleton rows={3} columns={6} toolbarButtonCount={1} />,
+  }
+)
+
+const CreateScheduledScanDialog = dynamic(
+  () =>
+    import("@/components/scan/scheduled/create-scheduled-scan-dialog").then(
+      (mod) => mod.CreateScheduledScanDialog
+    ),
+  { ssr: false }
+)
+
+const EditScheduledScanDialog = dynamic(
+  () =>
+    import("@/components/scan/scheduled/edit-scheduled-scan-dialog").then(
+      (mod) => mod.EditScheduledScanDialog
+    ),
+  { ssr: false }
+)
 
 interface TargetSettingsProps {
   targetId: number
@@ -328,21 +352,25 @@ export function TargetSettings({ targetId }: TargetSettingsProps) {
       </Card>
 
       {/* Create Dialog */}
-      <CreateScheduledScanDialog
-        open={createDialogOpen}
-        onOpenChange={setCreateDialogOpen}
-        presetTargetId={targetId}
-        presetTargetName={target?.name}
-        onSuccess={() => refetch()}
-      />
+      {createDialogOpen ? (
+        <CreateScheduledScanDialog
+          open={createDialogOpen}
+          onOpenChange={setCreateDialogOpen}
+          presetTargetId={targetId}
+          presetTargetName={target?.name}
+          onSuccess={() => refetch()}
+        />
+      ) : null}
 
       {/* Edit Dialog */}
-      <EditScheduledScanDialog
-        open={editDialogOpen}
-        onOpenChange={setEditDialogOpen}
-        scheduledScan={editingScheduledScan}
-        onSuccess={() => refetch()}
-      />
+      {editDialogOpen ? (
+        <EditScheduledScanDialog
+          open={editDialogOpen}
+          onOpenChange={setEditDialogOpen}
+          scheduledScan={editingScheduledScan}
+          onSuccess={() => refetch()}
+        />
+      ) : null}
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>

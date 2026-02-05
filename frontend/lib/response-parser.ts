@@ -47,7 +47,7 @@ export interface LegacyApiResponse<T = unknown> {
  * @example
  * const response = await api.get('/scans');
  * if (isErrorResponse(response)) {
- *   console.error('Error:', response.error.code);
+ *   // handle error
  * }
  */
 export function isErrorResponse(response: unknown): response is ApiErrorResponse {
@@ -126,7 +126,7 @@ export function isLegacyErrorResponse<T = unknown>(
  * const response = await quickScan(data);
  * const data = parseResponse<QuickScanResponse>(response);
  * if (data) {
- *   console.log('Scan count:', data.count);
+ *   // use data.count
  * }
  */
 export function parseResponse<T>(response: unknown): T | null {

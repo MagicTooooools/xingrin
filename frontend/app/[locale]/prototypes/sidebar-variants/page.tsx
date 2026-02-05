@@ -781,7 +781,7 @@ export default function SidebarVariantsPage() {
   )
 }
 
-function MenuButton({ icon: Icon, label, active }: { icon: any, label: string, active?: boolean }) {
+function MenuButton({ icon: Icon, label, active }: { icon: React.ComponentType<{ className?: string }>, label: string, active?: boolean }) {
   return (
     <div className={`flex items-center gap-2 px-2 py-2 text-sm rounded-md ${active ? 'bg-zinc-100 font-medium' : 'text-zinc-600 hover:bg-zinc-50'}`}>
       <Icon className="w-4 h-4" />

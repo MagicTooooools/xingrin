@@ -3,7 +3,7 @@
 import * as React from "react"
 import type { ColumnDef } from "@tanstack/react-table"
 import { useTranslations } from "next-intl"
-import { UnifiedDataTable } from "@/components/ui/data-table"
+import { UnifiedDataTable } from "@/components/ui/data-table/unified-data-table"
 import { PREDEFINED_FIELDS, type FilterField } from "@/components/common/smart-filter-input"
 import type { IPAddress } from "@/types/ip-address.types"
 import type { PaginationInfo } from "@/types/common.types"

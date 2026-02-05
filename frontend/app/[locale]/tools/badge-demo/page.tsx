@@ -2,16 +2,15 @@
 
 import { PageHeader } from "@/components/common/page-header"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import { 
-  CheckCircle2, AlertCircle, Clock, Loader2, 
-  ShieldCheck, XCircle, Activity, Server, Database,
-  Terminal, Hash, Shield, Tag
+  CheckCircle2, Clock, Loader2, 
+  XCircle, Activity, Server, Database,
+  Terminal, Hash, Tag
 } from "@/components/icons"
 
 export default function BadgeDemoPage() {
   return (
-    <div className="flex flex-col gap-6 py-6 animate-in fade-in zoom-in duration-500">
+    <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6 animate-in fade-in zoom-in duration-500">
       <PageHeader
         code="UI-BADGE"
         title="Industrial Status Badges"

@@ -5,6 +5,13 @@ import { ColumnDef } from "@tanstack/react-table"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import type { ScanRecord, ScanStatus } from "@/types/scan.types"
 import {
   Tooltip,
@@ -12,19 +19,9 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { Eye, Trash2 } from "@/components/icons"
+import { Eye, Trash2, MoreHorizontal } from "@/components/icons"
 import { DataTableColumnHeader } from "@/components/ui/data-table/column-header"
-import {
-  IconClock,
-  IconCircleCheck,
-  IconCircleX,
-  IconLoader2,
-  IconWorld,
-  IconBrowser,
-  IconServer,
-  IconLink,
-  IconBug,
-} from "@/components/icons"
+import { IconCircleX } from "@/components/icons"
 import { ScanStatusBadge } from "@/components/scan/scan-status-badge"
 import { cn } from "@/lib/utils"
 
@@ -364,14 +361,14 @@ export const createScanHistoryColumns = ({
       const canStop = scan.status === 'running' || scan.status === 'pending'
       
       return (
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
           <TooltipProvider delayDuration={300}>
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8"
+                  className="h-8 w-8 text-primary hover:bg-primary/10"
                   onClick={() => navigate(`/scan/history/${scan.id}/`)}
                 >
                   <Eye className="h-4 w-4" />
@@ -381,39 +378,33 @@ export const createScanHistoryColumns = ({
             </Tooltip>
           </TooltipProvider>
 
-          {canStop && (
-            <TooltipProvider delayDuration={300}>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
-                    onClick={() => handleStop(scan)}
-                  >
-                    <IconCircleX className="h-4 w-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>{t.actions.stop}</TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          )}
-
-          <TooltipProvider delayDuration={300}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
-                  onClick={() => handleDelete(scan)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>{t.actions.delete}</TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="h-8 w-8 p-0">
+                <span className="sr-only">Open menu</span>
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {canStop && (
+                <>
+                  <DropdownMenuItem onClick={() => handleStop(scan)}>
+                    <IconCircleX className="mr-2 h-4 w-4 text-orange-500" />
+                    {t.actions.stop}
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                </>
+              )}
+              
+              <DropdownMenuItem 
+                onClick={() => handleDelete(scan)}
+                className="text-destructive focus:text-destructive"
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                {t.actions.delete}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       )
     },

@@ -1,46 +1,35 @@
 "use client"
 
 import React, { useState, useCallback, useEffect } from "react"
-import Editor from "@monaco-editor/react"
 import * as yaml from "js-yaml"
 import { AlertCircle } from "@/components/icons"
-import { useColorTheme } from "@/hooks/use-color-theme"
 import { useTranslations } from "next-intl"
 import { cn } from "@/lib/utils"
+import { CodeEditor } from "@/components/ui/code-editor"
 
 interface YamlEditorProps {
   value: string
   onChange: (value: string) => void
   placeholder?: string
   disabled?: boolean
-  height?: string
   className?: string
   onValidationChange?: (isValid: boolean, error?: { message: string; line?: number; column?: number }) => void
 }
 
 /**
- * YAML Editor component with Monaco Editor
- * Provides VSCode-level editing experience with syntax highlighting and validation
+ * YAML Editor component with CodeMirror
+ * Provides syntax highlighting and validation
  */
 export function YamlEditor({
   value,
   onChange,
   placeholder,
   disabled = false,
-  height = "100%",
   className,
   onValidationChange,
 }: YamlEditorProps) {
   const t = useTranslations("common.yamlEditor")
-  const { currentTheme } = useColorTheme()
-  const [shouldMount, setShouldMount] = useState(false)
   const [yamlError, setYamlError] = useState<{ message: string; line?: number; column?: number } | null>(null)
-
-  // Delay mounting to avoid Monaco hitTest error on rapid container changes
-  useEffect(() => {
-    const timer = setTimeout(() => setShouldMount(true), 50)
-    return () => clearTimeout(timer)
-  }, [])
 
   // Check for duplicate keys in YAML content
   const checkDuplicateKeys = useCallback((content: string): { key: string; line: number } | null => {
@@ -108,72 +97,29 @@ export function YamlEditor({
   }, [onValidationChange, checkDuplicateKeys, t])
 
   // Handle editor content change
-  const handleEditorChange = useCallback((newValue: string | undefined) => {
-    const content = newValue || ""
-    onChange(content)
-    validateYaml(content)
+  const handleEditorChange = useCallback((newValue: string) => {
+    onChange(newValue)
+    validateYaml(newValue)
   }, [onChange, validateYaml])
 
-  // Handle editor mount
-  const handleEditorDidMount = useCallback(() => {
-    // Validate initial content
+  // Validate initial content
+  useEffect(() => {
     validateYaml(value)
   }, [validateYaml, value])
 
   return (
     <div className={cn("flex flex-col h-full", className)}>
-      {/* Monaco Editor */}
-      <div className={cn("flex-1 overflow-hidden", yamlError ? 'border-destructive' : '')}>
-        {shouldMount ? (
-          <Editor
-            height={height}
-            defaultLanguage="yaml"
-            value={value}
-            onChange={handleEditorChange}
-            onMount={handleEditorDidMount}
-            theme={currentTheme.isDark ? "vs-dark" : "light"}
-            options={{
-              minimap: { enabled: false },
-              fontSize: 12,
-              lineNumbers: "off",
-              wordWrap: "off",
-              scrollBeyondLastLine: false,
-              automaticLayout: true,
-              tabSize: 2,
-              insertSpaces: true,
-              formatOnPaste: true,
-              formatOnType: true,
-              folding: true,
-              foldingStrategy: "indentation",
-              showFoldingControls: "mouseover",
-              bracketPairColorization: {
-                enabled: true,
-              },
-              padding: {
-                top: 8,
-                bottom: 8,
-              },
-              readOnly: disabled,
-              placeholder: placeholder,
-            }}
-            loading={
-              <div className="flex items-center justify-center h-full bg-muted/30">
-                <div className="flex flex-col items-center gap-2">
-                  <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-                  <p className="text-xs text-muted-foreground">{t("loading")}</p>
-                </div>
-              </div>
-            }
-          />
-        ) : (
-          <div className="flex items-center justify-center h-full bg-muted/30">
-            <div className="flex flex-col items-center gap-2">
-              <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-              <p className="text-xs text-muted-foreground">{t("loading")}</p>
-            </div>
-          </div>
-        )}
-      </div>
+      {/* CodeMirror Editor */}
+      <CodeEditor
+        value={value}
+        onChange={handleEditorChange}
+        language="yaml"
+        placeholder={placeholder}
+        readOnly={disabled}
+        className={cn("flex-1", yamlError ? 'border-destructive' : '')}
+        showLineNumbers={false}
+        showFoldGutter
+      />
 
       {/* Error message display */}
       {yamlError && (

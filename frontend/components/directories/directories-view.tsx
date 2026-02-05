@@ -219,8 +219,7 @@ export function DirectoriesView({
       a.click()
       a.remove()
       URL.revokeObjectURL(url)
-    } catch (error) {
-      console.error("Failed to download directory list", error)
+    } catch {
       toast.error(tToast("downloadFailed"))
     }
   }
@@ -255,8 +254,7 @@ export function DirectoriesView({
       setSelectedDirectories([])
       setDeleteDialogOpen(false)
       refetch()
-    } catch (error) {
-      console.error("Failed to delete directories", error)
+    } catch {
       toast.error(tToast("deleteFailed"))
     } finally {
       setIsDeleting(false)

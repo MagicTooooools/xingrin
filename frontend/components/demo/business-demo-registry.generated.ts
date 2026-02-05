@@ -3,7 +3,7 @@ export type BusinessDemoItem = {
   title: string
   group: string
   modulePath: string
-  loader: () => Promise<Record<string, any>>
+  loader: () => Promise<Record<string, unknown>>
 }
 
 export const businessDemoItems: BusinessDemoItem[] = [

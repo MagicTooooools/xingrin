@@ -1,19 +1,9 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
-import dynamic from "next/dynamic"
 import Link from "next/link"
 import { useParams } from "next/navigation"
-
-// Dynamic import Monaco Editor to reduce bundle size (~2MB)
-const Editor = dynamic(() => import("@monaco-editor/react"), {
-  ssr: false,
-  loading: () => (
-    <div className="flex items-center justify-center h-full">
-      <div className="text-sm text-muted-foreground">Loading editor...</div>
-    </div>
-  ),
-})
+import { CodeEditor } from "@/components/ui/code-editor"
 import {
   ChevronDown,
   ChevronRight,
@@ -25,7 +15,6 @@ import {
   Tag,
   User,
 } from "@/components/icons"
-import { useColorTheme } from "@/hooks/use-color-theme"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -101,7 +90,6 @@ export default function NucleiRepoDetailPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [editorValue, setEditorValue] = useState<string>("")
 
-  const { currentTheme } = useColorTheme()
   const t = useTranslations("tools.nuclei")
   const tCommon = useTranslations("common")
 
@@ -320,20 +308,13 @@ export default function NucleiRepoDetailPage() {
 
               {/* Code editor */}
               <div className="flex-1 min-h-0">
-                <Editor
-                  height="100%"
-                  defaultLanguage="yaml"
+                <CodeEditor
                   value={editorValue}
-                  options={{
-                    minimap: { enabled: false },
-                    fontSize: 13,
-                    lineNumbers: "on",
-                    scrollBeyondLastLine: false,
-                    automaticLayout: true,
-                    readOnly: true,
-                    padding: { top: 16 },
-                  }}
-                  theme={currentTheme.isDark ? "vs-dark" : "light"}
+                  language="yaml"
+                  readOnly
+                  showLineNumbers
+                  showFoldGutter
+                  className="rounded-none border-0"
                 />
               </div>
 

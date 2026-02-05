@@ -104,8 +104,7 @@ export function ScreenshotsGallery({ targetId, scanId }: ScreenshotsGalleryProps
       setSelectedIds(new Set())
       setDeleteDialogOpen(false)
       refetch()
-    } catch (error) {
-      console.error("Failed to delete screenshots", error)
+    } catch {
       toast.error(tToast("deleteFailed"))
     } finally {
       setIsDeleting(false)

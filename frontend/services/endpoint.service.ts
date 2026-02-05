@@ -9,7 +9,15 @@ import type {
   BatchDeleteEndpointsResponse
 } from "@/types/endpoint.types"
 import type { PaginatedResponse } from "@/types/api-response.types"
-import { USE_MOCK, mockDelay, getMockEndpoints, getMockEndpointById } from '@/mock'
+import {
+  USE_MOCK,
+  mockDelay,
+  getMockEndpoints,
+  getMockEndpointById,
+  mockEndpoints,
+  getMockTargetById,
+  getMockScanById,
+} from '@/mock'
 
 // Bulk create endpoints response type
 export interface BulkCreateEndpointsResponse {
@@ -92,6 +100,45 @@ export class EndpointService {
    * @returns Promise<GetEndpointsResponse>
    */
   static async getEndpointsByTargetId(targetId: number, params: GetEndpointsRequest, filter?: string): Promise<GetEndpointsResponse> {
+    if (USE_MOCK) {
+      await mockDelay()
+      const page = params.page || 1
+      const pageSize = params.pageSize || 10
+      const search = (filter || params.search || "").toLowerCase()
+      const target = getMockTargetById(targetId)
+      const domain = target?.name?.toLowerCase()
+
+      let filtered = mockEndpoints
+
+      if (domain) {
+        filtered = filtered.filter((ep) =>
+          ep.url.toLowerCase().includes(domain) ||
+          (ep.host || "").toLowerCase().includes(domain)
+        )
+      }
+
+      if (search) {
+        filtered = filtered.filter((ep) => {
+          const url = ep.url.toLowerCase()
+          const title = (ep.title || "").toLowerCase()
+          const host = (ep.host || "").toLowerCase()
+          return url.includes(search) || title.includes(search) || host.includes(search)
+        })
+      }
+
+      const total = filtered.length
+      const totalPages = Math.ceil(total / pageSize)
+      const start = (page - 1) * pageSize
+      const endpoints = filtered.slice(start, start + pageSize)
+
+      return {
+        endpoints,
+        total,
+        page,
+        pageSize,
+        totalPages,
+      }
+    }
     // api-client.ts automatically converts camelCase params to snake_case
     const response = await api.get<GetEndpointsResponse>(`/targets/${targetId}/endpoints/`, {
       params: { ...params, filter }
@@ -110,6 +157,45 @@ export class EndpointService {
     params: GetEndpointsRequest,
     filter?: string,
   ): Promise<PaginatedResponse<Endpoint>> {
+    if (USE_MOCK) {
+      await mockDelay()
+      const page = params.page || 1
+      const pageSize = params.pageSize || 10
+      const search = (filter || params.search || "").toLowerCase()
+      const scan = getMockScanById(scanId)
+      const domain = scan?.target?.name?.toLowerCase()
+
+      let filtered = mockEndpoints
+
+      if (domain) {
+        filtered = filtered.filter((ep) =>
+          ep.url.toLowerCase().includes(domain) ||
+          (ep.host || "").toLowerCase().includes(domain)
+        )
+      }
+
+      if (search) {
+        filtered = filtered.filter((ep) => {
+          const url = ep.url.toLowerCase()
+          const title = (ep.title || "").toLowerCase()
+          const host = (ep.host || "").toLowerCase()
+          return url.includes(search) || title.includes(search) || host.includes(search)
+        })
+      }
+
+      const total = filtered.length
+      const totalPages = Math.ceil(total / pageSize)
+      const start = (page - 1) * pageSize
+      const results = filtered.slice(start, start + pageSize)
+
+      return {
+        results,
+        total,
+        page,
+        pageSize,
+        totalPages,
+      }
+    }
     const response = await api.get<PaginatedResponse<Endpoint>>(`/scans/${scanId}/endpoints/`, {
       params: { ...params, filter },
     })

@@ -2,8 +2,11 @@
 
 import React from "react"
 
+type BadgeType = 'info' | 'success' | 'warning' | 'error'
+type BadgeProps = { label: string; value: string | number; type: BadgeType }
+
 export default function BadgeVariantsPage() {
-  const stats = [
+  const stats: BadgeProps[] = [
     { label: "SUBDOMAIN", value: "156", type: "info" },
     { label: "WEBSITE", value: "89", type: "success" },
     { label: "IP", value: "45", type: "warning" },
@@ -169,7 +172,7 @@ export default function BadgeVariantsPage() {
 }
 
 // 辅助函数
-const getColor = (type: string) => {
+const getColor = (type: BadgeType) => {
   switch (type) {
     case 'info': return 'text-sky-600 bg-sky-50 border-sky-200';
     case 'success': return 'text-emerald-600 bg-emerald-50 border-emerald-200';
@@ -179,7 +182,7 @@ const getColor = (type: string) => {
   }
 }
 
-const getSolidBg = (type: string) => {
+const getSolidBg = (type: BadgeType) => {
   switch (type) {
     case 'info': return 'bg-sky-600';
     case 'success': return 'bg-emerald-600';
@@ -189,7 +192,7 @@ const getSolidBg = (type: string) => {
   }
 }
 
-const getDotColor = (type: string) => {
+const getDotColor = (type: BadgeType) => {
   switch (type) {
     case 'info': return 'bg-sky-500';
     case 'success': return 'bg-emerald-500';
@@ -199,7 +202,7 @@ const getDotColor = (type: string) => {
   }
 }
 
-const getLineColor = (type: string) => {
+const getLineColor = (type: BadgeType) => {
   switch (type) {
     case 'info': return 'border-sky-500';
     case 'success': return 'border-emerald-500';
@@ -209,7 +212,7 @@ const getLineColor = (type: string) => {
   }
 }
 
-const getBorderColor = (type: string) => {
+const getBorderColor = (type: BadgeType) => {
   switch (type) {
     case 'info': return 'border-sky-500 text-sky-600';
     case 'success': return 'border-emerald-500 text-emerald-600';
@@ -220,7 +223,7 @@ const getBorderColor = (type: string) => {
 }
 
 // 方案组件
-function BadgeA({ label, value, type }: any) {
+function BadgeA({ label, value, type }: BadgeProps) {
   const colors = getColor(type);
   return (
     <span className={`inline-flex items-center rounded-none border px-2 py-1 text-[10px] font-mono font-medium tracking-wider uppercase ${colors}`}>
@@ -229,7 +232,7 @@ function BadgeA({ label, value, type }: any) {
   )
 }
 
-function BadgeB({ label, value, type }: any) {
+function BadgeB({ label, value, type }: BadgeProps) {
   let customClass = "";
   if (type === 'info') customClass = "bg-sky-100 text-sky-700 border-transparent";
   if (type === 'success') customClass = "bg-emerald-100 text-emerald-700 border-transparent";
@@ -243,7 +246,7 @@ function BadgeB({ label, value, type }: any) {
   )
 }
 
-function BadgeC({ label, value, type }: any) {
+function BadgeC({ label, value, type }: BadgeProps) {
   const dotColor = getDotColor(type);
   return (
     <span className="inline-flex items-center text-[11px] font-medium text-zinc-600">
@@ -254,7 +257,7 @@ function BadgeC({ label, value, type }: any) {
   )
 }
 
-function BadgeD({ label, value, type }: any) {
+function BadgeD({ label, value, type }: BadgeProps) {
   const colors = getBorderColor(type);
   return (
     <span className={`inline-flex items-center rounded-sm border px-1.5 py-0.5 text-[10px] font-mono tracking-wider uppercase bg-white ${colors}`}>
@@ -264,7 +267,7 @@ function BadgeD({ label, value, type }: any) {
   )
 }
 
-function BadgeE({ label, value, type }: any) {
+function BadgeE({ label, value, type }: BadgeProps) {
   const dotColor = getDotColor(type);
   return (
     <span className="inline-flex items-center rounded border border-zinc-200 bg-white shadow-sm px-2 py-0.5 text-[10px] overflow-hidden relative pl-2.5">
@@ -276,7 +279,7 @@ function BadgeE({ label, value, type }: any) {
   )
 }
 
-function BadgeF({ label, value, type }: any) {
+function BadgeF({ label, value, type }: BadgeProps) {
   const solidBg = getSolidBg(type);
   
   // 对于 F，我们需要边框颜色与实心背景匹配
@@ -298,7 +301,7 @@ function BadgeF({ label, value, type }: any) {
   )
 }
 
-function BadgeG({ label, value, type }: any) {
+function BadgeG({ label, value, type }: BadgeProps) {
   const lineColor = getLineColor(type);
   return (
     <span className={`inline-flex items-baseline gap-1.5 text-[10px] uppercase tracking-wider border-b-2 ${lineColor} pb-0.5 px-0.5`}>
@@ -308,7 +311,7 @@ function BadgeG({ label, value, type }: any) {
   )
 }
 
-function BadgeH({ label, value, type }: any) {
+function BadgeH({ label, value, type }: BadgeProps) {
   const solidBg = getSolidBg(type);
   return (
     <span className="inline-flex items-center bg-zinc-900 text-white text-[10px] font-mono tracking-wider uppercase rounded-sm overflow-hidden pr-2">

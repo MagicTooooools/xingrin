@@ -1,8 +1,5 @@
-import { DashboardStatCards } from "@/components/dashboard/dashboard-stat-cards"
-import { AssetTrendChart } from "@/components/dashboard/asset-trend-chart"
-import { VulnSeverityChart } from "@/components/dashboard/vuln-severity-chart"
-import { DashboardDataTable } from "@/components/dashboard/dashboard-data-table"
 import { BauhausDashboardHeader } from "@/components/dashboard/bauhaus-dashboard-header"
+import { DashboardLazySections } from "@/components/dashboard/dashboard-lazy-sections"
 
 /**
  * Dashboard page component
@@ -16,22 +13,7 @@ export default function Page() {
       {/* Bauhaus 风格 Dashboard Header - 仅在 Bauhaus 主题下显示 */}
       <BauhausDashboardHeader />
 
-      {/* Top statistics cards */}
-      <DashboardStatCards />
-
-      {/* Chart area - Trend chart + Vulnerability distribution */}
-      <div className="grid gap-4 px-4 lg:px-6 @xl/main:grid-cols-2">
-        {/* Asset trend line chart */}
-        <AssetTrendChart />
-
-        {/* Vulnerability severity distribution */}
-        <VulnSeverityChart />
-      </div>
-
-      {/* Vulnerabilities / Scan history tab */}
-      <div className="px-4 lg:px-6">
-        <DashboardDataTable />
-      </div>
+      <DashboardLazySections />
     </div>
   )
 }

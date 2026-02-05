@@ -82,7 +82,6 @@ export function useCreateSubdomain() {
     },
     onError: (error: unknown) => {
       toastMessages.dismiss('create-subdomain')
-      console.error('Failed to create subdomain:', error)
       toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.asset.subdomain.create.error')
     },
   })
@@ -110,7 +109,6 @@ export function useDeleteSubdomainFromOrganization() {
     },
     onError: (error: unknown, { organizationId, targetId }) => {
       toastMessages.dismiss(`delete-${organizationId}-${targetId}`)
-      console.error('Failed to remove subdomain:', error)
       toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.asset.subdomain.delete.error')
     },
   })
@@ -136,7 +134,6 @@ export function useBatchDeleteSubdomainsFromOrganization() {
     },
     onError: (error: unknown, { organizationId }) => {
       toastMessages.dismiss(`batch-delete-${organizationId}`)
-      console.error('Failed to batch remove subdomains:', error)
       toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.asset.subdomain.delete.error')
     },
   })
@@ -163,7 +160,6 @@ export function useDeleteSubdomain() {
     },
     onError: (error: unknown, id) => {
       toastMessages.dismiss(`delete-subdomain-${id}`)
-      console.error('Failed to delete subdomain:', error)
       toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.asset.subdomain.delete.error')
     },
   })
@@ -190,7 +186,6 @@ export function useBatchDeleteSubdomains() {
     },
     onError: (error: unknown) => {
       toastMessages.dismiss('batch-delete-subdomains')
-      console.error('Failed to batch delete subdomains:', error)
       toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.asset.subdomain.delete.error')
     },
   })
@@ -215,7 +210,6 @@ export function useUpdateSubdomain() {
     },
     onError: (error: unknown, { id }) => {
       toastMessages.dismiss(`update-subdomain-${id}`)
-      console.error('Failed to update subdomain:', error)
       toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'common.status.updateFailed')
     },
   })
@@ -313,7 +307,6 @@ export function useBulkCreateSubdomains() {
     },
     onError: (error: unknown) => {
       toastMessages.dismiss('bulk-create-subdomains')
-      console.error('Failed to bulk create subdomains:', error)
       toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.asset.subdomain.create.error')
     },
   })

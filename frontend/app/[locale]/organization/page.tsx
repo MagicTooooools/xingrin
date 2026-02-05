@@ -1,8 +1,17 @@
 "use client"
 
-import { OrganizationList } from "@/components/organization/organization-list"
+import dynamic from "next/dynamic"
+import { DataTableSkeleton } from "@/components/ui/data-table-skeleton"
 import { PageHeader } from "@/components/common/page-header"
 import { useTranslations } from "next-intl"
+
+const OrganizationList = dynamic(
+  () => import("@/components/organization/organization-list").then((mod) => mod.OrganizationList),
+  {
+    ssr: false,
+    loading: () => <DataTableSkeleton rows={6} columns={4} withPadding />,
+  }
+)
 
 /**
  * Organization management page

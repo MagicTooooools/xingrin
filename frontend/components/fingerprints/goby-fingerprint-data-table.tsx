@@ -28,7 +28,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { UnifiedDataTable } from "@/components/ui/data-table"
+import { UnifiedDataTable } from "@/components/ui/data-table/unified-data-table"
 import type { FilterField } from "@/components/common/smart-filter-input"
 import type { GobyFingerprint } from "@/types/fingerprint.types"
 import type { PaginationInfo } from "@/types/common.types"

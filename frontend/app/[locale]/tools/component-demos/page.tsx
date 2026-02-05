@@ -23,7 +23,7 @@ export default function ComponentDemosIndexPage() {
   }, {})
 
   return (
-    <div className="flex flex-col gap-6 py-6">
+    <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
       <PageHeader
         code="DEMO-LAB"
         title="组件 Demo 索引"

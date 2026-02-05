@@ -2,8 +2,7 @@
 
 import React from "react"
 import { useParams } from "next/navigation"
-import { VulnerabilitiesDetailView } from "@/components/vulnerabilities"
-
+import { VulnerabilitiesDetailView } from "@/components/vulnerabilities/vulnerabilities-detail-view"
 /**
  * Target vulnerabilities page
  * Displays vulnerability details under the target

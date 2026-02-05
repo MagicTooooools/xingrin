@@ -283,7 +283,6 @@ export function useCreateCommand() {
       queryClient.invalidateQueries({ queryKey: ["commands"] })
     },
     onError: (error: unknown) => {
-      console.error("Failed to create command:", error)
       toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.command.create.error')
     },
   })
@@ -305,7 +304,6 @@ export function useUpdateCommand() {
       queryClient.invalidateQueries({ queryKey: ["command"] })
     },
     onError: (error: unknown) => {
-      console.error("Failed to update command:", error)
       toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.command.update.error')
     },
   })
@@ -325,7 +323,6 @@ export function useDeleteCommand() {
       queryClient.invalidateQueries({ queryKey: ["commands"] })
     },
     onError: (error: unknown) => {
-      console.error("Failed to delete command:", error)
       toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.command.delete.error')
     },
   })
@@ -358,7 +355,6 @@ export function useBatchDeleteCommands() {
       queryClient.invalidateQueries({ queryKey: ["commands"] })
     },
     onError: (error: unknown) => {
-      console.error("Failed to batch delete commands:", error)
       toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.command.delete.error')
     },
   })

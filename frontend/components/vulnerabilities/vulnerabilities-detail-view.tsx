@@ -205,7 +205,6 @@ export function VulnerabilitiesDetailView({
     setIsLoading(true)
 
     setTimeout(() => {
-      console.log("Delete vulnerability:", vulnerabilityToDelete.id)
       setVulnerabilityToDelete(null)
       setIsLoading(false)
     }, 1000)
@@ -214,13 +213,10 @@ export function VulnerabilitiesDetailView({
   const confirmBulkDelete = async () => {
     if (selectedVulnerabilities.length === 0) return
 
-    const deletedIds = selectedVulnerabilities.map(vulnerability => vulnerability.id)
-
     setBulkDeleteDialogOpen(false)
     setIsLoading(true)
 
     setTimeout(() => {
-      console.log("Bulk delete vulnerabilities:", deletedIds)
       setSelectedVulnerabilities([])
       setIsLoading(false)
     }, 1000)

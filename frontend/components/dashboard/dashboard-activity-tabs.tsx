@@ -2,7 +2,7 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { VulnerabilitiesDetailView } from "@/components/vulnerabilities/vulnerabilities-detail-view"
-import { ScanHistoryList } from "@/components/scan/history"
+import { ScanHistoryList } from "@/components/scan/history/scan-history-list"
 import { IconBug, IconRadar } from "@/components/icons"
 
 export function DashboardActivityTabs() {

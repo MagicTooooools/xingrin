@@ -438,7 +438,7 @@
     },
     "assetTrend": {
       "title": "资产趋势",
-      "description": "每小时更新 · 点击折线或图例可隐藏/显示",
+      "description": "每小时更新",
       "noData": "暂无历史数据",
       "current": "当前",
       "subdomains": "子域名",
@@ -828,6 +828,7 @@
           "ips": "IP 地址",
           "urls": "URL",
           "directories": "目录",
+          "screenshots": "截图",
           "vulnerabilities": "漏洞"
         },
         "severity": {
@@ -2460,6 +2461,7 @@
           "ips": "IP 地址",
           "urls": "URL",
           "directories": "目录",
+          "screenshots": "截图",
           "vulnerabilities": "漏洞总数"
         },
         "severity": {

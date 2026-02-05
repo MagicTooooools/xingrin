@@ -83,7 +83,7 @@ export function MermaidDiagram({ chart, className = "" }: MermaidDiagramProps) {
         const { svg: renderedSvg } = await mermaid.render(id, chart)
         setSvg(renderedSvg)
       } catch (error) {
-        console.error("Mermaid rendering error:", error)
+        void error
       }
     }
 

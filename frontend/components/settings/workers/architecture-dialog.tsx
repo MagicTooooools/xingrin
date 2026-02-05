@@ -1,5 +1,7 @@
 "use client"
 
+import { useState } from "react"
+import dynamic from "next/dynamic"
 import { useTranslations } from "next-intl"
 import { IconInfoCircle } from "@/components/icons"
 import {
@@ -13,10 +15,19 @@ import {
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { ArchitectureFlow } from "./architecture-flow"
+import { Skeleton } from "@/components/ui/skeleton"
+
+const ArchitectureFlow = dynamic(
+  () => import("./architecture-flow").then((mod) => mod.ArchitectureFlow),
+  {
+    ssr: false,
+    loading: () => <Skeleton className="h-[360px] w-full" />,
+  }
+)
 
 export function ArchitectureDialog() {
   const t = useTranslations("pages.workers")
+  const [open, setOpen] = useState(false)
   const labels = {
     location: t("flowTableLocation"),
     comms: t("flowTableComms"),
@@ -59,7 +70,7 @@ export function ArchitectureDialog() {
   ]
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="outline" size="sm">
           <IconInfoCircle className="h-4 w-4 mr-2" />
@@ -81,7 +92,7 @@ export function ArchitectureDialog() {
                   {t("flowDiagramDesc")}
                 </p>
               </div>
-              <ArchitectureFlow />
+              {open ? <ArchitectureFlow /> : <Skeleton className="h-[360px] w-full" />}
             </div>
 
             <Separator />

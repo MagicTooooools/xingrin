@@ -40,8 +40,7 @@ export function useMarkAllAsRead() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notifications'] })
     },
-    onError: (error: unknown) => {
-      console.error('Failed to mark all as read:', error)
+    onError: () => {
     },
   })
 }

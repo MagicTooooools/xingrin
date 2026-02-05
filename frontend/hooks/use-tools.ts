@@ -53,7 +53,6 @@ export function useCreateTool() {
     },
     onError: (error: unknown) => {
       toastMessages.dismiss('create-tool')
-      console.error('Failed to create tool:', error)
       toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.tool.create.error')
     },
   })
@@ -80,7 +79,6 @@ export function useUpdateTool() {
     },
     onError: (error: unknown) => {
       toastMessages.dismiss('update-tool')
-      console.error('Failed to update tool:', error)
       toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.tool.update.error')
     },
   })
@@ -106,7 +104,6 @@ export function useDeleteTool() {
     },
     onError: (error: unknown) => {
       toastMessages.dismiss('delete-tool')
-      console.error('Failed to delete tool:', error)
       toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.tool.delete.error')
     },
   })

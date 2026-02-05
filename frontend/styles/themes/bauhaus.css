@@ -246,6 +246,25 @@
   box-shadow: none;
 }
 
+/* Minimal Tab (Style H) overrides */
+[data-theme="bauhaus"] [data-slot="tabs-list"][data-variant="minimal-tab"] {
+  background: transparent;
+  border: 0;
+  padding: 0;
+}
+
+[data-theme="bauhaus"] [data-slot="tabs-trigger"][data-variant="minimal-tab"] {
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+[data-theme="bauhaus"] [data-slot="tabs-trigger"][data-variant="minimal-tab"][data-state="active"] {
+  background: transparent;
+  border: 0;
+  border-bottom: 2px solid var(--primary);
+  box-shadow: none;
+}
+
 [data-theme="bauhaus"] [data-slot="table-header"] {
   background: var(--secondary);
 }

@@ -97,7 +97,6 @@ export function useNotificationSSE() {
     // 每 30 秒发送一次心跳
     heartbeatTimerRef.current = setInterval(() => {
       if (wsRef.current?.readyState === WebSocket.OPEN) {
-        console.log('[HEARTBEAT] 发送心跳 ping')
         wsRef.current.send(JSON.stringify({ type: 'ping' }))
       }
     }, 30000) // 30秒
@@ -121,13 +120,11 @@ export function useNotificationSSE() {
   const connect = useCallback(() => {
     // 防止重复连接
     if (isConnectingRef.current) {
-      console.log('[SKIP] 已在连接中，跳过')
       return
     }
 
     // 如果已经连接，跳过
     if (wsRef.current?.readyState === WebSocket.OPEN) {
-      console.log('[SKIP] 已连接，跳过')
       return
     }
 
@@ -151,13 +148,11 @@ export function useNotificationSSE() {
       const wsHost = backendUrl.replace(/^https?:\/\//, '')
       const wsUrl = `${wsProtocol}://${wsHost}/ws/notifications/`
 
-      console.log('[CONNECTING] 正在连接 WebSocket:', wsUrl, `(尝试 ${reconnectAttempts.current + 1})`)
 
       const ws = new WebSocket(wsUrl)
       wsRef.current = ws
 
       ws.onopen = () => {
-        console.log('[SUCCESS] WebSocket 连接已建立')
         setIsConnected(true)
         isConnectingRef.current = false
         reconnectAttempts.current = 0 // 重置重连计数
@@ -168,58 +163,45 @@ export function useNotificationSSE() {
       ws.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data) as Record<string, unknown>
-          console.log('[MESSAGE] WebSocket 消息接收:', data)
 
           const messageType = typeof data.type === 'string' ? data.type : undefined
 
           if (messageType === 'connected') {
-            console.log('[SUCCESS] WebSocket 连接成功')
             return
           }
 
           if (messageType === 'pong') {
             // 心跳响应
-            console.log('[HEARTBEAT] 心跳响应')
             return
           }
 
           if (messageType === 'error') {
             const errorMessage = typeof data.message === 'string' ? data.message : ''
-            console.error('[ERROR] WebSocket 错误:', errorMessage)
             toastMessages.error('toast.notification.connection.error', { message: errorMessage })
             return
           }
 
           // 处理通知消息
           if (messageType === 'notification') {
-            console.log('[NOTIFICATION] 处理通知消息 (type=notification)')
             if (isBackendNotification(data)) {
-              console.log('[TRANSFORM] 转换通知:', data)
               const notification = transformBackendNotification(data)
-              console.log('[UPDATE] 更新通知列表，新通知:', notification)
               setNotifications(prev => {
                 const updated = [notification, ...prev.slice(0, 49)]
-                console.log('[STATS] 通知列表已更新，总数:', updated.length)
                 return updated
               })
 
               queryClient.invalidateQueries({ queryKey: ['notifications'] })
-            } else {
-              console.warn('[WARN] 通知数据不完整:', data)
             }
             return
           }
 
           // 备用处理：直接检查通知字段
           if (isBackendNotification(data)) {
-            console.log('[NOTIFICATION] 处理通知消息 (直接字段)')
             const notification = transformBackendNotification(data)
 
             // 添加到通知列表
-            console.log('[UPDATE] 更新通知列表，新通知:', notification)
             setNotifications(prev => {
               const updated = [notification, ...prev.slice(0, 49)]
-              console.log('[STATS] 通知列表已更新，总数:', updated.length)
               return updated
             })
 
@@ -227,20 +209,18 @@ export function useNotificationSSE() {
             queryClient.invalidateQueries({ queryKey: ['notifications'] })
           }
         } catch (error) {
-          console.error('[ERROR] 解析 WebSocket 消息失败:', error, '原始数据:', event.data)
+          void error
         }
       }
 
       ws.onerror = () => {
         // WebSocket onerror 接收的是 Event 对象，不是 Error
         // 实际的错误信息通常不可用，只能记录连接状态
-        console.warn('[WARN] WebSocket 连接错误，将自动重连')
         setIsConnected(false)
         isConnectingRef.current = false
       }
 
       ws.onclose = (event) => {
-        console.log('[CLOSED] WebSocket 连接已关闭:', event.code, event.reason)
         setIsConnected(false)
         isConnectingRef.current = false
         // 停止心跳
@@ -251,17 +231,13 @@ export function useNotificationSSE() {
           if (reconnectAttempts.current < maxReconnectAttempts) {
             const delay = getReconnectDelay()
             reconnectAttempts.current++
-            console.log(`[RECONNECT] ${delay / 1000}秒后尝试重连... (第 ${reconnectAttempts.current} 次)`)
             reconnectTimerRef.current = setTimeout(() => {
               connect()
             }, delay)
-          } else {
-            console.error('[ERROR] 已达到最大重连次数，停止重连')
           }
         }
       }
-    } catch (error) {
-      console.error('[ERROR] 创建 WebSocket 失败:', error instanceof Error ? error.message : String(error))
+    } catch {
       setIsConnected(false)
       isConnectingRef.current = false
     }

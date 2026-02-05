@@ -1,6 +1,6 @@
 "use client"
 
-import { WappalyzerFingerprintView } from "@/components/fingerprints"
+import { WappalyzerFingerprintView } from "@/components/fingerprints/wappalyzer-fingerprint-view"
 
 export default function WappalyzerFingerprintsPage() {
   return (

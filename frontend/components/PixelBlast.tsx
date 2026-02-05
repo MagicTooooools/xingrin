@@ -584,8 +584,17 @@ const PixelBlast = ({
           if (threeRef.current?.composer)
             threeRef.current.composer.setSize(renderer.domElement.width, renderer.domElement.height);
           uniforms.uPixelSize.value = pixelSize * renderer.getPixelRatio();
+          updateRectCache();
+        };
+        let rectCache: DOMRect | null = null;
+        let rectCacheTime = 0;
+        const updateRectCache = () => {
+          if (!renderer) return;
+          rectCache = renderer.domElement.getBoundingClientRect();
+          rectCacheTime = performance.now();
         };
         setSize();
+        updateRectCache();
         const ro = new ResizeObserver(setSize);
         ro.observe(container);
         // Fixed seed for deterministic animation (no random)
@@ -630,7 +639,11 @@ const PixelBlast = ({
         if (composer && renderer) composer.setSize(renderer.domElement.width, renderer.domElement.height);
         const mapToPixels = (e: MouseEvent | PointerEvent) => {
           if (!renderer) return { fx: 0, fy: 0, w: 0, h: 0 };
-          const rect = renderer.domElement.getBoundingClientRect();
+          const now = performance.now();
+          if (!rectCache || now - rectCacheTime > 200) {
+            updateRectCache();
+          }
+          const rect = rectCache ?? renderer.domElement.getBoundingClientRect();
           const scaleX = renderer.domElement.width / rect.width;
           const scaleY = renderer.domElement.height / rect.height;
           const fx = (e.clientX - rect.left) * scaleX;
@@ -729,7 +742,7 @@ const PixelBlast = ({
           domElement
         };
       } catch (err) {
-        console.error('[PixelBlast] WebGL initialization failed', err);
+        void err
         if (renderer) renderer.dispose();
         if (canvas && canvas.parentElement === container) {
           (container as HTMLDivElement).removeChild(canvas);

@@ -65,7 +65,7 @@ function parseEngineFeatures(engine: ScanEngine) {
         screenshot: !!config?.screenshot,
       }
     } catch (error) {
-      console.error("Failed to parse YAML configuration:", error)
+      void error
     }
   }
   

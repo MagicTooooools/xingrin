@@ -1,7 +1,7 @@
 "use client"
 
 import React from "react"
-import { ARLFingerprintView } from "@/components/fingerprints"
+import { ARLFingerprintView } from "@/components/fingerprints/arl-fingerprint-view"
 
 export default function ARLFingerprintPage() {
   return (

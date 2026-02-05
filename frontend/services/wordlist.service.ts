@@ -1,10 +1,20 @@
 import apiClient from "@/lib/api-client"
 import type { GetWordlistsResponse, Wordlist } from "@/types/wordlist.types"
+import {
+  USE_MOCK,
+  mockDelay,
+  getMockWordlists,
+  getMockWordlistContent,
+} from "@/mock"
 
 // Dictionary (Wordlist) API service
 
 // Get wordlist list
 export async function getWordlists(page = 1, pageSize = 10): Promise<GetWordlistsResponse> {
+  if (USE_MOCK) {
+    await mockDelay()
+    return getMockWordlists({ page, pageSize })
+  }
   const response = await apiClient.get<GetWordlistsResponse>("/wordlists/", {
     params: {
       page,
@@ -43,6 +53,10 @@ export async function deleteWordlist(id: number): Promise<void> {
 
 // Get wordlist content
 export async function getWordlistContent(id: number): Promise<string> {
+  if (USE_MOCK) {
+    await mockDelay()
+    return getMockWordlistContent()
+  }
   const response = await apiClient.get<{ content: string }>(`/wordlists/${id}/content/`)
   return response.data.content
 }

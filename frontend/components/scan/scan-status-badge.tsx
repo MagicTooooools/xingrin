@@ -88,7 +88,6 @@ export const ScanStatusBadge = ({
     // Kept for backward compatibility if needed, though we primarily use F2 now
     const baseClasses = "flex flex-col justify-center px-2 border-l-2 relative overflow-hidden transition-all hover:bg-muted/30"
     const sizeClasses = "h-9 w-32" 
-    const bgStyle = variant === "filled" ? { backgroundColor: `${color}10` } : { backgroundColor: "var(--muted-20)" }
     const borderStyle = { borderLeftColor: color }
     const roundedClass = variant === "sharp" ? "rounded-none" : "rounded-sm"
 

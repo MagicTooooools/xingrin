@@ -127,7 +127,6 @@ export function useCreateOrganization() {
     },
     onError: (error: unknown) => {
       toastMessages.dismiss('create-organization')
-      console.error('Failed to create organization:', error)
       toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.organization.create.error')
     },
   })
@@ -153,7 +152,6 @@ export function useUpdateOrganization() {
     },
     onError: (error: unknown, { id }) => {
       toastMessages.dismiss(`update-${id}`)
-      console.error('Failed to update organization:', error)
       toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.organization.update.error')
     },
   })
@@ -203,7 +201,6 @@ export function useDeleteOrganization() {
         })
       }
       
-      console.error('Failed to delete organization:', error)
       toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.organization.delete.error')
     },
     onSettled: () => {
@@ -260,7 +257,6 @@ export function useBatchDeleteOrganizations() {
         })
       }
       
-      console.error('Failed to batch delete organizations:', error)
       toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.organization.delete.error')
     },
     onSettled: () => {
@@ -294,7 +290,6 @@ export function useUnlinkTargetsFromOrganization() {
     },
     onError: (error: unknown, { organizationId }) => {
       toastMessages.dismiss(`unlink-${organizationId}`)
-      console.error('Failed to unlink targets:', error)
       toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.target.unlink.error')
     },
   })

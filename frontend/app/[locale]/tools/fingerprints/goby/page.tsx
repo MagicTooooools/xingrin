@@ -1,6 +1,6 @@
 "use client"
 
-import { GobyFingerprintView } from "@/components/fingerprints"
+import { GobyFingerprintView } from "@/components/fingerprints/goby-fingerprint-view"
 
 export default function GobyFingerprintsPage() {
   return (

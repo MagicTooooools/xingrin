@@ -3,7 +3,52 @@ import { useToastMessages } from '@/lib/toast-helpers'
 import { getErrorCode, getErrorResponseData } from '@/lib/response-parser'
 import { DirectoryService } from '@/services/directory.service'
 import { api } from '@/lib/api-client'
+import { USE_MOCK, mockDelay, mockDirectories, getMockTargetById, getMockScanById } from '@/mock'
 import type { DirectoryListResponse } from '@/types/directory.types'
+
+const buildMockDirectoriesResponse = (params: {
+  page: number
+  pageSize: number
+  filter?: string
+  targetId?: number
+  scanId?: number
+}): DirectoryListResponse => {
+  const page = params.page
+  const pageSize = params.pageSize
+  const filter = params.filter?.toLowerCase() || ""
+  const target = params.targetId ? getMockTargetById(params.targetId) : undefined
+  const scan = params.scanId ? getMockScanById(params.scanId) : undefined
+  const domain = (target?.name || scan?.target?.name || "").toLowerCase()
+
+  let filtered = mockDirectories
+
+  if (domain) {
+    filtered = filtered.filter((d) =>
+      d.url.toLowerCase().includes(domain) ||
+      d.websiteUrl.toLowerCase().includes(domain)
+    )
+  }
+
+  if (filter) {
+    filtered = filtered.filter((d) =>
+      d.url.toLowerCase().includes(filter) ||
+      d.contentType.toLowerCase().includes(filter)
+    )
+  }
+
+  const total = filtered.length
+  const totalPages = Math.ceil(total / pageSize)
+  const start = (page - 1) * pageSize
+  const results = filtered.slice(start, start + pageSize)
+
+  return {
+    results,
+    total,
+    page,
+    pageSize,
+    totalPages,
+  }
+}
 
 // API 服务函数
 const directoryService = {
@@ -12,6 +57,15 @@ const directoryService = {
     targetId: number,
     params: { page: number; pageSize: number; filter?: string }
   ): Promise<DirectoryListResponse> => {
+    if (USE_MOCK) {
+      await mockDelay()
+      return buildMockDirectoriesResponse({
+        page: params.page,
+        pageSize: params.pageSize,
+        filter: params.filter,
+        targetId,
+      })
+    }
     const response = await api.get<DirectoryListResponse>(
       `/targets/${targetId}/directories/`,
       { params }
@@ -24,6 +78,15 @@ const directoryService = {
     scanId: number,
     params: { page: number; pageSize: number; filter?: string }
   ): Promise<DirectoryListResponse> => {
+    if (USE_MOCK) {
+      await mockDelay()
+      return buildMockDirectoriesResponse({
+        page: params.page,
+        pageSize: params.pageSize,
+        filter: params.filter,
+        scanId,
+      })
+    }
     const response = await api.get<DirectoryListResponse>(
       `/scans/${scanId}/directories/`,
       { params }
@@ -189,7 +252,6 @@ export function useBulkCreateDirectories() {
     },
     onError: (error: unknown) => {
       toastMessages.dismiss('bulk-create-directories')
-      console.error('Failed to bulk create directories:', error)
       toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.asset.directory.create.error')
     },
   })

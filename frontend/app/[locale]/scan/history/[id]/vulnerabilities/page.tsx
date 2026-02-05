@@ -2,8 +2,7 @@
 
 import React from "react"
 import { useParams } from "next/navigation"
-import { VulnerabilitiesDetailView } from "@/components/vulnerabilities"
-
+import { VulnerabilitiesDetailView } from "@/components/vulnerabilities/vulnerabilities-detail-view"
 export default function ScanHistoryVulnerabilitiesPage() {
   const { id } = useParams<{ id: string }>()
 

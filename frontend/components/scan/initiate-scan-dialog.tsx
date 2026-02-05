@@ -223,7 +223,6 @@ export function InitiateScanDialog({
       setPendingEngineIds(null)
       setPendingPresetId(null)
     } catch (err: unknown) {
-      console.error("Failed to initiate scan:", err)
       const error = err as { response?: { data?: { error?: { code?: string; message?: string } } } }
       toast.error(tToast("initiateScanFailed"), {
         description: error?.response?.data?.error?.message || (err instanceof Error ? err.message : tToast("unknownError")),

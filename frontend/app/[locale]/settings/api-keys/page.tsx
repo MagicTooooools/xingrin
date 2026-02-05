@@ -228,122 +228,123 @@ export default function ApiKeysSettingsPage() {
     setHasChanges(false)
   }
 
-  const enabledCount = Object.values(formData).filter((provider) => provider.enabled).length
 
   if (isLoading) {
     return (
-      <div className="p-4 md:p-6 space-y-6">
+      <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
         <PageHeader
           code="API-01"
           title={pageTitle}
           description={pageDescription}
-          className="px-0"
         />
-        <div>
-          <Skeleton className="h-8 w-48" />
-          <Skeleton className="h-4 w-96 mt-2" />
-        </div>
-        <div className="grid gap-4">
-          {[1, 2, 3].map((i) => (
-            <Skeleton key={i} className="h-24 w-full" />
-          ))}
+        <div className="px-4 lg:px-6 space-y-6">
+          <div>
+            <Skeleton className="h-8 w-48" />
+            <Skeleton className="h-4 w-96 mt-2" />
+          </div>
+          <div className="grid gap-4">
+            {[1, 2, 3].map((i) => (
+              <Skeleton key={i} className="h-24 w-full" />
+            ))}
+          </div>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="p-4 md:p-6 space-y-6">
+    <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
       <PageHeader
         code="API-01"
         title={pageTitle}
         description={pageDescription}
-        className="px-0"
       />
 
-      {/* Provider 卡片列表 */}
-      <div className="grid gap-4">
-        {PROVIDERS.map((provider) => {
-          const data = formData[provider.key]
-          const isEnabled = data.enabled
+      <div className="px-4 lg:px-6 space-y-6">
+        {/* Provider 卡片列表 */}
+        <div className="grid gap-4">
+          {PROVIDERS.map((provider) => {
+            const data = formData[provider.key]
+            const isEnabled = data.enabled
 
-          return (
-            <Card key={provider.key}>
-              <CardHeader className="pb-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${provider.bgColor}`}>
-                      <provider.icon className={`h-5 w-5 ${provider.color}`} />
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <CardTitle className="text-base">{provider.name}</CardTitle>
-                        {isEnabled && <Badge variant="outline" className="text-xs text-green-600">已启用</Badge>}
+            return (
+              <Card key={provider.key}>
+                <CardHeader className="pb-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${provider.bgColor}`}>
+                        <provider.icon className={`h-5 w-5 ${provider.color}`} />
                       </div>
-                      <CardDescription>{provider.description}</CardDescription>
-                    </div>
-                  </div>
-                  <Switch
-                    checked={isEnabled}
-                    onCheckedChange={(checked) => updateProvider(provider.key, 'enabled', checked)}
-                  />
-                </div>
-              </CardHeader>
-
-              {/* 展开的配置表单 */}
-              {isEnabled && (
-                <CardContent className="pt-0">
-                  <Separator className="mb-4" />
-                  <div className="space-y-4">
-                    {provider.fields.map((field) => {
-                      const rawValue = (data as Record<ProviderFieldName, string | boolean>)[field.name]
-                      const fieldValue = typeof rawValue === "string" ? rawValue : ""
-                      return (
-                      <div key={field.name} className="space-y-2">
-                        <label className="text-sm font-medium">{field.label}</label>
-                        {field.type === 'password' ? (
-                          <PasswordInput
-                            value={fieldValue}
-                            onChange={(value) => updateProvider(provider.key, field.name, value)}
-                            placeholder={field.placeholder}
-                          />
-                        ) : (
-                          <Input
-                            type="text"
-                            value={fieldValue}
-                            onChange={(e) => updateProvider(provider.key, field.name, e.target.value)}
-                            placeholder={field.placeholder}
-                          />
-                        )}
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <CardTitle className="text-base">{provider.name}</CardTitle>
+                          {isEnabled && <Badge variant="outline" className="text-xs text-green-600">已启用</Badge>}
+                        </div>
+                        <CardDescription>{provider.description}</CardDescription>
                       </div>
-                    )})}
-                    <p className="text-xs text-muted-foreground">
-                      获取 API Key：
-                      <a 
-                        href={provider.docUrl} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="text-primary hover:underline ml-1"
-                      >
-                        {provider.docUrl}
-                      </a>
-                    </p>
+                    </div>
+                    <Switch
+                      checked={isEnabled}
+                      onCheckedChange={(checked) => updateProvider(provider.key, 'enabled', checked)}
+                    />
                   </div>
-                </CardContent>
-              )}
-            </Card>
-          )
-        })}
-      </div>
+                </CardHeader>
 
-      {/* 保存按钮 */}
-      <div className="flex justify-end">
-        <Button 
-          onClick={handleSave} 
-          disabled={updateMutation.isPending || !hasChanges}
-        >
-          {updateMutation.isPending ? '保存中...' : '保存配置'}
-        </Button>
+                {/* 展开的配置表单 */}
+                {isEnabled && (
+                  <CardContent className="pt-0">
+                    <Separator className="mb-4" />
+                    <div className="space-y-4">
+                      {provider.fields.map((field) => {
+                        const rawValue = (data as Record<ProviderFieldName, string | boolean>)[field.name]
+                        const fieldValue = typeof rawValue === "string" ? rawValue : ""
+                        return (
+                        <div key={field.name} className="space-y-2">
+                          <label className="text-sm font-medium">{field.label}</label>
+                          {field.type === 'password' ? (
+                            <PasswordInput
+                              value={fieldValue}
+                              onChange={(value) => updateProvider(provider.key, field.name, value)}
+                              placeholder={field.placeholder}
+                            />
+                          ) : (
+                            <Input
+                              type="text"
+                              value={fieldValue}
+                              onChange={(e) => updateProvider(provider.key, field.name, e.target.value)}
+                              placeholder={field.placeholder}
+                            />
+                          )}
+                        </div>
+                      )})}
+                      <p className="text-xs text-muted-foreground">
+                        获取 API Key：
+                        <a 
+                          href={provider.docUrl} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-primary hover:underline ml-1"
+                        >
+                          {provider.docUrl}
+                        </a>
+                      </p>
+                    </div>
+                  </CardContent>
+                )}
+              </Card>
+            )
+          })}
+        </div>
+
+        {/* 保存按钮 */}
+        <div className="flex justify-end">
+          <Button 
+            onClick={handleSave} 
+            disabled={updateMutation.isPending || !hasChanges}
+          >
+            {updateMutation.isPending ? '保存中...' : '保存配置'}
+          </Button>
+        </div>
       </div>
     </div>
   )

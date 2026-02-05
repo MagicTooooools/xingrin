@@ -1,7 +1,7 @@
 "use client"
 
 import React from "react"
-import { FingersFingerprintView } from "@/components/fingerprints"
+import { FingersFingerprintView } from "@/components/fingerprints/fingers-fingerprint-view"
 
 export default function FingersFingerprintPage() {
   return (

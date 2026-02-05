@@ -18,91 +18,97 @@ export function useRoutePrefetch(currentPath?: string) {
   }, [locale])
 
   useEffect(() => {
-    console.log('[START] 路由预加载 Hook 已挂载，开始预加载...')
+    const w = typeof window !== 'undefined'
+      ? (window as Window & { __lunafoxRoutePrefetchDone?: boolean })
+      : null
+    const hasPrefetched = !!w?.__lunafoxRoutePrefetchDone
 
     // 使用 requestIdleCallback 在浏览器空闲时预加载，不影响当前页面渲染
-    const prefetchRoutes = () => {
-      const routes = [
-        // 仪表盘
-        '/dashboard/',
-        // 组织
-        '/organization/',
-        // 目标
-        '/target/',
-        // 漏洞
-        '/vulnerabilities/',
-        // 扫描
-        '/scan/history/',
+    const prefetchBaseRoutes = () => {
+      const criticalRoutes = ['/dashboard/', '/organization/', '/target/']
+      const secondaryRoutes = ['/scan/history/', '/vulnerabilities/']
+      const lowPriorityRoutes = [
         '/scan/scheduled/',
         '/scan/engine/',
-        // 工具
         '/tools/',
-        '/tools/config/',
-        '/tools/config/opensource/',
-        '/tools/config/custom/',
-        '/tools/nuclei/',
-        '/tools/wordlists/',
-        // 指纹管理
-        '/tools/fingerprints/',
-        '/tools/fingerprints/ehole/',
-        '/tools/fingerprints/goby/',
-        '/tools/fingerprints/wappalyzer/',
-        '/tools/fingerprints/fingers/',
-        '/tools/fingerprints/fingerprinthub/',
-        '/tools/fingerprints/arl/',
-        // 设置
         '/settings/workers/',
-        '/settings/notifications/',
-        '/settings/system-logs/',
       ]
 
-      routes.forEach((route) => {
-        console.log(`  -> 预加载: ${route}`)
+      criticalRoutes.forEach((route) => {
         router.prefetch(withLocale(route))
       })
 
-      // 如果提供了当前路径，智能预加载相关动态路由
-      if (currentPath) {
-        // 如果是目标详情页（如 /target/146），预加载子路由
-        const targetIdMatch = currentPath.match(/\/target\/(\d+)$/)
-        if (targetIdMatch) {
-          const targetId = targetIdMatch[1]
-          const subRoutes = ['subdomain', 'endpoints', 'websites', 'vulnerabilities', 'directories', 'ip-addresses']
-          subRoutes.forEach(sub => {
-            router.prefetch(withLocale(`/target/${targetId}/${sub}`))
-          })
-          console.log(`  -> 智能预加载目标子路由: /target/${targetId}/*`)
-        }
-        
-        // 如果是扫描历史详情页（如 /scan/history/146），预加载子路由
-        const scanIdMatch = currentPath.match(/\/scan\/history\/(\d+)$/)
-        if (scanIdMatch) {
-          const scanId = scanIdMatch[1]
-          const subRoutes = ['subdomain', 'endpoints', 'websites', 'vulnerabilities', 'directories', 'ip-addresses']
-          subRoutes.forEach(sub => {
-            router.prefetch(withLocale(`/scan/history/${scanId}/${sub}`))
-          })
-          console.log(`  -> 智能预加载扫描子路由: /scan/history/${scanId}/*`)
-        }
+      const scheduleSecondary = () => {
+        secondaryRoutes.forEach((route) => {
+          router.prefetch(withLocale(route))
+        })
       }
 
-      console.log('[DONE] 所有路由预加载请求已发送')
+      const scheduleLowPriority = () => {
+        lowPriorityRoutes.forEach((route) => {
+          router.prefetch(withLocale(route))
+        })
+      }
 
       if (typeof window !== 'undefined') {
-        const w = window as Window & { __lunafoxRoutePrefetchDone?: boolean }
-        w.__lunafoxRoutePrefetchDone = true
-        window.dispatchEvent(new Event('lunafox:route-prefetch-done'))
+        if ('requestIdleCallback' in window) {
+          window.requestIdleCallback(scheduleSecondary, { timeout: 2000 })
+          window.requestIdleCallback(scheduleLowPriority, { timeout: 4000 })
+          return
+        }
       }
+
+      scheduleSecondary()
+      setTimeout(scheduleLowPriority, 1200)
+    }
+
+    const prefetchDynamicRoutes = () => {
+      if (!currentPath) return
+      // 如果是目标详情页（如 /target/146），预加载子路由
+      const targetIdMatch = currentPath.match(/\/target\/(\d+)$/)
+      if (targetIdMatch) {
+        const targetId = targetIdMatch[1]
+        const subRoutes = ['subdomain', 'endpoints', 'websites', 'vulnerabilities', 'directories', 'ip-addresses']
+        subRoutes.forEach(sub => {
+          router.prefetch(withLocale(`/target/${targetId}/${sub}`))
+        })
+      }
+      
+      // 如果是扫描历史详情页（如 /scan/history/146），预加载子路由
+      const scanIdMatch = currentPath.match(/\/scan\/history\/(\d+)$/)
+      if (scanIdMatch) {
+        const scanId = scanIdMatch[1]
+        const subRoutes = ['subdomain', 'endpoints', 'websites', 'vulnerabilities', 'directories', 'ip-addresses']
+        subRoutes.forEach(sub => {
+          router.prefetch(withLocale(`/scan/history/${scanId}/${sub}`))
+        })
+      }
+    }
+
+    const runPrefetch = () => {
+      if (!hasPrefetched) {
+        prefetchBaseRoutes()
+        if (w) {
+          w.__lunafoxRoutePrefetchDone = true
+          w.dispatchEvent(new Event('lunafox:route-prefetch-done'))
+        }
+      }
+      prefetchDynamicRoutes()
+    }
+
+    if (hasPrefetched) {
+      runPrefetch()
+      return
     }
 
     // 使用 requestIdleCallback 在浏览器空闲时执行，如果不支持则立即执行
     if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
-      const idleId = window.requestIdleCallback(prefetchRoutes)
+      const idleId = window.requestIdleCallback(runPrefetch)
       return () => window.cancelIdleCallback(idleId)
-    } else {
-      prefetchRoutes()
-      return
     }
+
+    runPrefetch()
+    return
   }, [router, currentPath, withLocale])
 }
 
@@ -138,7 +144,6 @@ export function useSmartRoutePrefetch(currentPath: string) {
           subRoutes.forEach(sub => {
             router.prefetch(withLocale(`/target/${targetId}/${sub}`))
           })
-          console.log(`  -> 预加载目标子路由: /target/${targetId}/*`)
         }
       } else if (currentPath.includes('/scan/history')) {
         // 在扫描历史页面，预加载目标页面

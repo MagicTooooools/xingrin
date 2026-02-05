@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useRef, useEffect } from "react"
+import { useMemo, useRef, useEffect, useDeferredValue } from "react"
 import AnsiToHtml from "ansi-to-html"
 import type { LogLevel } from "./log-toolbar"
 
@@ -192,10 +192,11 @@ function filterByLevel(content: string, level: LogLevel): string {
 export function AnsiLogViewer({ content, className, searchQuery = "", logLevel = "all" }: AnsiLogViewerProps) {
   const containerRef = useRef<HTMLPreElement>(null)
   const isAtBottomRef = useRef(true)  // 跟踪用户是否在底部
+  const deferredQuery = useDeferredValue(searchQuery)
 
   // 解析日志并添加颜色
   // 支持两种模式：ANSI 颜色码和纯文本日志级别解析
-  const htmlContent = useMemo(() => {
+  const baseHtml = useMemo(() => {
     if (!content) return ""
     
     // 先按级别筛选
@@ -210,9 +211,14 @@ export function AnsiLogViewer({ content, className, searchQuery = "", logLevel =
       result = colorizeLogContent(filteredContent)
     }
     
-    // 应用搜索高亮
-    return highlightSearch(result, searchQuery)
-  }, [content, searchQuery, logLevel])
+    return result
+  }, [content, logLevel])
+
+  // 应用搜索高亮（使用延迟的 query 以避免输入卡顿）
+  const htmlContent = useMemo(
+    () => highlightSearch(baseHtml, deferredQuery),
+    [baseHtml, deferredQuery]
+  )
 
   // 监听滚动事件，检测用户是否在底部
   useEffect(() => {
@@ -225,8 +231,8 @@ export function AnsiLogViewer({ content, className, searchQuery = "", logLevel =
       isAtBottomRef.current = scrollHeight - scrollTop - clientHeight < 30
     }
     
-    container.addEventListener('scroll', handleScroll)
-    return () => container.removeEventListener('scroll', handleScroll)
+    container.addEventListener('scroll', handleScroll, { passive: true })
+    return () => container.removeEventListener('scroll', handleScroll, { passive: true })
   }, [])
 
   // 只有用户在底部时才自动滚动

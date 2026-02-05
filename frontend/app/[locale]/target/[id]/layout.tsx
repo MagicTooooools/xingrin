@@ -161,10 +161,7 @@ export default function TargetLayout({
       <div className="flex items-center gap-2 text-sm px-4 lg:px-6">
         <span className="text-muted-foreground">{t("breadcrumb.targetDetail")}</span>
         <span className="text-muted-foreground">/</span>
-        <span className="font-medium flex items-center gap-1.5">
-          <Target className="h-4 w-4" />
-          {target.name}
-        </span>
+        <span className="font-medium">{target.name}</span>
       </div>
 
       {/* Primary navigation */}
@@ -250,8 +247,8 @@ export default function TargetLayout({
       {showSecondaryNav && (
         <div className="flex items-center px-4 lg:px-6">
           <Tabs value={getSecondaryTab()} className="w-full">
-            <TabsList variant="underline">
-              <TabsTrigger value="websites" variant="underline" asChild>
+            <TabsList variant="minimal-tab">
+              <TabsTrigger value="websites" variant="minimal-tab" asChild>
                 <Link href={secondaryPaths.websites} className="flex items-center gap-0.5">
                   {t("tabs.websites")}
                   {counts.websites > 0 && (
@@ -261,7 +258,7 @@ export default function TargetLayout({
                   )}
                 </Link>
               </TabsTrigger>
-              <TabsTrigger value="subdomain" variant="underline" asChild>
+              <TabsTrigger value="subdomain" variant="minimal-tab" asChild>
                 <Link href={secondaryPaths.subdomain} className="flex items-center gap-0.5">
                   {t("tabs.subdomains")}
                   {counts.subdomain > 0 && (
@@ -271,7 +268,7 @@ export default function TargetLayout({
                   )}
                 </Link>
               </TabsTrigger>
-              <TabsTrigger value="ip-addresses" variant="underline" asChild>
+              <TabsTrigger value="ip-addresses" variant="minimal-tab" asChild>
                 <Link href={secondaryPaths["ip-addresses"]} className="flex items-center gap-0.5">
                   {t("tabs.ips")}
                   {counts["ip-addresses"] > 0 && (
@@ -281,7 +278,7 @@ export default function TargetLayout({
                   )}
                 </Link>
               </TabsTrigger>
-              <TabsTrigger value="endpoints" variant="underline" asChild>
+              <TabsTrigger value="endpoints" variant="minimal-tab" asChild>
                 <Link href={secondaryPaths.endpoints} className="flex items-center gap-0.5">
                   {t("tabs.urls")}
                   {counts.endpoints > 0 && (

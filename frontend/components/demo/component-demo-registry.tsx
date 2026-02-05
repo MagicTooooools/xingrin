@@ -1,9 +1,7 @@
 "use client"
 
-import React from "react"
-import { uiDemoItems, type DemoItem as UiDemoItem } from "@/components/demo/ui-demo-registry"
+import { uiDemoMeta } from "@/components/demo/ui-demo-manifest"
 import { businessDemoItems } from "@/components/demo/business-demo-registry.generated"
-import { DynamicModuleDemo } from "@/components/demo/dynamic-module-demo"
 
 export type DemoEntry = {
   slug: string
@@ -11,7 +9,9 @@ export type DemoEntry = {
   description?: string
   group: string
   kind: "ui" | "business"
-  Demo: React.ComponentType
+  loader: () => Promise<Record<string, unknown>>
+  props?: Record<string, unknown>
+  fallbackRoute?: string
 }
 
 const BUSINESS_GROUP_TITLES: Record<string, string> = {
@@ -61,7 +61,7 @@ const BUSINESS_ROUTES: Record<string, string> = {
 }
 
 const resolveBusinessDemoProps = (slug: string, group: string) => {
-  const props: Record<string, any> = {}
+  const props: Record<string, unknown> = {}
 
   if (slug.includes("detail-view") || slug.includes("view")) {
     if (["websites", "subdomains", "directories", "endpoints", "ip-addresses", "screenshots"].includes(group)) {
@@ -82,37 +82,39 @@ const resolveBusinessDemoProps = (slug: string, group: string) => {
   return props
 }
 
+const createUiLoader = (slug: string) => async () => {
+  const mod = await import("@/components/demo/ui-demo-registry")
+  const Component = mod.getUiDemoComponent?.(slug)
+
+  if (!Component) return {}
+
+  return { default: Component }
+}
+
 const businessEntries: DemoEntry[] = businessDemoItems.map((item) => {
   const groupTitle = BUSINESS_GROUP_TITLES[item.group] || item.group
   const fallbackRoute = BUSINESS_ROUTES[item.group]
   const props = resolveBusinessDemoProps(item.slug, item.group)
 
-  const Demo = () => (
-    <DynamicModuleDemo
-      loader={item.loader}
-      props={props}
-      title={item.title}
-      description={`模块：${groupTitle}`}
-      fallbackRoute={fallbackRoute}
-    />
-  )
-
   return {
     slug: `biz-${item.slug}`,
     title: item.title,
+    description: `模块：${groupTitle}`,
     group: groupTitle,
     kind: "business",
-    Demo,
+    loader: item.loader,
+    props,
+    fallbackRoute,
   }
 })
 
-const uiEntries: DemoEntry[] = uiDemoItems.map((item: UiDemoItem) => ({
+const uiEntries: DemoEntry[] = uiDemoMeta.map((item) => ({
   slug: `ui-${item.slug}`,
   title: item.title,
   description: item.description,
   group: item.group,
   kind: "ui",
-  Demo: item.Demo,
+  loader: createUiLoader(item.slug),
 }))
 
 export const demoEntries: DemoEntry[] = [...uiEntries, ...businessEntries]

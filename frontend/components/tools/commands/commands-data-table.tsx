@@ -4,8 +4,7 @@ import * as React from "react"
 import type { ColumnDef } from "@tanstack/react-table"
 import { useTranslations } from "next-intl"
 import { Input } from "@/components/ui/input"
-import { UnifiedDataTable } from "@/components/ui/data-table"
-
+import { UnifiedDataTable } from "@/components/ui/data-table/unified-data-table"
 interface CommandsDataTableProps<TData extends { id: number; displayName?: string }> {
   columns: ColumnDef<TData, unknown>[]
   data: TData[]

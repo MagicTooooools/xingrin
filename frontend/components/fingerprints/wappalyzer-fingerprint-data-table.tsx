@@ -29,7 +29,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { UnifiedDataTable } from "@/components/ui/data-table"
+import { UnifiedDataTable } from "@/components/ui/data-table/unified-data-table"
 import type { FilterField } from "@/components/common/smart-filter-input"
 import type { WappalyzerFingerprint } from "@/types/fingerprint.types"
 import type { PaginationInfo } from "@/types/common.types"

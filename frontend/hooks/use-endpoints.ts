@@ -147,7 +147,6 @@ export function useCreateEndpoint() {
     },
     onError: (error: unknown) => {
       toastMessages.dismiss('create-endpoint')
-      console.error('Failed to create endpoint:', error)
       toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.asset.endpoint.create.error')
     },
   })
@@ -170,7 +169,6 @@ export function useDeleteEndpoint() {
     },
     onError: (error: unknown, id) => {
       toastMessages.dismiss(`delete-endpoint-${id}`)
-      console.error('Failed to delete endpoint:', error)
       toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.asset.endpoint.delete.error')
     },
   })
@@ -194,7 +192,6 @@ export function useBatchDeleteEndpoints() {
     },
     onError: (error: unknown) => {
       toastMessages.dismiss('batch-delete-endpoints')
-      console.error('Failed to batch delete endpoints:', error)
       toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.asset.endpoint.delete.error')
     },
   })
@@ -234,7 +231,6 @@ export function useBulkCreateEndpoints() {
     },
     onError: (error: unknown) => {
       toastMessages.dismiss('bulk-create-endpoints')
-      console.error('Failed to bulk create endpoints:', error)
       toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.asset.endpoint.create.error')
     },
   })

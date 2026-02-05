@@ -136,9 +136,8 @@ export function AllTargetsDetailView({
       await deleteTargetMutation.mutateAsync({ id: targetToDelete.id, name: targetToDelete.name })
       setDeleteDialogOpen(false)
       setTargetToDelete(null)
-    } catch (error) {
+    } catch {
       // Error already handled in hook
-      console.error('Delete failed:', error)
     }
   }
 
@@ -158,9 +157,8 @@ export function AllTargetsDetailView({
       })
       setBulkDeleteDialogOpen(false)
       setSelectedTargets([])
-    } catch (error) {
+    } catch {
       // Error already handled in hook
-      console.error('Batch delete failed:', error)
     }
   }
 

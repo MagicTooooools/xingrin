@@ -1,7 +1,15 @@
 import { api } from "@/lib/api-client"
 import type { Subdomain, GetSubdomainsResponse, GetAllSubdomainsParams, GetAllSubdomainsResponse, GetSubdomainByIDResponse, BatchCreateSubdomainsResponse } from "@/types/subdomain.types"
 import type { PaginatedResponse } from "@/types/api-response.types"
-import { USE_MOCK, mockDelay, getMockSubdomains, getMockSubdomainById } from '@/mock'
+import {
+  USE_MOCK,
+  mockDelay,
+  getMockSubdomains,
+  getMockSubdomainById,
+  mockSubdomains,
+  getMockTargetById,
+  getMockScanById,
+} from '@/mock'
 
 // Bulk create subdomains response type
 export interface BulkCreateSubdomainsResponse {
@@ -213,6 +221,37 @@ export class SubdomainService {
       filter?: string
     }
   ): Promise<PaginatedResponse<BasicSubdomainResult>> {
+    if (USE_MOCK) {
+      await mockDelay()
+      const page = params?.page || 1
+      const pageSize = params?.pageSize || 10
+      const filter = params?.filter?.toLowerCase() || ""
+      const target = getMockTargetById(targetId)
+      const domain = target?.name?.toLowerCase()
+
+      let filtered = mockSubdomains
+
+      if (domain) {
+        filtered = filtered.filter((sub) => sub.name.toLowerCase().includes(domain))
+      }
+
+      if (filter) {
+        filtered = filtered.filter((sub) => sub.name.toLowerCase().includes(filter))
+      }
+
+      const total = filtered.length
+      const totalPages = Math.ceil(total / pageSize)
+      const start = (page - 1) * pageSize
+      const results = filtered.slice(start, start + pageSize)
+
+      return {
+        results,
+        total,
+        page,
+        pageSize,
+        totalPages,
+      }
+    }
     const response = await api.get<PaginatedResponse<BasicSubdomainResult>>(`/targets/${targetId}/subdomains/`, {
       params: {
         page: params?.page || 1,
@@ -232,6 +271,46 @@ export class SubdomainService {
       filter?: string
     }
   ): Promise<PaginatedResponse<ScanSubdomainResult>> {
+    if (USE_MOCK) {
+      await mockDelay()
+      const page = params?.page || 1
+      const pageSize = params?.pageSize || 10
+      const filter = params?.filter?.toLowerCase() || ""
+      const scan = getMockScanById(scanId)
+      const domain = scan?.target?.name?.toLowerCase()
+
+      let filtered = mockSubdomains
+
+      if (domain) {
+        filtered = filtered.filter((sub) => sub.name.toLowerCase().includes(domain))
+      }
+
+      if (filter) {
+        filtered = filtered.filter((sub) => sub.name.toLowerCase().includes(filter))
+      }
+
+      const total = filtered.length
+      const totalPages = Math.ceil(total / pageSize)
+      const start = (page - 1) * pageSize
+      const results = filtered.slice(start, start + pageSize).map((sub) => ({
+        id: sub.id,
+        name: sub.name,
+        createdAt: sub.createdAt,
+        cname: [],
+        isCdn: false,
+        cdnName: "",
+        ports: [],
+        ipAddresses: [],
+      }))
+
+      return {
+        results,
+        total,
+        page,
+        pageSize,
+        totalPages,
+      }
+    }
     const response = await api.get<PaginatedResponse<ScanSubdomainResult>>(`/scans/${scanId}/subdomains/`, {
       params: {
         page: params?.page || 1,

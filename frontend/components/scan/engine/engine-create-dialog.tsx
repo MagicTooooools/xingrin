@@ -2,8 +2,6 @@
 
 import React, { useState } from "react"
 import { FileCode, Save, X, AlertCircle, CheckCircle2, ArrowLeft, ArrowRight, Lock, Check } from "@/components/icons"
-import Editor from "@monaco-editor/react"
-import type { editor } from "monaco-editor"
 import * as yaml from "js-yaml"
 import { useTranslations } from "next-intl"
 import {
@@ -19,8 +17,8 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
+import { CodeEditor } from "@/components/ui/code-editor"
 import { toast } from "sonner"
-import { useColorTheme } from "@/hooks/use-color-theme"
 import { usePresetEngines } from "@/hooks/use-engines"
 import { cn } from "@/lib/utils"
 import { parseEngineCapabilities } from "@/lib/engine-config"
@@ -54,10 +52,7 @@ export function EngineCreateDialog({
   const [engineName, setEngineName] = useState("")
   const [yamlContent, setYamlContent] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isEditorReady, setIsEditorReady] = useState(false)
   const [yamlError, setYamlError] = useState<{ message: string; line?: number; column?: number } | null>(null)
-  const { currentTheme } = useColorTheme()
-  const editorRef = React.useRef<editor.IStandaloneCodeEditor | null>(null)
   
   const { data: presetEngines = [] } = usePresetEngines()
 
@@ -103,16 +98,9 @@ export function EngineCreateDialog({
   }
 
   // Handle editor content change
-  const handleEditorChange = (value: string | undefined) => {
-    const newValue = value || ""
-    setYamlContent(newValue)
-    validateYaml(newValue)
-  }
-
-  // Handle editor mount
-  const handleEditorDidMount = (editorInstance: editor.IStandaloneCodeEditor) => {
-    editorRef.current = editorInstance
-    setIsEditorReady(true)
+  const handleEditorChange = (value: string) => {
+    setYamlContent(value)
+    validateYaml(value)
   }
 
   // Handle save
@@ -150,7 +138,6 @@ export function EngineCreateDialog({
       })
       onOpenChange(false)
     } catch (error) {
-      console.error("Failed to create engine:", error)
       toast.error(tToast("engineCreateFailed"), {
         description: error instanceof Error ? error.message : tToast("unknownError"),
       })
@@ -336,48 +323,16 @@ export function EngineCreateDialog({
                       </div>
                     </div>
 
-                    {/* Monaco Editor */}
-                    <div className={`border rounded-md overflow-hidden flex-1 ${yamlError ? 'border-destructive' : ''}`}>
-                      <Editor
-                        height="100%"
-                        defaultLanguage="yaml"
-                        value={yamlContent}
-                        onChange={handleEditorChange}
-                        onMount={handleEditorDidMount}
-                        theme={currentTheme.isDark ? "vs-dark" : "light"}
-                        options={{
-                          minimap: { enabled: false },
-                          fontSize: 13,
-                          lineNumbers: "on",
-                          wordWrap: "off",
-                          scrollBeyondLastLine: false,
-                          automaticLayout: true,
-                          tabSize: 2,
-                          insertSpaces: true,
-                          formatOnPaste: true,
-                          formatOnType: true,
-                          folding: true,
-                          foldingStrategy: "indentation",
-                          showFoldingControls: "always",
-                          bracketPairColorization: {
-                            enabled: true,
-                          },
-                          padding: {
-                            top: 16,
-                            bottom: 16,
-                          },
-                          readOnly: isSubmitting,
-                        }}
-                        loading={
-                          <div className="flex items-center justify-center h-full">
-                            <div className="flex flex-col items-center gap-2">
-                              <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-                              <p className="text-sm text-muted-foreground">{t("loadingEditor")}</p>
-                            </div>
-                          </div>
-                        }
-                      />
-                    </div>
+                    {/* CodeMirror Editor */}
+                    <CodeEditor
+                      value={yamlContent}
+                      onChange={handleEditorChange}
+                      language="yaml"
+                      readOnly={isSubmitting}
+                      className={`flex-1 ${yamlError ? 'border-destructive' : ''}`}
+                      showLineNumbers
+                      showFoldGutter
+                    />
 
                     {/* Error message display */}
                     {yamlError && (
@@ -425,7 +380,7 @@ export function EngineCreateDialog({
                     <Button
                       type="button"
                       onClick={handleSave}
-                      disabled={isSubmitting || !engineName.trim() || !!yamlError || !isEditorReady}
+                      disabled={isSubmitting || !engineName.trim() || !!yamlError}
                     >
                       {isSubmitting ? (
                         <>

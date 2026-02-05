@@ -14,7 +14,15 @@ import type {
 } from '@/types/target.types'
 import type { Endpoint } from '@/types/endpoint.types'
 import type { PaginatedResponse } from '@/types/api-response.types'
-import { USE_MOCK, mockDelay, getMockTargets, getMockTargetById, getMockTargetBlacklist, updateMockTargetBlacklist } from '@/mock'
+import {
+  USE_MOCK,
+  mockDelay,
+  getMockTargets,
+  getMockTargetById,
+  getMockTargetBlacklist,
+  updateMockTargetBlacklist,
+  mockEndpoints,
+} from '@/mock'
 
 /**
  * Get all targets list (paginated)
@@ -141,6 +149,43 @@ export async function getTargetEndpoints(
   pageSize = 10,
   filter?: string
 ): Promise<PaginatedResponse<Endpoint>> {
+  if (USE_MOCK) {
+    await mockDelay()
+    const target = getMockTargetById(id)
+    const domain = target?.name?.toLowerCase()
+    const search = filter?.toLowerCase() || ""
+
+    let filtered = mockEndpoints
+
+    if (domain) {
+      filtered = filtered.filter((ep) =>
+        ep.url.toLowerCase().includes(domain) ||
+        (ep.host || "").toLowerCase().includes(domain)
+      )
+    }
+
+    if (search) {
+      filtered = filtered.filter((ep) => {
+        const url = ep.url.toLowerCase()
+        const title = (ep.title || "").toLowerCase()
+        const host = (ep.host || "").toLowerCase()
+        return url.includes(search) || title.includes(search) || host.includes(search)
+      })
+    }
+
+    const total = filtered.length
+    const totalPages = Math.ceil(total / pageSize)
+    const start = (page - 1) * pageSize
+    const results = filtered.slice(start, start + pageSize)
+
+    return {
+      results,
+      total,
+      page,
+      pageSize,
+      totalPages,
+    }
+  }
   const response = await api.get<PaginatedResponse<Endpoint>>(`/targets/${id}/endpoints/`, {
     params: {
       page,

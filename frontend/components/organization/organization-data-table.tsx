@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl"
 import { IconSearch, IconLoader2 } from "@/components/icons"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { UnifiedDataTable } from "@/components/ui/data-table"
+import { UnifiedDataTable } from "@/components/ui/data-table/unified-data-table"
 import type { OrganizationDataTableProps } from "@/types/organization.types"
 
 export function OrganizationDataTable({

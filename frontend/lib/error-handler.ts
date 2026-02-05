@@ -4,7 +4,6 @@
  * According to project rule 24:
  * - Success messages: Frontend constructs them
  * - Error messages: Frontend constructs them, providing more specific error reasons
- * - Console logs: Print complete backend response body
  */
 
 import { toast } from "sonner"
@@ -35,10 +34,6 @@ export function handleMutationError(
     toast.dismiss(toastId)
   }
 
-  // Print detailed error information to console
-    console.error('Operation failed:', error)
-    console.error('Backend response:', (error as ApiError)?.response?.data || error)
-
   // Show frontend custom user-friendly error message
   toast.error(userMessage)
 }
@@ -49,10 +44,6 @@ export function handleMutationError(
  * @param userMessage Frontend custom user-friendly error message
  */
 export function handleQueryError(error: unknown, userMessage: string) {
-  // Print detailed error information to console
-    console.error('Query failed:', error)
-    console.error('Backend response:', (error as ApiError)?.response?.data || error)
-
   // Show frontend custom user-friendly error message
   toast.error(userMessage)
 }
@@ -73,10 +64,6 @@ export function handleSuccess(
     toast.dismiss(toastId)
   }
 
-  // Print success information to console
-    console.log('Operation successful')
-    console.log('Backend response:', response)
-
   // Show frontend custom success message
   toast.success(successMessage)
 }
@@ -95,12 +82,6 @@ export function handleWarning(
   // Dismiss loading toast (if any)
   if (toastId) {
     toast.dismiss(toastId)
-  }
-
-  // Print information to console (development environment only)
-  if (process.env.NODE_ENV === 'development') {
-    console.log('Operation partially successful')
-    console.log('Backend response:', response)
   }
 
   // Show frontend custom warning message

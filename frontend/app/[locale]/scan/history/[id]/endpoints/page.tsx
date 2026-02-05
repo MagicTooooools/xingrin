@@ -2,8 +2,7 @@
 
 import React from "react"
 import { useParams } from "next/navigation"
-import { EndpointsDetailView } from "@/components/endpoints"
-
+import { EndpointsDetailView } from "@/components/endpoints/endpoints-detail-view"
 export default function ScanHistoryEndpointsPage() {
   const { id } = useParams<{ id: string }>()
 

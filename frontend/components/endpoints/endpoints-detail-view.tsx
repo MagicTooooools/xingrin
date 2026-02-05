@@ -259,8 +259,7 @@ export function EndpointsDetailView({
       a.click()
       a.remove()
       URL.revokeObjectURL(url)
-    } catch (error) {
-      console.error("Failed to download endpoint list", error)
+    } catch {
       toast.error(tToast("downloadFailed"))
     }
   }
@@ -295,8 +294,7 @@ export function EndpointsDetailView({
       setSelectedEndpoints([])
       setBulkDeleteDialogOpen(false)
       refetch()
-    } catch (error) {
-      console.error("Failed to delete endpoints", error)
+    } catch {
       toast.error(tToast("deleteFailed"))
     } finally {
       setIsDeleting(false)

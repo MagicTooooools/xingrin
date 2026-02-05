@@ -1,11 +1,6 @@
 "use client"
 
-import { SystemLogsView } from "@/components/settings/system-logs"
-
+import { SystemLogsView } from "@/components/settings/system-logs/system-logs-view"
 export default function SystemLogsPage() {
-  return (
-    <div className="flex flex-1 flex-col p-4 h-full">
-      <SystemLogsView />
-    </div>
-  )
+  return <SystemLogsView />
 }

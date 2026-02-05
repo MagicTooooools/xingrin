@@ -6,7 +6,7 @@ import { Filter } from "@/components/icons"
 import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { UnifiedDataTable } from "@/components/ui/data-table"
+import { UnifiedDataTable } from "@/components/ui/data-table/unified-data-table"
 import {
   Select,
   SelectContent,

@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tansta
 import { useToastMessages } from '@/lib/toast-helpers'
 import { getErrorCode, getErrorResponseData } from '@/lib/response-parser'
 import { WebsiteService } from '@/services/website.service'
+import { USE_MOCK, mockDelay, getMockWebsites, getMockScanById } from '@/mock'
 import { api } from '@/lib/api-client'
 import type { WebSiteListResponse } from '@/types/website.types'
 
@@ -12,6 +13,15 @@ const websiteService = {
     targetId: number,
     params: { page: number; pageSize: number; filter?: string }
   ): Promise<WebSiteListResponse> => {
+    if (USE_MOCK) {
+      await mockDelay()
+      return getMockWebsites({
+        page: params.page,
+        pageSize: params.pageSize,
+        search: params.filter,
+        targetId,
+      })
+    }
     const response = await api.get<WebSiteListResponse>(
       `/targets/${targetId}/websites/`,
       { params }
@@ -24,6 +34,25 @@ const websiteService = {
     scanId: number,
     params: { page: number; pageSize: number; filter?: string }
   ): Promise<WebSiteListResponse> => {
+    if (USE_MOCK) {
+      await mockDelay()
+      const scan = getMockScanById(scanId)
+      if (!scan?.targetId) {
+        return {
+          results: [],
+          total: 0,
+          page: params.page,
+          pageSize: params.pageSize,
+          totalPages: 0,
+        }
+      }
+      return getMockWebsites({
+        page: params.page,
+        pageSize: params.pageSize,
+        search: params.filter,
+        targetId: scan.targetId,
+      })
+    }
     const response = await api.get<WebSiteListResponse>(
       `/scans/${scanId}/websites/`,
       { params }
@@ -193,7 +222,6 @@ export function useBulkCreateWebsites() {
     },
     onError: (error: unknown) => {
       toastMessages.dismiss('bulk-create-websites')
-      console.error('Failed to bulk create websites:', error)
       toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.asset.website.create.error')
     },
   })

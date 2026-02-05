@@ -14,6 +14,7 @@ interface UseScanLogsOptions {
   scanId: number
   enabled?: boolean
   pollingInterval?: number  // 默认 3000ms
+  maxLogs?: number  // 默认 5000，<=0 表示不限制
 }
 
 interface UseScanLogsReturn {
@@ -26,12 +27,18 @@ export function useScanLogs({
   scanId,
   enabled = true,
   pollingInterval = 3000,
+  maxLogs = 5000,
 }: UseScanLogsOptions): UseScanLogsReturn {
   const [logs, setLogs] = useState<ScanLog[]>([])
   const [loading, setLoading] = useState(false)
   const lastLogId = useRef<number | null>(null)
   const isMounted = useRef(true)
   
+  const clampLogs = useCallback((items: ScanLog[]) => {
+    if (!maxLogs || maxLogs <= 0) return items
+    return items.length > maxLogs ? items.slice(-maxLogs) : items
+  }, [maxLogs])
+
   const fetchLogs = useCallback(async (incremental = false) => {
     if (!enabled || !isMounted.current) return
     
@@ -56,20 +63,21 @@ export function useScanLogs({
           setLogs(prev => {
             const existingIds = new Set(prev.map(l => l.id))
             const uniqueNewLogs = newLogs.filter(l => !existingIds.has(l.id))
-            return uniqueNewLogs.length > 0 ? [...prev, ...uniqueNewLogs] : prev
+            if (uniqueNewLogs.length === 0) return prev
+            return clampLogs([...prev, ...uniqueNewLogs])
           })
         } else {
-          setLogs(newLogs)
+          setLogs(clampLogs(newLogs))
         }
       }
     } catch (error) {
-      console.error('Failed to fetch scan logs:', error)
+      void error
     } finally {
       if (isMounted.current) {
         setLoading(false)
       }
     }
-  }, [scanId, enabled])
+  }, [scanId, enabled, clampLogs])
   
   // 初始加载
   useEffect(() => {
@@ -103,6 +111,12 @@ export function useScanLogs({
     lastLogId.current = null
     fetchLogs(false)
   }, [fetchLogs])
+
+  // 当 maxLogs 变化时，主动裁剪缓存，避免长时间运行的内存占用增长
+  useEffect(() => {
+    if (!maxLogs || maxLogs <= 0) return
+    setLogs(prev => (prev.length > maxLogs ? prev.slice(-maxLogs) : prev))
+  }, [maxLogs])
   
   return { logs, loading, refetch }
 }

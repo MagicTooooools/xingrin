@@ -58,6 +58,9 @@ export function WaveGrid({
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const animationRef = useRef<number>(0)
   const timeRef = useRef<number>(0)
+  const isActiveRef = useRef(true)
+  const isIntersectingRef = useRef(true)
+  const prefersReducedMotionRef = useRef(false)
 
   const rgb = useMemo(() => hexToRgb(color) || { r: 107, g: 114, b: 128 }, [color])
 
@@ -122,6 +125,10 @@ export function WaveGrid({
 
     const ctx = canvas.getContext("2d")
     if (!ctx) return
+    if (!isActiveRef.current) {
+      animationRef.current = requestAnimationFrame(draw)
+      return
+    }
 
     ctx.clearRect(0, 0, width, height)
 
@@ -164,6 +171,51 @@ export function WaveGrid({
     timeRef.current += 1
     animationRef.current = requestAnimationFrame(draw)
   }, [cols, rows, squareSize, gridGap, width, height, rgb, getWaveOpacity, waveDirection, flickerChance, minOpacity, maxOpacity])
+
+  const updateActiveState = useCallback(() => {
+    isActiveRef.current =
+      !prefersReducedMotionRef.current &&
+      !document.hidden &&
+      isIntersectingRef.current
+  }, [])
+
+  useEffect(() => {
+    if (typeof window === "undefined") return
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)")
+    const handleReduceMotion = (e: MediaQueryListEvent | MediaQueryList) => {
+      prefersReducedMotionRef.current = "matches" in e ? e.matches : mq.matches
+      updateActiveState()
+    }
+    handleReduceMotion(mq)
+    mq.addEventListener("change", handleReduceMotion)
+    return () => mq.removeEventListener("change", handleReduceMotion)
+  }, [updateActiveState])
+
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+
+    const handleVisibility = () => {
+      updateActiveState()
+    }
+
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        isIntersectingRef.current = entry.isIntersecting
+        updateActiveState()
+      },
+      { threshold: 0 }
+    )
+
+    io.observe(canvas)
+    document.addEventListener("visibilitychange", handleVisibility)
+    updateActiveState()
+
+    return () => {
+      io.disconnect()
+      document.removeEventListener("visibilitychange", handleVisibility)
+    }
+  }, [updateActiveState])
 
   useEffect(() => {
     draw()

@@ -1,11 +1,9 @@
 "use client"
 
 import React from "react"
+import dynamic from "next/dynamic"
 import { useTranslations } from "next-intl"
-import { ScheduledScanDataTable } from "@/components/scan/scheduled/scheduled-scan-data-table"
 import { createScheduledScanColumns } from "@/components/scan/scheduled/scheduled-scan-columns"
-import { CreateScheduledScanDialog } from "@/components/scan/scheduled/create-scheduled-scan-dialog"
-import { EditScheduledScanDialog } from "@/components/scan/scheduled/edit-scheduled-scan-dialog"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -24,6 +22,30 @@ import {
 import type { ScheduledScan } from "@/types/scheduled-scan.types"
 import { DataTableSkeleton } from "@/components/ui/data-table-skeleton"
 import { PageHeader } from "@/components/common/page-header"
+
+const ScheduledScanDataTable = dynamic(
+  () => import("@/components/scan/scheduled/scheduled-scan-data-table").then((mod) => mod.ScheduledScanDataTable),
+  {
+    ssr: false,
+    loading: () => (
+      <DataTableSkeleton
+        toolbarButtonCount={2}
+        rows={5}
+        columns={6}
+      />
+    ),
+  }
+)
+
+const CreateScheduledScanDialog = dynamic(
+  () => import("@/components/scan/scheduled/create-scheduled-scan-dialog").then((mod) => mod.CreateScheduledScanDialog),
+  { ssr: false }
+)
+
+const EditScheduledScanDialog = dynamic(
+  () => import("@/components/scan/scheduled/edit-scheduled-scan-dialog").then((mod) => mod.EditScheduledScanDialog),
+  { ssr: false }
+)
 
 /**
  * Scheduled scan page
@@ -218,19 +240,23 @@ export default function ScheduledScanPage() {
       </div>
 
       {/* Create scheduled scan dialog */}
-      <CreateScheduledScanDialog
-        open={createDialogOpen}
-        onOpenChange={setCreateDialogOpen}
-        onSuccess={() => refetch()}
-      />
+      {createDialogOpen ? (
+        <CreateScheduledScanDialog
+          open={createDialogOpen}
+          onOpenChange={setCreateDialogOpen}
+          onSuccess={() => refetch()}
+        />
+      ) : null}
 
       {/* Edit scheduled scan dialog */}
-      <EditScheduledScanDialog
-        open={editDialogOpen}
-        onOpenChange={setEditDialogOpen}
-        scheduledScan={editingScheduledScan}
-        onSuccess={() => refetch()}
-      />
+      {editDialogOpen ? (
+        <EditScheduledScanDialog
+          open={editDialogOpen}
+          onOpenChange={setEditDialogOpen}
+          scheduledScan={editingScheduledScan}
+          onSuccess={() => refetch()}
+        />
+      ) : null}
 
       {/* Delete confirmation dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>

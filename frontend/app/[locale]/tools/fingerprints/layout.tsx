@@ -13,6 +13,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { PageHeader } from "@/components/common/page-header"
 import { useFingerprintStats } from "@/hooks/use-fingerprints"
 import { useTranslations } from "next-intl"
 
@@ -79,22 +80,11 @@ export default function FingerprintsLayout({
 
   return (
     <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-      {/* Page header */}
-      <div className="px-4 lg:px-6">
-        <div className="space-y-1">
-          <div className="flex items-center gap-3">
-            <span className="px-1.5 py-0.5 text-[10px] font-mono bg-primary text-primary-foreground tracking-wider">
-              FPR-01
-            </span>
-            <h1 className="text-2xl font-bold tracking-tight">
-              {t("title")}
-            </h1>
-          </div>
-          <p className="text-sm text-muted-foreground pl-[calc(3rem+0.75rem)]">
-            {t("pageDescription")}
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        code="FPR-01"
+        title={t("title")}
+        description={t("pageDescription")}
+      />
 
       {/* Tabs navigation */}
       <div className="flex items-center justify-between px-4 lg:px-6">

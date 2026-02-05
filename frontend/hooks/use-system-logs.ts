@@ -32,7 +32,7 @@ export function useSystemLogs(options?: {
     queryFn: () => systemLogService.getSystemLogs({ file: options?.file, lines: options?.lines }),
     enabled: options?.enabled ?? true,
     refetchInterval: options?.autoRefresh ? 2000 : false,
-    refetchIntervalInBackground: options?.autoRefresh ?? false,
+    refetchIntervalInBackground: false,
     retry: false,
   })
 

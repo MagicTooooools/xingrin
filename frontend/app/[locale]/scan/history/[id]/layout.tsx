@@ -3,7 +3,7 @@
 import React from "react"
 import { usePathname, useParams } from "next/navigation"
 import Link from "next/link"
-import { Target, LayoutDashboard, Package, FolderSearch, Image as ImageIcon, ShieldAlert } from "@/components/icons"
+import { LayoutDashboard, Package, FolderSearch, Image as ImageIcon, ShieldAlert } from "@/components/icons"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -107,8 +107,7 @@ export default function ScanHistoryLayout({
       <div className="flex items-center gap-2 text-sm px-4 lg:px-6">
         <span className="text-muted-foreground">{t("breadcrumb.scanHistory")}</span>
         <span className="text-muted-foreground">/</span>
-        <span className="font-medium flex items-center gap-1.5">
-          <Target className="h-4 w-4" />
+        <span className="font-medium">
           {scanData?.target?.name || t("taskId", { id })}
         </span>
       </div>
@@ -175,8 +174,8 @@ export default function ScanHistoryLayout({
       {showSecondaryNav && (
         <div className="flex items-center px-4 lg:px-6">
           <Tabs value={getSecondaryTab()} className="w-full">
-            <TabsList variant="underline">
-              <TabsTrigger value="websites" variant="underline" asChild>
+            <TabsList variant="minimal-tab">
+              <TabsTrigger value="websites" variant="minimal-tab" asChild>
                 <Link href={secondaryPaths.websites} className="flex items-center gap-0.5">
                   {t("tabs.websites")}
                   {counts.websites > 0 && (
@@ -186,7 +185,7 @@ export default function ScanHistoryLayout({
                   )}
                 </Link>
               </TabsTrigger>
-              <TabsTrigger value="subdomain" variant="underline" asChild>
+              <TabsTrigger value="subdomain" variant="minimal-tab" asChild>
                 <Link href={secondaryPaths.subdomain} className="flex items-center gap-0.5">
                   {t("tabs.subdomains")}
                   {counts.subdomain > 0 && (
@@ -196,7 +195,7 @@ export default function ScanHistoryLayout({
                   )}
                 </Link>
               </TabsTrigger>
-              <TabsTrigger value="ip-addresses" variant="underline" asChild>
+              <TabsTrigger value="ip-addresses" variant="minimal-tab" asChild>
                 <Link href={secondaryPaths["ip-addresses"]} className="flex items-center gap-0.5">
                   {t("tabs.ips")}
                   {counts["ip-addresses"] > 0 && (
@@ -206,7 +205,7 @@ export default function ScanHistoryLayout({
                   )}
                 </Link>
               </TabsTrigger>
-              <TabsTrigger value="endpoints" variant="underline" asChild>
+              <TabsTrigger value="endpoints" variant="minimal-tab" asChild>
                 <Link href={secondaryPaths.endpoints} className="flex items-center gap-0.5">
                   {t("tabs.urls")}
                   {counts.endpoints > 0 && (

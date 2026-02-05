@@ -89,7 +89,7 @@ import { Dropzone, DropzoneContent, DropzoneEmptyState } from "@/components/ui/d
 import { CopyablePopoverContent } from "@/components/ui/copyable-popover-content"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { UnifiedDataTable } from "@/components/ui/data-table"
+import { UnifiedDataTable } from "@/components/ui/data-table/unified-data-table"
 import {
   ChartContainer,
   ChartLegend,
@@ -117,6 +117,7 @@ import {
 } from "@/components/ui/sidebar"
 import {
   AlertTriangle,
+  AlertCircle,
   ChevronRight,
   Info,
   Search,
@@ -138,9 +139,31 @@ export type DemoItem = {
 }
 
 const DemoShell = ({ title, description, children }: { title: string; description?: string; children: React.ReactNode }) => (
-  <div className="flex flex-col gap-4 py-6">
+  <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
     <PageHeader code="UI-DEMO" title={title} description={description} />
     <div className="px-4 lg:px-6">{children}</div>
+  </div>
+)
+
+const StyleGrid = ({ children }: { children: React.ReactNode }) => (
+  <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">{children}</div>
+)
+
+const StyleCard = ({
+  title,
+  description,
+  children,
+}: {
+  title: string
+  description?: string
+  children: React.ReactNode
+}) => (
+  <div className="rounded-md border border-border/70 bg-card/70 p-3 shadow-xs">
+    <div className="mb-3 space-y-1">
+      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">{title}</p>
+      {description ? <p className="text-xs text-muted-foreground">{description}</p> : null}
+    </div>
+    <div className="space-y-2">{children}</div>
   </div>
 )
 
@@ -210,7 +233,7 @@ const IconDemo = () => {
       </div>
       <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         {items.map((name) => {
-          const IconComp = (Icons as Record<string, React.ComponentType<any>>)[name]
+          const IconComp = (Icons as Record<string, React.ComponentType<{ className?: string }>>)[name]
           return (
             <div key={name} className="flex items-center gap-2 rounded-md border p-2 text-xs">
               {IconComp ? <IconComp className="size-4" /> : null}
@@ -822,7 +845,12 @@ const TerminalDemo = () => (
 
 const TerminalLoginDemo = () => (
   <DemoShell title="TerminalLogin" description="登录终端">
-    <TerminalLogin translations={terminalTranslations} onLogin={async () => toast.success("认证完成")} />
+    <TerminalLogin
+      translations={terminalTranslations}
+      onLogin={async () => {
+        toast.success("认证完成")
+      }}
+    />
   </DemoShell>
 )
 
@@ -918,6 +946,607 @@ const FormDemo = () => {
   )
 }
 
+const TabsStyleLabDemo = () => (
+  <DemoShell title="Tabs Styles" description="标签页风格对比">
+    <StyleGrid>
+      <StyleCard title="Segmented" description="分段面板">
+        <Tabs defaultValue="overview">
+          <TabsList>
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="assets">Assets</TabsTrigger>
+            <TabsTrigger value="events">Events</TabsTrigger>
+          </TabsList>
+          <TabsContent value="overview" className="text-xs text-muted-foreground">
+            面板式标签页。
+          </TabsContent>
+        </Tabs>
+      </StyleCard>
+      <StyleCard title="Underline" description="底部线条">
+        <Tabs defaultValue="overview">
+          <TabsList variant="underline" className="w-full justify-start">
+            <TabsTrigger variant="underline" value="overview">Overview</TabsTrigger>
+            <TabsTrigger variant="underline" value="assets">Assets</TabsTrigger>
+            <TabsTrigger variant="underline" value="events">Events</TabsTrigger>
+          </TabsList>
+          <TabsContent value="overview" className="text-xs text-muted-foreground">
+            适合导航栏场景。
+          </TabsContent>
+        </Tabs>
+      </StyleCard>
+      <StyleCard title="Rail" description="硬边轨道">
+        <Tabs defaultValue="overview">
+          <TabsList className="w-full justify-start gap-2 rounded-none border border-border/70 bg-transparent p-1">
+            <TabsTrigger
+              value="overview"
+              className="rounded-none border border-transparent px-3 text-xs uppercase tracking-wider data-[state=active]:border-foreground data-[state=active]:bg-foreground data-[state=active]:text-background"
+            >
+              Overview
+            </TabsTrigger>
+            <TabsTrigger
+              value="assets"
+              className="rounded-none border border-transparent px-3 text-xs uppercase tracking-wider data-[state=active]:border-foreground data-[state=active]:bg-foreground data-[state=active]:text-background"
+            >
+              Assets
+            </TabsTrigger>
+            <TabsTrigger
+              value="events"
+              className="rounded-none border border-transparent px-3 text-xs uppercase tracking-wider data-[state=active]:border-foreground data-[state=active]:bg-foreground data-[state=active]:text-background"
+            >
+              Events
+            </TabsTrigger>
+          </TabsList>
+          <TabsContent value="overview" className="text-xs text-muted-foreground">
+            强调工业感的导航条。
+          </TabsContent>
+        </Tabs>
+      </StyleCard>
+    </StyleGrid>
+  </DemoShell>
+)
+
+const TabsMiniStyleLabDemo = () => (
+  <DemoShell title="Small Tabs" description="小尺寸标签页候选">
+    <StyleGrid>
+      <StyleCard title="Minimal Tab Classic" description="参考 Style H：下划线 + 文字强调">
+        <Tabs defaultValue="logs">
+          <TabsList variant="minimal-tab">
+            <TabsTrigger variant="minimal-tab" value="logs">Logs</TabsTrigger>
+            <TabsTrigger variant="minimal-tab" value="config">Config</TabsTrigger>
+            <TabsTrigger variant="minimal-tab" value="alerts">Alerts</TabsTrigger>
+          </TabsList>
+          <TabsContent value="logs" className="text-xs text-muted-foreground">
+            选中只加下划线与文字强调。
+          </TabsContent>
+        </Tabs>
+      </StyleCard>
+
+      <StyleCard title="Minimal Tab Transparent" description="默认透明下划线，Hover 才出现">
+        <Tabs defaultValue="logs">
+          <TabsList variant="minimal-tab">
+            <TabsTrigger
+              variant="minimal-tab"
+              value="logs"
+              className="border-transparent hover:border-border data-[state=active]:border-primary"
+            >
+              Logs
+            </TabsTrigger>
+            <TabsTrigger
+              variant="minimal-tab"
+              value="config"
+              className="border-transparent hover:border-border data-[state=active]:border-primary"
+            >
+              Config
+            </TabsTrigger>
+            <TabsTrigger
+              variant="minimal-tab"
+              value="alerts"
+              className="border-transparent hover:border-border data-[state=active]:border-primary"
+            >
+              Alerts
+            </TabsTrigger>
+          </TabsList>
+          <TabsContent value="logs" className="text-xs text-muted-foreground">
+            更克制的“隐形”标签。
+          </TabsContent>
+        </Tabs>
+      </StyleCard>
+
+      <StyleCard title="Minimal Tab Dense" description="更紧凑的工具条">
+        <Tabs defaultValue="logs">
+          <TabsList variant="minimal-tab" className="gap-2">
+            <TabsTrigger
+              variant="minimal-tab"
+              value="logs"
+              className="px-1.5 text-[10px] uppercase tracking-wider"
+            >
+              Logs
+            </TabsTrigger>
+            <TabsTrigger
+              variant="minimal-tab"
+              value="config"
+              className="px-1.5 text-[10px] uppercase tracking-wider"
+            >
+              Config
+            </TabsTrigger>
+            <TabsTrigger
+              variant="minimal-tab"
+              value="alerts"
+              className="px-1.5 text-[10px] uppercase tracking-wider"
+            >
+              Alerts
+            </TabsTrigger>
+          </TabsList>
+          <TabsContent value="logs" className="text-xs text-muted-foreground">
+            适合窄栏或工具条。
+          </TabsContent>
+        </Tabs>
+      </StyleCard>
+    </StyleGrid>
+  </DemoShell>
+)
+
+const SelectStyleLabDemo = () => {
+  const [ghostValue, setGhostValue] = React.useState("alpha")
+  const [panelValue, setPanelValue] = React.useState("beta")
+  const [monoValue, setMonoValue] = React.useState("gamma")
+
+  return (
+    <DemoShell title="Select Styles" description="下拉选择风格对比">
+      <StyleGrid>
+        <StyleCard title="Ghost" description="下划线形式">
+          <Select value={ghostValue} onValueChange={setGhostValue}>
+            <SelectTrigger className="w-full rounded-none border-0 border-b border-border bg-transparent px-0 shadow-none focus-visible:ring-0">
+              <SelectValue placeholder="选择策略" />
+            </SelectTrigger>
+            <SelectContent className="rounded-none border-foreground">
+              <SelectItem value="alpha">Alpha</SelectItem>
+              <SelectItem value="beta">Beta</SelectItem>
+              <SelectItem value="gamma">Gamma</SelectItem>
+            </SelectContent>
+          </Select>
+        </StyleCard>
+        <StyleCard title="Panel" description="柔和面板">
+          <Select value={panelValue} onValueChange={setPanelValue}>
+            <SelectTrigger className="w-full bg-secondary/70 border-border/70 shadow-sm">
+              <SelectValue placeholder="选择策略" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="alpha">Alpha</SelectItem>
+              <SelectItem value="beta">Beta</SelectItem>
+              <SelectItem value="gamma">Gamma</SelectItem>
+            </SelectContent>
+          </Select>
+        </StyleCard>
+        <StyleCard title="Monolith" description="硬边对比">
+          <Select value={monoValue} onValueChange={setMonoValue}>
+            <SelectTrigger className="w-full rounded-none border-foreground bg-foreground text-background">
+              <SelectValue placeholder="选择策略" />
+            </SelectTrigger>
+            <SelectContent className="rounded-none border-foreground">
+              <SelectItem value="alpha">Alpha</SelectItem>
+              <SelectItem value="beta">Beta</SelectItem>
+              <SelectItem value="gamma">Gamma</SelectItem>
+            </SelectContent>
+          </Select>
+        </StyleCard>
+      </StyleGrid>
+    </DemoShell>
+  )
+}
+
+const ControlStyleLabDemo = () => {
+  const [checked, setChecked] = React.useState(true)
+  const [radio, setRadio] = React.useState("fast")
+  const [switchOn, setSwitchOn] = React.useState(true)
+  const [toggles, setToggles] = React.useState<string[]>(["deep"])
+
+  return (
+    <DemoShell title="Control Styles" description="复选/单选/开关/切换">
+      <StyleGrid>
+        <StyleCard title="Signal" description="高亮警示">
+          <div className="space-y-3 text-sm">
+            <div className="flex items-center gap-2">
+              <Checkbox
+                checked={checked}
+                onCheckedChange={(value) => setChecked(Boolean(value))}
+                className="border-[var(--highlight)] data-[state=checked]:bg-[var(--highlight)] data-[state=checked]:border-[var(--highlight)]"
+              />
+              <Label>启用高危扫描</Label>
+            </div>
+            <RadioGroup value={radio} onValueChange={setRadio} className="gap-2">
+              <div className="flex items-center gap-2">
+                <RadioGroupItem
+                  value="fast"
+                  id="radio-fast"
+                  className="border-[var(--highlight)] text-[var(--highlight)]"
+                />
+                <Label htmlFor="radio-fast">Fast</Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <RadioGroupItem
+                  value="deep"
+                  id="radio-deep"
+                  className="border-[var(--highlight)] text-[var(--highlight)]"
+                />
+                <Label htmlFor="radio-deep">Deep</Label>
+              </div>
+            </RadioGroup>
+            <div className="flex items-center gap-2">
+              <Switch
+                checked={switchOn}
+                onCheckedChange={setSwitchOn}
+                className="data-[state=checked]:bg-[var(--highlight)]"
+              />
+              <span className="text-xs text-muted-foreground">实时监控</span>
+            </div>
+          </div>
+        </StyleCard>
+        <StyleCard title="Wireframe" description="线框+虚线">
+          <div className="space-y-3 text-sm">
+            <div className="flex items-center gap-2">
+              <Checkbox
+                checked={checked}
+                onCheckedChange={(value) => setChecked(Boolean(value))}
+                className="border-dashed data-[state=checked]:bg-foreground data-[state=checked]:border-foreground"
+              />
+              <Label>启用审计模式</Label>
+            </div>
+            <ToggleGroup type="multiple" value={toggles} onValueChange={setToggles} className="gap-2">
+              <ToggleGroupItem
+                value="deep"
+                variant="outline"
+                className="rounded-none border-dashed data-[state=on]:border-foreground data-[state=on]:bg-foreground data-[state=on]:text-background"
+              >
+                Deep
+              </ToggleGroupItem>
+              <ToggleGroupItem
+                value="safe"
+                variant="outline"
+                className="rounded-none border-dashed data-[state=on]:border-foreground data-[state=on]:bg-foreground data-[state=on]:text-background"
+              >
+                Safe
+              </ToggleGroupItem>
+            </ToggleGroup>
+          </div>
+        </StyleCard>
+      </StyleGrid>
+    </DemoShell>
+  )
+}
+
+const SurfaceStyleLabDemo = () => (
+  <DemoShell title="Surface Styles" description="对话框与侧边面板">
+    <StyleGrid>
+      <StyleCard title="Dialog Monolith" description="硬边框对话框">
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button variant="outline">打开对话框</Button>
+          </DialogTrigger>
+          <DialogContent className="rounded-none border-foreground">
+            <DialogHeader>
+              <DialogTitle>执行扫描</DialogTitle>
+              <DialogDescription>选择扫描策略并确认。</DialogDescription>
+            </DialogHeader>
+            <Input placeholder="example.com" />
+            <DialogFooter>
+              <Button className="rounded-none">确认</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </StyleCard>
+      <StyleCard title="Sheet Rail" description="侧边轨道">
+        <Sheet>
+          <SheetTrigger asChild>
+            <Button variant="outline">打开侧栏</Button>
+          </SheetTrigger>
+          <SheetContent side="right" className="border-l border-border/70 rounded-none">
+            <SheetHeader>
+              <SheetTitle>配置面板</SheetTitle>
+              <SheetDescription>快速调整策略参数。</SheetDescription>
+            </SheetHeader>
+            <div className="mt-4 space-y-2">
+              <Label>策略名称</Label>
+              <Input placeholder="Default" />
+            </div>
+          </SheetContent>
+        </Sheet>
+      </StyleCard>
+    </StyleGrid>
+  </DemoShell>
+)
+
+const OverlayStyleLabDemo = () => (
+  <DemoShell title="Overlay Styles" description="Popover / Tooltip 风格">
+    <StyleGrid>
+      <StyleCard title="Popover Grid" description="网格面板">
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="outline">打开 Popover</Button>
+          </PopoverTrigger>
+          <PopoverContent className="rounded-none border-foreground bg-background shadow-md">
+            <div className="space-y-2 text-xs">
+              <p className="font-semibold uppercase tracking-wider text-muted-foreground">资产摘要</p>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="rounded border border-border/70 p-2">
+                  <div className="text-xs text-muted-foreground">Risk</div>
+                  <div className="text-sm font-semibold">12</div>
+                </div>
+                <div className="rounded border border-border/70 p-2">
+                  <div className="text-xs text-muted-foreground">Assets</div>
+                  <div className="text-sm font-semibold">128</div>
+                </div>
+              </div>
+            </div>
+          </PopoverContent>
+        </Popover>
+      </StyleCard>
+      <StyleCard title="Tooltip Mono" description="高对比提示">
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="outline">悬停提示</Button>
+            </TooltipTrigger>
+            <TooltipContent className="rounded-none bg-foreground text-background shadow-md">
+              高危端口告警
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      </StyleCard>
+    </StyleGrid>
+  </DemoShell>
+)
+
+const ProgressStyleLabDemo = () => (
+  <DemoShell title="Progress Styles" description="进度条风格对比">
+    <StyleGrid>
+      <StyleCard title="Mono" description="硬边对比">
+        <Progress
+          value={72}
+          className="h-2 rounded-none bg-foreground/10 [&_[data-slot=progress-indicator]]:bg-foreground"
+        />
+      </StyleCard>
+      <StyleCard title="Signal" description="高亮进度">
+        <Progress
+          value={54}
+          className="h-3 rounded-none bg-[var(--highlight)]/15 [&_[data-slot=progress-indicator]]:bg-[var(--highlight)]"
+        />
+      </StyleCard>
+      <StyleCard title="Soft" description="柔和面板">
+        <Progress
+          value={38}
+          className="h-4 bg-secondary/70 [&_[data-slot=progress-indicator]]:bg-primary/70"
+        />
+      </StyleCard>
+    </StyleGrid>
+  </DemoShell>
+)
+
+const ButtonStyleLabDemo = () => (
+  <DemoShell title="Button Styles" description="按钮材质与强调方式">
+    <StyleGrid>
+      <StyleCard title="Monolith" description="高对比、硬边框">
+        <div className="flex flex-wrap gap-2">
+          <Button className="border border-foreground bg-foreground text-background shadow-sm hover:bg-foreground/90">
+            执行
+          </Button>
+          <Button
+            variant="outline"
+            className="border-foreground text-foreground hover:bg-foreground hover:text-background"
+          >
+            预览
+          </Button>
+        </div>
+      </StyleCard>
+      <StyleCard title="Signal" description="高亮警戒">
+        <div className="flex flex-wrap gap-2">
+          <Button className="bg-[var(--highlight)] text-black hover:bg-[var(--highlight)]/90">警戒</Button>
+          <Button
+            variant="outline"
+            className="border-[var(--highlight)] text-[var(--highlight)] hover:bg-[var(--highlight)]/10"
+          >
+            查看
+          </Button>
+        </div>
+      </StyleCard>
+      <StyleCard title="Gridline" description="线框与虚线">
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" className="border-dashed">
+            Outline
+          </Button>
+          <Button variant="ghost" className="border border-dashed border-border">
+            Ghost
+          </Button>
+        </div>
+      </StyleCard>
+      <StyleCard title="Panel" description="柔和面板">
+        <div className="flex flex-wrap gap-2">
+          <Button className="bg-secondary text-secondary-foreground shadow-xs">Primary</Button>
+          <Button variant="secondary" className="border border-border/60">
+            Secondary
+          </Button>
+        </div>
+      </StyleCard>
+    </StyleGrid>
+  </DemoShell>
+)
+
+const InputStyleLabDemo = () => (
+  <DemoShell title="Input Styles" description="输入框形态与密度">
+    <StyleGrid>
+      <StyleCard title="Underline" description="工程表单风">
+        <div className="space-y-2">
+          <Label>目标域名</Label>
+          <Input
+            placeholder="example.com"
+            className="rounded-none border-0 border-b border-border bg-transparent px-0 shadow-none focus-visible:border-foreground focus-visible:ring-0"
+          />
+        </div>
+      </StyleCard>
+      <StyleCard title="Panel" description="柔和面板">
+        <div className="space-y-2">
+          <Label>资产标签</Label>
+          <Input placeholder="production" className="bg-secondary/70 border-border/60 shadow-sm" />
+        </div>
+      </StyleCard>
+      <StyleCard title="Signal Edge" description="左侧强调条">
+        <div className="space-y-2">
+          <Label>扫描策略</Label>
+          <div className="relative">
+            <span className="pointer-events-none absolute inset-y-1 left-0 w-1 bg-[var(--highlight)]" />
+            <Input placeholder="Deep Scan" className="pl-4 border-border/70 bg-background" />
+          </div>
+        </div>
+      </StyleCard>
+      <StyleCard title="Terminal" description="等宽终端感">
+        <div className="space-y-2">
+          <Label>命令</Label>
+          <Input
+            placeholder="lunafox scan --deep"
+            className="bg-foreground text-background placeholder:text-background/60 border-foreground/70 font-mono"
+          />
+        </div>
+      </StyleCard>
+    </StyleGrid>
+  </DemoShell>
+)
+
+const CardStyleLabDemo = () => (
+  <DemoShell title="Card Styles" description="卡片结构与层级">
+    <StyleGrid>
+      <StyleCard title="Top Stripe" description="顶部标识条">
+        <Card className="relative overflow-hidden">
+          <div className="absolute left-0 top-0 h-1 w-full bg-foreground" />
+          <CardHeader>
+            <CardTitle className="text-sm">资产概览</CardTitle>
+            <CardDescription>扫描任务统计</CardDescription>
+          </CardHeader>
+          <CardContent className="text-sm text-muted-foreground">活跃资产 128 · 风险 12</CardContent>
+        </Card>
+      </StyleCard>
+      <StyleCard title="Panel" description="柔和面板">
+        <Card className="border-dashed bg-secondary/60">
+          <CardHeader>
+            <CardTitle className="text-sm">运行中</CardTitle>
+            <CardDescription>实时监控</CardDescription>
+          </CardHeader>
+          <CardContent className="text-sm text-muted-foreground">队列 3 · 负载 68%</CardContent>
+        </Card>
+      </StyleCard>
+      <StyleCard title="Accent Edge" description="侧边高亮">
+        <Card className="border-l-4 border-l-[var(--highlight)]">
+          <CardHeader>
+            <CardTitle className="text-sm">警戒区</CardTitle>
+            <CardDescription>高危端口</CardDescription>
+          </CardHeader>
+          <CardContent className="text-sm text-muted-foreground">已锁定 4 项</CardContent>
+        </Card>
+      </StyleCard>
+    </StyleGrid>
+  </DemoShell>
+)
+
+const BadgeStyleLabDemo = () => (
+  <DemoShell title="Badge Styles" description="状态标记风格">
+    <StyleGrid>
+      <StyleCard title="Mono" description="高对比标签">
+        <div className="flex flex-wrap gap-2">
+          <Badge className="bg-foreground text-background">CRITICAL</Badge>
+          <Badge className="border border-foreground text-foreground">LOCKED</Badge>
+        </div>
+      </StyleCard>
+      <StyleCard title="Signal" description="强调色边框">
+        <div className="flex flex-wrap gap-2">
+          <Badge className="border border-[var(--highlight)] text-[var(--highlight)] bg-transparent">ALERT</Badge>
+          <Badge className="border border-info text-info bg-transparent">INFO</Badge>
+        </div>
+      </StyleCard>
+      <StyleCard title="Gridline" description="虚线风格">
+        <div className="flex flex-wrap gap-2">
+          <Badge className="border border-dashed text-muted-foreground bg-transparent">QUEUED</Badge>
+          <Badge className="border border-dashed text-muted-foreground bg-transparent">SYNC</Badge>
+        </div>
+      </StyleCard>
+    </StyleGrid>
+  </DemoShell>
+)
+
+const AlertStyleLabDemo = () => (
+  <DemoShell title="Alert Styles" description="反馈语气与级别">
+    <StyleGrid>
+      <StyleCard title="Info" description="温和提示">
+        <Alert className="border-info/30 bg-info/5 text-info [&>svg]:text-info">
+          <Info className="size-4" />
+          <AlertTitle>系统同步</AlertTitle>
+          <AlertDescription>最新扫描结果已更新。</AlertDescription>
+        </Alert>
+      </StyleCard>
+      <StyleCard title="Warning" description="注意警示">
+        <Alert className="border-warning/30 bg-warning/5 text-warning [&>svg]:text-warning">
+          <AlertTriangle className="size-4" />
+          <AlertTitle>风险上升</AlertTitle>
+          <AlertDescription>检测到异常端口暴露。</AlertDescription>
+        </Alert>
+      </StyleCard>
+      <StyleCard title="Error" description="严重告警">
+        <Alert className="border-error/30 bg-error/5 text-error [&>svg]:text-error">
+          <AlertCircle className="size-4" />
+          <AlertTitle>扫描失败</AlertTitle>
+          <AlertDescription>目标无响应，请稍后重试。</AlertDescription>
+        </Alert>
+      </StyleCard>
+    </StyleGrid>
+  </DemoShell>
+)
+
+const TableStyleLabDemo = () => (
+  <DemoShell title="Table Styles" description="表格密度与分隔方式">
+    <StyleGrid>
+      <StyleCard title="Striped" description="行交替">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>任务</TableHead>
+              <TableHead>状态</TableHead>
+              <TableHead>Owner</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {sampleTableData.map((row) => (
+              <TableRow key={row.id} className="odd:bg-muted/40">
+                <TableCell>{row.name}</TableCell>
+                <TableCell>{row.status}</TableCell>
+                <TableCell>{row.owner}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </StyleCard>
+      <StyleCard title="Matrix" description="密集网格">
+        <div className="rounded-md border border-border/70">
+          <Table className="text-xs">
+            <TableHeader className="[&_tr]:border-b-0">
+              <TableRow className="bg-secondary/70">
+                <TableHead className="h-8 text-xs uppercase tracking-wider">任务</TableHead>
+                <TableHead className="h-8 text-xs uppercase tracking-wider">状态</TableHead>
+                <TableHead className="h-8 text-xs uppercase tracking-wider">Owner</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {sampleTableData.map((row) => (
+                <TableRow key={row.id} className="border-b border-dashed">
+                  <TableCell className="py-1">{row.name}</TableCell>
+                  <TableCell className="py-1">{row.status}</TableCell>
+                  <TableCell className="py-1">{row.owner}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      </StyleCard>
+    </StyleGrid>
+  </DemoShell>
+)
+
 export const uiDemoItems: DemoItem[] = [
   { slug: "icon", title: "Icon", description: "图标展示与搜索", group: "基础", Demo: IconDemo },
   { slug: "button", title: "Button", description: "按钮样式", group: "基础", Demo: ButtonDemo },
@@ -973,4 +1602,24 @@ export const uiDemoItems: DemoItem[] = [
   { slug: "status", title: "Status", description: "状态指示", group: "品牌", Demo: StatusDemo },
   { slug: "field", title: "Field", description: "字段组合", group: "表单", Demo: FieldDemo },
   { slug: "form", title: "Form", description: "表单封装", group: "表单", Demo: FormDemo },
+  { slug: "tabs-style-lab", title: "Tabs Styles", description: "标签页风格实验", group: "风格", Demo: TabsStyleLabDemo },
+  { slug: "tabs-mini-lab", title: "Small Tabs", description: "小尺寸标签页候选", group: "风格", Demo: TabsMiniStyleLabDemo },
+  { slug: "select-style-lab", title: "Select Styles", description: "下拉选择风格实验", group: "风格", Demo: SelectStyleLabDemo },
+  { slug: "control-style-lab", title: "Control Styles", description: "表单控件风格实验", group: "风格", Demo: ControlStyleLabDemo },
+  { slug: "surface-style-lab", title: "Surface Styles", description: "面板/对话框风格实验", group: "风格", Demo: SurfaceStyleLabDemo },
+  { slug: "overlay-style-lab", title: "Overlay Styles", description: "浮层风格实验", group: "风格", Demo: OverlayStyleLabDemo },
+  { slug: "progress-style-lab", title: "Progress Styles", description: "进度条风格实验", group: "风格", Demo: ProgressStyleLabDemo },
+  { slug: "button-style-lab", title: "Button Styles", description: "按钮风格实验", group: "风格", Demo: ButtonStyleLabDemo },
+  { slug: "input-style-lab", title: "Input Styles", description: "输入框风格实验", group: "风格", Demo: InputStyleLabDemo },
+  { slug: "card-style-lab", title: "Card Styles", description: "卡片风格实验", group: "风格", Demo: CardStyleLabDemo },
+  { slug: "badge-style-lab", title: "Badge Styles", description: "标签风格实验", group: "风格", Demo: BadgeStyleLabDemo },
+  { slug: "alert-style-lab", title: "Alert Styles", description: "提示风格实验", group: "风格", Demo: AlertStyleLabDemo },
+  { slug: "table-style-lab", title: "Table Styles", description: "表格风格实验", group: "风格", Demo: TableStyleLabDemo },
 ]
+
+export const uiDemoMap = uiDemoItems.reduce<Record<string, DemoItem["Demo"]>>((acc, item) => {
+  acc[item.slug] = item.Demo
+  return acc
+}, {})
+
+export const getUiDemoComponent = (slug: string) => uiDemoMap[slug]

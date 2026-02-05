@@ -192,7 +192,7 @@ export function SubdomainsDetailView({
       a.remove()
       URL.revokeObjectURL(url)
     } catch (error) {
-      console.error("Failed to download subdomains", error)
+      void error
     }
   }
 
@@ -225,8 +225,7 @@ export function SubdomainsDetailView({
       setSelectedSubdomains([])
       setDeleteDialogOpen(false)
       refetch()
-    } catch (error) {
-      console.error("Failed to delete subdomains", error)
+    } catch {
       toast.error(tToast("deleteFailed"))
     } finally {
       setIsDeleting(false)

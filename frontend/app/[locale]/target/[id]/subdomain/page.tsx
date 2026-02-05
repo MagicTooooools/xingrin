@@ -2,8 +2,7 @@
 
 import React from "react"
 import { useParams } from "next/navigation"
-import { SubdomainsDetailView } from "@/components/subdomains"
-
+import { SubdomainsDetailView } from "@/components/subdomains/subdomains-detail-view"
 export default function TargetSubdomainPage() {
   const { id } = useParams<{ id: string }>()
 

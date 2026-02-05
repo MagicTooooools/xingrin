@@ -368,7 +368,7 @@ function resolveLayout(
   return { positions, groups, height }
 }
 
-function RoleNode({ data }: NodeProps<RoleNodeData>) {
+function RoleNode({ data }: NodeProps<Node<RoleNodeData>>) {
   const Icon = data.icon
 
   return (
@@ -444,7 +444,7 @@ function RoleNode({ data }: NodeProps<RoleNodeData>) {
   )
 }
 
-function GroupNode({ data }: NodeProps<GroupNodeData>) {
+function GroupNode({ data }: NodeProps<Node<GroupNodeData>>) {
   return (
     <div className="h-full w-full rounded-xl border border-dashed border-muted-foreground/30 bg-muted/10">
       <div className="px-3 pt-2 text-[11px] font-medium text-muted-foreground">
@@ -663,9 +663,9 @@ export function ArchitectureFlow() {
         nodesConnectable={false}
         elementsSelectable={false}
         panOnDrag={true}
-        zoomOnScroll={false}
-        zoomOnPinch={false}
-        preventScrolling={false}
+        zoomOnScroll={true}
+        zoomOnPinch={true}
+        preventScrolling={true}
         proOptions={{ hideAttribution: true }}
       >
         <Background

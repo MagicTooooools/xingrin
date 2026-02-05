@@ -189,6 +189,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         { title: "Badge Demo", url: "/tools/badge-demo/" },
         { title: "Badge Variants", url: "/prototypes/badge-variants/" },
         { title: "Status Progress Variants", url: "/prototypes/status-progress-variants/" },
+        { title: "Asset Card Variants", url: "/prototypes/asset-card-variants/" },
       ],
     },
     {
@@ -208,13 +209,19 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         { title: "Dashboard Demo", url: "/prototypes/dashboard-demo/" },
         { title: "Dashboard Demo Dark", url: "/prototypes/dashboard-demo-dark/" },
         { title: "Dashboard Rework", url: "/prototypes/dashboard-rework/" },
+        { title: "Asset Pulse Designs", url: "/prototypes/asset-pulse-designs/" },
+        { title: "Asset Pulse Light", url: "/prototypes/asset-pulse-light-designs/" },
+        { title: "Advanced Asset Pulse", url: "/prototypes/advanced-asset-pulse/" },
+        { title: "Vuln Chart Designs", url: "/prototypes/vuln-designs/" },
       ],
     },
     {
       title: "流程与风格",
       icon: IconRadar,
       items: [
+        { title: "Scan Engine Designs", url: "/scan/engine/demo/" },
         { title: "Scan Dialogs", url: "/prototypes/scan-dialogs/" },
+        { title: "Scan Actions Demo", url: "/prototypes/scan-history-actions/" },
         { title: "Arknights UI Demo", url: "/prototypes/arknights-ui/" },
       ],
     },

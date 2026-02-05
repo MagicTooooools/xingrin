@@ -53,6 +53,9 @@ function GravityStarsBackground({
   const containerRef = React.useRef<HTMLDivElement | null>(null);
   const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
   const animRef = React.useRef<number | null>(null);
+  const isActiveRef = React.useRef(true);
+  const isIntersectingRef = React.useRef(true);
+  const prefersReducedMotionRef = React.useRef(false);
   const starsRef = React.useRef<Particle[]>([]);
   const mouseRef = React.useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const [dpr, setDpr] = React.useState(1);
@@ -289,10 +292,59 @@ function GravityStarsBackground({
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
+    if (!isActiveRef.current) {
+      animRef.current = requestAnimationFrame(animate);
+      return;
+    }
     updateStars();
     drawStars(ctx);
     animRef.current = requestAnimationFrame(animate);
   }, [updateStars, drawStars]);
+
+  const updateActiveState = React.useCallback(() => {
+    isActiveRef.current =
+      !prefersReducedMotionRef.current &&
+      !document.hidden &&
+      isIntersectingRef.current;
+  }, []);
+
+  React.useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const handleReduceMotion = (e: MediaQueryListEvent | MediaQueryList) => {
+      prefersReducedMotionRef.current = 'matches' in e ? e.matches : mq.matches;
+      updateActiveState();
+    };
+    handleReduceMotion(mq);
+    mq.addEventListener('change', handleReduceMotion);
+    return () => mq.removeEventListener('change', handleReduceMotion);
+  }, [updateActiveState]);
+
+  React.useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const handleVisibility = () => {
+      updateActiveState();
+    };
+
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        isIntersectingRef.current = entry.isIntersecting;
+        updateActiveState();
+      },
+      { threshold: 0 }
+    );
+
+    io.observe(container);
+    document.addEventListener('visibilitychange', handleVisibility);
+    updateActiveState();
+
+    return () => {
+      io.disconnect();
+      document.removeEventListener('visibilitychange', handleVisibility);
+    };
+  }, [updateActiveState]);
 
   React.useEffect(() => {
     resizeCanvas();

@@ -2,8 +2,7 @@
 
 import React from "react"
 import { useParams } from "next/navigation"
-import { IPAddressesView } from "@/components/ip-addresses"
-
+import { IPAddressesView } from "@/components/ip-addresses/ip-addresses-view"
 export default function ScanHistoryIPsPage() {
   const { id } = useParams<{ id: string }>()
 

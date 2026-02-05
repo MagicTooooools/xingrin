@@ -1,9 +1,7 @@
 "use client"
 
-import React, { useState, useEffect, useRef } from "react"
+import React, { useState, useEffect } from "react"
 import { FileCode, Save, X, AlertCircle, CheckCircle2, AlertTriangle } from "@/components/icons"
-import Editor from "@monaco-editor/react"
-import type { editor } from "monaco-editor"
 import * as yaml from "js-yaml"
 import { useTranslations } from "next-intl"
 import {
@@ -16,8 +14,8 @@ import {
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
+import { CodeEditor } from "@/components/ui/code-editor"
 import { toast } from "sonner"
-import { useColorTheme } from "@/hooks/use-color-theme"
 import type { ScanEngine } from "@/types/engine.types"
 
 interface EngineEditDialogProps {
@@ -43,10 +41,7 @@ export function EngineEditDialog({
   const [yamlContent, setYamlContent] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [hasChanges, setHasChanges] = useState(false)
-  const [isEditorReady, setIsEditorReady] = useState(false)
   const [yamlError, setYamlError] = useState<{ message: string; line?: number; column?: number } | null>(null)
-  const { currentTheme } = useColorTheme()
-  const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null)
 
   // Generate sample YAML configuration
   const generateSampleYaml = (engine: ScanEngine) => {
@@ -163,17 +158,10 @@ url_fetch:
   }
 
   // Handle editor content change
-  const handleEditorChange = (value: string | undefined) => {
-    const newValue = value || ""
-    setYamlContent(newValue)
+  const handleEditorChange = (value: string) => {
+    setYamlContent(value)
     setHasChanges(true)
-    validateYaml(newValue)
-  }
-
-  // Handle editor mount
-  const handleEditorDidMount = (editorInstance: editor.IStandaloneCodeEditor) => {
-    editorRef.current = editorInstance
-    setIsEditorReady(true)
+    validateYaml(value)
   }
 
   // Handle save
@@ -204,8 +192,7 @@ url_fetch:
 
       setHasChanges(false)
       onOpenChange(false)
-    } catch (error) {
-      console.error("Failed to save YAML config:", error)
+    } catch {
       // Error toast is handled by useUpdateEngine hook
     } finally {
       setIsSubmitting(false)
@@ -257,48 +244,16 @@ url_fetch:
                 </div>
               </div>
 
-              {/* Monaco Editor */}
-              <div className={`border rounded-md overflow-hidden h-full ${yamlError ? 'border-destructive' : ''}`}>
-                <Editor
-                  height="100%"
-                  defaultLanguage="yaml"
-                  value={yamlContent}
-                  onChange={handleEditorChange}
-                  onMount={handleEditorDidMount}
-                  theme={currentTheme.isDark ? "vs-dark" : "light"}
-                  options={{
-                    minimap: { enabled: false },
-                    fontSize: 13,
-                    lineNumbers: "on",
-                    wordWrap: "off",
-                    scrollBeyondLastLine: false,
-                    automaticLayout: true,
-                    tabSize: 2,
-                    insertSpaces: true,
-                    formatOnPaste: true,
-                    formatOnType: true,
-                    folding: true,
-                    foldingStrategy: "indentation",
-                    showFoldingControls: "always",
-                    bracketPairColorization: {
-                      enabled: true,
-                    },
-                    padding: {
-                      top: 16,
-                      bottom: 16,
-                    },
-                    readOnly: isSubmitting,
-                  }}
-                  loading={
-                    <div className="flex items-center justify-center h-full">
-                      <div className="flex flex-col items-center gap-2">
-                        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-                        <p className="text-sm text-muted-foreground">{t("loadingEditor")}</p>
-                      </div>
-                    </div>
-                  }
-                />
-              </div>
+              {/* CodeMirror Editor */}
+              <CodeEditor
+                value={yamlContent}
+                onChange={handleEditorChange}
+                language="yaml"
+                readOnly={isSubmitting}
+                className={yamlError ? 'border-destructive' : ''}
+                showLineNumbers
+                showFoldGutter
+              />
 
               {/* Error message display */}
               {yamlError && (
@@ -334,7 +289,7 @@ url_fetch:
             <Button
               type="button"
               onClick={handleSave}
-              disabled={isSubmitting || !hasChanges || !!yamlError || !isEditorReady}
+              disabled={isSubmitting || !hasChanges || !!yamlError}
             >
               {isSubmitting ? (
                 <>

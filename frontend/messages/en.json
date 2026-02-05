@@ -424,7 +424,7 @@
     },
     "assetTrend": {
       "title": "Asset Trend",
-      "description": "Updated hourly · Click line or legend to hide/show",
+      "description": "Updated hourly",
       "noData": "No historical data",
       "current": "Current",
       "subdomains": "Subdomains",
@@ -814,6 +814,7 @@
           "ips": "IP Addresses",
           "urls": "URLs",
           "directories": "Directories",
+          "screenshots": "Screenshots",
           "vulnerabilities": "Vulnerabilities"
         },
         "severity": {
@@ -2437,6 +2438,7 @@
           "ips": "IP Addresses",
           "urls": "URLs",
           "directories": "Directories",
+          "screenshots": "Screenshots",
           "vulnerabilities": "Total Vulnerabilities"
         },
         "severity": {

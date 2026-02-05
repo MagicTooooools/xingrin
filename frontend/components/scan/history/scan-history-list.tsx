@@ -1,9 +1,9 @@
 "use client"
 
 import React, { useState, useMemo } from "react"
+import dynamic from "next/dynamic"
 import { useRouter } from "next/navigation"
 import { useTranslations, useLocale } from "next-intl"
-import { ScanHistoryDataTable } from "./scan-history-data-table"
 import { createScanHistoryColumns } from "./scan-history-columns"
 import { getDateLocale } from "@/lib/date-utils"
 import type { ScanRecord, ScanStatus } from "@/types/scan.types"
@@ -23,7 +23,20 @@ import { toast } from "sonner"
 import { useScans } from "@/hooks/use-scans"
 import { deleteScan, bulkDeleteScans, stopScan, getScan } from "@/services/scan.service"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { ScanProgressDialog, buildScanProgressData, type ScanProgressData } from "@/components/scan/scan-progress-dialog"
+import { buildScanProgressData, type ScanProgressData } from "@/components/scan/scan-progress-dialog"
+
+const ScanHistoryDataTable = dynamic(
+  () => import("./scan-history-data-table").then((mod) => mod.ScanHistoryDataTable),
+  {
+    ssr: false,
+    loading: () => <DataTableSkeleton rows={6} columns={6} withPadding />,
+  }
+)
+
+const ScanProgressDialog = dynamic(
+  () => import("@/components/scan/scan-progress-dialog").then((mod) => mod.ScanProgressDialog),
+  { ssr: false }
+)
 
 /**
  * Scan history list component
@@ -205,9 +218,8 @@ export function ScanHistoryList({ hideToolbar = false, targetId, pageSize: custo
     try {
       await deleteMutation.mutateAsync(scanToDelete.id)
       toast.success(tToast("deletedScanRecord", { name: scanToDelete.target?.name ?? "" }))
-    } catch (error) {
+    } catch {
       toast.error(tToast("deleteFailed"))
-      console.error('Delete failed:', error)
     } finally {
       setScanToDelete(null)
     }
@@ -236,9 +248,8 @@ export function ScanHistoryList({ hideToolbar = false, targetId, pageSize: custo
     try {
       await stopMutation.mutateAsync(scanToStop.id)
       toast.success(tToast("stoppedScan", { name: scanToStop.target?.name ?? "" }))
-    } catch (error) {
+    } catch {
       toast.error(tToast("stopFailed"))
-      console.error('Stop scan failed:', error)
     } finally {
       setScanToStop(null)
     }
@@ -271,9 +282,8 @@ export function ScanHistoryList({ hideToolbar = false, targetId, pageSize: custo
     try {
       const result = await bulkDeleteMutation.mutateAsync(deletedIds)
       toast.success(result.message || tToast("bulkDeleteSuccess", { count: result.deletedCount }))
-    } catch (error) {
+    } catch {
       toast.error(tToast("bulkDeleteFailed"))
-      console.error('Bulk delete failed:', error)
     }
   }
 
@@ -428,11 +438,13 @@ export function ScanHistoryList({ hideToolbar = false, targetId, pageSize: custo
       </AlertDialog>
 
       {/* Scan progress dialog */}
-      <ScanProgressDialog
-        open={progressDialogOpen}
-        onOpenChange={setProgressDialogOpen}
-        data={progressData}
-      />
+      {progressDialogOpen ? (
+        <ScanProgressDialog
+          open={progressDialogOpen}
+          onOpenChange={setProgressDialogOpen}
+          data={progressData}
+        />
+      ) : null}
     </>
   )
 }

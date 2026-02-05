@@ -10,6 +10,7 @@ import {
   Server,
   Link2,
   FolderOpen,
+  Camera,
   ShieldAlert,
   AlertTriangle,
   Clock,
@@ -17,7 +18,7 @@ import {
   ChevronRight,
   CheckCircle2,
   PauseCircle,
-  Play,
+  Loader2,
 } from "@/components/icons"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -96,6 +97,7 @@ function formatShortDate(
  */
 export function TargetOverview({ targetId }: TargetOverviewProps) {
   const t = useTranslations("pages.targetDetail.overview")
+  const tInitiate = useTranslations("scan.initiate")
   const locale = useLocale()
 
   const [scanDialogOpen, setScanDialogOpen] = useState(false)
@@ -115,6 +117,7 @@ export function TargetOverview({ targetId }: TargetOverviewProps) {
     endpoints: targetSummary?.endpoints ?? 0,
     ips: targetSummary?.ips ?? 0,
     directories: targetSummary?.directories ?? 0,
+    screenshots: targetSummary?.screenshots ?? 0,
   }), [targetSummary])
 
   const vulnSummary = React.useMemo(
@@ -129,31 +132,43 @@ export function TargetOverview({ targetId }: TargetOverviewProps) {
         title: t("cards.websites"),
         value: summary.websites || 0,
         icon: Globe,
+        code: "DAT-WEB",
         href: `/target/${targetId}/websites/`,
       },
       {
         title: t("cards.subdomains"),
         value: summary.subdomains || 0,
         icon: Network,
+        code: "DAT-SUB",
         href: `/target/${targetId}/subdomain/`,
       },
       {
         title: t("cards.ips"),
         value: summary.ips || 0,
         icon: Server,
+        code: "DAT-IP",
         href: `/target/${targetId}/ip-addresses/`,
       },
       {
         title: t("cards.urls"),
         value: summary.endpoints || 0,
         icon: Link2,
+        code: "DAT-URL",
         href: `/target/${targetId}/endpoints/`,
       },
       {
         title: t("cards.directories"),
         value: summary.directories || 0,
         icon: FolderOpen,
+        code: "DAT-DIR",
         href: `/target/${targetId}/directories/`,
+      },
+      {
+        title: t("cards.screenshots"),
+        value: summary.screenshots || 0,
+        icon: Camera,
+        code: "DAT-SCR",
+        href: `/target/${targetId}/screenshots/`,
       },
     ],
     [summary, targetId, t]
@@ -208,8 +223,8 @@ export function TargetOverview({ targetId }: TargetOverviewProps) {
   return (
     <div className="space-y-6">
       {/* Target info + Initiate Scan button */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+      <div className="flex flex-wrap items-end justify-between gap-3 -mt-4">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground">
           <div className="flex items-center gap-1.5">
             <Calendar className="h-4 w-4" />
             <span>{t("createdAt")}: {formatDate(target.createdAt, locale)}</span>
@@ -219,27 +234,60 @@ export function TargetOverview({ targetId }: TargetOverviewProps) {
             <span>{t("lastScanned")}: {formatDate(target.lastScannedAt, locale)}</span>
           </div>
         </div>
-        <Button onClick={() => setScanDialogOpen(true)}>
-          <Play className="h-4 w-4 mr-2" />
-          {t("initiateScan")}
+        <Button 
+          onClick={() => setScanDialogOpen(true)}
+          className="
+            relative overflow-hidden group 
+            bg-background border border-destructive/50 text-destructive
+            hover:border-destructive
+            min-w-[140px]
+            shrink-0 self-end
+          "
+        >
+          <span className="absolute inset-y-0 left-0 w-[2px] bg-destructive transition-all duration-300 group-hover:w-full opacity-10" />
+          <span className="absolute bottom-0 right-0 h-[2px] w-0 bg-destructive transition-all duration-300 group-hover:w-full" />
+          <span className="relative z-10 flex items-center gap-2">
+            <Loader2 className="h-4 w-4 animate-spin hidden group-hover:block" />
+            <span className="group-hover:hidden">{t("initiateScan")}</span>
+            <span className="hidden group-hover:block">{tInitiate("initiating")}</span>
+          </span>
         </Button>
       </div>
 
       {/* Asset statistics cards */}
       <div>
         <h3 className="text-lg font-semibold mb-4">{t("assetsTitle")}</h3>
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-6">
           {assetCards.map((card) => (
-            <Link key={card.title} href={card.href}>
-              <Card className="hover:border-primary/50 transition-colors cursor-pointer">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">{card.title}</CardTitle>
-                  <card.icon className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{card.value.toLocaleString()}</div>
-                </CardContent>
-              </Card>
+            <Link key={card.title} href={card.href} className="block">
+              <div
+                className="group relative p-4 hover:bg-accent/5 transition-all duration-300 cursor-pointer"
+                style={{ background: "var(--card)" }}
+              >
+                <div className="absolute inset-0 border border-border/40 group-hover:border-primary/30 transition-colors" />
+                <div className="absolute top-0 right-0 h-2 w-2 border-r border-t border-primary/50" />
+                <div className="absolute bottom-0 left-0 h-2 w-2 border-l border-b border-primary/50" />
+
+                <div className="relative z-10">
+                  <div className="flex justify-between items-start mb-2">
+                    <div className="text-[10px] font-mono text-muted-foreground bg-muted px-1.5 py-0.5 rounded-sm">
+                      {card.code}
+                    </div>
+                    <card.icon className="h-4 w-4 text-muted-foreground/70 group-hover:text-primary transition-colors" />
+                  </div>
+
+                  <div className="text-3xl font-light tracking-tight text-foreground group-hover:translate-x-1 transition-transform duration-300">
+                    {card.value.toLocaleString()}
+                  </div>
+
+                  <div className="mt-2 flex items-center gap-2">
+                    <div className="h-px flex-1 bg-border border-t border-dashed border-muted-foreground/20" />
+                    <span className="text-[11px] text-foreground/85 font-mono uppercase tracking-wider">
+                      {card.title}
+                    </span>
+                  </div>
+                </div>
+              </div>
             </Link>
           ))}
         </div>

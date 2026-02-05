@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl"
 
 import { cn } from "@/lib/utils"
 
-function Spinner({ className, ...props }: React.ComponentProps<"svg">) {
+function Spinner({ className, ...props }: React.ComponentPropsWithoutRef<typeof Loader2Icon>) {
   const t = useTranslations("common.ui")
   
   return (

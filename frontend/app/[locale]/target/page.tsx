@@ -1,8 +1,17 @@
 "use client"
 
-import { AllTargetsDetailView } from "@/components/target/all-targets-detail-view"
+import dynamic from "next/dynamic"
+import { DataTableSkeleton } from "@/components/ui/data-table-skeleton"
 import { PageHeader } from "@/components/common/page-header"
 import { useTranslations } from "next-intl"
+
+const AllTargetsDetailView = dynamic(
+  () => import("@/components/target/all-targets-detail-view").then((mod) => mod.AllTargetsDetailView),
+  {
+    ssr: false,
+    loading: () => <DataTableSkeleton rows={6} columns={5} withPadding />,
+  }
+)
 
 export default function AllTargetsPage() {
   const t = useTranslations("pages.target")

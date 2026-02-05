@@ -1,12 +1,35 @@
 "use client"
 
+import dynamic from "next/dynamic"
 import { Button } from "@/components/ui/button"
 import { SidebarTrigger } from "@/components/ui/sidebar"
-import { NotificationDrawer } from "@/components/notifications"
-import { QuickScanDialog } from "@/components/scan/quick-scan-dialog"
 import { LanguageSwitcher } from "@/components/language-switcher"
 import { Link } from "@/i18n/navigation"
 import { useTranslations } from "next-intl"
+
+const HeaderIconPlaceholder = () => (
+  <div className="h-8 w-8" aria-hidden="true" />
+)
+
+const HeaderButtonPlaceholder = () => (
+  <div className="h-8 w-24" aria-hidden="true" />
+)
+
+const QuickScanDialog = dynamic(
+  () => import("@/components/scan/quick-scan-dialog").then((mod) => mod.QuickScanDialog),
+  {
+    ssr: false,
+    loading: () => <HeaderButtonPlaceholder />,
+  }
+)
+
+const NotificationDrawer = dynamic(
+  () => import("@/components/notifications/notification-drawer").then((mod) => mod.NotificationDrawer),
+  {
+    ssr: false,
+    loading: () => <HeaderIconPlaceholder />,
+  }
+)
 
 /**
  * 统一顶栏组件
@@ -24,12 +47,23 @@ export function UnifiedHeader() {
     >
       {/* Logo 区域 - 固定宽度，与侧边栏宽度一致 */}
       <div className="flex h-full w-(--sidebar-width) shrink-0 items-center px-4">
-        <Link href="/" className="flex items-center gap-2">
+        <Link href="/" className="flex items-center gap-3">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={logoSrc} alt="Logo" className="size-6" />
-          <span className="text-base font-semibold">
-            {t("appName")}
-          </span>
+          <img src={logoSrc} alt="Logo" className="size-7" />
+          <div className="flex flex-col gap-0.5 leading-none">
+            <div className="flex items-center gap-2">
+              <span className="text-base font-semibold tracking-tight">
+                {t("appName")}
+              </span>
+              <span className="rounded-sm border border-border px-1.5 py-0.5 text-[9px] uppercase tracking-[0.2em] text-muted-foreground">
+                {process.env.NEXT_PUBLIC_IMAGE_TAG || "dev"}
+              </span>
+            </div>
+            <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.24em] text-muted-foreground">
+              <span className="h-1.5 w-1.5 rounded-full bg-[var(--success)]" />
+              <span>Security Console</span>
+            </div>
+          </div>
         </Link>
       </div>
 

@@ -1,4 +1,5 @@
 import { api } from "@/lib/api-client"
+import { USE_MOCK, mockDelay, mockIPAddresses, getMockTargetById, getMockScanById } from "@/mock"
 import type { GetIPAddressesParams, GetIPAddressesResponse } from "@/types/ip-address.types"
 
 // Bulk delete response type
@@ -24,6 +25,42 @@ export class IPAddressService {
     targetId: number,
     params?: GetIPAddressesParams
   ): Promise<GetIPAddressesResponse> {
+    if (USE_MOCK) {
+      await mockDelay()
+      const page = params?.page || 1
+      const pageSize = params?.pageSize || 10
+      const filter = params?.filter?.toLowerCase() || ""
+      const target = getMockTargetById(targetId)
+      const domain = target?.name?.toLowerCase()
+
+      let filtered = mockIPAddresses
+
+      if (domain) {
+        filtered = filtered.filter((ip) =>
+          ip.hosts.some((host) => host.toLowerCase().includes(domain))
+        )
+      }
+
+      if (filter) {
+        filtered = filtered.filter((ip) =>
+          ip.ip.toLowerCase().includes(filter) ||
+          ip.hosts.some((host) => host.toLowerCase().includes(filter))
+        )
+      }
+
+      const total = filtered.length
+      const totalPages = Math.ceil(total / pageSize)
+      const start = (page - 1) * pageSize
+      const results = filtered.slice(start, start + pageSize)
+
+      return {
+        results,
+        total,
+        page,
+        pageSize,
+        totalPages,
+      }
+    }
     const response = await api.get<GetIPAddressesResponse>(`/targets/${targetId}/host-ports`, {
       params: {
         page: params?.page || 1,
@@ -38,6 +75,42 @@ export class IPAddressService {
     scanId: number,
     params?: GetIPAddressesParams
   ): Promise<GetIPAddressesResponse> {
+    if (USE_MOCK) {
+      await mockDelay()
+      const page = params?.page || 1
+      const pageSize = params?.pageSize || 10
+      const filter = params?.filter?.toLowerCase() || ""
+      const scan = getMockScanById(scanId)
+      const domain = scan?.target?.name?.toLowerCase()
+
+      let filtered = mockIPAddresses
+
+      if (domain) {
+        filtered = filtered.filter((ip) =>
+          ip.hosts.some((host) => host.toLowerCase().includes(domain))
+        )
+      }
+
+      if (filter) {
+        filtered = filtered.filter((ip) =>
+          ip.ip.toLowerCase().includes(filter) ||
+          ip.hosts.some((host) => host.toLowerCase().includes(filter))
+        )
+      }
+
+      const total = filtered.length
+      const totalPages = Math.ceil(total / pageSize)
+      const start = (page - 1) * pageSize
+      const results = filtered.slice(start, start + pageSize)
+
+      return {
+        results,
+        total,
+        page,
+        pageSize,
+        totalPages,
+      }
+    }
     const response = await api.get<GetIPAddressesResponse>(`/scans/${scanId}/host-ports`, {
       params: {
         page: params?.page || 1,

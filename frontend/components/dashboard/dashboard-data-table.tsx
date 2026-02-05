@@ -4,7 +4,7 @@ import * as React from "react"
 import { IconBug, IconRadar } from "@/components/icons"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Skeleton } from "@/components/ui/skeleton"
-import { UnifiedDataTable } from "@/components/ui/data-table"
+import { UnifiedDataTable } from "@/components/ui/data-table/unified-data-table"
 import { useAllVulnerabilities } from "@/hooks/use-vulnerabilities"
 import { useScans } from "@/hooks/use-scans"
 import { VulnerabilityDetailDialog } from "@/components/vulnerabilities/vulnerability-detail-dialog"
@@ -152,7 +152,7 @@ export function DashboardDataTable() {
       setProgressData(data)
       setProgressDialogOpen(true)
     } catch (error) {
-      console.error("获取扫描详情失败:", error)
+      void error
     }
   }, [])
 
@@ -169,9 +169,8 @@ export function DashboardDataTable() {
     try {
       await deleteMutation.mutateAsync(scanToDelete.id)
       toast.success(t('common.status.success'))
-    } catch (error) {
+    } catch {
       toast.error(t('common.status.error'))
-      console.error('删除失败:', error)
     } finally {
       setScanToDelete(null)
     }
@@ -190,9 +189,8 @@ export function DashboardDataTable() {
     try {
       await stopMutation.mutateAsync(scanToStop.id)
       toast.success(t('common.status.success'))
-    } catch (error) {
+    } catch {
       toast.error(t('common.status.error'))
-      console.error('停止扫描失败:', error)
     } finally {
       setScanToStop(null)
     }
@@ -218,9 +216,9 @@ export function DashboardDataTable() {
         },
         actions: {
           snapshot: t('common.actions.snapshot'),
-          stopScan: t('scan.stopScan'),
+          stop: t('scan.stopScan'),
+          stopScanPending: t('scan.stopScanPending'),
           delete: t('common.actions.delete'),
-          openMenu: t('common.actions.openMenu'),
           selectAll: t('common.actions.selectAll'),
           selectRow: t('common.actions.selectRow'),
         },

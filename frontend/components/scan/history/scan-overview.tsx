@@ -10,11 +10,11 @@ import {
   Server,
   Link2,
   FolderOpen,
+  Camera,
   AlertTriangle,
   Clock,
   Calendar,
   ChevronRight,
-  Target,
   CheckCircle2,
   XCircle,
   Loader2,
@@ -209,8 +209,8 @@ export function ScanOverview({ scanId }: ScanOverviewProps) {
   // Logs hook
   const { logs, loading: logsLoading } = useScanLogs({
     scanId,
-    enabled: !!scan,
-    pollingInterval: isRunning && autoRefresh ? 3000 : 0,
+    enabled: !!scan && activeTab === 'logs',
+    pollingInterval: isRunning && autoRefresh && activeTab === 'logs' ? 3000 : 0,
   })
 
   // Memoize derived values to avoid unnecessary recalculations
@@ -245,8 +245,6 @@ export function ScanOverview({ scanId }: ScanOverviewProps) {
   const statusIconConfig = React.useMemo(() => getStatusIcon(status), [status])
   const StatusIcon = statusIconConfig.icon
   const statusStyle = SCAN_STATUS_STYLES[status] || "bg-muted text-muted-foreground"
-  const targetId = scan?.targetId
-  const targetName = scan?.target?.name
   const startedAt = React.useMemo(
     () => scanWithLegacy?.startedAt || scan?.createdAt,
     [scan, scanWithLegacy]
@@ -259,31 +257,43 @@ export function ScanOverview({ scanId }: ScanOverviewProps) {
         title: t("cards.websites"),
         value: summary.websites || 0,
         icon: Globe,
+        code: "DAT-WEB",
         href: `/scan/history/${scanId}/websites/`,
       },
       {
         title: t("cards.subdomains"),
         value: summary.subdomains || 0,
         icon: Network,
+        code: "DAT-SUB",
         href: `/scan/history/${scanId}/subdomain/`,
       },
       {
         title: t("cards.ips"),
         value: summary.ips || 0,
         icon: Server,
+        code: "DAT-IP",
         href: `/scan/history/${scanId}/ip-addresses/`,
       },
       {
         title: t("cards.urls"),
         value: summary.endpoints || 0,
         icon: Link2,
+        code: "DAT-URL",
         href: `/scan/history/${scanId}/endpoints/`,
       },
       {
         title: t("cards.directories"),
         value: summary.directories || 0,
         icon: FolderOpen,
+        code: "DAT-DIR",
         href: `/scan/history/${scanId}/directories/`,
+      },
+      {
+        title: t("cards.screenshots"),
+        value: summary.screenshots || 0,
+        icon: Camera,
+        code: "DAT-SCR",
+        href: `/scan/history/${scanId}/screenshots/`,
       },
     ],
     [summary, scanId, t]
@@ -324,16 +334,6 @@ export function ScanOverview({ scanId }: ScanOverviewProps) {
       {/* Scan info + Status */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-6 text-sm text-muted-foreground">
-          {/* Target */}
-          {targetId && targetName && (
-            <Link
-              href={`/target/${targetId}/overview/`}
-              className="flex items-center gap-1.5 hover:text-foreground transition-colors"
-            >
-              <Target className="h-4 w-4" />
-              <span>{targetName}</span>
-            </Link>
-          )}
           {/* Started at */}
           <div className="flex items-center gap-1.5">
             <Calendar className="h-4 w-4" />
@@ -369,18 +369,37 @@ export function ScanOverview({ scanId }: ScanOverviewProps) {
       {/* Asset statistics cards */}
       <div>
         <h3 className="text-lg font-semibold mb-4">{t("assetsTitle")}</h3>
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-6">
           {assetCards.map((card) => (
-            <Link key={card.title} href={card.href}>
-              <Card className="hover:border-primary/50 transition-colors cursor-pointer">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">{card.title}</CardTitle>
-                  <card.icon className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{card.value.toLocaleString()}</div>
-                </CardContent>
-              </Card>
+            <Link key={card.title} href={card.href} className="block">
+              <div
+                className="group relative p-4 hover:bg-accent/5 transition-all duration-300 cursor-pointer"
+                style={{ background: "var(--card)" }}
+              >
+                <div className="absolute inset-0 border border-border/40 group-hover:border-primary/30 transition-colors" />
+                <div className="absolute top-0 right-0 h-2 w-2 border-r border-t border-primary/50" />
+                <div className="absolute bottom-0 left-0 h-2 w-2 border-l border-b border-primary/50" />
+
+                <div className="relative z-10">
+                  <div className="flex justify-between items-start mb-2">
+                    <div className="text-[10px] font-mono text-muted-foreground bg-muted px-1.5 py-0.5 rounded-sm">
+                      {card.code}
+                    </div>
+                    <card.icon className="h-4 w-4 text-muted-foreground/70 group-hover:text-primary transition-colors" />
+                  </div>
+
+                  <div className="text-3xl font-light tracking-tight text-foreground group-hover:translate-x-1 transition-transform duration-300">
+                    {card.value.toLocaleString()}
+                  </div>
+
+                  <div className="mt-2 flex items-center gap-2">
+                    <div className="h-px flex-1 bg-border border-t border-dashed border-muted-foreground/20" />
+                    <span className="text-[11px] text-foreground/85 font-mono uppercase tracking-wider">
+                      {card.title}
+                    </span>
+                  </div>
+                </div>
+              </div>
             </Link>
           ))}
         </div>
@@ -492,10 +511,14 @@ export function ScanOverview({ scanId }: ScanOverviewProps) {
           {/* Tab Header */}
           <div className="flex items-center justify-between px-3 py-2 bg-muted/30 border-b shrink-0">
             <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'logs' | 'config')}>
-              <TabsList variant="underline" className="h-8 gap-3">
-                <TabsTrigger variant="underline" value="logs" className="text-xs">{t("logsTitle")}</TabsTrigger>
-                <TabsTrigger variant="underline" value="config" className="text-xs">{t("configTitle")}</TabsTrigger>
-              </TabsList>
+            <TabsList variant="minimal-tab">
+              <TabsTrigger variant="minimal-tab" value="logs">
+                {t("logsTitle")}
+              </TabsTrigger>
+              <TabsTrigger variant="minimal-tab" value="config">
+                {t("configTitle")}
+              </TabsTrigger>
+            </TabsList>
             </Tabs>
             {/* Auto-refresh toggle (only for logs tab when running) */}
             {activeTab === 'logs' && isRunning && (
@@ -524,7 +547,7 @@ export function ScanOverview({ scanId }: ScanOverviewProps) {
                     value={scan.yamlConfiguration}
                     onChange={() => {}}
                     disabled={true}
-                    height="100%"
+                    className="h-full"
                   />
                 ) : (
                   <div className="flex items-center justify-center h-full text-muted-foreground text-sm">

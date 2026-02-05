@@ -8,7 +8,6 @@ import {
   IconLoader2, 
 } from "@/components/icons"
 import { cn } from "@/lib/utils"
-import { Badge } from "@/components/ui/badge"
 import { ScanStatus } from "@/types/scan.types"
 
 // Mock Data
@@ -470,7 +469,6 @@ const CompactDualLineVariant = ({ status, progress, variant = "default" }: { sta
     const sizeClasses = "h-9 w-32" // Slightly larger for better readability
     
     // Variant specifics
-    const bgStyle = variant === "filled" ? { backgroundColor: `${color}10` } : { backgroundColor: "var(--muted-20)" } // fallback to class if var not works, using style below
     const borderStyle = { borderLeftColor: color }
     const roundedClass = variant === "sharp" ? "rounded-none" : "rounded-sm"
 

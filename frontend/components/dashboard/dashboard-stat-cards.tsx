@@ -1,6 +1,6 @@
 "use client"
 
-import { memo } from "react"
+import { memo, useEffect } from "react"
 import { useAssetStatistics } from "@/hooks/use-dashboard"
 import { Card, CardAction, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -8,6 +8,19 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { IconTarget, IconStack2, IconBug, IconPlayerPlay, IconTrendingUp, IconTrendingDown } from "@/components/icons"
 import { useTranslations } from "next-intl"
 import { useLocale } from "next-intl"
+import { motion, useSpring, useTransform } from "framer-motion"
+
+function NumberTicker({ value }: { value: number }) {
+  // Initialize from 0 to create a "count up" effect on mount
+  const spring = useSpring(0, { mass: 0.8, stiffness: 75, damping: 15 });
+  const display = useTransform(spring, (current) => Math.round(current).toLocaleString());
+
+  useEffect(() => {
+    spring.set(value);
+  }, [value, spring]);
+
+  return <motion.span>{display}</motion.span>;
+}
 
 const TrendBadge = memo(function TrendBadge({ change }: { change: number }) {
   if (change === 0) return null
@@ -61,7 +74,7 @@ const StatCard = memo(function StatCard({
           <Skeleton className="h-8 w-24" />
         ) : (
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            {typeof value === 'number' ? value.toLocaleString() : value}
+            {typeof value === 'number' ? <NumberTicker value={value} /> : value}
           </CardTitle>
         )}
         {!loading && change !== undefined && (

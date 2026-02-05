@@ -111,19 +111,19 @@ export default function NotificationSettingsPage() {
   const wecomEnabled = form.watch('wecom.enabled')
 
   return (
-    <div className="p-4 md:p-6 space-y-6">
+    <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
       <PageHeader
         code="NTF-01"
         title={t("pageTitle")}
         description={t("pageDesc")}
-        className="px-0"
       />
 
-      <Tabs defaultValue="channels" className="w-full">
-        <TabsList>
-          <TabsTrigger value="channels">{t("tabs.channels")}</TabsTrigger>
-          <TabsTrigger value="preferences">{t("tabs.preferences")}</TabsTrigger>
-        </TabsList>
+      <div className="px-4 lg:px-6">
+        <Tabs defaultValue="channels" className="w-full">
+          <TabsList>
+            <TabsTrigger value="channels">{t("tabs.channels")}</TabsTrigger>
+            <TabsTrigger value="preferences">{t("tabs.preferences")}</TabsTrigger>
+          </TabsList>
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
@@ -312,7 +312,8 @@ export default function NotificationSettingsPage() {
             </div>
           </form>
         </Form>
-      </Tabs>
+        </Tabs>
+      </div>
     </div>
   )
 }
