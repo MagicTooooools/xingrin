@@ -42,8 +42,6 @@ subdomain_discovery:
         enabled: true
         timeout-runtime: 3600
         threads-cli: 10
-      sublist3r:
-        enabled: false
       assetfinder:
         enabled: false
   bruteforce:
@@ -116,8 +114,6 @@ subdomain_discovery:
     enabled: false
     tools:
       subfinder:
-        enabled: false
-      sublist3r:
         enabled: false
       assetfinder:
         enabled: false

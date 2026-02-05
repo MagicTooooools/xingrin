@@ -514,6 +514,12 @@ install_agent_worker() {
   AGENT_URL_ENV=("LUNAFOX_AGENT_SERVER_URL=$AGENT_SERVER_URL")
   NETWORK_NAME="${LUNAFOX_NETWORK:-lunafox_network}"
   NETWORK_ENV=("LUNAFOX_NETWORK=$NETWORK_NAME")
+  THRESHOLD_ENV=(
+    "MAX_TASKS=${MAX_TASKS:-10}"
+    "CPU_THRESHOLD=${CPU_THRESHOLD:-80}"
+    "MEM_THRESHOLD=${MEM_THRESHOLD:-80}"
+    "DISK_THRESHOLD=${DISK_THRESHOLD:-85}"
+  )
   ADMIN_USER="admin"
   ADMIN_PASS="admin"
 
@@ -609,7 +615,7 @@ install_agent_worker() {
     PULL_ENV=("AGENT_SKIP_PULL=1")
   fi
   if [ ${#PULL_ENV[@]} -gt 0 ]; then
-    if ! (set -o pipefail; curl -kfsSL "$SERVER_URL/api/agents/install.sh?token=$REG_TOKEN" | env "${REGISTER_URL_ENV[@]}" "${AGENT_URL_ENV[@]}" "${NETWORK_ENV[@]}" "${PULL_ENV[@]}" bash); then
+    if ! (set -o pipefail; curl -kfsSL "$SERVER_URL/api/agents/install.sh?token=$REG_TOKEN" | env "${REGISTER_URL_ENV[@]}" "${AGENT_URL_ENV[@]}" "${NETWORK_ENV[@]}" "${THRESHOLD_ENV[@]}" "${PULL_ENV[@]}" bash); then
       error "Agent 安装脚本执行失败"
       echo -e "${DIM}请求地址: $SERVER_URL/api/agents/install.sh?token=$REG_TOKEN${RESET}"
       echo -e "${DIM}注册地址: ${REGISTER_URL_ENV[*]}${RESET}"
@@ -619,7 +625,7 @@ install_agent_worker() {
       exit 1
     fi
   else
-    if ! (set -o pipefail; curl -kfsSL "$SERVER_URL/api/agents/install.sh?token=$REG_TOKEN" | env "${REGISTER_URL_ENV[@]}" "${AGENT_URL_ENV[@]}" "${NETWORK_ENV[@]}" bash); then
+    if ! (set -o pipefail; curl -kfsSL "$SERVER_URL/api/agents/install.sh?token=$REG_TOKEN" | env "${REGISTER_URL_ENV[@]}" "${AGENT_URL_ENV[@]}" "${NETWORK_ENV[@]}" "${THRESHOLD_ENV[@]}" bash); then
       error "Agent 安装脚本执行失败"
       echo -e "${DIM}请求地址: $SERVER_URL/api/agents/install.sh?token=$REG_TOKEN${RESET}"
       echo -e "${DIM}注册地址: ${REGISTER_URL_ENV[*]}${RESET}"

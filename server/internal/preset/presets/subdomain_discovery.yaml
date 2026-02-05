@@ -18,11 +18,6 @@ configuration: |
           enabled: true
           timeout-runtime: 3600  # Scan timeout in seconds
           threads-cli: 10  # Number of concurrent threads
-        # Collect subdomains using multiple search engines
-        sublist3r:
-          enabled: true
-          timeout-runtime: 3600  # Scan timeout in seconds
-          threads-cli: 10  # Number of concurrent threads
 
     # Stage 2: Dictionary Bruteforce
     # Bruteforce domains using dictionaries to discover unpublished subdomains

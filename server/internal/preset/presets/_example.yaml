@@ -26,8 +26,6 @@ configuration: |
           enabled: true
           timeout-runtime: 3600
           threads-cli: 10
-        sublist3r:
-          enabled: false
         assetfinder:
           enabled: false
     bruteforce:
