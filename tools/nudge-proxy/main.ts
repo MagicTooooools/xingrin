@@ -1,5 +1,6 @@
 const OPENAI_API_KEY = Deno.env.get("AI_API_KEY");
 const OPENAI_BASE_URL = Deno.env.get("AI_BASE_URL") || "https://api.deepseek.com/v1";
+const AI_MODEL = Deno.env.get("AI_MODEL") || "deepseek-chat";
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
@@ -56,9 +57,10 @@ Do NOT output markdown. Output ONLY the JSON string.
         Authorization: `Bearer ${OPENAI_API_KEY}`,
       },
       body: JSON.stringify({
-        model: "deepseek-chat", // Or user configured model
+        model: AI_MODEL,
         messages: [{ role: "system", content: prompt }],
-        response_format: { type: "json_object" },
+        // response_format: { type: "json_object" }, // Some models (like NVIDIA hosted) might not support this field strictly
+        temperature: 0.7,
       }),
     });
 
