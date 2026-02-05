@@ -45,12 +45,6 @@ function getHealthStyle(state: string) {
   return "bg-muted text-muted-foreground border-border"
 }
 
-function getStatusVariant(status: string) {
-  if (status === "online") return "online"
-  if (status === "offline") return "offline"
-  return "maintenance"
-}
-
 function formatUptime(seconds?: number | null) {
   if (seconds === null || seconds === undefined) return "-"
   const total = Math.max(0, Math.floor(seconds))

@@ -64,6 +64,9 @@ func main() {
 	if execErr != nil {
 		pkg.Logger.Error("Workflow execution failed",
 			zap.Int("scanId", cfg.ScanID),
+			zap.String("workflow", cfg.WorkflowName),
+			zap.String("targetName", cfg.TargetName),
+			zap.String("targetType", cfg.TargetType),
 			zap.Error(execErr))
 		os.Exit(1) // Agent will detect exit code and set status to "failed"
 	}
@@ -71,7 +74,17 @@ func main() {
 	// Save results
 	ctx := context.Background()
 	if err := w.SaveResults(ctx, serverClient, params, output); err != nil {
-		pkg.Logger.Error("Failed to save results", zap.Error(err))
+		fileCount := 0
+		if output != nil {
+			if files, ok := output.Data.([]string); ok {
+				fileCount = len(files)
+			}
+		}
+		pkg.Logger.Error("Failed to save results",
+			zap.Int("scanId", cfg.ScanID),
+			zap.String("workflow", cfg.WorkflowName),
+			zap.Int("files", fileCount),
+			zap.Error(err))
 		os.Exit(1)
 	}
 

@@ -14,6 +14,10 @@ dist/
 build/
 bin/
 
+# Node dependencies
+node_modules/
+**/node_modules/
+
 # IDE
 .vscode/
 .idea/

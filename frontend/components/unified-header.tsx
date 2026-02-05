@@ -1,7 +1,6 @@
 "use client"
 
 import dynamic from "next/dynamic"
-import { Button } from "@/components/ui/button"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { LanguageSwitcher } from "@/components/language-switcher"
 import { Link } from "@/i18n/navigation"
@@ -77,15 +76,6 @@ export function UnifiedHeader() {
           <QuickScanDialog />
           <NotificationDrawer />
           <LanguageSwitcher />
-          <Button variant="ghost" asChild size="sm" className="hidden sm:flex">
-            <a
-              href="https://github.com/yyhuni/xingrin"
-              rel="noopener noreferrer"
-              target="_blank"
-            >
-              GitHub
-            </a>
-          </Button>
         </div>
       </div>
     </header>

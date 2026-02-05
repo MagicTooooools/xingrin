@@ -35,6 +35,7 @@ import { Separator } from "@/components/ui/separator"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useScan } from "@/hooks/use-scans"
 import { useScanLogs } from "@/hooks/use-scan-logs"
+import { useStarNudge } from "@/hooks/use-star-nudge"
 import { ScanLogList } from "@/components/scan/scan-log-list"
 import { cn } from "@/lib/utils"
 import type { ScanRecord, ScanStatus, StageProgressItem, StageStatus } from "@/types/scan.types"
@@ -167,6 +168,14 @@ export function ScanOverview({ scanId }: ScanOverviewProps) {
   const locale = useLocale()
 
   const { data: scan, isLoading, error } = useScan(scanId)
+  const { trigger: triggerStarNudge } = useStarNudge({ probability: 1 }) // 100% 概率触发，实际可调整
+
+  // 监听扫描状态变化，在扫描完成时触发好评引导
+  React.useEffect(() => {
+    if (scan?.status === "completed") {
+      triggerStarNudge()
+    }
+  }, [scan?.status, triggerStarNudge])
 
   type LegacyVulnerabilitySummary = {
     total?: number

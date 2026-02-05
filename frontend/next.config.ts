@@ -60,4 +60,5 @@ const nextConfig: NextConfig = {
   },
 };
 
+// Force restart
 export default withNextIntl(nextConfig);

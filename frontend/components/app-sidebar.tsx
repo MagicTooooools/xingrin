@@ -51,6 +51,8 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible"
+import { useBroadcastSSE } from "@/hooks/use-broadcast-sse"
+import { useNudgeGuardian } from "@/hooks/use-nudge-guardian"
 
 /**
  * Application sidebar component
@@ -63,6 +65,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname()
   const normalize = (p: string) => (p !== "/" && p.endsWith("/") ? p.slice(0, -1) : p)
   const current = normalize(pathname)
+  
+  // 监听 SSE 广播推送
+  useBroadcastSSE()
+
+  // 启动本地 Nudge 守护进程 (深夜/久坐提醒)
+  useNudgeGuardian()
+  
   const handleNavClick = React.useCallback(() => {
     if (typeof window !== "undefined") {
       window.dispatchEvent(new Event("lunafox:route-progress-start"))
@@ -200,6 +209,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         { title: "Demo B: Ghost Header", url: "/prototypes/header-demo-b/" },
         { title: "Demo C: Docked UI", url: "/prototypes/header-demo-c/" },
         { title: "Sidebar Variants", url: "/prototypes/sidebar-variants/" },
+        { title: "Nudge & Care Demo", url: "/tools/nudges/" },
+        { title: "Nudge Design Variants", url: "/tools/nudges/design-variants/" },
       ],
     },
     {
@@ -209,6 +220,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         { title: "Dashboard Demo", url: "/prototypes/dashboard-demo/" },
         { title: "Dashboard Demo Dark", url: "/prototypes/dashboard-demo-dark/" },
         { title: "Dashboard Rework", url: "/prototypes/dashboard-rework/" },
+        { title: "GitHub Buttons", url: "/tools/github-buttons/" },
         { title: "Asset Pulse Designs", url: "/prototypes/asset-pulse-designs/" },
         { title: "Asset Pulse Light", url: "/prototypes/asset-pulse-light-designs/" },
         { title: "Advanced Asset Pulse", url: "/prototypes/advanced-asset-pulse/" },
