@@ -7,8 +7,6 @@
 在你的电脑上找一个空文件夹（不要在 lunafox 项目里），新建一个 `main.ts` 文件，内容如下：
 
 ```typescript
-import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
-
 const OPENAI_API_KEY = Deno.env.get("AI_API_KEY");
 const OPENAI_BASE_URL = Deno.env.get("AI_BASE_URL") || "https://api.deepseek.com/v1";
 
@@ -18,7 +16,7 @@ const CORS_HEADERS = {
   "Access-Control-Allow-Headers": "Content-Type",
 };
 
-serve(async (req) => {
+Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: CORS_HEADERS });
   }

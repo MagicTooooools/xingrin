@@ -1,5 +1,3 @@
-import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
-
 const OPENAI_API_KEY = Deno.env.get("AI_API_KEY");
 const OPENAI_BASE_URL = Deno.env.get("AI_BASE_URL") || "https://api.deepseek.com/v1";
 
@@ -9,7 +7,8 @@ const CORS_HEADERS = {
   "Access-Control-Allow-Headers": "Content-Type",
 };
 
-serve(async (req) => {
+// Use modern Deno.serve (no imports required)
+Deno.serve(async (req) => {
   // Handle CORS preflight
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: CORS_HEADERS });
