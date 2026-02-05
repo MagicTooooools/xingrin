@@ -1,30 +1,39 @@
-# LunaFox Nudge Proxy
+# LunaFox AI Nudge Proxy (Deno Version)
 
-一个轻量级的 API 中转服务，用于为 LunaFox 用户生成 AI 驱动的关怀弹窗（Nudges），同时避免在开源前端代码中暴露 API Key。
+一个极其轻量的 API 代理服务，运行在 Deno Deploy 上，用于为 LunaFox 客户端生成 AI 关怀文案，同时隐藏你的 API Key。
 
-## 🚀 部署到 Zeabur
+## 为什么选择 Deno Deploy?
+- **完全免费**: Free Tier 每月 10万次请求。
+- **无需绑卡**: 只要有 GitHub 账号就能用。
+- **全球加速**: 基于边缘计算，速度快。
+- **单文件**: 只需要一个 `main.ts`。
 
-1. **推送到 GitHub**: 确保 `tools/nudge-proxy` 目录已包含在你的 GitHub 仓库中。
-2. **登录 Zeabur**: 访问 [Zeabur 控制台](https://zeabur.com)。
-3. **创建项目**: 创建一个新项目（例如 `lunafox-services`）。
-4. **部署服务**:
-   - 点击 **新建服务** -> **Git**。
-   - 选择你的仓库。
-   - **根目录 (Root Directory)**: 设置为 `tools/nudge-proxy`。
-   - Zeabur 会自动识别为 Node.js 项目并部署。
-5. **配置环境变量**:
-   - 进入服务的 **设置** -> **变量**。
-   - 添加 `AI_API_KEY`: 你的 OpenAI 或 DeepSeek API Key。
-   - (可选) `AI_BASE_URL`: 例如 `https://api.deepseek.com/v1`。
-6. **启用域名**:
-   - 进入 **网络 (Networking)**。
-   - 启用 "公网域名" (你会获得一个类似 `xxx.zeabur.app` 的地址)。
+## 🚀 部署指南 (3 分钟)
+
+1. **推送代码**: 确保你的 `tools/nudge-proxy/main.ts` 已提交到 GitHub 仓库。
+2. **登录 Deno Deploy**: 访问 [dash.deno.com](https://dash.deno.com)。
+3. **新建项目**:
+   - 点击 **"New Project"**。
+   - 选择 **"Select a repository"** -> 找到你的 `lunafox` 仓库。
+   - **Branch**: 选择你的分支 (如 `002-server-orchestration` 或 `main`)。
+   - **Entrypoint**: 选择 `tools/nudge-proxy/main.ts`。
+   - 点击 **"Link"**。
+4. **配置环境变量 (Environment Variables)**:
+   - 项目创建后，进入 **Settings** -> **Environment Variables**。
+   - 添加 `AI_API_KEY`: 填入你的 DeepSeek / OpenAI API Key。
+   - (可选) 添加 `AI_BASE_URL`: 如果用 DeepSeek，填 `https://api.deepseek.com/v1`。
+5. **获取域名**:
+   - Deno 会自动给你分配一个 `xxxx.deno.dev` 的域名。
+   - 复制这个域名。
 
 ## 🔗 前端集成
 
-在 LunaFox 前端 (`frontend`) 的环境变量中设置：
+在 LunaFox 前端 (`frontend`) 的环境变量 (`.env`) 中设置：
+
 ```env
-NEXT_PUBLIC_NUDGE_API_URL=https://your-service.zeabur.app/generate
+NEXT_PUBLIC_NUDGE_API_URL=https://your-project-name.deno.dev
 ```
 
-`useAiNudge` Hook 会检测此变量，如果存在则自动调用该接口，否则降级使用本地静态文案。
+注意：Deno Deploy 默认不需要 `/generate` 路径后缀（取决于 `main.ts` 怎么写，目前的 `main.ts` 会直接处理根路径 POST 请求，或者你可以加上 `/generate` 但代码里要适配路由）。
+
+**注意**: 当前 `main.ts` 简单地处理所有 POST 请求。你可以直接填 `https://your-project-name.deno.dev` 作为 API 地址。
