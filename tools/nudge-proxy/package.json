@@ -1,0 +1,12 @@
+{
+  "name": "nudge-proxy",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "start": "tsx src/index.ts"
+  },
+  "dependencies": {
+    "hono": "^4.0.0",
+    "openai": "^4.0.0",
+    "tsx": "^4.7.0"
+  }
+}
