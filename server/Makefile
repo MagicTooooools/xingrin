@@ -1,4 +1,4 @@
-.PHONY: build run test lint clean
+.PHONY: build run test check-ddd lint clean check-dto-selftest
 
 # Build the server binary
 build:
@@ -7,6 +7,16 @@ build:
 # Run the server
 run:
 	go run ./cmd/server
+
+# DDD + DTO boundary guard
+check-ddd:
+	bash ./scripts/check-ddd-boundaries.sh
+	bash ./scripts/check-dto-boundaries.sh
+
+# Local optional guard self-test
+check-dto-selftest:
+	bash ./scripts/check-dto-boundaries-selftest.sh
+
 
 # Run tests
 test:

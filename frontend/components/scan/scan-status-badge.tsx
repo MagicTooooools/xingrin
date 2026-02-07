@@ -54,7 +54,9 @@ export const ScanStatusBadge = ({
     // --- Variant F2: Inline Block (Segmented) ---
     if (variant === "inline") {
         const segments = 8
-        const activeSegments = Math.ceil((displayProgress / 100) * segments)
+        const rawActiveSegments = Math.ceil((displayProgress / 100) * segments)
+        const hasProgressBar = status !== "pending"
+        const activeSegments = hasProgressBar ? Math.max(1, rawActiveSegments) : rawActiveSegments
         
         return (
             <div className={cn(

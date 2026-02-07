@@ -1468,7 +1468,6 @@
         "requirementsDocker": "目标机器已安装并运行 Docker",
         "requirementsAccess": "目标机器无需公网，但必须可访问服务端地址",
         "linuxTab": "Linux / macOS",
-        "windowsTab": "Windows",
         "commandHint": "如提示权限不足，请使用具备 Docker 权限的用户执行",
         "openDialog": "打开安装器",
         "showAdvanced": "显示安装命令",

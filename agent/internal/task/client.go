@@ -6,12 +6,15 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"strings"
 	"time"
 
 	"github.com/yyhuni/lunafox/agent/internal/domain"
 )
+
+const fallbackErrorSnippetRunes = 512
 
 // Client handles HTTP API requests to the server.
 type Client struct {
@@ -40,7 +43,7 @@ func NewClient(serverURL, apiKey string) *Client {
 
 // PullTask requests a task from the server. Returns nil when no task available.
 func (c *Client) PullTask(ctx context.Context) (*domain.Task, error) {
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.baseURL+"/api/agent/tasks/pull", nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.baseURL+"/api/agents/tasks/pull", nil)
 	if err != nil {
 		return nil, err
 	}
@@ -68,13 +71,7 @@ func (c *Client) PullTask(ctx context.Context) (*domain.Task, error) {
 
 // UpdateStatus reports task status to the server with retry.
 func (c *Client) UpdateStatus(ctx context.Context, taskID int, status, errorMessage string) error {
-	payload := map[string]string{
-		"status": status,
-	}
-	if errorMessage != "" {
-		payload["errorMessage"] = errorMessage
-	}
-	body, err := json.Marshal(payload)
+	body, err := marshalStatusPayload(status, errorMessage)
 	if err != nil {
 		return err
 	}
@@ -90,29 +87,111 @@ func (c *Client) UpdateStatus(ctx context.Context, taskID int, status, errorMess
 			}
 		}
 
-		req, err := http.NewRequestWithContext(ctx, http.MethodPatch, fmt.Sprintf("%s/api/agent/tasks/%d/status", c.baseURL, taskID), bytes.NewReader(body))
-		if err != nil {
-			return err
-		}
-		req.Header.Set("Content-Type", "application/json")
-		req.Header.Set("X-Agent-Key", c.apiKey)
-
-		resp, err := c.http.Do(req)
-		if err != nil {
-			lastErr = err
+		statusCode, bodyText, requestErr := c.sendStatusUpdate(ctx, taskID, body)
+		if requestErr != nil {
+			lastErr = requestErr
 			continue
 		}
-		resp.Body.Close()
 
-		if resp.StatusCode == http.StatusOK {
+		if statusCode == http.StatusOK {
 			return nil
 		}
-		lastErr = fmt.Errorf("update status failed: status %d", resp.StatusCode)
+		if bodyText != "" {
+			lastErr = fmt.Errorf("update status failed: status %d: %s", statusCode, bodyText)
+		} else {
+			lastErr = fmt.Errorf("update status failed: status %d", statusCode)
+		}
+
+		if shouldRetryWithCompactError(statusCode, bodyText, errorMessage) {
+			fallbackMessage := compactStatusErrorMessage(errorMessage)
+			fallbackBody, marshalErr := marshalStatusPayload(status, fallbackMessage)
+			if marshalErr != nil {
+				return marshalErr
+			}
+
+			fallbackStatusCode, fallbackBodyText, fallbackErr := c.sendStatusUpdate(ctx, taskID, fallbackBody)
+			if fallbackErr != nil {
+				return fmt.Errorf("%w; fallback update request failed: %v", lastErr, fallbackErr)
+			}
+			if fallbackStatusCode == http.StatusOK {
+				return nil
+			}
+			if fallbackBodyText != "" {
+				return fmt.Errorf("%w; fallback update failed: status %d: %s", lastErr, fallbackStatusCode, fallbackBodyText)
+			}
+			return fmt.Errorf("%w; fallback update failed: status %d", lastErr, fallbackStatusCode)
+		}
 
 		// Don't retry 4xx client errors (except 429)
-		if resp.StatusCode >= 400 && resp.StatusCode < 500 && resp.StatusCode != 429 {
+		if statusCode >= 400 && statusCode < 500 && statusCode != 429 {
 			return lastErr
 		}
 	}
 	return lastErr
+}
+
+func marshalStatusPayload(status, errorMessage string) ([]byte, error) {
+	payload := map[string]string{
+		"status": status,
+	}
+	if errorMessage != "" {
+		payload["errorMessage"] = errorMessage
+	}
+	return json.Marshal(payload)
+}
+
+func (c *Client) sendStatusUpdate(ctx context.Context, taskID int, body []byte) (int, string, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodPatch, fmt.Sprintf("%s/api/agents/tasks/%d/status", c.baseURL, taskID), bytes.NewReader(body))
+	if err != nil {
+		return 0, "", err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("X-Agent-Key", c.apiKey)
+
+	resp, err := c.http.Do(req)
+	if err != nil {
+		return 0, "", err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == http.StatusOK {
+		return resp.StatusCode, "", nil
+	}
+
+	bodyBytes, _ := io.ReadAll(io.LimitReader(resp.Body, 2048))
+	return resp.StatusCode, strings.TrimSpace(string(bodyBytes)), nil
+}
+
+func shouldRetryWithCompactError(statusCode int, bodyText, errorMessage string) bool {
+	if statusCode != http.StatusBadRequest || errorMessage == "" {
+		return false
+	}
+	lowerBody := strings.ToLower(bodyText)
+	return strings.Contains(lowerBody, "error message exceeds 4kb limit")
+}
+
+func compactStatusErrorMessage(errorMessage string) string {
+	cleaned := strings.ToValidUTF8(errorMessage, "")
+	cleaned = strings.Map(func(r rune) rune {
+		switch {
+		case r == '\n' || r == '\r' || r == '\t':
+			return ' '
+		case r < 32 || r == 127:
+			return -1
+		default:
+			return r
+		}
+	}, cleaned)
+	cleaned = strings.Join(strings.Fields(cleaned), " ")
+
+	if cleaned == "" {
+		return "worker failed (truncated): details omitted"
+	}
+
+	runes := []rune(cleaned)
+	if len(runes) > fallbackErrorSnippetRunes {
+		cleaned = string(runes[:fallbackErrorSnippetRunes])
+	}
+
+	return "worker failed (truncated): " + cleaned
 }

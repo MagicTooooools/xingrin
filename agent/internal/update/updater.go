@@ -164,10 +164,10 @@ func (u *Updater) startNewContainer(ctx context.Context, image, version string) 
 	env := []string{
 		fmt.Sprintf("SERVER_URL=%s", u.cfg.Snapshot().ServerURL),
 		fmt.Sprintf("API_KEY=%s", u.apiKey),
-		fmt.Sprintf("MAX_TASKS=%d", u.cfg.Snapshot().MaxTasks),
-		fmt.Sprintf("CPU_THRESHOLD=%d", u.cfg.Snapshot().CPUThreshold),
-		fmt.Sprintf("MEM_THRESHOLD=%d", u.cfg.Snapshot().MemThreshold),
-		fmt.Sprintf("DISK_THRESHOLD=%d", u.cfg.Snapshot().DiskThreshold),
+		fmt.Sprintf("LUNAFOX_AGENT_MAX_TASKS=%d", u.cfg.Snapshot().MaxTasks),
+		fmt.Sprintf("LUNAFOX_AGENT_CPU_THRESHOLD=%d", u.cfg.Snapshot().CPUThreshold),
+		fmt.Sprintf("LUNAFOX_AGENT_MEM_THRESHOLD=%d", u.cfg.Snapshot().MemThreshold),
+		fmt.Sprintf("LUNAFOX_AGENT_DISK_THRESHOLD=%d", u.cfg.Snapshot().DiskThreshold),
 		fmt.Sprintf("AGENT_VERSION=%s", version),
 	}
 	if u.token != "" {

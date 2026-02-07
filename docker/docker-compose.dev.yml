@@ -1,7 +1,7 @@
 name: lunafox
 
 services:
-  # Agent 请通过安装脚本注册启动（/api/agents/install.sh）
+  # Agent 请通过安装脚本注册启动（/api/agents/install-script）
   postgres:
     image: postgres:16.3-alpine
     restart: "on-failure:3"

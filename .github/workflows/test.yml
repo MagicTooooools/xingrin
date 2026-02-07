@@ -21,6 +21,10 @@ jobs:
         working-directory: worker
         run: make test
 
+      - name: Check server DDD boundaries
+        working-directory: server
+        run: make check-ddd
+
       - name: Run server tests
         working-directory: server
         run: make test

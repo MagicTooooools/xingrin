@@ -29,6 +29,7 @@ COMPOSE_ENV=()
 DOCKER_PREFIX=()
 DOCKER_BIN=""
 ENV_FILE_ARGS=()
+PROFILE_ARGS=()
 
 # 颜色
 RED='\033[0;31m'
@@ -246,19 +247,36 @@ confirm_action() {
   fi
 }
 
+set_profile_args() {
+  PROFILE_ARGS=()
+  if [ "$MODE" = "prod" ]; then
+    PROFILE_ARGS=(--profile local-db)
+  fi
+}
+
+start_local_agent() {
+  local stopped_agents=()
+  while IFS= read -r container_name; do
+    [ -n "$container_name" ] || continue
+    stopped_agents+=("$container_name")
+  done < <("${DOCKER_PREFIX[@]}" "$DOCKER_BIN" ps -a --filter status=exited --format "{{.Names}}" | grep -E '^lunafox-agent($|-)' || true)
+  if [ "${#stopped_agents[@]}" -eq 0 ]; then
+    return
+  fi
+
+  info "检测到已停止的本地 Agent 容器，正在启动: ${stopped_agents[*]}"
+  "${DOCKER_PREFIX[@]}" "$DOCKER_BIN" start "${stopped_agents[@]}" >/dev/null
+  success "本地 Agent 已启动"
+}
+
 start_services() {
   ENV_FILE_ARGS=()
   if [ -f "$ENV_FILE" ]; then
     ENV_FILE_ARGS=(--env-file "$ENV_FILE")
   fi
-  PROFILE_ARG=""
-  if [ "$MODE" = "prod" ]; then
-    DB_HOST="$(grep -E "^DB_HOST=" "$ENV_FILE" | cut -d'=' -f2 | tr -d '\"' || true)"
-    if [ -z "$DB_HOST" ] || [ "$DB_HOST" = "postgres" ] || [ "$DB_HOST" = "localhost" ] || [ "$DB_HOST" = "127.0.0.1" ]; then
-      PROFILE_ARG="--profile local-db"
-    fi
-  fi
-  "${COMPOSE_CMD[@]}" "${ENV_FILE_ARGS[@]}" -f "$COMPOSE_FILE" ${PROFILE_ARG:+$PROFILE_ARG} up -d
+  set_profile_args
+  "${COMPOSE_CMD[@]}" "${ENV_FILE_ARGS[@]}" -f "$COMPOSE_FILE" "${PROFILE_ARGS[@]}" up -d
+  start_local_agent
   success "服务已启动"
 }
 

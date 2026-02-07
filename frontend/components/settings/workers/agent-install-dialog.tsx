@@ -15,12 +15,6 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs"
-import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
@@ -60,16 +54,14 @@ type AgentSnapshot = {
   createdAt?: string | null
 }
 
-const buildInstallCommands = (token: string, config: InstallConfig) => {
-  if (!token) return { linux: "", windows: "" }
+const buildInstallCommand = (token: string, config: InstallConfig) => {
+  if (!token) return ""
   const registerUrl = config.registerUrl.trim()
   if (!registerUrl) {
-    return { linux: "", windows: "" }
+    return ""
   }
   const scriptBaseUrl = normalizeOrigin(registerUrl)
-  const linux = `curl -kfsSL "${scriptBaseUrl}/api/agents/install.sh?token=${token}" | LUNAFOX_REGISTER_URL="${registerUrl}" bash`
-  const windows = `[System.Net.ServicePointManager]::ServerCertificateValidationCallback = { $true }; $env:LUNAFOX_REGISTER_URL=\"${registerUrl}\"; irm "${scriptBaseUrl}/api/agents/install.ps1?token=${token}" | iex`
-  return { linux, windows }
+  return `curl -kfsSL "${scriptBaseUrl}/api/agents/install-script?token=${token}" | LUNAFOX_AGENT_REGISTER_URL="${registerUrl}" bash`
 }
 
 type AgentInstallDialogProps = {
@@ -98,7 +90,6 @@ export function AgentInstallDialog({
   const [configOpen, setConfigOpen] = useState(false)
   const [step, setStep] = useState<1 | 2 | 3>(1)
   const [verificationState, setVerificationState] = useState<VerificationState>("idle")
-  const [commandTab, setCommandTab] = useState<"linux" | "windows">("linux")
   const [copied, setCopied] = useState(false)
   const copyResetRef = useRef<number | null>(null)
   const verificationIntervalRef = useRef<number | null>(null)
@@ -119,7 +110,6 @@ export function AgentInstallDialog({
     setConfigOpen(false)
     setStep(1)
     setVerificationState("idle")
-    setCommandTab("linux")
   }, [open, defaultRegisterUrl])
 
   const clearVerificationTimers = () => {
@@ -295,15 +285,13 @@ export function AgentInstallDialog({
     }
   }, [copyToClipboard, tToast])
 
-  const installCommands = useMemo(() => {
-    return buildInstallCommands(token?.token ?? "", {
+  const installCommand = useMemo(() => {
+    return buildInstallCommand(token?.token ?? "", {
       registerUrl: registerUrlInput,
     })
   }, [token, registerUrlInput])
 
-  const commandToCopy = useMemo(() => {
-    return commandTab === "linux" ? installCommands.linux : installCommands.windows
-  }, [commandTab, installCommands.linux, installCommands.windows])
+  const commandToCopy = installCommand
 
   const canCopyCommand = useMemo(() => {
     return Boolean(commandToCopy)
@@ -580,38 +568,15 @@ export function AgentInstallDialog({
                   {copied ? tToast("copied") : tActions("copy")}
                 </Button>
               </div>
-              <Tabs
-                value={commandTab}
-                onValueChange={(value) => setCommandTab(value as "linux" | "windows")}
-                className="w-full"
-              >
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="linux">{t("install.linuxTab")}</TabsTrigger>
-                  <TabsTrigger value="windows">{t("install.windowsTab")}</TabsTrigger>
-                </TabsList>
-                <TabsContent value="linux" className="space-y-2">
-                  <div className="rounded-lg border bg-muted/30 p-3">
-                    {token ? (
-                      <pre className="max-h-48 overflow-y-auto font-mono text-xs whitespace-pre-wrap break-all">{installCommands.linux}</pre>
-                    ) : (
-                      <div className="text-xs text-muted-foreground">
-                        {isGenerating ? t("install.commandStatusGenerating") : t("install.commandPlaceholder")}
-                      </div>
-                    )}
+              <div className="rounded-lg border bg-muted/30 p-3">
+                {token ? (
+                  <pre className="max-h-48 overflow-y-auto font-mono text-xs whitespace-pre-wrap break-all">{installCommand}</pre>
+                ) : (
+                  <div className="text-xs text-muted-foreground">
+                    {isGenerating ? t("install.commandStatusGenerating") : t("install.commandPlaceholder")}
                   </div>
-                </TabsContent>
-                <TabsContent value="windows" className="space-y-2">
-                  <div className="rounded-lg border bg-muted/30 p-3">
-                    {token ? (
-                      <pre className="max-h-48 overflow-y-auto font-mono text-xs whitespace-pre-wrap break-all">{installCommands.windows}</pre>
-                    ) : (
-                      <div className="text-xs text-muted-foreground">
-                        {isGenerating ? t("install.commandStatusGenerating") : t("install.commandPlaceholder")}
-                      </div>
-                    )}
-                  </div>
-                </TabsContent>
-              </Tabs>
+                )}
+              </div>
             </div>
           </div>
         )}

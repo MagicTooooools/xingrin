@@ -122,41 +122,6 @@ tools:
         documentation:
           description: Number of concurrent threads
 
-  sublist3r:
-    metadata:
-      display_name: Sublist3r
-      description: Collect subdomains using multiple search engines
-      stage: recon
-
-    base_command: python3 '/opt/lunafox-tools/share/Sublist3r/sublist3r.py' -d {{.Domain}} -o {{quote .OutputFile}}
-    runtime_params:
-      - semantic_id: timeout-runtime
-        var: Timeout
-        config_schema:
-          key: timeout-runtime
-          type: integer
-          required: true
-        config_example:
-          show_as: value
-          comment: true
-          value: 3600
-        documentation:
-          description: Scan timeout in seconds
-    cli_params:
-      - semantic_id: threads-cli
-        var: Threads
-        arg: -t {{.Threads}}
-        config_schema:
-          key: threads-cli
-          type: integer
-          required: true
-        config_example:
-          show_as: value
-          comment: true
-          value: 10
-        documentation:
-          description: Number of concurrent threads
-
   assetfinder:
     metadata:
       display_name: Assetfinder

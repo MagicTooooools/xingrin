@@ -186,7 +186,6 @@ func TestLoadAllTemplates(t *testing.T) {
 	// 验证所有预期的工具都存在
 	expectedTools := []string{
 		toolSubfinder,
-		toolSublist3r,
 		toolAssetfinder,
 		toolSubdomainBruteforce,
 		toolSubdomainResolve,
@@ -406,36 +405,6 @@ func TestCommandGeneration_SubfinderWithProviderConfig(t *testing.T) {
 
 	// 验证包含 provider config
 	assert.Contains(t, cmd, "-pc \"/etc/subfinder/config.yaml\"")
-
-	t.Logf("Generated command: %s", cmd)
-}
-
-// TestCommandGeneration_Sublist3r 测试 sublist3r 命令生成
-func TestCommandGeneration_Sublist3r(t *testing.T) {
-	require.NoError(t, pkg.InitLogger("error"))
-	defer pkg.Sync()
-	tmpl, err := getTemplate(toolSublist3r)
-	require.NoError(t, err)
-
-	builder := activity.NewCommandBuilder()
-
-	params := map[string]any{
-		"Domain":     "example.com",
-		"OutputFile": "/tmp/output.txt",
-	}
-	config := map[string]any{
-		"timeout-runtime": 3600,
-		"threads-cli":     10,
-	}
-
-	cmd, err := builder.Build(tmpl, params, config)
-	require.NoError(t, err)
-
-	assert.Contains(t, cmd, "python3")
-	assert.Contains(t, cmd, "/opt/lunafox-tools/share/Sublist3r/sublist3r.py")
-	assert.Contains(t, cmd, "-d example.com")
-	assert.Contains(t, cmd, "-o \"/tmp/output.txt\"")
-	assert.Contains(t, cmd, "-t 10")
 
 	t.Logf("Generated command: %s", cmd)
 }
@@ -723,7 +692,7 @@ func TestAllToolsHaveTimeoutParam(t *testing.T) {
 func TestReconToolsHaveThreadsParam(t *testing.T) {
 	require.NoError(t, pkg.InitLogger("error"))
 	defer pkg.Sync()
-	reconToolNames := []string{toolSubfinder, toolSublist3r}
+	reconToolNames := []string{toolSubfinder}
 
 	for _, toolName := range reconToolNames {
 		t.Run(toolName, func(t *testing.T) {
@@ -826,7 +795,6 @@ func TestStageAssignment(t *testing.T) {
 	defer pkg.Sync()
 	expectedStages := map[string]string{
 		toolSubfinder:                   stageRecon,
-		toolSublist3r:                   stageRecon,
 		toolAssetfinder:                 stageRecon,
 		toolSubdomainBruteforce:         stageBruteforce,
 		toolSubdomainResolve:            stageResolve,

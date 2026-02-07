@@ -17,19 +17,19 @@ const (
 
 // Load parses configuration from environment variables and CLI flags.
 func Load(args []string) (*Config, error) {
-	maxTasks, err := readEnvInt("MAX_TASKS", defaultMaxTasks)
+	maxTasks, err := readEnvInt("LUNAFOX_AGENT_MAX_TASKS", defaultMaxTasks)
 	if err != nil {
 		return nil, err
 	}
-	cpuThreshold, err := readEnvInt("CPU_THRESHOLD", defaultCPUThreshold)
+	cpuThreshold, err := readEnvInt("LUNAFOX_AGENT_CPU_THRESHOLD", defaultCPUThreshold)
 	if err != nil {
 		return nil, err
 	}
-	memThreshold, err := readEnvInt("MEM_THRESHOLD", defaultMemThreshold)
+	memThreshold, err := readEnvInt("LUNAFOX_AGENT_MEM_THRESHOLD", defaultMemThreshold)
 	if err != nil {
 		return nil, err
 	}
-	diskThreshold, err := readEnvInt("DISK_THRESHOLD", defaultDiskThreshold)
+	diskThreshold, err := readEnvInt("LUNAFOX_AGENT_DISK_THRESHOLD", defaultDiskThreshold)
 	if err != nil {
 		return nil, err
 	}

@@ -64,11 +64,6 @@ func validScanConfig() map[string]any {
 					"timeout-runtime": 3600,
 					"threads-cli":     10,
 				},
-				toolSublist3r: map[string]any{
-					"enabled":         true,
-					"timeout-runtime": 3600,
-					"threads-cli":     10,
-				},
 				toolAssetfinder: map[string]any{
 					"enabled":         true,
 					"timeout-runtime": 3600,

@@ -51,7 +51,7 @@ export const agentService = {
       await mockDelay()
       return getMockRegistrationToken()
     }
-    const response = await api.post<RegistrationTokenResponse>('/registration-tokens')
+    const response = await api.post<RegistrationTokenResponse>('/agents/registration-tokens')
     return response.data
   },
 }

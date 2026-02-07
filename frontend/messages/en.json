@@ -1469,7 +1469,6 @@
         "requirementsDocker": "Docker installed and running on the target machine",
         "requirementsAccess": "Target machine does not need public Internet access but must reach the server URL",
         "linuxTab": "Linux / macOS",
-        "windowsTab": "Windows",
         "commandHint": "If you see permission errors, use a user with Docker access",
         "openDialog": "Open installer",
         "showAdvanced": "Show install commands",

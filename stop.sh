@@ -28,6 +28,7 @@ COMPOSE_ENV=()
 DOCKER_PREFIX=()
 DOCKER_BIN=""
 ENV_FILE_ARGS=()
+PROFILE_ARGS=()
 
 # 颜色
 RED='\033[0;31m'
@@ -221,12 +222,36 @@ confirm_action() {
   fi
 }
 
+set_profile_args() {
+  PROFILE_ARGS=()
+  if [ "$MODE" = "prod" ]; then
+    PROFILE_ARGS=(--profile local-db)
+  fi
+}
+
+stop_local_agent() {
+  local running_agents=()
+  while IFS= read -r container_name; do
+    [ -n "$container_name" ] || continue
+    running_agents+=("$container_name")
+  done < <("${DOCKER_PREFIX[@]}" "$DOCKER_BIN" ps --format "{{.Names}}" | grep -E '^lunafox-agent($|-)' || true)
+  if [ "${#running_agents[@]}" -eq 0 ]; then
+    return
+  fi
+
+  info "检测到本地 Agent 容器，正在停止: ${running_agents[*]}"
+  "${DOCKER_PREFIX[@]}" "$DOCKER_BIN" stop "${running_agents[@]}" >/dev/null
+  success "本地 Agent 已停止"
+}
+
 stop_services() {
   ENV_FILE_ARGS=()
   if [ -f "$DOCKER_DIR/.env" ]; then
     ENV_FILE_ARGS=(--env-file "$DOCKER_DIR/.env")
   fi
-  "${COMPOSE_CMD[@]}" "${ENV_FILE_ARGS[@]}" -f "$COMPOSE_FILE" down
+  set_profile_args
+  "${COMPOSE_CMD[@]}" "${ENV_FILE_ARGS[@]}" -f "$COMPOSE_FILE" "${PROFILE_ARGS[@]}" down
+  stop_local_agent
   success "服务已停止"
 }
 

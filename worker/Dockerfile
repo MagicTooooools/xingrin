@@ -109,10 +109,6 @@ RUN pipx install uro && \
     pipx install waymore && \
     pipx install dnsgen
 
-# Install Sublist3r (directory-based tool under /opt/lunafox-tools/share)
-RUN git clone https://github.com/aboul3la/Sublist3r.git /opt/lunafox-tools/share/Sublist3r && \
-    pip3 install --no-cache-dir -r /opt/lunafox-tools/share/Sublist3r/requirements.txt --break-system-packages
-
 # Copy Go scanning tools (into /opt/lunafox-tools/bin)
 COPY --from=tools-builder /go/bin/* /opt/lunafox-tools/bin/
 COPY --from=tools-builder /usr/local/bin/massdns /opt/lunafox-tools/bin/massdns

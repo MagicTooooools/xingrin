@@ -8,10 +8,10 @@ func TestLoadConfigFromEnvAndFlags(t *testing.T) {
 	t.Setenv("SERVER_URL", "https://example.com")
 	t.Setenv("API_KEY", "abc12345")
 	t.Setenv("AGENT_VERSION", "v1.2.3")
-	t.Setenv("MAX_TASKS", "5")
-	t.Setenv("CPU_THRESHOLD", "80")
-	t.Setenv("MEM_THRESHOLD", "81")
-	t.Setenv("DISK_THRESHOLD", "82")
+	t.Setenv("LUNAFOX_AGENT_MAX_TASKS", "5")
+	t.Setenv("LUNAFOX_AGENT_CPU_THRESHOLD", "80")
+	t.Setenv("LUNAFOX_AGENT_MEM_THRESHOLD", "81")
+	t.Setenv("LUNAFOX_AGENT_DISK_THRESHOLD", "82")
 
 	cfg, err := Load([]string{})
 	if err != nil {
@@ -65,11 +65,11 @@ func TestLoadConfigInvalidEnvValue(t *testing.T) {
 	t.Setenv("SERVER_URL", "https://example.com")
 	t.Setenv("API_KEY", "abc")
 	t.Setenv("AGENT_VERSION", "v1.2.3")
-	t.Setenv("MAX_TASKS", "nope")
+	t.Setenv("LUNAFOX_AGENT_MAX_TASKS", "nope")
 
 	_, err := Load([]string{})
 	if err == nil {
-		t.Fatalf("expected error for invalid MAX_TASKS")
+		t.Fatalf("expected error for invalid LUNAFOX_AGENT_MAX_TASKS")
 	}
 }
 

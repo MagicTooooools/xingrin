@@ -10,6 +10,8 @@ import (
 	"time"
 
 	"github.com/yyhuni/lunafox/agent/internal/domain"
+	"github.com/yyhuni/lunafox/agent/internal/logger"
+	"go.uber.org/zap"
 )
 
 // Puller coordinates task pulling with load gating and backoff.
@@ -31,6 +33,10 @@ type Puller struct {
 	randSrc      *rand.Rand
 	mu           sync.RWMutex
 	paused       atomic.Bool
+
+	blocked         bool
+	lastBlockLog    time.Time
+	lastBlockReason string
 }
 
 type MetricsSampler interface {
@@ -97,6 +103,10 @@ func (p *Puller) Run(ctx context.Context) error {
 		task, err := p.client.PullTask(ctx)
 		if err != nil {
 			delay := p.nextErrorBackoff()
+			logger.Log.Warn("pull task failed",
+				zap.Error(err),
+				zap.Duration("backoff", delay),
+			)
 			if !p.wait(ctx, delay) {
 				return ctx.Err()
 			}
@@ -121,13 +131,31 @@ func (p *Puller) Run(ctx context.Context) error {
 
 func (p *Puller) canPull() bool {
 	maxTasks, cpuThreshold, memThreshold, diskThreshold := p.currentConfig()
-	if p.counter != nil && p.counter.Count() >= maxTasks {
+	runningTasks := 0
+	if p.counter != nil {
+		runningTasks = p.counter.Count()
+	}
+	if runningTasks >= maxTasks {
+		p.logBlocked("max_tasks",
+			zap.Int("runningTasks", runningTasks),
+			zap.Int("maxTasks", maxTasks),
+		)
 		return false
 	}
 	cpu, mem, disk := p.collector.Sample()
-	return cpu < float64(cpuThreshold) &&
-		mem < float64(memThreshold) &&
-		disk < float64(diskThreshold)
+	if cpu >= float64(cpuThreshold) || mem >= float64(memThreshold) || disk >= float64(diskThreshold) {
+		p.logBlocked("resource_threshold",
+			zap.Float64("cpu", cpu),
+			zap.Float64("mem", mem),
+			zap.Float64("disk", disk),
+			zap.Int("cpuThreshold", cpuThreshold),
+			zap.Int("memThreshold", memThreshold),
+			zap.Int("diskThreshold", diskThreshold),
+		)
+		return false
+	}
+	p.clearBlocked()
+	return true
 }
 
 func (p *Puller) loadInterval() time.Duration {
@@ -249,4 +277,23 @@ func (p *Puller) currentConfig() (int, int, int, int) {
 func (p *Puller) waitUntilCanceled(ctx context.Context) bool {
 	<-ctx.Done()
 	return false
+}
+
+func (p *Puller) logBlocked(reason string, fields ...zap.Field) {
+	now := time.Now()
+	if !p.blocked || reason != p.lastBlockReason || now.Sub(p.lastBlockLog) >= 30*time.Second {
+		allFields := append([]zap.Field{zap.String("reason", reason)}, fields...)
+		logger.Log.Debug("task puller blocked", allFields...)
+		p.lastBlockLog = now
+		p.lastBlockReason = reason
+	}
+	p.blocked = true
+}
+
+func (p *Puller) clearBlocked() {
+	if p.blocked {
+		logger.Log.Debug("task puller unblocked", zap.String("reason", p.lastBlockReason))
+	}
+	p.blocked = false
+	p.lastBlockReason = ""
 }
