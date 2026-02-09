@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { DataTableColumnHeader } from "@/components/ui/data-table/column-header"
 import { UnifiedDataTable } from "@/components/ui/data-table/unified-data-table"
 import { ExpandableCell, ExpandableTagList } from "@/components/ui/data-table/expandable-cell"
-import type { SearchResult, AssetType, Vulnerability, EndpointSearchResult } from "@/types/search.types"
+import type { SearchResult, AssetType, Vulnerability } from "@/types/search.types"
 
 interface SearchResultsTableProps {
   results: SearchResult[]
@@ -15,7 +15,7 @@ interface SearchResultsTableProps {
   onViewVulnerability?: (vuln: Vulnerability) => void
 }
 
-export function SearchResultsTable({ results, assetType }: SearchResultsTableProps) {
+export function SearchResultsTable({ results, assetType: _assetType }: SearchResultsTableProps) {
   const format = useFormatter()
 
   const formatDate = useCallback((dateString: string) => {
@@ -241,37 +241,7 @@ export function SearchResultsTable({ results, assetType }: SearchResultsTablePro
     },
   ], [formatDate])
 
-  // Endpoint 特有列
-  const endpointColumns: ColumnDef<SearchResult, unknown>[] = useMemo(() => [
-    {
-      id: "matchedGfPatterns",
-      accessorKey: "matchedGfPatterns",
-      meta: { title: "GF Patterns" },
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="GF Patterns" />
-      ),
-      size: 150,
-      minSize: 100,
-      maxSize: 250,
-      cell: ({ row }) => {
-        const patterns = (row.original as EndpointSearchResult).matchedGfPatterns
-        if (!patterns || patterns.length === 0) return <span className="text-muted-foreground">-</span>
-        return <ExpandableTagList items={patterns} maxLines={2} variant="secondary" />
-      },
-    },
-  ], [])
-
-  // 根据资产类型组合列
-  const columns = useMemo(() => {
-    if (assetType === 'endpoint') {
-      // 在 technologies 后面插入 gfPatterns
-      const techIndex = baseColumns.findIndex(col => col.id === 'technologies')
-      const cols = [...baseColumns]
-      cols.splice(techIndex + 1, 0, ...endpointColumns)
-      return cols
-    }
-    return baseColumns
-  }, [assetType, baseColumns, endpointColumns])
+	const columns = useMemo(() => baseColumns, [baseColumns])
 
   return (
     <UnifiedDataTable

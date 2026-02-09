@@ -59,10 +59,9 @@
       "contentType": "内容类型",
       "technologies": "技术栈",
       "responseBody": "响应体",
-      "vhost": "虚拟主机",
-      "gfPatterns": "GF Patterns",
-      "responseHeaders": "响应头",
-      "responseTime": "响应时间"
+		"vhost": "虚拟主机",
+		"responseHeaders": "响应头",
+		"responseTime": "响应时间"
     },
     "website": {
       "url": "URL",
@@ -389,11 +388,10 @@
       "webserver": "Web 服务器",
       "contentType": "内容类型",
       "responseBody": "响应体",
-      "responseHeaders": "响应头",
-      "vhost": "VHost",
-      "createdAt": "创建时间",
-      "gfPatterns": "GF 模式"
-    },
+		"responseHeaders": "响应头",
+		"vhost": "VHost",
+		"createdAt": "创建时间"
+	},
     "card": {
       "title": "标题",
       "expand": "展开",

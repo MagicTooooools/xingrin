@@ -23,9 +23,9 @@ export interface WebsiteSearchResult {
 
 // Endpoint 搜索结果类型
 export interface EndpointSearchResult {
-  id: number
-  url: string
-  host: string
+	id: number
+	url: string
+	host: string
   title: string
   technologies: string[]
   statusCode: number | null
@@ -35,10 +35,9 @@ export interface EndpointSearchResult {
   location: string
   vhost: boolean | null
   responseHeaders: Record<string, string>
-  responseBody: string
-  createdAt: string | null
-  targetId: number
-  matchedGfPatterns: string[]
+	responseBody: string
+	createdAt: string | null
+	targetId: number
 }
 
 // 通用搜索结果类型（兼容旧代码）

@@ -31,7 +31,7 @@ export function useScanLogs({
 }: UseScanLogsOptions): UseScanLogsReturn {
   const [logs, setLogs] = useState<ScanLog[]>([])
   const [loading, setLoading] = useState(false)
-  const nextCursorRef = useRef<string | null>(null)
+  const lastLogIDRef = useRef<number | null>(null)
   const isMounted = useRef(true)
   
   const clampLogs = useCallback((items: ScanLog[]) => {
@@ -44,17 +44,15 @@ export function useScanLogs({
     
     setLoading(true)
     try {
-      const params: { limit: number; cursor?: string } = { limit: 200 }
-      if (incremental && nextCursorRef.current) {
-        params.cursor = nextCursorRef.current
+      const params: { limit: number; afterId?: number } = { limit: 200 }
+      if (incremental && lastLogIDRef.current !== null) {
+        params.afterId = lastLogIDRef.current
       }
       
       const response = await getScanLogs(scanId, params)
       const newLogs = response.results
-      if (response.nextCursor) {
-        nextCursorRef.current = response.nextCursor
-      } else if (!incremental) {
-        nextCursorRef.current = null
+      if (newLogs.length > 0) {
+        lastLogIDRef.current = newLogs[newLogs.length - 1].id
       }
       
       if (!isMounted.current) return
@@ -87,7 +85,7 @@ export function useScanLogs({
     if (enabled) {
       // 重置状态
       setLogs([])
-      nextCursorRef.current = null
+      lastLogIDRef.current = null
       fetchLogs(false)
     }
     return () => {
@@ -110,7 +108,7 @@ export function useScanLogs({
   
   const refetch = useCallback(() => {
     setLogs([])
-    nextCursorRef.current = null
+    lastLogIDRef.current = null
     fetchLogs(false)
   }, [fetchLogs])
 

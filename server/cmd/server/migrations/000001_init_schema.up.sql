@@ -9,7 +9,7 @@
 CREATE TABLE IF NOT EXISTS auth_user (
     id SERIAL PRIMARY KEY,
     password VARCHAR(128) NOT NULL,
-    last_login TIMESTAMP,
+    last_login TIMESTAMPTZ,
     is_superuser BOOLEAN NOT NULL DEFAULT FALSE,
     username VARCHAR(150) NOT NULL,
     first_name VARCHAR(150) NOT NULL DEFAULT '',
@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS auth_user (
     email VARCHAR(254) NOT NULL DEFAULT '',
     is_staff BOOLEAN NOT NULL DEFAULT FALSE,
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
-    date_joined TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    date_joined TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 CREATE UNIQUE INDEX IF NOT EXISTS idx_auth_user_username ON auth_user(username);
 
@@ -25,7 +25,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_auth_user_username ON auth_user(username);
 CREATE TABLE IF NOT EXISTS django_session (
     session_key VARCHAR(40) PRIMARY KEY,
     session_data TEXT NOT NULL,
-    expire_date TIMESTAMP NOT NULL
+    expire_date TIMESTAMPTZ NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_django_session_expire_date ON django_session(expire_date);
 
@@ -34,8 +34,8 @@ CREATE TABLE IF NOT EXISTS organization (
     id SERIAL PRIMARY KEY,
     name VARCHAR(300) NOT NULL,
     description VARCHAR(1000) NOT NULL DEFAULT '',
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    deleted_at TIMESTAMP
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMPTZ
 );
 CREATE INDEX IF NOT EXISTS idx_org_name ON organization(name);
 CREATE INDEX IF NOT EXISTS idx_org_created_at ON organization(created_at);
@@ -46,9 +46,9 @@ CREATE TABLE IF NOT EXISTS target (
     id SERIAL PRIMARY KEY,
     name VARCHAR(300) NOT NULL,
     type VARCHAR(20) NOT NULL DEFAULT 'domain',
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    last_scanned_at TIMESTAMP,
-    deleted_at TIMESTAMP
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    last_scanned_at TIMESTAMPTZ,
+    deleted_at TIMESTAMPTZ
 );
 CREATE INDEX IF NOT EXISTS idx_target_name ON target(name);
 CREATE INDEX IF NOT EXISTS idx_target_type ON target(type);
@@ -69,8 +69,8 @@ CREATE TABLE IF NOT EXISTS scan_engine (
     id SERIAL PRIMARY KEY,
     name VARCHAR(200) NOT NULL,
     configuration VARCHAR(10000) NOT NULL DEFAULT '',
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 CREATE UNIQUE INDEX IF NOT EXISTS unique_scan_engine_name ON scan_engine(name);
 CREATE INDEX IF NOT EXISTS idx_scan_engine_created_at ON scan_engine(created_at);
@@ -86,8 +86,8 @@ CREATE TABLE IF NOT EXISTS worker_node (
     password VARCHAR(200) NOT NULL DEFAULT '',
     is_local BOOLEAN NOT NULL DEFAULT FALSE,
     status VARCHAR(20) NOT NULL DEFAULT 'pending',
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 CREATE UNIQUE INDEX IF NOT EXISTS unique_worker_name ON worker_node(name);
 CREATE INDEX IF NOT EXISTS idx_worker_node_created_at ON worker_node(created_at);
@@ -101,8 +101,8 @@ CREATE TABLE IF NOT EXISTS wordlist (
     file_size BIGINT NOT NULL DEFAULT 0,
     line_count INTEGER NOT NULL DEFAULT 0,
     file_hash VARCHAR(64) NOT NULL DEFAULT '',
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 CREATE UNIQUE INDEX IF NOT EXISTS unique_wordlist_name ON wordlist(name);
 CREATE INDEX IF NOT EXISTS idx_wordlist_created_at ON wordlist(created_at);
@@ -114,9 +114,9 @@ CREATE TABLE IF NOT EXISTS nuclei_template_repo (
     repo_url VARCHAR(500) NOT NULL DEFAULT '',
     local_path VARCHAR(500) NOT NULL DEFAULT '',
     commit_hash VARCHAR(40) NOT NULL DEFAULT '',
-    last_synced_at TIMESTAMP,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    last_synced_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 CREATE UNIQUE INDEX IF NOT EXISTS unique_nuclei_repo_name ON nuclei_template_repo(name);
 
@@ -128,7 +128,7 @@ CREATE TABLE IF NOT EXISTS blacklist_rule (
     scope VARCHAR(20) NOT NULL DEFAULT 'global',
     target_id INTEGER REFERENCES target(id) ON DELETE CASCADE,
     description VARCHAR(500) NOT NULL DEFAULT '',
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX IF NOT EXISTS idx_blacklist_scope ON blacklist_rule(scope);
 CREATE INDEX IF NOT EXISTS idx_blacklist_target ON blacklist_rule(target_id);
@@ -142,16 +142,16 @@ CREATE TABLE IF NOT EXISTS notification_settings (
     wecom_enabled BOOLEAN NOT NULL DEFAULT FALSE,
     wecom_webhook_url VARCHAR(500) NOT NULL DEFAULT '',
     categories JSONB NOT NULL DEFAULT '{"scan": true, "vulnerability": true, "asset": true, "system": false}',
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 -- subfinder_provider_settings (singleton)
 CREATE TABLE IF NOT EXISTS subfinder_provider_settings (
     id SERIAL PRIMARY KEY,
     providers JSONB NOT NULL DEFAULT '{}',
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 -- ============================================
@@ -174,9 +174,9 @@ CREATE TABLE IF NOT EXISTS scan (
     progress INTEGER NOT NULL DEFAULT 0,
     current_stage VARCHAR(50) NOT NULL DEFAULT '',
     stage_progress JSONB NOT NULL DEFAULT '{}',
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    stopped_at TIMESTAMP,
-    deleted_at TIMESTAMP,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    stopped_at TIMESTAMPTZ,
+    deleted_at TIMESTAMPTZ,
     -- Cached statistics
     cached_subdomains_count INTEGER NOT NULL DEFAULT 0,
     cached_websites_count INTEGER NOT NULL DEFAULT 0,
@@ -189,7 +189,7 @@ CREATE TABLE IF NOT EXISTS scan (
     cached_vulns_high INTEGER NOT NULL DEFAULT 0,
     cached_vulns_medium INTEGER NOT NULL DEFAULT 0,
     cached_vulns_low INTEGER NOT NULL DEFAULT 0,
-    stats_updated_at TIMESTAMP
+    stats_updated_at TIMESTAMPTZ
 );
 CREATE INDEX IF NOT EXISTS idx_scan_target ON scan(target_id);
 CREATE INDEX IF NOT EXISTS idx_scan_status ON scan(status);
@@ -203,7 +203,7 @@ CREATE TABLE IF NOT EXISTS scan_input_target (
     scan_id INTEGER NOT NULL REFERENCES scan(id) ON DELETE CASCADE,
     value VARCHAR(2000) NOT NULL,
     input_type VARCHAR(10) NOT NULL DEFAULT 'domain',
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX IF NOT EXISTS idx_scan_input_target_scan ON scan_input_target(scan_id);
 CREATE INDEX IF NOT EXISTS idx_scan_input_target_type ON scan_input_target(input_type);
@@ -214,7 +214,7 @@ CREATE TABLE IF NOT EXISTS scan_log (
     scan_id INTEGER NOT NULL REFERENCES scan(id) ON DELETE CASCADE,
     level VARCHAR(10) NOT NULL DEFAULT 'info',
     content TEXT NOT NULL DEFAULT '',
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX IF NOT EXISTS idx_scan_log_scan ON scan_log(scan_id);
 CREATE INDEX IF NOT EXISTS idx_scan_log_created_at ON scan_log(created_at);
@@ -231,10 +231,10 @@ CREATE TABLE IF NOT EXISTS scheduled_scan (
     cron_expression VARCHAR(100) NOT NULL DEFAULT '0 2 * * *',
     is_enabled BOOLEAN NOT NULL DEFAULT TRUE,
     run_count INTEGER NOT NULL DEFAULT 0,
-    last_run_time TIMESTAMP,
-    next_run_time TIMESTAMP,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    last_run_time TIMESTAMPTZ,
+    next_run_time TIMESTAMPTZ,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX IF NOT EXISTS idx_scheduled_scan_name ON scheduled_scan(name);
 CREATE INDEX IF NOT EXISTS idx_scheduled_scan_enabled ON scheduled_scan(is_enabled);
@@ -249,7 +249,7 @@ CREATE TABLE IF NOT EXISTS subdomain (
     id SERIAL PRIMARY KEY,
     target_id INTEGER NOT NULL REFERENCES target(id) ON DELETE CASCADE,
     name VARCHAR(1000) NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX IF NOT EXISTS idx_subdomain_target ON subdomain(target_id);
 CREATE INDEX IF NOT EXISTS idx_subdomain_name ON subdomain(name);
@@ -263,7 +263,7 @@ CREATE TABLE IF NOT EXISTS host_port_mapping (
     host VARCHAR(1000) NOT NULL,
     ip INET NOT NULL,
     port INTEGER NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX IF NOT EXISTS idx_hpm_target ON host_port_mapping(target_id);
 CREATE INDEX IF NOT EXISTS idx_hpm_host ON host_port_mapping(host);
@@ -279,7 +279,7 @@ CREATE TABLE IF NOT EXISTS website (
     url TEXT NOT NULL,
     host VARCHAR(253) NOT NULL DEFAULT '',
     location TEXT NOT NULL DEFAULT '',
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     title TEXT NOT NULL DEFAULT '',
     webserver TEXT NOT NULL DEFAULT '',
     response_body TEXT NOT NULL DEFAULT '',
@@ -305,17 +305,16 @@ CREATE TABLE IF NOT EXISTS endpoint (
     url TEXT NOT NULL,
     host VARCHAR(253) NOT NULL DEFAULT '',
     location TEXT NOT NULL DEFAULT '',
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     title TEXT NOT NULL DEFAULT '',
     webserver TEXT NOT NULL DEFAULT '',
     response_body TEXT NOT NULL DEFAULT '',
-    content_type TEXT NOT NULL DEFAULT '',
-    tech VARCHAR(100)[] NOT NULL DEFAULT '{}',
-    status_code INTEGER,
-    content_length INTEGER,
-    vhost BOOLEAN,
-    matched_gf_patterns VARCHAR(100)[] NOT NULL DEFAULT '{}',
-    response_headers TEXT NOT NULL DEFAULT ''
+	content_type TEXT NOT NULL DEFAULT '',
+	tech VARCHAR(100)[] NOT NULL DEFAULT '{}',
+	status_code INTEGER,
+	content_length INTEGER,
+	vhost BOOLEAN,
+	response_headers TEXT NOT NULL DEFAULT ''
 );
 CREATE INDEX IF NOT EXISTS idx_endpoint_target ON endpoint(target_id);
 CREATE INDEX IF NOT EXISTS idx_endpoint_url ON endpoint(url);
@@ -335,7 +334,7 @@ CREATE TABLE IF NOT EXISTS directory (
     content_length INTEGER,
     content_type VARCHAR(200) NOT NULL DEFAULT '',
     duration INTEGER,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX IF NOT EXISTS idx_directory_target ON directory(target_id);
 CREATE INDEX IF NOT EXISTS idx_directory_url ON directory(url);
@@ -350,8 +349,8 @@ CREATE TABLE IF NOT EXISTS screenshot (
     url TEXT NOT NULL,
     status_code SMALLINT,
     image BYTEA,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX IF NOT EXISTS idx_screenshot_target ON screenshot(target_id);
 CREATE INDEX IF NOT EXISTS idx_screenshot_created_at ON screenshot(created_at);
@@ -369,7 +368,7 @@ CREATE TABLE IF NOT EXISTS vulnerability (
     description TEXT NOT NULL DEFAULT '',
     raw_output JSONB NOT NULL DEFAULT '{}',
     reviewed BOOLEAN NOT NULL DEFAULT FALSE,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX IF NOT EXISTS idx_vuln_target ON vulnerability(target_id);
 CREATE INDEX IF NOT EXISTS idx_vuln_url ON vulnerability(url);
@@ -388,7 +387,7 @@ CREATE TABLE IF NOT EXISTS subdomain_snapshot (
     id SERIAL PRIMARY KEY,
     scan_id INTEGER NOT NULL REFERENCES scan(id) ON DELETE CASCADE,
     name VARCHAR(1000) NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX IF NOT EXISTS idx_subdomain_snap_scan ON subdomain_snapshot(scan_id);
 CREATE INDEX IF NOT EXISTS idx_subdomain_snap_name ON subdomain_snapshot(name);
@@ -402,7 +401,7 @@ CREATE TABLE IF NOT EXISTS host_port_mapping_snapshot (
     host VARCHAR(1000) NOT NULL,
     ip INET NOT NULL,
     port INTEGER NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX IF NOT EXISTS idx_hpm_snap_scan ON host_port_mapping_snapshot(scan_id);
 CREATE INDEX IF NOT EXISTS idx_hpm_snap_host ON host_port_mapping_snapshot(host);
@@ -427,7 +426,7 @@ CREATE TABLE IF NOT EXISTS website_snapshot (
     response_body TEXT NOT NULL DEFAULT '',
     vhost BOOLEAN,
     response_headers TEXT NOT NULL DEFAULT '',
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX IF NOT EXISTS idx_website_snap_scan ON website_snapshot(scan_id);
 CREATE INDEX IF NOT EXISTS idx_website_snap_url ON website_snapshot(url);
@@ -448,13 +447,12 @@ CREATE TABLE IF NOT EXISTS endpoint_snapshot (
     content_length INTEGER,
     location TEXT NOT NULL DEFAULT '',
     webserver TEXT NOT NULL DEFAULT '',
-    content_type TEXT NOT NULL DEFAULT '',
-    tech VARCHAR(100)[] NOT NULL DEFAULT '{}',
-    response_body TEXT NOT NULL DEFAULT '',
-    vhost BOOLEAN,
-    matched_gf_patterns VARCHAR(100)[] NOT NULL DEFAULT '{}',
-    response_headers TEXT NOT NULL DEFAULT '',
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+	content_type TEXT NOT NULL DEFAULT '',
+	tech VARCHAR(100)[] NOT NULL DEFAULT '{}',
+	response_body TEXT NOT NULL DEFAULT '',
+	vhost BOOLEAN,
+	response_headers TEXT NOT NULL DEFAULT '',
+	created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX IF NOT EXISTS idx_endpoint_snap_scan ON endpoint_snapshot(scan_id);
 CREATE INDEX IF NOT EXISTS idx_endpoint_snap_url ON endpoint_snapshot(url);
@@ -474,7 +472,7 @@ CREATE TABLE IF NOT EXISTS directory_snapshot (
     content_length INTEGER,
     content_type VARCHAR(200) NOT NULL DEFAULT '',
     duration INTEGER,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX IF NOT EXISTS idx_directory_snap_scan ON directory_snapshot(scan_id);
 CREATE INDEX IF NOT EXISTS idx_directory_snap_url ON directory_snapshot(url);
@@ -490,7 +488,7 @@ CREATE TABLE IF NOT EXISTS screenshot_snapshot (
     url TEXT NOT NULL,
     status_code SMALLINT,
     image BYTEA,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX IF NOT EXISTS idx_screenshot_snap_scan ON screenshot_snapshot(scan_id);
 CREATE INDEX IF NOT EXISTS idx_screenshot_snap_created_at ON screenshot_snapshot(created_at);
@@ -507,7 +505,7 @@ CREATE TABLE IF NOT EXISTS vulnerability_snapshot (
     cvss_score DECIMAL(3,1) NOT NULL DEFAULT 0.0,
     description TEXT NOT NULL DEFAULT '',
     raw_output JSONB NOT NULL DEFAULT '{}',
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX IF NOT EXISTS idx_vuln_snap_scan ON vulnerability_snapshot(scan_id);
 CREATE INDEX IF NOT EXISTS idx_vuln_snap_url ON vulnerability_snapshot(url);
@@ -537,7 +535,7 @@ CREATE TABLE IF NOT EXISTS asset_statistics (
     prev_websites INTEGER NOT NULL DEFAULT 0,
     prev_vulns INTEGER NOT NULL DEFAULT 0,
     prev_assets INTEGER NOT NULL DEFAULT 0,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 -- statistics_history
@@ -551,8 +549,8 @@ CREATE TABLE IF NOT EXISTS statistics_history (
     total_websites INTEGER NOT NULL DEFAULT 0,
     total_vulns INTEGER NOT NULL DEFAULT 0,
     total_assets INTEGER NOT NULL DEFAULT 0,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 CREATE UNIQUE INDEX IF NOT EXISTS unique_statistics_date ON statistics_history(date);
 CREATE INDEX IF NOT EXISTS idx_statistics_date ON statistics_history(date);
@@ -564,9 +562,9 @@ CREATE TABLE IF NOT EXISTS notification (
     level VARCHAR(20) NOT NULL DEFAULT 'low',
     title VARCHAR(200) NOT NULL DEFAULT '',
     message VARCHAR(2000) NOT NULL DEFAULT '',
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     is_read BOOLEAN NOT NULL DEFAULT FALSE,
-    read_at TIMESTAMP
+    read_at TIMESTAMPTZ
 );
 CREATE INDEX IF NOT EXISTS idx_notification_category ON notification(category);
 CREATE INDEX IF NOT EXISTS idx_notification_level ON notification(level);
@@ -582,9 +580,6 @@ CREATE INDEX IF NOT EXISTS idx_website_tech_gin ON website USING GIN (tech);
 
 -- GIN index for endpoint.tech array
 CREATE INDEX IF NOT EXISTS idx_endpoint_tech_gin ON endpoint USING GIN (tech);
-
--- GIN index for endpoint.matched_gf_patterns array
-CREATE INDEX IF NOT EXISTS idx_endpoint_matched_gf_patterns_gin ON endpoint USING GIN (matched_gf_patterns);
 
 -- GIN index for scan.engine_ids array
 CREATE INDEX IF NOT EXISTS idx_scan_engine_ids_gin ON scan USING GIN (engine_ids);
@@ -608,8 +603,8 @@ ON CONFLICT (username) DO NOTHING;
 CREATE TABLE IF NOT EXISTS subfinder_provider_settings (
     id INTEGER PRIMARY KEY DEFAULT 1 CHECK (id = 1),
     providers JSONB NOT NULL DEFAULT '{}'::jsonb,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Insert default row with all providers disabled
@@ -637,7 +632,7 @@ CREATE TABLE IF NOT EXISTS agent (
     health_state    VARCHAR(20) DEFAULT 'ok',
     health_reason   VARCHAR(64),
     health_message  VARCHAR(256),
-    health_since    TIMESTAMP,
+    health_since    TIMESTAMPTZ,
     hostname        VARCHAR(255),
     ip_address      VARCHAR(45),
     version         VARCHAR(20),
@@ -652,18 +647,18 @@ CREATE TABLE IF NOT EXISTS agent (
     registration_token  VARCHAR(8),
 
     -- Timestamps
-    connected_at    TIMESTAMP,
-    last_heartbeat  TIMESTAMP,
-    created_at      TIMESTAMP DEFAULT NOW(),
-    updated_at      TIMESTAMP DEFAULT NOW()
+    connected_at    TIMESTAMPTZ,
+    last_heartbeat  TIMESTAMPTZ,
+    created_at      TIMESTAMPTZ DEFAULT NOW(),
+    updated_at      TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- registration_token
 CREATE TABLE IF NOT EXISTS registration_token (
     id              SERIAL PRIMARY KEY,
     token           VARCHAR(8) NOT NULL UNIQUE,
-    expires_at      TIMESTAMP NOT NULL DEFAULT (NOW() + INTERVAL '1 hour'),
-    created_at      TIMESTAMP DEFAULT NOW()
+    expires_at      TIMESTAMPTZ NOT NULL DEFAULT (NOW() + INTERVAL '1 hour'),
+    created_at      TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- scan_task
@@ -681,9 +676,9 @@ CREATE TABLE IF NOT EXISTS scan_task (
     error_message   VARCHAR(4096),
 
     -- Timestamps
-    created_at      TIMESTAMP DEFAULT NOW(),
-    started_at      TIMESTAMP,
-    completed_at    TIMESTAMP
+    created_at      TIMESTAMPTZ DEFAULT NOW(),
+    started_at      TIMESTAMPTZ,
+    completed_at    TIMESTAMPTZ
 );
 
 -- Indexes for agent table

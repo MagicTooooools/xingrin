@@ -31,7 +31,7 @@ func TestIsToolEnabled(t *testing.T) {
 		},
 	}
 	assert.True(t, isToolEnabled(stageConfig, toolSubfinder))
-	assert.False(t, isToolEnabled(stageConfig, toolSublist3r))
+	assert.False(t, isToolEnabled(stageConfig, "missing_tool"))
 	assert.False(t, isToolEnabled(map[string]any{"tools": "bad"}, toolSubfinder))
 }
 

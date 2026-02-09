@@ -3,6 +3,7 @@ package assetwiring
 import (
 	assetdomain "github.com/yyhuni/lunafox/server/internal/modules/asset/domain"
 	assetmodel "github.com/yyhuni/lunafox/server/internal/modules/asset/repository/persistence"
+	"github.com/yyhuni/lunafox/server/internal/pkg/timeutil"
 )
 
 func assetModelWebsiteToDomain(item *assetmodel.Website) *assetdomain.Website {
@@ -15,7 +16,7 @@ func assetModelWebsiteToDomain(item *assetmodel.Website) *assetdomain.Website {
 		URL:             item.URL,
 		Host:            item.Host,
 		Location:        item.Location,
-		CreatedAt:       item.CreatedAt,
+		CreatedAt:       timeutil.ToUTC(item.CreatedAt),
 		Title:           item.Title,
 		Webserver:       item.Webserver,
 		ResponseBody:    item.ResponseBody,
@@ -38,7 +39,7 @@ func assetDomainWebsiteToModel(item *assetdomain.Website) *assetmodel.Website {
 		URL:             item.URL,
 		Host:            item.Host,
 		Location:        item.Location,
-		CreatedAt:       item.CreatedAt,
+		CreatedAt:       timeutil.ToUTC(item.CreatedAt),
 		Title:           item.Title,
 		Webserver:       item.Webserver,
 		ResponseBody:    item.ResponseBody,
@@ -69,7 +70,7 @@ func assetModelEndpointToDomain(item *assetmodel.Endpoint) *assetdomain.Endpoint
 		URL:               item.URL,
 		Host:              item.Host,
 		Location:          item.Location,
-		CreatedAt:         item.CreatedAt,
+		CreatedAt:         timeutil.ToUTC(item.CreatedAt),
 		Title:             item.Title,
 		Webserver:         item.Webserver,
 		ResponseBody:      item.ResponseBody,
@@ -78,7 +79,6 @@ func assetModelEndpointToDomain(item *assetmodel.Endpoint) *assetdomain.Endpoint
 		StatusCode:        item.StatusCode,
 		ContentLength:     item.ContentLength,
 		Vhost:             item.Vhost,
-		MatchedGFPatterns: item.MatchedGFPatterns,
 		ResponseHeaders:   item.ResponseHeaders,
 	}
 }
@@ -93,7 +93,7 @@ func assetDomainEndpointToModel(item *assetdomain.Endpoint) *assetmodel.Endpoint
 		URL:               item.URL,
 		Host:              item.Host,
 		Location:          item.Location,
-		CreatedAt:         item.CreatedAt,
+		CreatedAt:         timeutil.ToUTC(item.CreatedAt),
 		Title:             item.Title,
 		Webserver:         item.Webserver,
 		ResponseBody:      item.ResponseBody,
@@ -102,7 +102,6 @@ func assetDomainEndpointToModel(item *assetdomain.Endpoint) *assetmodel.Endpoint
 		StatusCode:        item.StatusCode,
 		ContentLength:     item.ContentLength,
 		Vhost:             item.Vhost,
-		MatchedGFPatterns: item.MatchedGFPatterns,
 		ResponseHeaders:   item.ResponseHeaders,
 	}
 }
@@ -127,7 +126,7 @@ func assetModelDirectoryToDomain(item *assetmodel.Directory) *assetdomain.Direct
 		ContentLength: item.ContentLength,
 		ContentType:   item.ContentType,
 		Duration:      item.Duration,
-		CreatedAt:     item.CreatedAt,
+		CreatedAt:     timeutil.ToUTC(item.CreatedAt),
 	}
 }
 
@@ -143,7 +142,7 @@ func assetDomainDirectoryToModel(item *assetdomain.Directory) *assetmodel.Direct
 		ContentLength: item.ContentLength,
 		ContentType:   item.ContentType,
 		Duration:      item.Duration,
-		CreatedAt:     item.CreatedAt,
+		CreatedAt:     timeutil.ToUTC(item.CreatedAt),
 	}
 }
 
@@ -163,7 +162,7 @@ func assetModelSubdomainToDomain(item *assetmodel.Subdomain) *assetdomain.Subdom
 		ID:        item.ID,
 		TargetID:  item.TargetID,
 		Name:      item.Name,
-		CreatedAt: item.CreatedAt,
+		CreatedAt: timeutil.ToUTC(item.CreatedAt),
 	}
 }
 
@@ -175,7 +174,7 @@ func assetDomainSubdomainToModel(item *assetdomain.Subdomain) *assetmodel.Subdom
 		ID:        item.ID,
 		TargetID:  item.TargetID,
 		Name:      item.Name,
-		CreatedAt: item.CreatedAt,
+		CreatedAt: timeutil.ToUTC(item.CreatedAt),
 	}
 }
 
@@ -197,7 +196,7 @@ func assetModelHostPortToDomain(item *assetmodel.HostPort) *assetdomain.HostPort
 		Host:      item.Host,
 		IP:        item.IP,
 		Port:      item.Port,
-		CreatedAt: item.CreatedAt,
+		CreatedAt: timeutil.ToUTC(item.CreatedAt),
 	}
 }
 
@@ -211,7 +210,7 @@ func assetDomainHostPortToModel(item *assetdomain.HostPort) *assetmodel.HostPort
 		Host:      item.Host,
 		IP:        item.IP,
 		Port:      item.Port,
-		CreatedAt: item.CreatedAt,
+		CreatedAt: timeutil.ToUTC(item.CreatedAt),
 	}
 }
 
@@ -233,8 +232,8 @@ func assetModelScreenshotToDomain(item *assetmodel.Screenshot) *assetdomain.Scre
 		URL:        item.URL,
 		StatusCode: item.StatusCode,
 		Image:      item.Image,
-		CreatedAt:  item.CreatedAt,
-		UpdatedAt:  item.UpdatedAt,
+		CreatedAt:  timeutil.ToUTC(item.CreatedAt),
+		UpdatedAt:  timeutil.ToUTC(item.UpdatedAt),
 	}
 }
 
@@ -248,8 +247,8 @@ func assetDomainScreenshotToModel(item *assetdomain.Screenshot) *assetmodel.Scre
 		URL:        item.URL,
 		StatusCode: item.StatusCode,
 		Image:      item.Image,
-		CreatedAt:  item.CreatedAt,
-		UpdatedAt:  item.UpdatedAt,
+		CreatedAt:  timeutil.ToUTC(item.CreatedAt),
+		UpdatedAt:  timeutil.ToUTC(item.UpdatedAt),
 	}
 }
 

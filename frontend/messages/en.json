@@ -56,10 +56,9 @@
       "contentType": "Content Type",
       "technologies": "Technologies",
       "responseBody": "Response Body",
-      "vhost": "VHost",
-      "gfPatterns": "GF Patterns",
-      "responseHeaders": "Response Headers",
-      "responseTime": "Response Time"
+		"vhost": "VHost",
+		"responseHeaders": "Response Headers",
+		"responseTime": "Response Time"
     },
     "website": {
       "host": "Host",
@@ -375,11 +374,10 @@
       "webserver": "Web Server",
       "contentType": "Content Type",
       "responseBody": "Response Body",
-      "responseHeaders": "Response Headers",
-      "vhost": "VHost",
-      "createdAt": "Created At",
-      "gfPatterns": "GF Patterns"
-    },
+		"responseHeaders": "Response Headers",
+		"vhost": "VHost",
+		"createdAt": "Created At"
+	},
     "card": {
       "title": "Title",
       "expand": "Expand",

@@ -172,21 +172,20 @@ export interface ScanLog {
 export interface GetScanLogsResponse {
   results: ScanLog[]
   hasMore: boolean
-  nextCursor?: string
 }
 
 /**
  * Get scan logs params type
  */
 export interface GetScanLogsParams {
-  cursor?: string
+  afterId?: number
   limit?: number
 }
 
 /**
  * Get scan logs
  * @param scanId - Scan ID
- * @param params - Query parameters (cursor for pagination, limit for max results)
+ * @param params - Query parameters (afterId for pagination, limit for max results)
  * @returns Scan logs with hasMore indicator
  */
 export async function getScanLogs(scanId: number, params?: GetScanLogsParams): Promise<GetScanLogsResponse> {

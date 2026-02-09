@@ -15,8 +15,8 @@ func newAssetHostPortStoreAdapter(repo *assetrepo.HostPortRepository) *assetHost
 	return &assetHostPortStoreAdapter{repo: repo}
 }
 
-func (adapter *assetHostPortStoreAdapter) GetIPAggregation(targetID int, filter string) ([]assetdomain.IPAggregationRow, int64, error) {
-	rows, total, err := adapter.repo.GetIPAggregation(targetID, filter)
+func (adapter *assetHostPortStoreAdapter) GetIPAggregation(targetID int, page, pageSize int, filter string) ([]assetdomain.IPAggregationRow, int64, error) {
+	rows, total, err := adapter.repo.GetIPAggregation(targetID, page, pageSize, filter)
 	if err != nil {
 		return nil, 0, err
 	}

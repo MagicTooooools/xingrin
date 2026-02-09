@@ -10,23 +10,22 @@ import { ExpandableCell, ExpandableTagList } from "@/components/ui/data-table/ex
 
 // Translation type definitions
 export interface EndpointTranslations {
-  columns: {
-    url: string
-    host: string
-    title: string
+	columns: {
+		url: string
+		host: string
+		title: string
     status: string
     contentLength: string
     location: string
     webServer: string
     contentType: string
-    technologies: string
-    responseBody: string
-    vhost: string
-    gfPatterns: string
-    responseHeaders: string
-    responseTime: string
-    createdAt: string
-  }
+		technologies: string
+		responseBody: string
+		vhost: string
+		responseHeaders: string
+		responseTime: string
+		createdAt: string
+	}
   actions: {
     selectAll: string
     selectRow: string
@@ -271,29 +270,8 @@ export function createEndpointColumns({
         return <span className="text-sm font-mono">{vhost ? "true" : "false"}</span>
       },
     },
-    {
-      accessorKey: "gfPatterns",
-      meta: { title: t.columns.gfPatterns },
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={t.columns.gfPatterns} />
-      ),
-      size: 150,
-      minSize: 100,
-      maxSize: 250,
-      cell: ({ row }) => {
-        const patterns = (row.getValue("gfPatterns") as string[] | null | undefined) || []
-        return (
-          <ExpandableTagList
-            items={patterns}
-            maxLines={2}
-            variant="secondary"
-          />
-        )
-      },
-      enableSorting: false,
-    },
-    {
-      accessorKey: "responseTime",
+	{
+		accessorKey: "responseTime",
       meta: { title: t.columns.responseTime },
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title={t.columns.responseTime} />

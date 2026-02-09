@@ -41,7 +41,6 @@ export const mockEndpoints: Endpoint[] = [
     host: 'api.acme.com',
     webserver: 'nginx/1.24.0',
     tech: ['Django', 'Python'],
-    gfPatterns: ['api', 'json'],
     createdAt: '2024-12-28T10:02:00Z',
   },
   {
@@ -56,7 +55,6 @@ export const mockEndpoints: Endpoint[] = [
     host: 'api.acme.com',
     webserver: 'nginx/1.24.0',
     tech: ['Django', 'Python'],
-    gfPatterns: ['api', 'json'],
     createdAt: '2024-12-28T10:03:00Z',
   },
   {
@@ -85,7 +83,6 @@ export const mockEndpoints: Endpoint[] = [
     host: 'acme.io',
     webserver: 'cloudflare',
     tech: ['Node.js', 'Express'],
-    gfPatterns: ['config', 'json'],
     createdAt: '2024-12-27T14:31:00Z',
   },
   {
@@ -142,7 +139,6 @@ export const mockEndpoints: Endpoint[] = [
     responseTime: 0.034,
     host: 'globalfinance.com',
     webserver: 'Microsoft-IIS/10.0',
-    gfPatterns: ['git', 'config'],
     createdAt: '2024-12-25T16:21:00Z',
   },
   {
@@ -171,7 +167,6 @@ export const mockEndpoints: Endpoint[] = [
     host: 'retailmax.com',
     webserver: 'nginx/1.22.0',
     tech: ['React', 'Redux'],
-    gfPatterns: ['param', 'id'],
     createdAt: '2024-12-21T10:46:00Z',
   },
   {

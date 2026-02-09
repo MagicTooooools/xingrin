@@ -9,12 +9,11 @@ export interface Endpoint {
 
   // HTTP metadata (may be null in some scenarios)
   method?: string
-  statusCode: number | null       // Backend: status_code (pointer type, may be null)
-  title: string
-  contentLength: number | null    // Backend: content_length (pointer type, may be null)
-  contentType?: string | null     // Backend: content_type (optional)
-  responseTime?: number | null    // Backend: response_time (in seconds, optional)
-  gfPatterns?: string[] | null    // Backend: matched_gf_patterns, GF pattern matching results
+	statusCode: number | null       // Backend: status_code (pointer type, may be null)
+	title: string
+	contentLength: number | null    // Backend: content_length (pointer type, may be null)
+	contentType?: string | null     // Backend: content_type (optional)
+	responseTime?: number | null    // Backend: response_time (in seconds, optional)
 
   // Site/endpoint dimension additional info (used by both asset table and snapshot table)
   host?: string
@@ -59,14 +58,13 @@ export interface GetEndpointsResponse {
 export interface CreateEndpointRequest {
   url: string                      // Required
   method?: string                  // Optional
-  statusCode?: number | null       // Optional
-  title?: string                   // Optional
-  contentLength?: number | null    // Optional
-  contentType?: string | null      // Optional
-  responseTime?: number | null     // Optional
-  gfPatterns?: string[] | null     // Optional, GF pattern matching results
-  domain?: string                  // Optional
-  subdomain?: string               // Optional
+	statusCode?: number | null       // Optional
+	title?: string                   // Optional
+	contentLength?: number | null    // Optional
+	contentType?: string | null      // Optional
+	responseTime?: number | null     // Optional
+	domain?: string                  // Optional
+	subdomain?: string               // Optional
 }
 
 // Create Endpoint response (extends common batch create response)
@@ -78,13 +76,12 @@ export interface UpdateEndpointRequest {
   url?: string
   method?: string
   statusCode?: number
-  title?: string
-  contentLength?: number
-  contentType?: string | null
-  responseTime?: number | null
-  gfPatterns?: string[] | null
-  domain?: string
-  subdomain?: string
+	title?: string
+	contentLength?: number
+	contentType?: string | null
+	responseTime?: number | null
+	domain?: string
+	subdomain?: string
 }
 
 // Batch delete Endpoint request parameters

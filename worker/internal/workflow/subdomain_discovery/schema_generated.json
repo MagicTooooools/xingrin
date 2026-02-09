@@ -271,53 +271,11 @@
                 ]
               },
               "x-stage": "recon"
-            },
-            "sublist3r": {
-              "type": "object",
-              "description": "Collect subdomains using multiple search engines",
-              "properties": {
-                "enabled": {
-                  "type": "boolean",
-                  "description": "Whether to enable this tool"
-                },
-                "threads-cli": {
-                  "type": "integer",
-                  "description": "Number of concurrent threads"
-                },
-                "timeout-runtime": {
-                  "type": "integer",
-                  "description": "Scan timeout in seconds"
-                }
-              },
-              "required": [
-                "enabled"
-              ],
-              "additionalProperties": false,
-              "if": {
-                "type": "object",
-                "properties": {
-                  "enabled": {
-                    "const": true
-                  }
-                },
-                "required": [
-                  "enabled"
-                ]
-              },
-              "then": {
-                "type": "object",
-                "required": [
-                  "timeout-runtime",
-                  "threads-cli"
-                ]
-              },
-              "x-stage": "recon"
             }
           },
           "required": [
             "assetfinder",
-            "subfinder",
-            "sublist3r"
+            "subfinder"
           ],
           "additionalProperties": false
         }

@@ -87,4 +87,16 @@ POST   /api/engines             # 创建引擎
 GET    /api/engines/:id         # 获取引擎
 PUT    /api/engines/:id         # 更新引擎
 DELETE /api/engines/:id         # 删除引擎
+
+GET    /api/scans/:id/logs      # 扫描日志（afterId 分页，参数: afterId, limit）
 ```
+
+## 时间语义标准（UTC）
+
+- 数据库存储统一使用 `TIMESTAMPTZ`。
+- 数据库连接强制 `TimeZone=UTC`。
+- 服务端时间写入统一使用 UTC（含 GORM `NowFunc`）。
+- API / WebSocket 时间字段统一按 RFC3339Nano 输出（UTC，`Z`）。
+- CSV 导出时间统一为 RFC3339Nano UTC。
+
+示例：`2026-02-09T12:34:56.123456789Z`

@@ -13,7 +13,7 @@ func TestConfigDefaults(t *testing.T) {
 	// Clear all relevant environment variables
 	envVars := []string{
 		"SERVER_PORT", "GIN_MODE",
-		"DB_HOST", "DB_PORT", "DB_USER", "DB_PASSWORD", "DB_NAME", "DB_SSLMODE",
+		"DB_HOST", "DB_PORT", "DB_USER", "DB_PASSWORD", "DB_NAME", "DB_SSLMODE", "DB_TIMEZONE",
 		"DB_MAX_OPEN_CONNS", "DB_MAX_IDLE_CONNS", "DB_CONN_MAX_LIFETIME",
 		"REDIS_HOST", "REDIS_PORT", "REDIS_PASSWORD", "REDIS_DB",
 		"LOG_LEVEL", "LOG_FORMAT",
@@ -55,6 +55,9 @@ func TestConfigDefaults(t *testing.T) {
 	}
 	if cfg.Database.SSLMode != defaults.Database.SSLMode {
 		t.Errorf("Database.SSLMode: expected %s, got %s", defaults.Database.SSLMode, cfg.Database.SSLMode)
+	}
+	if cfg.Database.TimeZone != defaults.Database.TimeZone {
+		t.Errorf("Database.TimeZone: expected %s, got %s", defaults.Database.TimeZone, cfg.Database.TimeZone)
 	}
 	if cfg.Database.MaxOpenConns != defaults.Database.MaxOpenConns {
 		t.Errorf("Database.MaxOpenConns: expected %d, got %d", defaults.Database.MaxOpenConns, cfg.Database.MaxOpenConns)
@@ -101,6 +104,9 @@ func TestConfigFromEnv(t *testing.T) {
 	if err := os.Setenv("DB_PORT", "5433"); err != nil {
 		t.Fatalf("Failed to set DB_PORT: %v", err)
 	}
+	if err := os.Setenv("DB_TIMEZONE", "Asia/Shanghai"); err != nil {
+		t.Fatalf("Failed to set DB_TIMEZONE: %v", err)
+	}
 	if err := os.Setenv("LOG_LEVEL", "debug"); err != nil {
 		t.Fatalf("Failed to set LOG_LEVEL: %v", err)
 	}
@@ -111,6 +117,7 @@ func TestConfigFromEnv(t *testing.T) {
 		_ = os.Unsetenv("SERVER_PORT")
 		_ = os.Unsetenv("DB_HOST")
 		_ = os.Unsetenv("DB_PORT")
+		_ = os.Unsetenv("DB_TIMEZONE")
 		_ = os.Unsetenv("LOG_LEVEL")
 		_ = os.Unsetenv("PUBLIC_URL")
 	}()
@@ -129,6 +136,9 @@ func TestConfigFromEnv(t *testing.T) {
 	if cfg.Database.Port != 5433 {
 		t.Errorf("Database.Port: expected 5433, got %d", cfg.Database.Port)
 	}
+	if cfg.Database.TimeZone != "Asia/Shanghai" {
+		t.Errorf("Database.TimeZone: expected Asia/Shanghai, got %s", cfg.Database.TimeZone)
+	}
 	if cfg.Log.Level != "debug" {
 		t.Errorf("Log.Level: expected debug, got %s", cfg.Log.Level)
 	}
@@ -146,9 +156,10 @@ func TestDatabaseDSN(t *testing.T) {
 		Password: "secret",
 		Name:     "testdb",
 		SSLMode:  "disable",
+		TimeZone: "UTC",
 	}
 
-	expected := "host=localhost port=5432 user=postgres password=secret dbname=testdb sslmode=disable"
+	expected := "host=localhost port=5432 user=postgres password=secret dbname=testdb sslmode=disable TimeZone=UTC"
 	if cfg.DSN() != expected {
 		t.Errorf("DSN: expected %s, got %s", expected, cfg.DSN())
 	}

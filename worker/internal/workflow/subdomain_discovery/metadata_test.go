@@ -3,9 +3,9 @@ package subdomain_discovery
 import (
 	"testing"
 
-	"github.com/yyhuni/lunafox/worker/internal/pkg"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/yyhuni/lunafox/worker/internal/pkg"
 	"go.uber.org/zap"
 )
 
@@ -60,7 +60,6 @@ func TestToolsMatchMetadata(t *testing.T) {
 	// 代码中定义的 tool 名称
 	codeTools := map[string]bool{
 		toolSubfinder:                   true,
-		toolSublist3r:                   true,
 		toolAssetfinder:                 true,
 		toolSubdomainBruteforce:         true,
 		toolSubdomainPermutationResolve: true,
@@ -80,19 +79,6 @@ func TestToolsMatchMetadata(t *testing.T) {
 	}
 
 	// 注意：不检查反向（templates 中有但代码中没有），因为可能有未使用的工具定义
-}
-
-// TestReconToolsMatchMetadata 验证 reconTools 列表和实际定义的工具一致
-func TestReconToolsMatchMetadata(t *testing.T) {
-	// reconTools 应该包含所有侦察工具
-	expectedReconTools := []string{
-		toolSubfinder,
-		toolSublist3r,
-		toolAssetfinder,
-	}
-
-	assert.ElementsMatch(t, expectedReconTools, reconTools,
-		"reconTools list should match the expected reconnaissance tools")
 }
 
 // TestStageToolMapping 验证每个 stage 都有对应的工具
@@ -130,7 +116,6 @@ func TestGeneratedConstantsNotEmpty(t *testing.T) {
 
 	// 验证 tool 常量
 	assert.NotEmpty(t, toolSubfinder, "toolSubfinder should not be empty")
-	assert.NotEmpty(t, toolSublist3r, "toolSublist3r should not be empty")
 	assert.NotEmpty(t, toolAssetfinder, "toolAssetfinder should not be empty")
 	assert.NotEmpty(t, toolSubdomainBruteforce, "toolSubdomainBruteforce should not be empty")
 	assert.NotEmpty(t, toolSubdomainPermutationResolve, "toolSubdomainPermutationResolve should not be empty")

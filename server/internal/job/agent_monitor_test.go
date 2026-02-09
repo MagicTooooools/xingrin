@@ -5,38 +5,38 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yyhuni/lunafox/server/internal/modules/agent/model"
+	agentdomain "github.com/yyhuni/lunafox/server/internal/modules/agent/domain"
 	agentrepo "github.com/yyhuni/lunafox/server/internal/modules/agent/repository"
-	scanmodel "github.com/yyhuni/lunafox/server/internal/modules/scan/model"
 	scanrepo "github.com/yyhuni/lunafox/server/internal/modules/scan/repository"
+	scanmodel "github.com/yyhuni/lunafox/server/internal/modules/scan/repository/persistence"
 )
 
 type fakeAgentRepo struct {
-	agents  []*model.Agent
+	agents  []*agentdomain.Agent
 	updated []int
 }
 
-func (f *fakeAgentRepo) Create(ctx context.Context, agent *model.Agent) error {
+func (f *fakeAgentRepo) Create(ctx context.Context, agent *agentdomain.Agent) error {
 	return nil
 }
 
-func (f *fakeAgentRepo) FindByID(ctx context.Context, id int) (*model.Agent, error) {
+func (f *fakeAgentRepo) FindByID(ctx context.Context, id int) (*agentdomain.Agent, error) {
 	return nil, nil
 }
 
-func (f *fakeAgentRepo) FindByAPIKey(ctx context.Context, apiKey string) (*model.Agent, error) {
+func (f *fakeAgentRepo) FindByAPIKey(ctx context.Context, apiKey string) (*agentdomain.Agent, error) {
 	return nil, nil
 }
 
-func (f *fakeAgentRepo) List(ctx context.Context, page, pageSize int, status string) ([]*model.Agent, int64, error) {
+func (f *fakeAgentRepo) List(ctx context.Context, page, pageSize int, status string) ([]*agentdomain.Agent, int64, error) {
 	return nil, 0, nil
 }
 
-func (f *fakeAgentRepo) FindStaleOnline(ctx context.Context, before time.Time) ([]*model.Agent, error) {
+func (f *fakeAgentRepo) FindStaleOnline(ctx context.Context, before time.Time) ([]*agentdomain.Agent, error) {
 	return f.agents, nil
 }
 
-func (f *fakeAgentRepo) Update(ctx context.Context, agent *model.Agent) error {
+func (f *fakeAgentRepo) Update(ctx context.Context, agent *agentdomain.Agent) error {
 	return nil
 }
 
@@ -92,7 +92,7 @@ func (f *fakeScanTaskRepo) FailTasksForOfflineAgent(ctx context.Context, agentID
 
 func TestAgentMonitorMarksOfflineAndRecovers(t *testing.T) {
 	agentRepo := &fakeAgentRepo{
-		agents: []*model.Agent{{ID: 1}, {ID: 2}},
+		agents: []*agentdomain.Agent{{ID: 1}, {ID: 2}},
 	}
 	taskRepo := &fakeScanTaskRepo{}
 

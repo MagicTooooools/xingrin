@@ -43,12 +43,11 @@ function endpointToSearchResult(endpoint: typeof mockEndpoints[0]): EndpointSear
     webserver: endpoint.webserver || '',
     location: endpoint.location || '',
     vhost: null,
-    responseHeaders: {},
-    responseBody: '',
-    createdAt: endpoint.createdAt ?? null,
-    targetId: 1,
-    matchedGfPatterns: endpoint.gfPatterns || [],
-  }
+		responseHeaders: {},
+		responseBody: '',
+		createdAt: endpoint.createdAt ?? null,
+		targetId: 1,
+	}
 }
 
 // 解析搜索表达式

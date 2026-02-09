@@ -72,13 +72,12 @@ export function EndpointsDetailView({
       location: tColumns("endpoint.location"),
       webServer: tColumns("endpoint.webServer"),
       contentType: tColumns("endpoint.contentType"),
-      technologies: tColumns("endpoint.technologies"),
-      responseBody: tColumns("endpoint.responseBody"),
-      vhost: tColumns("endpoint.vhost"),
-      gfPatterns: tColumns("endpoint.gfPatterns"),
-      responseHeaders: tColumns("endpoint.responseHeaders"),
-      responseTime: tColumns("endpoint.responseTime"),
-      createdAt: tColumns("common.createdAt"),
+		technologies: tColumns("endpoint.technologies"),
+		responseBody: tColumns("endpoint.responseBody"),
+		vhost: tColumns("endpoint.vhost"),
+		responseHeaders: tColumns("endpoint.responseHeaders"),
+		responseTime: tColumns("endpoint.responseTime"),
+		createdAt: tColumns("common.createdAt"),
     },
     actions: {
       selectAll: tCommon("actions.selectAll"),
@@ -204,11 +203,11 @@ export function EndpointsDetailView({
   // Generate CSV content
   const generateCSV = (items: Endpoint[]): string => {
     const BOM = '\ufeff'
-    const headers = [
-      'url', 'host', 'location', 'title', 'status_code',
-      'content_length', 'content_type', 'webserver', 'tech',
-      'response_body', 'vhost', 'matched_gf_patterns', 'created_at'
-    ]
+	const headers = [
+		'url', 'host', 'location', 'title', 'status_code',
+		'content_length', 'content_type', 'webserver', 'tech',
+		'response_body', 'vhost', 'created_at'
+	]
     
     const rows = items.map(item => [
       escapeCSV(item.url),
