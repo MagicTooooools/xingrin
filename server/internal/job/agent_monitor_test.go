@@ -5,8 +5,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yyhuni/lunafox/server/internal/model"
-	"github.com/yyhuni/lunafox/server/internal/repository"
+	"github.com/yyhuni/lunafox/server/internal/modules/agent/model"
+	agentrepo "github.com/yyhuni/lunafox/server/internal/modules/agent/repository"
+	scanmodel "github.com/yyhuni/lunafox/server/internal/modules/scan/model"
+	scanrepo "github.com/yyhuni/lunafox/server/internal/modules/scan/repository"
 )
 
 type fakeAgentRepo struct {
@@ -43,7 +45,7 @@ func (f *fakeAgentRepo) UpdateStatus(ctx context.Context, id int, status string)
 	return nil
 }
 
-func (f *fakeAgentRepo) UpdateHeartbeat(ctx context.Context, id int, update repository.AgentHeartbeatUpdate) error {
+func (f *fakeAgentRepo) UpdateHeartbeat(ctx context.Context, id int, update agentrepo.AgentHeartbeatUpdate) error {
 	return nil
 }
 
@@ -55,11 +57,11 @@ type fakeScanTaskRepo struct {
 	recovered []int
 }
 
-func (f *fakeScanTaskRepo) FindByID(ctx context.Context, id int) (*model.ScanTask, error) {
+func (f *fakeScanTaskRepo) FindByID(ctx context.Context, id int) (*scanmodel.ScanTask, error) {
 	return nil, nil
 }
 
-func (f *fakeScanTaskRepo) PullTask(ctx context.Context, agentID int) (*model.ScanTask, error) {
+func (f *fakeScanTaskRepo) PullTask(ctx context.Context, agentID int) (*scanmodel.ScanTask, error) {
 	return nil, nil
 }
 
@@ -79,7 +81,7 @@ func (f *fakeScanTaskRepo) UnlockNextStage(ctx context.Context, scanID, stage in
 	return 0, nil
 }
 
-func (f *fakeScanTaskRepo) CancelTasksByScanID(ctx context.Context, scanID int) ([]repository.CancelledTaskInfo, error) {
+func (f *fakeScanTaskRepo) CancelTasksByScanID(ctx context.Context, scanID int) ([]scanrepo.CancelledTaskInfo, error) {
 	return nil, nil
 }
 

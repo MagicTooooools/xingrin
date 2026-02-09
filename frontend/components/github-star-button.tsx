@@ -1,8 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Button } from "@/components/ui/button"
-import { IconBrandGithub, IconStarFilled } from "@/components/icons"
+import { IconBrandGithub } from "@/components/icons"
 import { cn } from "@/lib/utils"
 
 interface GithubStarButtonProps {

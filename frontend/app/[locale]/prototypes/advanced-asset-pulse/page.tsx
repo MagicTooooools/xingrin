@@ -849,16 +849,16 @@ const CircuitTreemap = withRealData(({ data }) => {
 
   // Custom Content for Treemap Node
   type TreemapNodeProps = {
-    x: number
-    y: number
-    width: number
-    height: number
-    index: number
+    x?: number
+    y?: number
+    width?: number
+    height?: number
+    index?: number
     payload?: { fill?: string; name?: string; size?: number }
     colors?: string[]
     name?: string
   }
-  const CustomizedContent = ({ x, y, width, height, index, payload, colors, name }: TreemapNodeProps) => {
+  const CustomizedContent = ({ x = 0, y = 0, width = 0, height = 0, index = 0, payload, colors, name }: TreemapNodeProps) => {
     
     // Safety check for payload and depth
     // In this flat structure, depth 1 are the data items. Depth 0 is root.
@@ -886,7 +886,7 @@ const CircuitTreemap = withRealData(({ data }) => {
         )}
         {width > 50 && height > 30 && (
            <text x={x + width / 2} y={y + height / 2} textAnchor="middle" fill="rgba(255,255,255,0.8)" fontSize={10} dy={10} fontFamily="var(--font-mono)">
-             {size || (payload?.size)}
+             {payload?.size}
            </text>
         )}
       </g>
@@ -1286,6 +1286,7 @@ const CommandDeck = withRealData(({ data }) => {
      site: { label: 'Web Sites', totalKey: 'totalWebsites', deltaKey: 'newSite', color: 'var(--chart-4)' },
   }
   const activeConfig = config[activeTab]
+  const latest = processedData[processedData.length - 1] || data[data.length - 1] || {}
 
   return (
     <div className="w-full border border-border bg-card overflow-hidden flex flex-col h-[420px]">
@@ -1295,6 +1296,7 @@ const CommandDeck = withRealData(({ data }) => {
              const conf = config[key]
              const isActive = activeTab === key
              const total = latest[conf.totalKey as keyof typeof latest] as number
+             const delta = latest[conf.deltaKey as keyof typeof latest] as number
 
              return (
                 <button
@@ -1431,6 +1433,7 @@ const RichListConsole = withRealData(({ data }) => {
      site: { label: 'Web Sites', totalKey: 'totalWebsites', deltaKey: 'newSite', color: 'var(--chart-4)' },
   }
   const activeConfig = config[activeTab]
+  const latest = processedData[processedData.length - 1] || data[data.length - 1] || {}
 
   return (
     <div className="w-full border border-border bg-card overflow-hidden flex flex-col md:flex-row h-[450px]">
@@ -1545,9 +1548,9 @@ const SplitComparator = withRealData(({ data }) => {
              
              {/* Controls */}
              <div className="flex items-center gap-2 bg-card border border-border rounded-full px-2 py-1 shadow-sm">
-                <Selector value={leftKey} onChange={setLeftKey} side="left" />
+                <Selector value={leftKey} onChange={setLeftKey} />
                 <span className="text-muted-foreground text-[10px] font-mono">VS</span>
-                <Selector value={rightKey} onChange={setRightKey} side="right" />
+                <Selector value={rightKey} onChange={setRightKey} />
              </div>
           </div>
           
@@ -1891,6 +1894,7 @@ const TacticalCommand = withRealData(({ data }) => {
      site: { label: 'WEB SITES', totalKey: 'totalWebsites', deltaKey: 'newSite', color: '#10b981' }, // Green
   }
   const activeConfig = config[activeTab]
+  const latest = processedData[processedData.length - 1] || data[data.length - 1] || {}
 
   return (
     <div className="w-full border-2 border-primary/50 bg-black text-primary font-mono overflow-hidden flex flex-col h-[420px] relative">
@@ -1979,6 +1983,7 @@ const CorporateDashboard = withRealData(({ data }) => {
      site: { label: 'Web Sites', totalKey: 'totalWebsites', deltaKey: 'newSite', color: 'var(--chart-4)' },
   }
   const activeConfig = config[activeTab]
+  const latest = processedData[processedData.length - 1] || data[data.length - 1] || {}
 
   return (
     <div className="w-full bg-card rounded-xl shadow-sm border border-border/50 overflow-hidden flex flex-col h-[420px]">
@@ -2060,6 +2065,7 @@ const CyberNexus = withRealData(({ data }) => {
      site: { label: 'SITES', totalKey: 'totalWebsites', color: '#f59e0b' }, // Amber
   }
   const activeConfig = config[activeTab]
+  const latest = processedData[processedData.length - 1] || data[data.length - 1] || {}
 
   return (
     <div className="w-full border border-cyan-500/30 bg-slate-950 text-cyan-50 overflow-hidden flex flex-col h-[420px] relative shadow-[0_0_15px_rgba(6,182,212,0.1)]">
@@ -2144,6 +2150,7 @@ const MinimalistZen = withRealData(({ data }) => {
      site: { label: 'Sites', totalKey: 'totalWebsites', deltaKey: 'newSite' },
   }
   const activeConfig = config[activeTab]
+  const latest = processedData[processedData.length - 1] || data[data.length - 1] || {}
 
   return (
     <div className="w-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 flex flex-col h-[420px]">
@@ -2217,6 +2224,7 @@ const DataLab = withRealData(({ data }) => {
      site: { label: 'Web Sites', totalKey: 'totalWebsites', deltaKey: 'newSite', color: '#333' },
   }
   const activeConfig = config[activeTab]
+  const latest = processedData[processedData.length - 1] || data[data.length - 1] || {}
 
   return (
     <div className="w-full border border-stone-300 bg-[#fdfaf6] dark:bg-stone-900 text-stone-700 dark:text-stone-300 flex flex-col h-[420px] relative">
@@ -2379,6 +2387,8 @@ const StackedAccordion = withRealData(({ data }) => {
      url: { label: 'URL Endpoints', totalKey: 'totalEndpoints', color: 'var(--chart-3)' },
      site: { label: 'Web Sites', totalKey: 'totalWebsites', color: 'var(--chart-4)' },
   }
+
+  const latest = processedData[processedData.length - 1] || data[data.length - 1] || {}
 
   return (
     <div className="w-full border border-border bg-card overflow-hidden flex flex-col h-[450px]">

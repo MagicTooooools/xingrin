@@ -31,7 +31,7 @@ export function useScanLogs({
 }: UseScanLogsOptions): UseScanLogsReturn {
   const [logs, setLogs] = useState<ScanLog[]>([])
   const [loading, setLoading] = useState(false)
-  const lastLogId = useRef<number | null>(null)
+  const nextCursorRef = useRef<string | null>(null)
   const isMounted = useRef(true)
   
   const clampLogs = useCallback((items: ScanLog[]) => {
@@ -44,20 +44,22 @@ export function useScanLogs({
     
     setLoading(true)
     try {
-      const params: { limit: number; afterId?: number } = { limit: 200 }
-      if (incremental && lastLogId.current !== null) {
-        params.afterId = lastLogId.current
+      const params: { limit: number; cursor?: string } = { limit: 200 }
+      if (incremental && nextCursorRef.current) {
+        params.cursor = nextCursorRef.current
       }
       
       const response = await getScanLogs(scanId, params)
       const newLogs = response.results
+      if (response.nextCursor) {
+        nextCursorRef.current = response.nextCursor
+      } else if (!incremental) {
+        nextCursorRef.current = null
+      }
       
       if (!isMounted.current) return
       
       if (newLogs.length > 0) {
-        // 使用 ID 作为游标，ID 是唯一且自增的，避免时间戳重复导致的重复日志
-        lastLogId.current = newLogs[newLogs.length - 1].id
-        
         if (incremental) {
           // 按 ID 去重，防止 React Strict Mode 或竞态条件导致的重复
           setLogs(prev => {
@@ -85,7 +87,7 @@ export function useScanLogs({
     if (enabled) {
       // 重置状态
       setLogs([])
-      lastLogId.current = null
+      nextCursorRef.current = null
       fetchLogs(false)
     }
     return () => {
@@ -108,7 +110,7 @@ export function useScanLogs({
   
   const refetch = useCallback(() => {
     setLogs([])
-    lastLogId.current = null
+    nextCursorRef.current = null
     fetchLogs(false)
   }, [fetchLogs])
 

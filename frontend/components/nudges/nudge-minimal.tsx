@@ -2,7 +2,6 @@
 
 import * as React from "react"
 import { IconX } from "@/components/icons"
-import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import type { NudgeToastCardProps } from "./nudge-toast-card"
 
@@ -35,6 +34,7 @@ export function NudgeTerminal({
 
       <div className="p-4">
         <div className="mb-2 flex items-start gap-2 text-green-500">
+          {icon ? <span className="shrink-0 [&>svg]:size-4">{icon}</span> : null}
           <span className="shrink-0 text-lg leading-none mt-0.5">➜</span>
           <div className="space-y-1">
             <h3 className="font-bold leading-tight text-green-400">{title}</h3>

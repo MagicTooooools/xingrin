@@ -5,7 +5,6 @@ import { toast } from "sonner"
 import { NudgeToastCard } from "@/components/nudges/nudge-toast-card"
 import { 
   IconMoon, 
-  IconTerminal, 
   IconCoffee, 
   IconActivity, 
   IconSun, 
@@ -107,7 +106,6 @@ export function useNudgeGuardian() {
     const checkRules = () => {
       const now = new Date()
       const hour = now.getHours()
-      const minute = now.getMinutes()
       
       const sessionStart = Number(sessionStorage.getItem(SESSION_START) || Date.now())
       const sessionDurationMinutes = (Date.now() - sessionStart) / 1000 / 60

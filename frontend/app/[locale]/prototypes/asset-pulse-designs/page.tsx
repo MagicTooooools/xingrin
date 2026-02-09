@@ -233,11 +233,12 @@ function VariantMinimalistSpark() {
                 fill="var(--foreground)" 
                 radius={[2, 2, 0, 0]}
                 fillOpacity={0.2}
-                shape={(props: React.SVGProps<SVGRectElement> & { index?: number }) => {
-                  const isHovered = props.index === hovered;
+                shape={(props: unknown) => {
+                  const barProps = props as React.SVGProps<SVGRectElement> & { index?: number }
+                  const isHovered = barProps.index === hovered
                   return (
                     <rect 
-                       {...props} 
+                       {...barProps} 
                        fill={isHovered ? "var(--foreground)" : "var(--muted)"} 
                        className="transition-all duration-300"
                     />

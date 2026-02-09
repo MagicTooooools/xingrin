@@ -5,11 +5,9 @@ import { Button } from "@/components/ui/button"
 import { IconBrandGithub, IconStarFilled, IconStar } from "@/components/icons"
 import { PageHeader } from "@/components/common/page-header"
 import { motion } from "framer-motion"
-import { useStarNudge } from "@/hooks/use-star-nudge"
 
 export default function GithubButtonDemoPage() {
   const [stars, setStars] = useState<number | null>(null)
-  const { trigger, reset } = useStarNudge({ delay: 500 })
   
   // 模拟加载星数，实际项目中会调用 API
   useEffect(() => {
@@ -1006,7 +1004,7 @@ export default function GithubButtonDemoPage() {
           <div className="space-y-4">
             <h2 className="text-lg font-semibold">11. Final Recommendations (Refined & Clear)</h2>
             <p className="text-sm text-muted-foreground">
-              Based on your feedback: Balanced, low-noise, clear "Star" label, consistent with the app theme.
+              Based on your feedback: Balanced, low-noise, clear &quot;Star&quot; label, consistent with the app theme.
             </p>
             
             <div className="flex flex-wrap items-center gap-8 rounded-lg border border-dashed p-6">
@@ -1108,7 +1106,7 @@ export default function GithubButtonDemoPage() {
           <div className="space-y-4">
             <h2 className="text-lg font-semibold">12. Optimization Candidates (Refined Current Style)</h2>
             <p className="text-sm text-muted-foreground">
-              Variations based on the current implementation but addressing the "subtly off" feeling.
+              Variations based on the current implementation but addressing the &quot;subtly off&quot; feeling.
             </p>
             
             <div className="flex flex-wrap items-center gap-8 rounded-lg border border-dashed p-6">

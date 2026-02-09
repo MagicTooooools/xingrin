@@ -4,27 +4,33 @@ import (
 	"context"
 	"time"
 
+	"github.com/yyhuni/lunafox/server/internal/modules/agent/model"
 	"github.com/yyhuni/lunafox/server/internal/pkg"
-	"github.com/yyhuni/lunafox/server/internal/repository"
 	"go.uber.org/zap"
 )
 
+// AgentRepository defines behavior required by AgentMonitor.
+type AgentRepository interface {
+	FindStaleOnline(ctx context.Context, before time.Time) ([]*model.Agent, error)
+	UpdateStatus(ctx context.Context, id int, status string) error
+}
+
+// ScanTaskRepository defines behavior required by AgentMonitor.
+type ScanTaskRepository interface {
+	FailTasksForOfflineAgent(ctx context.Context, agentID int) error
+}
+
 // AgentMonitor marks stale agents offline and recovers their tasks.
 type AgentMonitor struct {
-	agentRepo    repository.AgentRepository
-	scanTaskRepo repository.ScanTaskRepository
+	agentRepo    AgentRepository
+	scanTaskRepo ScanTaskRepository
 	interval     time.Duration
 	timeout      time.Duration
 }
 
 // NewAgentMonitor creates a new AgentMonitor.
-func NewAgentMonitor(agentRepo repository.AgentRepository, scanTaskRepo repository.ScanTaskRepository, interval, timeout time.Duration) *AgentMonitor {
-	return &AgentMonitor{
-		agentRepo:    agentRepo,
-		scanTaskRepo: scanTaskRepo,
-		interval:     interval,
-		timeout:      timeout,
-	}
+func NewAgentMonitor(agentRepo AgentRepository, scanTaskRepo ScanTaskRepository, interval, timeout time.Duration) *AgentMonitor {
+	return &AgentMonitor{agentRepo: agentRepo, scanTaskRepo: scanTaskRepo, interval: interval, timeout: timeout}
 }
 
 // Run starts the monitor loop.
@@ -33,7 +39,6 @@ func (m *AgentMonitor) Run(ctx context.Context) {
 	defer ticker.Stop()
 
 	m.check(ctx)
-
 	for {
 		select {
 		case <-ctx.Done():
@@ -52,8 +57,20 @@ func (m *AgentMonitor) check(ctx context.Context) {
 		pkg.Warn("Failed to query stale agents", zap.Error(err))
 		return
 	}
+	if len(agents) > 0 {
+		pkg.Info("Stale agents detected", zap.Int("count", len(agents)), zap.Time("cutoff", cutoff))
+	}
 
 	for _, agent := range agents {
+		lastHeartbeat := time.Time{}
+		if agent.LastHeartbeat != nil {
+			lastHeartbeat = *agent.LastHeartbeat
+		}
+		pkg.Info("Marking agent offline due to stale heartbeat",
+			zap.Int("agent_id", agent.ID),
+			zap.Time("lastHeartbeat", lastHeartbeat),
+			zap.Duration("timeout", m.timeout),
+		)
 		if err := m.agentRepo.UpdateStatus(ctx, agent.ID, "offline"); err != nil {
 			pkg.Warn("Failed to mark agent offline", zap.Int("agent_id", agent.ID), zap.Error(err))
 			continue

@@ -22,7 +22,7 @@ export function BauhausDashboardHeader() {
       )
     }
 
-    let intervalId: ReturnType<typeof setInterval> | null = null
+    let intervalId: number | null = null
 
     const shouldRun = () =>
       !document.hidden && document.documentElement.getAttribute("data-theme") === "bauhaus"

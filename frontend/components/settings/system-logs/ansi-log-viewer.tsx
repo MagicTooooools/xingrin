@@ -232,7 +232,7 @@ export function AnsiLogViewer({ content, className, searchQuery = "", logLevel =
     }
     
     container.addEventListener('scroll', handleScroll, { passive: true })
-    return () => container.removeEventListener('scroll', handleScroll, { passive: true })
+    return () => container.removeEventListener('scroll', handleScroll)
   }, [])
 
   // 只有用户在底部时才自动滚动
