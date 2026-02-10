@@ -4,17 +4,12 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"github.com/yyhuni/lunafox/server/internal/pkg/dberrors"
 
 	"github.com/yyhuni/lunafox/server/internal/modules/asset/dto"
+	"github.com/yyhuni/lunafox/server/internal/pkg/dberrors"
 )
 
 var ErrDirectoryNotFound = errors.New("directory not found")
-
-type DirectoryStore interface {
-	DirectoryQueryStore
-	DirectoryCommandStore
-}
 
 type DirectoryFacade struct {
 	queryService *DirectoryQueryService

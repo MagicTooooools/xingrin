@@ -11,18 +11,6 @@ import (
 
 var ErrEndpointTargetNotFound = errors.New("target not found")
 
-type EndpointQueryStore interface {
-	FindByTargetID(targetID int, page, pageSize int, filter string) ([]assetdomain.Endpoint, int64, error)
-	GetByID(id int) (*assetdomain.Endpoint, error)
-	StreamByTargetID(targetID int) (*sql.Rows, error)
-	CountByTargetID(targetID int) (int64, error)
-	ScanRow(rows *sql.Rows) (*assetdomain.Endpoint, error)
-}
-
-type EndpointTargetLookup interface {
-	GetActiveByID(id int) (*assetdomain.TargetRef, error)
-}
-
 type EndpointQueryService struct {
 	store        EndpointQueryStore
 	targetLookup EndpointTargetLookup

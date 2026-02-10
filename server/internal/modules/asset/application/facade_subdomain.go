@@ -4,9 +4,9 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"github.com/yyhuni/lunafox/server/internal/pkg/dberrors"
 
 	"github.com/yyhuni/lunafox/server/internal/modules/asset/dto"
+	"github.com/yyhuni/lunafox/server/internal/pkg/dberrors"
 )
 
 var (
@@ -14,11 +14,6 @@ var (
 	ErrInvalidTargetType = errors.New("target type must be domain for subdomains")
 	ErrSubdomainNotMatch = errors.New("subdomain does not match target domain")
 )
-
-type SubdomainStore interface {
-	SubdomainQueryStore
-	SubdomainCommandStore
-}
 
 type SubdomainFacade struct {
 	queryService *SubdomainQueryService

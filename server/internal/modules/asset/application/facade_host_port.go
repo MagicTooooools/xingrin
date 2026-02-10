@@ -4,15 +4,10 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"github.com/yyhuni/lunafox/server/internal/pkg/dberrors"
 
 	"github.com/yyhuni/lunafox/server/internal/modules/asset/dto"
+	"github.com/yyhuni/lunafox/server/internal/pkg/dberrors"
 )
-
-type HostPortStore interface {
-	HostPortQueryStore
-	HostPortCommandStore
-}
 
 type HostPortFacade struct {
 	queryService *HostPortQueryService

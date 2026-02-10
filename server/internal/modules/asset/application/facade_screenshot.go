@@ -3,15 +3,10 @@ package application
 import (
 	"context"
 	"errors"
-	"github.com/yyhuni/lunafox/server/internal/pkg/dberrors"
 
 	"github.com/yyhuni/lunafox/server/internal/modules/asset/dto"
+	"github.com/yyhuni/lunafox/server/internal/pkg/dberrors"
 )
-
-type ScreenshotStore interface {
-	ScreenshotQueryStore
-	ScreenshotCommandStore
-}
 
 type ScreenshotFacade struct {
 	queryService *ScreenshotQueryService

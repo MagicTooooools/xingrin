@@ -4,15 +4,10 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"github.com/yyhuni/lunafox/server/internal/pkg/dberrors"
 
 	"github.com/yyhuni/lunafox/server/internal/modules/asset/dto"
+	"github.com/yyhuni/lunafox/server/internal/pkg/dberrors"
 )
-
-type WebsiteStore interface {
-	WebsiteQueryStore
-	WebsiteCommandStore
-}
 
 type WebsiteFacade struct {
 	queryService *WebsiteQueryService

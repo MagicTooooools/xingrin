@@ -25,14 +25,6 @@ type EndpointUpsertItem struct {
 	ResponseHeaders string
 }
 
-type EndpointCommandStore interface {
-	GetByID(id int) (*assetdomain.Endpoint, error)
-	BulkCreate(endpoints []assetdomain.Endpoint) (int, error)
-	Delete(id int) error
-	BulkDelete(ids []int) (int64, error)
-	BulkUpsert(endpoints []assetdomain.Endpoint) (int64, error)
-}
-
 type EndpointCommandService struct {
 	store        EndpointCommandStore
 	targetLookup EndpointTargetLookup
