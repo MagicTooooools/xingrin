@@ -34,7 +34,7 @@ func (r *agentRepository) Delete(ctx context.Context, id int) error {
 }
 
 // UpdateHeartbeat updates agent last heartbeat time and runtime fields.
-func (r *agentRepository) UpdateHeartbeat(ctx context.Context, id int, update AgentHeartbeatUpdate) error {
+func (r *agentRepository) UpdateHeartbeat(ctx context.Context, id int, update agentdomain.AgentHeartbeatUpdate) error {
 	now := update.LastHeartbeat
 	updates := map[string]interface{}{
 		"last_heartbeat": now,

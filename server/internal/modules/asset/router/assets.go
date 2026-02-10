@@ -6,7 +6,7 @@ import (
 	websitehandler "github.com/yyhuni/lunafox/server/internal/modules/asset/handler/website"
 )
 
-func RegisterWebsiteRoutes(protected *gin.RouterGroup, websiteHandler *websitehandler.WebsiteHandler) {
+func registerWebsiteRoutes(protected *gin.RouterGroup, websiteHandler *websitehandler.WebsiteHandler) {
 	protected.GET("/targets/:id/websites", websiteHandler.List)
 	protected.GET("/targets/:id/websites/export", websiteHandler.Export)
 	protected.POST("/targets/:id/websites/bulk-create", websiteHandler.BulkCreate)
@@ -16,7 +16,7 @@ func RegisterWebsiteRoutes(protected *gin.RouterGroup, websiteHandler *websiteha
 	protected.POST("/websites/bulk-delete", websiteHandler.BulkDelete)
 }
 
-func RegisterSubdomainRoutes(protected *gin.RouterGroup, subdomainHandler *handler.SubdomainHandler) {
+func registerSubdomainRoutes(protected *gin.RouterGroup, subdomainHandler *handler.SubdomainHandler) {
 	protected.GET("/targets/:id/subdomains", subdomainHandler.List)
 	protected.GET("/targets/:id/subdomains/export", subdomainHandler.Export)
 	protected.POST("/targets/:id/subdomains/bulk-create", subdomainHandler.BulkCreate)
@@ -24,7 +24,7 @@ func RegisterSubdomainRoutes(protected *gin.RouterGroup, subdomainHandler *handl
 	protected.POST("/subdomains/bulk-delete", subdomainHandler.BulkDelete)
 }
 
-func RegisterDirectoryRoutes(protected *gin.RouterGroup, directoryHandler *handler.DirectoryHandler) {
+func registerDirectoryRoutes(protected *gin.RouterGroup, directoryHandler *handler.DirectoryHandler) {
 	protected.GET("/targets/:id/directories", directoryHandler.List)
 	protected.GET("/targets/:id/directories/export", directoryHandler.Export)
 	protected.POST("/targets/:id/directories/bulk-create", directoryHandler.BulkCreate)

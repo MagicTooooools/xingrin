@@ -1,0 +1,76 @@
+package application
+
+import (
+	"context"
+	"database/sql"
+	"errors"
+
+	assetdomain "github.com/yyhuni/lunafox/server/internal/modules/asset/domain"
+	"github.com/yyhuni/lunafox/server/internal/pkg/dberrors"
+)
+
+var ErrDirectoryTargetNotFound = errors.New("target not found")
+
+type DirectoryQueryStore interface {
+	FindByTargetID(targetID int, page, pageSize int, filter string) ([]assetdomain.Directory, int64, error)
+	StreamByTargetID(targetID int) (*sql.Rows, error)
+	CountByTargetID(targetID int) (int64, error)
+	ScanRow(rows *sql.Rows) (*assetdomain.Directory, error)
+}
+
+type DirectoryTargetLookup interface {
+	GetActiveByID(id int) (*assetdomain.TargetRef, error)
+}
+
+type DirectoryQueryService struct {
+	store        DirectoryQueryStore
+	targetLookup DirectoryTargetLookup
+}
+
+func NewDirectoryQueryService(store DirectoryQueryStore, targetLookup DirectoryTargetLookup) *DirectoryQueryService {
+	return &DirectoryQueryService{store: store, targetLookup: targetLookup}
+}
+
+func (service *DirectoryQueryService) ListByTarget(ctx context.Context, targetID, page, pageSize int, filter string) ([]assetdomain.Directory, int64, error) {
+	_ = ctx
+
+	if _, err := service.targetLookup.GetActiveByID(targetID); err != nil {
+		if dberrors.IsRecordNotFound(err) {
+			return nil, 0, ErrDirectoryTargetNotFound
+		}
+		return nil, 0, err
+	}
+
+	return service.store.FindByTargetID(targetID, page, pageSize, filter)
+}
+
+func (service *DirectoryQueryService) StreamByTarget(ctx context.Context, targetID int) (*sql.Rows, error) {
+	_ = ctx
+
+	if _, err := service.targetLookup.GetActiveByID(targetID); err != nil {
+		if dberrors.IsRecordNotFound(err) {
+			return nil, ErrDirectoryTargetNotFound
+		}
+		return nil, err
+	}
+
+	return service.store.StreamByTargetID(targetID)
+}
+
+func (service *DirectoryQueryService) CountByTarget(ctx context.Context, targetID int) (int64, error) {
+	_ = ctx
+
+	if _, err := service.targetLookup.GetActiveByID(targetID); err != nil {
+		if dberrors.IsRecordNotFound(err) {
+			return 0, ErrDirectoryTargetNotFound
+		}
+		return 0, err
+	}
+
+	return service.store.CountByTargetID(targetID)
+}
+
+func (service *DirectoryQueryService) ScanRow(ctx context.Context, rows *sql.Rows) (*assetdomain.Directory, error) {
+	_ = ctx
+	return service.store.ScanRow(rows)
+}

@@ -105,7 +105,7 @@ fi
 REGISTER_PAYLOAD=$(printf '%s}' "$REGISTER_PAYLOAD")
 
 RESPONSE=$(curl "${curl_opts[@]}" \
-  -X POST "$REGISTER_URL/api/agents/registrations" \
+  -X POST "$REGISTER_URL/api/agent/register" \
   -H "Content-Type: application/json" \
   -d "$REGISTER_PAYLOAD" 2>&1) || {
   echo "Registration failed: $RESPONSE" >&2

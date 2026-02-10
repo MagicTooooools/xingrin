@@ -6,7 +6,7 @@ import (
 	snapshothandler "github.com/yyhuni/lunafox/server/internal/modules/snapshot/handler"
 )
 
-func RegisterEndpointRoutes(
+func registerEndpointRoutes(
 	protected *gin.RouterGroup,
 	endpointHandler *endpointhandler.EndpointHandler,
 	endpointSnapshotHandler *snapshothandler.EndpointSnapshotHandler,

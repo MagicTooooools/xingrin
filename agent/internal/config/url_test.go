@@ -7,11 +7,11 @@ func TestBuildWebSocketURL(t *testing.T) {
 		input    string
 		expected string
 	}{
-		{"https://example.com", "wss://example.com/api/agents/ws"},
-		{"http://example.com", "ws://example.com/api/agents/ws"},
-		{"https://example.com/api", "wss://example.com/api/agents/ws"},
-		{"https://example.com/base", "wss://example.com/base/api/agents/ws"},
-		{"wss://example.com", "wss://example.com/api/agents/ws"},
+		{"https://example.com", "wss://example.com/api/agent/ws"},
+		{"http://example.com", "ws://example.com/api/agent/ws"},
+		{"https://example.com/api", "wss://example.com/api/agent/ws"},
+		{"https://example.com/base", "wss://example.com/base/api/agent/ws"},
+		{"wss://example.com", "wss://example.com/api/agent/ws"},
 	}
 
 	for _, tt := range tests {

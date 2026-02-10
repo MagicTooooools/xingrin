@@ -48,8 +48,8 @@ func registerRoutes(engine *gin.Engine, d *deps, workerToken string, jwtMiddlewa
 		d.directorySnapshotHandler,
 		d.vulnerabilitySnapshotHandler,
 	)
-	scanrouter.RegisterScanModuleRoutes(protected, d.scanHandler, d.scanLogHandler)
+	scanrouter.RegisterScanRoutes(protected, d.scanHandler, d.scanLogHandler)
 	scanrouter.RegisterWorkerScanRoutes(api, workerToken, d.workerScanHandler)
-	securityrouter.RegisterVulnerabilityRoutes(protected, d.vulnerabilityHandler)
+	securityrouter.RegisterSecurityRoutes(protected, d.vulnerabilityHandler)
 	agentrouter.RegisterAgentRoutes(api, protected, d.agentHandler, d.agentWSHandler, d.agentTaskHandler, d.agentRepo)
 }

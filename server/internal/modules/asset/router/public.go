@@ -6,7 +6,7 @@ import (
 	snapshothandler "github.com/yyhuni/lunafox/server/internal/modules/snapshot/handler"
 )
 
-func RegisterPublicRoutes(
+func registerPublicRoutes(
 	api *gin.RouterGroup,
 	screenshotHandler *assethandler.ScreenshotHandler,
 	screenshotSnapshotHandler *snapshothandler.ScreenshotSnapshotHandler,

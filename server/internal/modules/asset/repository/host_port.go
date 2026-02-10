@@ -3,7 +3,6 @@ package repository
 import (
 	"github.com/yyhuni/lunafox/server/internal/pkg/scope"
 	"gorm.io/gorm"
-	"time"
 )
 
 // HostPortRepository handles host-port mapping (host_port_mapping) database operations
@@ -24,9 +23,3 @@ var HostPortFilterMapping = scope.FilterMapping{
 }
 
 var hostPortFilterMappingNormalized = scope.NormalizeFilterMapping(HostPortFilterMapping)
-
-// IPAggregationRow represents a row from IP aggregation query
-type IPAggregationRow struct {
-	IP        string
-	CreatedAt time.Time
-}

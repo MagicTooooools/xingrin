@@ -1,4 +1,4 @@
-.PHONY: build run test check-ddd check-architecture check-layer-dependencies check-domain-purity check-no-legacy-layer check-dto-selftest check-repo-selftest check-layer-selftest check-common-httpdto check-naming-conventions sync-common-httpdto lint clean deps fmt generate
+.PHONY: build run test check-ddd check-architecture check-layer-dependencies check-domain-purity check-no-legacy-layer check-dto-selftest check-repo-selftest check-layer-selftest check-common-httpdto check-naming-conventions sync-common-httpdto lint clean deps fmt generate check-router-boundaries check-router-selftest check-handler-boundaries check-handler-selftest
 
 # Build the server binary
 build:
@@ -17,6 +17,8 @@ check-architecture:
 	bash ./scripts/check-dto-boundaries.sh
 	bash ./scripts/check-repository-boundaries.sh
 	bash ./scripts/check-naming-conventions.sh
+	bash ./scripts/check-router-boundaries.sh
+	bash ./scripts/check-handler-boundaries.sh
 	bash ./scripts/check-common-httpdto.sh
 
 check-naming-conventions:
@@ -46,6 +48,22 @@ check-repo-selftest:
 # Local optional layer guard self-test
 check-layer-selftest:
 	bash ./scripts/check-layer-dependencies-selftest.sh
+
+# Router boundary guard
+check-router-boundaries:
+	bash ./scripts/check-router-boundaries.sh
+
+# Local optional router guard self-test
+check-router-selftest:
+	bash ./scripts/check-router-boundaries-selftest.sh
+
+# Handler boundary guard
+check-handler-boundaries:
+	bash ./scripts/check-handler-boundaries.sh
+
+# Local optional handler guard self-test
+check-handler-selftest:
+	bash ./scripts/check-handler-boundaries-selftest.sh
 
 # Check common_http template consistency
 check-common-httpdto:

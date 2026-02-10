@@ -11,6 +11,7 @@ import (
 	service "github.com/yyhuni/lunafox/server/internal/modules/asset/application"
 	"github.com/yyhuni/lunafox/server/internal/modules/asset/dto"
 	"github.com/yyhuni/lunafox/server/internal/pkg/csv"
+	"github.com/yyhuni/lunafox/server/internal/pkg/timeutil"
 )
 
 // Export exports endpoints as CSV.
@@ -40,7 +41,7 @@ func (h *EndpointHandler) Export(c *gin.Context) {
 
 	headers := []string{
 		"id", "target_id", "url", "host", "location", "title", "status_code",
-		"content_length", "content_type", "webserver", "tech", "matched_gf_patterns",
+		"content_length", "content_type", "webserver", "tech",
 		"response_body", "response_headers", "vhost", "created_at",
 	}
 	filename := fmt.Sprintf("target-%d-endpoints.csv", targetID)
@@ -67,10 +68,6 @@ func (h *EndpointHandler) Export(c *gin.Context) {
 		if len(endpoint.Tech) > 0 {
 			tech = strings.Join(endpoint.Tech, "|")
 		}
-		matchedGFPatterns := ""
-		if len(endpoint.MatchedGFPatterns) > 0 {
-			matchedGFPatterns = strings.Join(endpoint.MatchedGFPatterns, "|")
-		}
 
 		return []string{
 			strconv.Itoa(endpoint.ID),
@@ -84,11 +81,10 @@ func (h *EndpointHandler) Export(c *gin.Context) {
 			endpoint.ContentType,
 			endpoint.Webserver,
 			tech,
-			matchedGFPatterns,
 			endpoint.ResponseBody,
 			endpoint.ResponseHeaders,
 			vhost,
-			endpoint.CreatedAt.Format("2006-01-02 15:04:05"),
+			timeutil.FormatRFC3339NanoUTC(endpoint.CreatedAt),
 		}, nil
 	}
 

@@ -19,7 +19,7 @@ func TestClientPullTaskNoContent(t *testing.T) {
 		apiKey:  "key",
 		http: &http.Client{
 			Transport: roundTripFunc(func(r *http.Request) (*http.Response, error) {
-				if r.URL.Path != "/api/agents/tasks/pull" {
+				if r.URL.Path != "/api/agent/tasks/pull" {
 					t.Fatalf("unexpected path %s", r.URL.Path)
 				}
 				return &http.Response{

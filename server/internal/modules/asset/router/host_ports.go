@@ -6,7 +6,7 @@ import (
 	snapshothandler "github.com/yyhuni/lunafox/server/internal/modules/snapshot/handler"
 )
 
-func RegisterHostPortRoutes(
+func registerHostPortRoutes(
 	protected *gin.RouterGroup,
 	hostPortHandler *assethandler.HostPortHandler,
 	hostPortSnapshotHandler *snapshothandler.HostPortSnapshotHandler,

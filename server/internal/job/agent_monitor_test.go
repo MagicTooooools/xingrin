@@ -6,7 +6,6 @@ import (
 	"time"
 
 	agentdomain "github.com/yyhuni/lunafox/server/internal/modules/agent/domain"
-	agentrepo "github.com/yyhuni/lunafox/server/internal/modules/agent/repository"
 	scanrepo "github.com/yyhuni/lunafox/server/internal/modules/scan/repository"
 	scanmodel "github.com/yyhuni/lunafox/server/internal/modules/scan/repository/persistence"
 )
@@ -20,7 +19,7 @@ func (f *fakeAgentRepo) Create(ctx context.Context, agent *agentdomain.Agent) er
 	return nil
 }
 
-func (f *fakeAgentRepo) FindByID(ctx context.Context, id int) (*agentdomain.Agent, error) {
+func (f *fakeAgentRepo) GetByID(ctx context.Context, id int) (*agentdomain.Agent, error) {
 	return nil, nil
 }
 
@@ -45,7 +44,7 @@ func (f *fakeAgentRepo) UpdateStatus(ctx context.Context, id int, status string)
 	return nil
 }
 
-func (f *fakeAgentRepo) UpdateHeartbeat(ctx context.Context, id int, update agentrepo.AgentHeartbeatUpdate) error {
+func (f *fakeAgentRepo) UpdateHeartbeat(ctx context.Context, id int, update agentdomain.AgentHeartbeatUpdate) error {
 	return nil
 }
 
