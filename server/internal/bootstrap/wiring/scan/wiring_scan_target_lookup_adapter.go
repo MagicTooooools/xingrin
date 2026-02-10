@@ -6,15 +6,15 @@ import (
 	"github.com/yyhuni/lunafox/server/internal/pkg/timeutil"
 )
 
-type scanCreateTargetLookupAdapter struct {
+type scanTargetLookupAdapter struct {
 	repo *catalogrepo.TargetRepository
 }
 
-func newScanCreateTargetLookupAdapter(repo *catalogrepo.TargetRepository) *scanCreateTargetLookupAdapter {
-	return &scanCreateTargetLookupAdapter{repo: repo}
+func newScanTargetLookupAdapter(repo *catalogrepo.TargetRepository) *scanTargetLookupAdapter {
+	return &scanTargetLookupAdapter{repo: repo}
 }
 
-func (adapter *scanCreateTargetLookupAdapter) GetActiveByID(id int) (*scanapp.TargetRef, error) {
+func (adapter *scanTargetLookupAdapter) GetActiveByID(id int) (*scanapp.TargetRef, error) {
 	target, err := adapter.repo.GetActiveByID(id)
 	if err != nil {
 		return nil, err

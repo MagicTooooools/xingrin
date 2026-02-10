@@ -126,7 +126,8 @@ func buildDependencies(infra *infra, cfg *config.Config) *deps {
 	screenshotSvc := assetservice.NewScreenshotFacade(assetwiring.NewScreenshotStoreAdapter(screenshotRepo), assetTargetLookup)
 	vulnerabilitySvc := securityservice.NewVulnerabilityFacade(vulnerabilityRepo, securitywiring.NewTargetLookupAdapter(targetRepo))
 	scanSvc := scanservice.NewScanFacade(
-		scanwiring.NewStoreAdapter(scanRepo),
+		scanwiring.NewQueryStoreAdapter(scanRepo),
+		scanwiring.NewScanCommandStoreAdapter(scanRepo),
 		scanwiring.NewCommandStore(scanRepo),
 		scanwiring.NewTaskCancellerAdapter(scanTaskRepo),
 		infra.wsHub,

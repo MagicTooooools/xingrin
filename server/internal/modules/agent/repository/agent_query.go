@@ -10,7 +10,7 @@ import (
 )
 
 // FindByID finds an agent by ID.
-func (r *agentRepository) FindByID(ctx context.Context, id int) (*agentdomain.Agent, error) {
+func (r *agentRepository) GetByID(ctx context.Context, id int) (*agentdomain.Agent, error) {
 	var agent model.Agent
 	err := r.db.WithContext(ctx).First(&agent, id).Error
 	if err != nil {

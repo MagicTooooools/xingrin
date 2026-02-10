@@ -3,9 +3,8 @@ package router
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/yyhuni/lunafox/server/internal/middleware"
+	agentdomain "github.com/yyhuni/lunafox/server/internal/modules/agent/domain"
 	agenthandler "github.com/yyhuni/lunafox/server/internal/modules/agent/handler"
-	agentrepo "github.com/yyhuni/lunafox/server/internal/modules/agent/repository"
-	scanhandler "github.com/yyhuni/lunafox/server/internal/modules/scan/handler"
 )
 
 // RegisterAgentRoutes registers agent-facing routes.
@@ -14,24 +13,27 @@ func RegisterAgentRoutes(
 	protected *gin.RouterGroup,
 	agentHandler *agenthandler.AgentHandler,
 	agentWSHandler *agenthandler.AgentWebSocketHandler,
-	agentTaskHandler *scanhandler.AgentTaskHandler,
-	agentRepo agentrepo.AgentRepository,
+	agentTaskHandler *agenthandler.AgentTaskHandler,
+	agentRepo agentdomain.AgentRepository,
 ) {
-	api.POST("/agents/registrations", agentHandler.Register)
-	api.GET("/agents/install-script", agentHandler.InstallScript)
-	api.GET("/agents/ws", middleware.AgentAuthMiddleware(agentRepo), agentWSHandler.Handle)
+	runtime := api.Group("/agent")
+	runtime.POST("/register", agentHandler.Register)
+	runtime.GET("/install-script", agentHandler.InstallScript)
+	runtime.GET("/ws", middleware.AgentAuthMiddleware(agentRepo), agentWSHandler.Handle)
 
-	agentAPI := api.Group("/agents")
-	agentAPI.Use(middleware.AgentAuthMiddleware(agentRepo))
-	agentAPI.Use(middleware.AgentValidationMiddleware())
+	taskAPI := runtime.Group("")
+	taskAPI.Use(middleware.AgentAuthMiddleware(agentRepo))
 	{
-		agentAPI.POST("/tasks/pull", agentTaskHandler.PullTask)
-		agentAPI.PATCH("/tasks/:taskId/status", agentTaskHandler.UpdateTaskStatus)
+		taskAPI.POST("/tasks/pull", agentTaskHandler.PullTask)
+		taskAPI.PATCH("/tasks/:taskId/status", agentTaskHandler.UpdateTaskStatus)
 	}
 
-	protected.POST("/agents/registration-tokens", agentHandler.CreateRegistrationToken)
-	protected.GET("/agents", agentHandler.ListAgents)
-	protected.GET("/agents/:id", agentHandler.GetAgent)
-	protected.DELETE("/agents/:id", agentHandler.DeleteAgent)
-	protected.PUT("/agents/:id/config", agentHandler.UpdateAgentConfig)
+	admin := protected.Group("/admin/agents")
+	{
+		admin.POST("/registration-tokens", agentHandler.CreateRegistrationToken)
+		admin.GET("", agentHandler.ListAgents)
+		admin.GET("/:id", agentHandler.GetAgent)
+		admin.DELETE("/:id", agentHandler.DeleteAgent)
+		admin.PATCH("/:id/config", agentHandler.UpdateAgentConfig)
+	}
 }

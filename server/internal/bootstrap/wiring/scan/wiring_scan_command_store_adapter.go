@@ -5,6 +5,6 @@ import (
 	scanrepo "github.com/yyhuni/lunafox/server/internal/modules/scan/repository"
 )
 
-func newScanCommandStore(repo *scanrepo.ScanRepository) scandomain.ScanRepository {
+func newScanDomainCommandStoreAdapter(repo *scanrepo.ScanRepository) scandomain.ScanRepository {
 	return scanrepo.NewDomainScanRepository(repo)
 }

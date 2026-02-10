@@ -114,7 +114,7 @@ export async function deleteScan(id: number): Promise<void> {
  * @returns Deletion result
  */
 export async function bulkDeleteScans(ids: number[]): Promise<{ message: string; deletedCount: number }> {
-  const res = await api.post<{ message: string; deletedCount: number }>('/scans/bulk-delete/', { ids })
+  const res = await api.post<{ message: string; deletedCount: number }>('/scans/deletions/', { ids })
   return res.data
 }
 
@@ -124,7 +124,7 @@ export async function bulkDeleteScans(ids: number[]): Promise<{ message: string;
  * @returns Operation result
  */
 export async function stopScan(id: number): Promise<{ message: string; revokedTaskCount: number }> {
-  const res = await api.post<{ message: string; revokedTaskCount: number }>(`/scans/${id}/stop/`)
+  const res = await api.post<{ message: string; revokedTaskCount: number }>(`/scans/${id}/stoppages/`)
   return res.data
 }
 
@@ -152,7 +152,7 @@ export async function getScanStatistics(): Promise<ScanStatistics> {
     await mockDelay()
     return mockScanStatistics
   }
-  const res = await api.get<ScanStatistics>('/scans/statistics/')
+  const res = await api.get<ScanStatistics>('/scans/stats/')
   return res.data
 }
 
