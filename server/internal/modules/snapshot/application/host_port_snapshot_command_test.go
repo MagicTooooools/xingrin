@@ -76,13 +76,13 @@ func TestHostPortSnapshotCommandServiceErrors(t *testing.T) {
 }
 
 func TestIsHostPortMatchTarget(t *testing.T) {
-	if !IsHostPortMatchTarget("a.example.com", "1.1.1.1", "example.com", "domain") {
+	if !snapshotdomain.IsHostPortMatchTarget("a.example.com", "1.1.1.1", snapshotdomain.ScanTargetRef{Name: "example.com", Type: "domain"}) {
 		t.Fatalf("expected domain match")
 	}
-	if !IsHostPortMatchTarget("x", "1.1.1.1", "1.1.1.1", "ip") {
+	if !snapshotdomain.IsHostPortMatchTarget("x", "1.1.1.1", snapshotdomain.ScanTargetRef{Name: "1.1.1.1", Type: "ip"}) {
 		t.Fatalf("expected ip match")
 	}
-	if !IsHostPortMatchTarget("x", "10.0.0.5", "10.0.0.0/24", "cidr") {
+	if !snapshotdomain.IsHostPortMatchTarget("x", "10.0.0.5", snapshotdomain.ScanTargetRef{Name: "10.0.0.0/24", Type: "cidr"}) {
 		t.Fatalf("expected cidr match")
 	}
 }

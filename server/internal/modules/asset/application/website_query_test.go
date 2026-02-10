@@ -61,7 +61,7 @@ type websiteTargetLookupQueryStub struct {
 	err    error
 }
 
-func (stub *websiteTargetLookupQueryStub) FindByID(id int) (*assetdomain.TargetRef, error) {
+func (stub *websiteTargetLookupQueryStub) GetActiveByID(id int) (*assetdomain.TargetRef, error) {
 	if stub.err != nil {
 		return nil, stub.err
 	}

@@ -17,7 +17,7 @@ type authUserStoreStub struct {
 	errByName  error
 }
 
-func (stub *authUserStoreStub) FindByID(id int) (*identitydomain.User, error) {
+func (stub *authUserStoreStub) GetByID(id int) (*identitydomain.User, error) {
 	if stub.errByID != nil {
 		return nil, stub.errByID
 	}

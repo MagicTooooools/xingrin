@@ -27,7 +27,7 @@ type targetCommandStoreStub struct {
 	bulkDeletedIDs   []int
 }
 
-func (stub *targetCommandStoreStub) FindByID(id int) (*catalogdomain.Target, error) {
+func (stub *targetCommandStoreStub) GetActiveByID(id int) (*catalogdomain.Target, error) {
 	if stub.findByIDErr != nil {
 		return nil, stub.findByIDErr
 	}

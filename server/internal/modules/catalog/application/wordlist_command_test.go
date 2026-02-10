@@ -24,7 +24,7 @@ type wordlistCommandStoreStub struct {
 	deleteErr    error
 }
 
-func (stub *wordlistCommandStoreStub) FindByID(id int) (*catalogdomain.Wordlist, error) {
+func (stub *wordlistCommandStoreStub) GetByID(id int) (*catalogdomain.Wordlist, error) {
 	if stub.findByIDErr != nil {
 		return nil, stub.findByIDErr
 	}

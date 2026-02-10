@@ -22,7 +22,7 @@ type websiteCommandStoreStub struct {
 	bulkUpsertErr error
 }
 
-func (stub *websiteCommandStoreStub) FindByID(id int) (*assetdomain.Website, error) {
+func (stub *websiteCommandStoreStub) GetByID(id int) (*assetdomain.Website, error) {
 	if stub.findByIDErr != nil {
 		return nil, stub.findByIDErr
 	}
@@ -71,7 +71,7 @@ type websiteTargetLookupStub struct {
 	err     error
 }
 
-func (stub *websiteTargetLookupStub) FindByID(id int) (*assetdomain.TargetRef, error) {
+func (stub *websiteTargetLookupStub) GetActiveByID(id int) (*assetdomain.TargetRef, error) {
 	if stub.err != nil {
 		return nil, stub.err
 	}

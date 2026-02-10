@@ -65,7 +65,7 @@ type directoryQueryTargetLookupStub struct {
 	err     error
 }
 
-func (stub *directoryQueryTargetLookupStub) FindByID(id int) (*assetdomain.TargetRef, error) {
+func (stub *directoryQueryTargetLookupStub) GetActiveByID(id int) (*assetdomain.TargetRef, error) {
 	if stub.err != nil {
 		return nil, stub.err
 	}

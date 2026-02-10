@@ -21,7 +21,7 @@ type userCommandStoreStub struct {
 	forceCreateUserID int
 }
 
-func (stub *userCommandStoreStub) FindByID(id int) (*identitydomain.User, error) {
+func (stub *userCommandStoreStub) GetByID(id int) (*identitydomain.User, error) {
 	if stub.findByIDErr != nil {
 		return nil, stub.findByIDErr
 	}

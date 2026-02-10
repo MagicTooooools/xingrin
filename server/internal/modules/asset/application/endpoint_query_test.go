@@ -33,7 +33,7 @@ func (stub *endpointQueryStoreStub) FindByTargetID(targetID int, page, pageSize 
 	return append([]assetdomain.Endpoint(nil), stub.items...), stub.total, nil
 }
 
-func (stub *endpointQueryStoreStub) FindByID(id int) (*assetdomain.Endpoint, error) {
+func (stub *endpointQueryStoreStub) GetByID(id int) (*assetdomain.Endpoint, error) {
 	if stub.findErr != nil {
 		return nil, stub.findErr
 	}
@@ -74,7 +74,7 @@ type endpointQueryTargetLookupStub struct {
 	err     error
 }
 
-func (stub *endpointQueryTargetLookupStub) FindByID(id int) (*assetdomain.TargetRef, error) {
+func (stub *endpointQueryTargetLookupStub) GetActiveByID(id int) (*assetdomain.TargetRef, error) {
 	if stub.err != nil {
 		return nil, stub.err
 	}

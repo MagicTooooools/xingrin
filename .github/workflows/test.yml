@@ -28,6 +28,18 @@ jobs:
         working-directory: server
         run: make check-ddd
 
+      - name: Self-test server DTO guard
+        working-directory: server
+        run: make check-dto-selftest
+
+      - name: Self-test server repository guard
+        working-directory: server
+        run: make check-repo-selftest
+
+      - name: Self-test server layer guard
+        working-directory: server
+        run: make check-layer-selftest
+
       - name: Run server tests
         working-directory: server
         run: make test

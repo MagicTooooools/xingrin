@@ -39,7 +39,7 @@ type scanLookupForHandlerStub struct {
 	err error
 }
 
-func (stub *scanLookupForHandlerStub) FindByID(id int) (*scanapp.ScanLogScanRef, error) {
+func (stub *scanLookupForHandlerStub) GetActiveByID(id int) (*scanapp.ScanLogScanRef, error) {
 	if stub.err != nil {
 		return nil, stub.err
 	}

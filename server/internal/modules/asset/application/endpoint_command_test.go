@@ -22,7 +22,7 @@ type endpointCommandStoreStub struct {
 	bulkUpsertErr  error
 }
 
-func (stub *endpointCommandStoreStub) FindByID(id int) (*assetdomain.Endpoint, error) {
+func (stub *endpointCommandStoreStub) GetByID(id int) (*assetdomain.Endpoint, error) {
 	if stub.findByIDErr != nil {
 		return nil, stub.findByIDErr
 	}
@@ -71,7 +71,7 @@ type endpointTargetLookupStub struct {
 	err     error
 }
 
-func (stub *endpointTargetLookupStub) FindByID(id int) (*assetdomain.TargetRef, error) {
+func (stub *endpointTargetLookupStub) GetActiveByID(id int) (*assetdomain.TargetRef, error) {
 	if stub.err != nil {
 		return nil, stub.err
 	}

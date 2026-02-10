@@ -18,12 +18,3 @@ func TestParseWorkflowName(t *testing.T) {
 		t.Fatalf("unknown workflow should fail parse")
 	}
 }
-
-func TestIsKnownWorkflowName(t *testing.T) {
-	if !IsKnownWorkflowName("vuln_scan") {
-		t.Fatalf("vuln_scan should be known")
-	}
-	if IsKnownWorkflowName("anything_else") {
-		t.Fatalf("anything_else should be unknown")
-	}
-}

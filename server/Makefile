@@ -1,4 +1,4 @@
-.PHONY: build run test check-ddd check-architecture check-layer-dependencies check-domain-purity check-no-legacy-layer check-dto-selftest check-repo-selftest check-common-httpdto check-naming-conventions sync-common-httpdto lint clean deps fmt generate
+.PHONY: build run test check-ddd check-architecture check-layer-dependencies check-domain-purity check-no-legacy-layer check-dto-selftest check-repo-selftest check-layer-selftest check-common-httpdto check-naming-conventions sync-common-httpdto lint clean deps fmt generate
 
 # Build the server binary
 build:
@@ -42,6 +42,10 @@ check-dto-selftest:
 # Local optional repository guard self-test
 check-repo-selftest:
 	bash ./scripts/check-repository-boundaries-selftest.sh
+
+# Local optional layer guard self-test
+check-layer-selftest:
+	bash ./scripts/check-layer-dependencies-selftest.sh
 
 # Check common_http template consistency
 check-common-httpdto:

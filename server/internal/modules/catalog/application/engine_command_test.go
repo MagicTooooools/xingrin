@@ -22,7 +22,7 @@ type engineCommandStoreStub struct {
 	deletedID       int
 }
 
-func (stub *engineCommandStoreStub) FindByID(id int) (*catalogdomain.ScanEngine, error) {
+func (stub *engineCommandStoreStub) GetByID(id int) (*catalogdomain.ScanEngine, error) {
 	if stub.findByIDErr != nil {
 		return nil, stub.findByIDErr
 	}

@@ -36,7 +36,7 @@ func (stub *wordlistQueryStoreStub) List() ([]catalogdomain.Wordlist, error) {
 	return append([]catalogdomain.Wordlist(nil), stub.listItems...), nil
 }
 
-func (stub *wordlistQueryStoreStub) FindByID(id int) (*catalogdomain.Wordlist, error) {
+func (stub *wordlistQueryStoreStub) GetByID(id int) (*catalogdomain.Wordlist, error) {
 	if stub.findErr != nil {
 		return nil, stub.findErr
 	}

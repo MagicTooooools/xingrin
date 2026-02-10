@@ -7,18 +7,8 @@ import (
 )
 
 func TestScanTaskTransition(t *testing.T) {
-	task := &ScanTask{ID: 1, ScanID: 2, Name: "subdomain", Stage: 1, Status: TaskStatusPending}
-
 	startedAt := time.Now()
-	if err := task.Start(startedAt); err != nil {
-		t.Fatalf("Start failed: %v", err)
-	}
-	if task.Status != TaskStatusRunning {
-		t.Fatalf("expected running status, got %s", task.Status)
-	}
-	if task.StartedAt == nil || !task.StartedAt.Equal(startedAt) {
-		t.Fatalf("expected startedAt=%v, got %v", startedAt, task.StartedAt)
-	}
+	task := &ScanTask{ID: 1, ScanID: 2, Name: "subdomain", Stage: 1, Status: TaskStatusRunning, StartedAt: &startedAt}
 
 	completedAt := startedAt.Add(time.Minute)
 	if err := task.Complete(completedAt); err != nil {

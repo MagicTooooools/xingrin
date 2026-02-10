@@ -22,7 +22,7 @@ type targetQueryStoreStub struct {
 	listPageSize int
 }
 
-func (stub *targetQueryStoreStub) FindByID(id int) (*catalogdomain.Target, error) {
+func (stub *targetQueryStoreStub) GetActiveByID(id int) (*catalogdomain.Target, error) {
 	if stub.findByIDErr != nil {
 		return nil, stub.findByIDErr
 	}

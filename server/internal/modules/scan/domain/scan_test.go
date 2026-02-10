@@ -6,49 +6,9 @@ import (
 	"time"
 )
 
-func TestNewScan(t *testing.T) {
-	now := time.Now()
-
-	t.Run("invalid target", func(t *testing.T) {
-		scan, err := NewScan(0, ScanModeFull, now)
-		if !errors.Is(err, ErrInvalidTargetID) {
-			t.Fatalf("expected ErrInvalidTargetID, got %v", err)
-		}
-		if scan != nil {
-			t.Fatalf("scan should be nil when target is invalid")
-		}
-	})
-
-	t.Run("invalid mode", func(t *testing.T) {
-		scan, err := NewScan(1, ScanMode("invalid"), now)
-		if !errors.Is(err, ErrInvalidScanMode) {
-			t.Fatalf("expected ErrInvalidScanMode, got %v", err)
-		}
-		if scan != nil {
-			t.Fatalf("scan should be nil when mode is invalid")
-		}
-	})
-
-	t.Run("success", func(t *testing.T) {
-		scan, err := NewScan(1, ScanModeFull, now)
-		if err != nil {
-			t.Fatalf("unexpected error: %v", err)
-		}
-		if scan.Status != ScanStatusPending {
-			t.Fatalf("expected pending status, got %s", scan.Status)
-		}
-		if scan.CreatedAt != now {
-			t.Fatalf("expected created time %v, got %v", now, scan.CreatedAt)
-		}
-	})
-}
-
 func TestScanTransition(t *testing.T) {
 	now := time.Now()
-	scan, err := NewScan(1, ScanModeQuick, now)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	scan := &Scan{TargetID: 1, Mode: ScanModeQuick, Status: ScanStatusPending, CreatedAt: now}
 
 	if err := scan.MarkRunning(); err != nil {
 		t.Fatalf("MarkRunning failed: %v", err)
@@ -74,10 +34,7 @@ func TestScanTransition(t *testing.T) {
 
 func TestScanFailValidation(t *testing.T) {
 	now := time.Now()
-	scan, err := NewScan(1, ScanModeFull, now)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	scan := &Scan{TargetID: 1, Mode: ScanModeFull, Status: ScanStatusPending, CreatedAt: now}
 	if err := scan.MarkRunning(); err != nil {
 		t.Fatalf("MarkRunning failed: %v", err)
 	}

@@ -17,7 +17,7 @@ type engineQueryStoreStub struct {
 	listSize int
 }
 
-func (stub *engineQueryStoreStub) FindByID(id int) (*catalogdomain.ScanEngine, error) {
+func (stub *engineQueryStoreStub) GetByID(id int) (*catalogdomain.ScanEngine, error) {
 	_ = id
 	if stub.getErr != nil {
 		return nil, stub.getErr

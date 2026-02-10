@@ -14,19 +14,11 @@ func newCatalogEngineStoreAdapter(repo *catalogrepo.EngineRepository) *catalogEn
 }
 
 func (adapter *catalogEngineStoreAdapter) GetByID(id int) (*catalogdomain.ScanEngine, error) {
-	engine, err := adapter.repo.GetByID(id)
-	if err != nil {
-		return nil, err
-	}
-	return catalogModelEngineToDomain(engine), nil
+	return adapter.repo.GetByID(id)
 }
 
 func (adapter *catalogEngineStoreAdapter) FindAll(page, pageSize int) ([]catalogdomain.ScanEngine, int64, error) {
-	engines, total, err := adapter.repo.FindAll(page, pageSize)
-	if err != nil {
-		return nil, 0, err
-	}
-	return catalogModelEngineListToDomain(engines), total, nil
+	return adapter.repo.FindAll(page, pageSize)
 }
 
 func (adapter *catalogEngineStoreAdapter) ExistsByName(name string, excludeID ...int) (bool, error) {
@@ -34,16 +26,11 @@ func (adapter *catalogEngineStoreAdapter) ExistsByName(name string, excludeID ..
 }
 
 func (adapter *catalogEngineStoreAdapter) Create(engine *catalogdomain.ScanEngine) error {
-	modelEngine := catalogDomainEngineToModel(engine)
-	if err := adapter.repo.Create(modelEngine); err != nil {
-		return err
-	}
-	*engine = *catalogModelEngineToDomain(modelEngine)
-	return nil
+	return adapter.repo.Create(engine)
 }
 
 func (adapter *catalogEngineStoreAdapter) Update(engine *catalogdomain.ScanEngine) error {
-	return adapter.repo.Update(catalogDomainEngineToModel(engine))
+	return adapter.repo.Update(engine)
 }
 
 func (adapter *catalogEngineStoreAdapter) Delete(id int) error {

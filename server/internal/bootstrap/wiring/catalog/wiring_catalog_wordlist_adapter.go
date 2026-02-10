@@ -14,35 +14,19 @@ func newCatalogWordlistStoreAdapter(repo *catalogrepo.WordlistRepository) *catal
 }
 
 func (adapter *catalogWordlistStoreAdapter) FindAll(page, pageSize int) ([]catalogdomain.Wordlist, int64, error) {
-	wordlists, total, err := adapter.repo.FindAll(page, pageSize)
-	if err != nil {
-		return nil, 0, err
-	}
-	return catalogModelWordlistListToDomain(wordlists), total, nil
+	return adapter.repo.FindAll(page, pageSize)
 }
 
 func (adapter *catalogWordlistStoreAdapter) List() ([]catalogdomain.Wordlist, error) {
-	wordlists, err := adapter.repo.List()
-	if err != nil {
-		return nil, err
-	}
-	return catalogModelWordlistListToDomain(wordlists), nil
+	return adapter.repo.List()
 }
 
 func (adapter *catalogWordlistStoreAdapter) GetByID(id int) (*catalogdomain.Wordlist, error) {
-	wordlist, err := adapter.repo.GetByID(id)
-	if err != nil {
-		return nil, err
-	}
-	return catalogModelWordlistToDomain(wordlist), nil
+	return adapter.repo.GetByID(id)
 }
 
 func (adapter *catalogWordlistStoreAdapter) FindByName(name string) (*catalogdomain.Wordlist, error) {
-	wordlist, err := adapter.repo.FindByName(name)
-	if err != nil {
-		return nil, err
-	}
-	return catalogModelWordlistToDomain(wordlist), nil
+	return adapter.repo.FindByName(name)
 }
 
 func (adapter *catalogWordlistStoreAdapter) ExistsByName(name string) (bool, error) {
@@ -50,16 +34,11 @@ func (adapter *catalogWordlistStoreAdapter) ExistsByName(name string) (bool, err
 }
 
 func (adapter *catalogWordlistStoreAdapter) Create(wordlist *catalogdomain.Wordlist) error {
-	modelWordlist := catalogDomainWordlistToModel(wordlist)
-	if err := adapter.repo.Create(modelWordlist); err != nil {
-		return err
-	}
-	*wordlist = *catalogModelWordlistToDomain(modelWordlist)
-	return nil
+	return adapter.repo.Create(wordlist)
 }
 
 func (adapter *catalogWordlistStoreAdapter) Update(wordlist *catalogdomain.Wordlist) error {
-	return adapter.repo.Update(catalogDomainWordlistToModel(wordlist))
+	return adapter.repo.Update(wordlist)
 }
 
 func (adapter *catalogWordlistStoreAdapter) Delete(id int) error {
