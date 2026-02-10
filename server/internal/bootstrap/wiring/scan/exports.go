@@ -7,7 +7,7 @@ import (
 	scanrepo "github.com/yyhuni/lunafox/server/internal/modules/scan/repository"
 )
 
-func NewQueryStoreAdapter(repo *scanrepo.ScanRepository) scanapp.ScanQueryStore {
+func NewScanQueryStoreAdapter(repo *scanrepo.ScanRepository) scanapp.ScanQueryStore {
 	return newScanStoreAdapter(repo)
 }
 
@@ -15,22 +15,37 @@ func NewScanCommandStoreAdapter(repo *scanrepo.ScanRepository) scanapp.ScanComma
 	return newScanStoreAdapter(repo)
 }
 
-func NewCommandStore(repo *scanrepo.ScanRepository) scandomain.ScanRepository {
-	return newScanCommandStore(repo)
+func NewScanDomainRepositoryAdapter(repo *scanrepo.ScanRepository) scandomain.ScanRepository {
+	return newScanDomainRepositoryAdapter(repo)
 }
 
-func NewTaskCancellerAdapter(repo scanrepo.ScanTaskRepository) scanapp.ScanTaskCanceller {
+func NewScanTaskCancellerAdapter(repo scanrepo.ScanTaskRepository) scanapp.ScanTaskCanceller {
 	return newScanTaskCancellerAdapter(repo)
 }
 
-func NewCreateTargetLookupAdapter(repo *catalogrepo.TargetRepository) scanapp.CreateTargetLookup {
-	return newScanCreateTargetLookupAdapter(repo)
+func NewScanTargetLookupAdapter(repo *catalogrepo.TargetRepository) scanapp.CreateTargetLookup {
+	return newScanTargetLookupAdapter(repo)
 }
 
-func NewTaskStoreAdapter(repo scanrepo.ScanTaskRepository) scanapp.TaskStore {
+func NewScanTaskStoreAdapter(repo scanrepo.ScanTaskRepository) scanapp.TaskStore {
 	return newScanTaskStoreAdapter(repo)
 }
 
-func NewTaskRuntimeScanStoreAdapter(repo *scanrepo.ScanRepository) scanapp.TaskRuntimeScanStore {
-	return newTaskRuntimeScanStoreAdapter(repo)
+func NewScanTaskRuntimeStoreAdapter(repo *scanrepo.ScanRepository) scanapp.TaskRuntimeScanStore {
+	return newScanTaskRuntimeStoreAdapter(repo)
+}
+
+func NewScanApplicationService(
+	queryStore scanapp.ScanQueryStore,
+	commandStore scanapp.ScanCommandStore,
+	domainRepository scandomain.ScanRepository,
+	taskCanceller scanapp.ScanTaskCanceller,
+	notifier scanapp.TaskCancelNotifier,
+	targetLookup scanapp.CreateTargetLookup,
+) *scanapp.ScanFacade {
+	return scanapp.NewScanFacade(queryStore, commandStore, domainRepository, taskCanceller, notifier, targetLookup)
+}
+
+func NewScanTaskApplicationService(taskStore scanapp.TaskStore, runtimeStore scanapp.TaskRuntimeScanStore) *scanapp.ScanTaskFacade {
+	return scanapp.NewScanTaskFacade(taskStore, runtimeStore)
 }

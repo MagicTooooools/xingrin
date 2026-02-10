@@ -1,4 +1,4 @@
-.PHONY: build run test check-ddd check-architecture check-layer-dependencies check-domain-purity check-no-legacy-layer check-dto-selftest check-repo-selftest check-layer-selftest check-common-httpdto check-naming-conventions sync-common-httpdto lint clean deps fmt generate check-router-boundaries check-router-selftest check-handler-boundaries check-handler-selftest
+.PHONY: build run test check-ddd check-architecture check-layer-dependencies check-domain-purity check-no-legacy-layer check-dto-selftest check-repo-selftest check-layer-selftest check-wiring-selftest check-guards-selftest check-common-httpdto check-naming-conventions check-wiring-conventions sync-common-httpdto lint clean deps fmt generate check-router-boundaries check-router-selftest check-handler-boundaries check-handler-selftest
 
 # Build the server binary
 build:
@@ -8,7 +8,7 @@ build:
 run:
 	go run ./cmd/server
 
-# Architecture guard (DDD-Strict + DTO + Repository + HTTPDTO)
+# Architecture guards (DDD-Strict + DTO + Repository + HTTPDTO)
 check-architecture:
 	bash ./scripts/check-no-legacy-layer.sh
 	bash ./scripts/check-layer-dependencies.sh
@@ -19,10 +19,14 @@ check-architecture:
 	bash ./scripts/check-naming-conventions.sh
 	bash ./scripts/check-router-boundaries.sh
 	bash ./scripts/check-handler-boundaries.sh
+	bash ./scripts/check-wiring-conventions.sh
 	bash ./scripts/check-common-httpdto.sh
 
 check-naming-conventions:
 	bash ./scripts/check-naming-conventions.sh
+
+check-wiring-conventions:
+	bash ./scripts/check-wiring-conventions.sh
 
 check-layer-dependencies:
 	bash ./scripts/check-layer-dependencies.sh
@@ -37,23 +41,31 @@ check-no-legacy-layer:
 check-ddd:
 	$(MAKE) check-architecture
 
-# Local optional DTO guard self-test
+# Local optional: DTO guard self-test
 check-dto-selftest:
 	bash ./scripts/check-dto-boundaries-selftest.sh
 
-# Local optional repository guard self-test
+# Local optional: repository guard self-test
 check-repo-selftest:
 	bash ./scripts/check-repository-boundaries-selftest.sh
 
-# Local optional layer guard self-test
+# Local optional: layer dependency guard self-test
 check-layer-selftest:
 	bash ./scripts/check-layer-dependencies-selftest.sh
+
+# Local optional: wiring conventions guard self-test
+check-wiring-selftest:
+	bash ./scripts/check-wiring-conventions-selftest.sh
+
+# Local optional: all guards self-test
+check-guards-selftest:
+	bash ./scripts/check-guards-selftest.sh
 
 # Router boundary guard
 check-router-boundaries:
 	bash ./scripts/check-router-boundaries.sh
 
-# Local optional router guard self-test
+# Local optional: router boundary guard self-test
 check-router-selftest:
 	bash ./scripts/check-router-boundaries-selftest.sh
 
@@ -61,7 +73,7 @@ check-router-selftest:
 check-handler-boundaries:
 	bash ./scripts/check-handler-boundaries.sh
 
-# Local optional handler guard self-test
+# Local optional: handler boundary guard self-test
 check-handler-selftest:
 	bash ./scripts/check-handler-boundaries-selftest.sh
 
@@ -77,7 +89,7 @@ sync-common-httpdto:
 test:
 	go test -v ./...
 
-# Run tests with coverage
+# Run tests with coverage report
 test-coverage:
 	go test -v -coverprofile=coverage.out ./...
 	go tool cover -html=coverage.out -o coverage.html
@@ -100,6 +112,6 @@ deps:
 fmt:
 	go fmt ./...
 
-# Generate mocks (if needed)
+# Generate code (if configured)
 generate:
 	go generate ./...

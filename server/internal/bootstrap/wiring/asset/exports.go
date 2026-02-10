@@ -1,34 +1,35 @@
 package assetwiring
 
 import (
+	assetapp "github.com/yyhuni/lunafox/server/internal/modules/asset/application"
 	assetrepo "github.com/yyhuni/lunafox/server/internal/modules/asset/repository"
 	catalogrepo "github.com/yyhuni/lunafox/server/internal/modules/catalog/repository"
 )
 
-func NewTargetLookupAdapter(repo *catalogrepo.TargetRepository) *assetTargetLookupAdapter {
+func NewAssetTargetLookupAdapter(repo *catalogrepo.TargetRepository) assetapp.AssetTargetLookup {
 	return newAssetTargetLookupAdapter(repo)
 }
 
-func NewWebsiteStoreAdapter(repo *assetrepo.WebsiteRepository) *assetWebsiteStoreAdapter {
+func NewAssetWebsiteStoreAdapter(repo *assetrepo.WebsiteRepository) assetapp.WebsiteStore {
 	return newAssetWebsiteStoreAdapter(repo)
 }
 
-func NewSubdomainStoreAdapter(repo *assetrepo.SubdomainRepository) *assetSubdomainStoreAdapter {
+func NewAssetSubdomainStoreAdapter(repo *assetrepo.SubdomainRepository) assetapp.SubdomainStore {
 	return newAssetSubdomainStoreAdapter(repo)
 }
 
-func NewEndpointStoreAdapter(repo *assetrepo.EndpointRepository) *assetEndpointStoreAdapter {
+func NewAssetEndpointStoreAdapter(repo *assetrepo.EndpointRepository) assetapp.EndpointStore {
 	return newAssetEndpointStoreAdapter(repo)
 }
 
-func NewDirectoryStoreAdapter(repo *assetrepo.DirectoryRepository) *assetDirectoryStoreAdapter {
+func NewAssetDirectoryStoreAdapter(repo *assetrepo.DirectoryRepository) assetapp.DirectoryStore {
 	return newAssetDirectoryStoreAdapter(repo)
 }
 
-func NewHostPortStoreAdapter(repo *assetrepo.HostPortRepository) *assetHostPortStoreAdapter {
+func NewAssetHostPortStoreAdapter(repo *assetrepo.HostPortRepository) assetapp.HostPortStore {
 	return newAssetHostPortStoreAdapter(repo)
 }
 
-func NewScreenshotStoreAdapter(repo *assetrepo.ScreenshotRepository) *assetScreenshotStoreAdapter {
+func NewAssetScreenshotStoreAdapter(repo *assetrepo.ScreenshotRepository) assetapp.ScreenshotStore {
 	return newAssetScreenshotStoreAdapter(repo)
 }

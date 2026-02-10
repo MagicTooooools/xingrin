@@ -1,21 +1,21 @@
 name: Check Generated Files
 
 on:
-  workflow_call:  # 只在被其他 workflow 调用时运行
+  workflow_call:  # Run only when called by another workflow
 
 permissions:
   contents: read
 
 jobs:
   check:
-    runs-on: ubuntu-22.04  # 固定版本，避免 runner 更新导致 CI 行为变化
+    runs-on: ubuntu-22.04  # Pin runner version for stability
     steps:
       - uses: actions/checkout@v4
 
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.24'  # 与 go.mod 保持一致
+          go-version: '1.24'  # Keep in sync with go.mod
 
       - name: Generate files for all workflows
         working-directory: worker

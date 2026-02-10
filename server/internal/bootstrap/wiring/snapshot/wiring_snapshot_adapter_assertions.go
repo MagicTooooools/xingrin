@@ -2,7 +2,7 @@ package snapshotwiring
 
 import snapshotapp "github.com/yyhuni/lunafox/server/internal/modules/snapshot/application"
 
-var _ snapshotapp.SnapshotScanLookup = (*snapshotScanLookupAdapter)(nil)
+var _ snapshotapp.SnapshotScanRefLookup = (*snapshotScanRefLookupAdapter)(nil)
 
 var _ snapshotapp.WebsiteSnapshotQueryStore = (*snapshotWebsiteStoreAdapter)(nil)
 var _ snapshotapp.WebsiteSnapshotCommandStore = (*snapshotWebsiteStoreAdapter)(nil)

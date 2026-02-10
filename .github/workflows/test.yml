@@ -1,7 +1,7 @@
 name: Run Tests
 
 on:
-  workflow_call:  # 只在被其他 workflow 调用时运行
+  workflow_call:  # Run only when called by another workflow
 
 permissions:
   contents: read
@@ -28,25 +28,9 @@ jobs:
         working-directory: server
         run: make check-ddd
 
-      - name: Self-test server DTO guard
+      - name: Self-test server guards
         working-directory: server
-        run: make check-dto-selftest
-
-      - name: Self-test server repository guard
-        working-directory: server
-        run: make check-repo-selftest
-
-      - name: Self-test server layer guard
-        working-directory: server
-        run: make check-layer-selftest
-
-      - name: Self-test server router guard
-        working-directory: server
-        run: make check-router-selftest
-
-      - name: Self-test server handler guard
-        working-directory: server
-        run: make check-handler-selftest
+        run: make check-guards-selftest
 
       - name: Run server tests
         working-directory: server

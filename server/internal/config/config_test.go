@@ -6,9 +6,9 @@ import (
 )
 
 // TestConfigDefaults tests that default values are correctly set
-// Property 4: 配置默认值正确性
-// *对于任意* 缺失的环境变量，配置系统应返回预定义的默认值。
-// **验证: 需求 2.4**
+// Property 4: default configuration correctness
+// For any missing environment variable, the config system should return the predefined default value.
+// Verification target: requirement 2.4
 func TestConfigDefaults(t *testing.T) {
 	// Clear all relevant environment variables
 	envVars := []string{

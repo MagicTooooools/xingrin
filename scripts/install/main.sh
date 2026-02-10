@@ -18,9 +18,9 @@ for lib in "$SCRIPT_DIR/lib"/*.sh; do
 done
 
 # ==============================================================================
-# LunaFox 安装脚本
-#   ./install.sh        # 默认生产模式
-#   ./install.sh --dev  # 开发模式
+# LunaFox install script
+#   ./install.sh        # default production mode
+#   ./install.sh --dev  # development mode
 # ==============================================================================
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
@@ -42,7 +42,7 @@ GO111MODULE_VALUE="on"
 GOPROXY_VALUE="https://proxy.golang.org,direct"
 ALLOW_PULL="false"
 
-# 颜色
+# Colors
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
@@ -53,14 +53,14 @@ BOLD='\033[1m'
 DIM='\033[2m'
 RESET='\033[0m'
 
-# 渐变色定义
+# Gradient colors
 GRADIENT_1='\033[38;5;39m'
 GRADIENT_2='\033[38;5;45m'
 GRADIENT_3='\033[38;5;51m'
 GRADIENT_4='\033[38;5;87m'
 GRADIENT_5='\033[38;5;123m'
 
-# 特殊效果
+# Special effects
 UNDERLINE='\033[4m'
 
 usage() {

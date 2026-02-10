@@ -1,11 +1,18 @@
 package identitywiring
 
-import identityrepo "github.com/yyhuni/lunafox/server/internal/modules/identity/repository"
+import (
+	identityapp "github.com/yyhuni/lunafox/server/internal/modules/identity/application"
+	identityrepo "github.com/yyhuni/lunafox/server/internal/modules/identity/repository"
+)
 
-func NewUserStoreAdapter(repo *identityrepo.UserRepository) *identityUserStoreAdapter {
+func NewIdentityUserStoreAdapter(repo *identityrepo.UserRepository) identityapp.UserStore {
 	return newIdentityUserStoreAdapter(repo)
 }
 
-func NewOrganizationStoreAdapter(repo *identityrepo.OrganizationRepository) *identityOrganizationStoreAdapter {
+func NewIdentityAuthUserStoreAdapter(repo *identityrepo.UserRepository) identityapp.AuthUserStore {
+	return newIdentityUserStoreAdapter(repo)
+}
+
+func NewIdentityOrganizationStoreAdapter(repo *identityrepo.OrganizationRepository) identityapp.OrganizationStore {
 	return newIdentityOrganizationStoreAdapter(repo)
 }

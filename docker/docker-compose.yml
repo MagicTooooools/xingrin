@@ -1,10 +1,10 @@
 # ============================================
-# 生产环境配置 - 使用 Docker Hub 预构建镜像
+# Production configuration - using prebuilt Docker Hub images
 # ============================================
 name: lunafox
 
 services:
-  # PostgreSQL（可选，使用远程数据库时不启动）
+  # PostgreSQL (optional; do not start when using a remote database)
   postgres:
     profiles: ["local-db"]
     image: postgres:16.3-alpine

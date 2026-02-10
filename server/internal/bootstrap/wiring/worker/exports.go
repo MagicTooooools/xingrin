@@ -6,6 +6,14 @@ import (
 	scanrepo "github.com/yyhuni/lunafox/server/internal/modules/scan/repository"
 )
 
-func NewApplicationService(scanRepo *scanrepo.ScanRepository, settingsRepo *catalogrepo.SubfinderProviderSettingsRepository) *catalogapp.WorkerService {
-	return newWorkerApplicationService(scanRepo, settingsRepo)
+func NewWorkerScanGuardAdapter(scanRepo *scanrepo.ScanRepository) catalogapp.WorkerScanGuard {
+	return newWorkerScanGuardAdapter(scanRepo)
+}
+
+func NewWorkerProviderSettingsStoreAdapter(settingsRepo *catalogrepo.SubfinderProviderSettingsRepository) catalogapp.WorkerProviderSettingsStore {
+	return newWorkerSettingsStoreAdapter(settingsRepo)
+}
+
+func NewWorkerApplicationService(scanGuard catalogapp.WorkerScanGuard, settingsStore catalogapp.WorkerProviderSettingsStore) *catalogapp.WorkerService {
+	return newWorkerApplicationService(scanGuard, settingsStore)
 }

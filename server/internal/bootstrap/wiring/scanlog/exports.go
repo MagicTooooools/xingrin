@@ -5,6 +5,14 @@ import (
 	scanrepo "github.com/yyhuni/lunafox/server/internal/modules/scan/repository"
 )
 
-func NewApplicationService(scanLogRepo *scanrepo.ScanLogRepository, scanRepo *scanrepo.ScanRepository) *scanapp.ScanLogService {
-	return newScanLogApplicationService(scanLogRepo, scanRepo)
+func NewScanLogStoreAdapter(repo *scanrepo.ScanLogRepository) scanapp.ScanLogStore {
+	return newScanLogStoreAdapter(repo)
+}
+
+func NewScanLogScanLookupAdapter(repo *scanrepo.ScanRepository) scanapp.ScanLogScanLookup {
+	return newScanLogLookupAdapter(repo)
+}
+
+func NewScanLogApplicationService(logStore scanapp.ScanLogStore, scanLookup scanapp.ScanLogScanLookup) scanapp.ScanLogApplicationService {
+	return scanapp.NewScanLogService(logStore, scanLookup)
 }

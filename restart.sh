@@ -10,9 +10,9 @@ fi
 set -e
 
 # ==============================================================================
-# LunaFox 重启脚本
-#   ./restart.sh       # 默认生产模式
-#   ./restart.sh --dev # 开发模式
+# LunaFox restart script
+#   ./restart.sh       # default production mode
+#   ./restart.sh --dev # development mode
 # ==============================================================================
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -31,7 +31,7 @@ DOCKER_BIN=""
 ENV_FILE_ARGS=()
 PROFILE_ARGS=()
 
-# 颜色
+# Colors
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
@@ -42,7 +42,7 @@ BOLD='\033[1m'
 DIM='\033[2m'
 RESET='\033[0m'
 
-# 渐变色定义
+# Gradient colors
 GRADIENT_1='\033[38;5;39m'
 GRADIENT_2='\033[38;5;45m'
 GRADIENT_3='\033[38;5;51m'

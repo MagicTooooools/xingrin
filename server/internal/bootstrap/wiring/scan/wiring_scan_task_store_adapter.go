@@ -14,22 +14,11 @@ func newScanTaskStoreAdapter(repo scanrepo.ScanTaskRepository) *scanTaskStoreAda
 }
 
 func (adapter *scanTaskStoreAdapter) GetByID(ctx context.Context, id int) (*scanapp.TaskRecord, error) {
-	task, err := adapter.repo.GetByID(ctx, id)
-	if err != nil {
-		return nil, err
-	}
-	return &scanapp.TaskRecord{ID: task.ID, ScanID: task.ScanID, Stage: task.Stage, WorkflowName: task.WorkflowName, Status: task.Status, AgentID: task.AgentID, Config: task.Config}, nil
+	return adapter.repo.GetByID(ctx, id)
 }
 
 func (adapter *scanTaskStoreAdapter) PullTask(ctx context.Context, agentID int) (*scanapp.TaskRecord, error) {
-	task, err := adapter.repo.PullTask(ctx, agentID)
-	if err != nil {
-		return nil, err
-	}
-	if task == nil {
-		return nil, nil
-	}
-	return &scanapp.TaskRecord{ID: task.ID, ScanID: task.ScanID, Stage: task.Stage, WorkflowName: task.WorkflowName, Status: task.Status, AgentID: task.AgentID, Config: task.Config}, nil
+	return adapter.repo.PullTask(ctx, agentID)
 }
 
 func (adapter *scanTaskStoreAdapter) UpdateStatus(ctx context.Context, id int, status string, errorMessage string) error {
