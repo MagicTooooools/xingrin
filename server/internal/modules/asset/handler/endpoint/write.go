@@ -73,30 +73,3 @@ func (h *EndpointHandler) BulkDelete(c *gin.Context) {
 
 	dto.Success(c, dto.BulkDeleteResponse{DeletedCount: deletedCount})
 }
-
-// BulkUpsert creates or updates multiple endpoints for a target.
-// POST /api/targets/:id/endpoints/bulk-upsert
-func (h *EndpointHandler) BulkUpsert(c *gin.Context) {
-	targetID, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		dto.BadRequest(c, "Invalid target ID")
-		return
-	}
-
-	var req dto.BulkUpsertEndpointsRequest
-	if !dto.BindJSON(c, &req) {
-		return
-	}
-
-	affectedCount, err := h.svc.BulkUpsert(targetID, req.Endpoints)
-	if err != nil {
-		if errors.Is(err, service.ErrTargetNotFound) {
-			dto.NotFound(c, "Target not found")
-			return
-		}
-		dto.InternalError(c, "Failed to upsert endpoints")
-		return
-	}
-
-	dto.Success(c, dto.BulkUpsertEndpointsResponse{AffectedCount: affectedCount})
-}

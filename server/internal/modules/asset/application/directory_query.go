@@ -11,17 +11,6 @@ import (
 
 var ErrDirectoryTargetNotFound = errors.New("target not found")
 
-type DirectoryQueryStore interface {
-	FindByTargetID(targetID int, page, pageSize int, filter string) ([]assetdomain.Directory, int64, error)
-	StreamByTargetID(targetID int) (*sql.Rows, error)
-	CountByTargetID(targetID int) (int64, error)
-	ScanRow(rows *sql.Rows) (*assetdomain.Directory, error)
-}
-
-type DirectoryTargetLookup interface {
-	GetActiveByID(id int) (*assetdomain.TargetRef, error)
-}
-
 type DirectoryQueryService struct {
 	store        DirectoryQueryStore
 	targetLookup DirectoryTargetLookup

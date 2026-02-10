@@ -3,19 +3,27 @@ package repository
 import (
 	"time"
 
+	catalogdomain "github.com/yyhuni/lunafox/server/internal/modules/catalog/domain"
 	"github.com/yyhuni/lunafox/server/internal/modules/catalog/repository/persistence"
 	"github.com/yyhuni/lunafox/server/internal/pkg/scope"
 	"gorm.io/gorm/clause"
 )
 
 // Create creates a new target.
-func (r *TargetRepository) Create(target *model.Target) error {
-	return r.db.Create(target).Error
+func (r *TargetRepository) Create(target *catalogdomain.Target) error {
+	modelTarget := targetDomainToModel(target)
+	if err := r.db.Create(modelTarget).Error; err != nil {
+		return err
+	}
+	if target != nil {
+		*target = *targetModelToDomain(modelTarget)
+	}
+	return nil
 }
 
 // Update updates a target.
-func (r *TargetRepository) Update(target *model.Target) error {
-	return r.db.Save(target).Error
+func (r *TargetRepository) Update(target *catalogdomain.Target) error {
+	return r.db.Save(targetDomainToModel(target)).Error
 }
 
 // SoftDelete soft deletes a target.
@@ -40,12 +48,13 @@ func (r *TargetRepository) BulkSoftDelete(ids []int) (int64, error) {
 }
 
 // BulkCreateIgnoreConflicts creates multiple targets, ignoring duplicates.
-func (r *TargetRepository) BulkCreateIgnoreConflicts(targets []model.Target) (int, error) {
+func (r *TargetRepository) BulkCreateIgnoreConflicts(targets []catalogdomain.Target) (int, error) {
 	if len(targets) == 0 {
 		return 0, nil
 	}
 
-	result := r.db.Clauses(clause.OnConflict{DoNothing: true}).Create(&targets)
+	modelTargets := targetDomainListToModel(targets)
+	result := r.db.Clauses(clause.OnConflict{DoNothing: true}).Create(&modelTargets)
 	if result.Error != nil {
 		return 0, result.Error
 	}

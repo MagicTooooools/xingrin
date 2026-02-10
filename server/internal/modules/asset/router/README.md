@@ -15,3 +15,9 @@
 ## 约束
 - 仅保留一个模块公开入口函数（health 这类跨模块启动入口除外）
 - 子路由注册函数保持小写私有，避免对外暴露实现细节
+- `bulk-upsert` 路由统一委托给 `snapshot` 模块 handler：
+  - `/targets/:id/websites/bulk-upsert` -> `WebsiteSnapshotHandler`
+  - `/targets/:id/endpoints/bulk-upsert` -> `EndpointSnapshotHandler`
+  - `/targets/:id/directories/bulk-upsert` -> `DirectorySnapshotHandler`
+  - `/targets/:id/host-ports/bulk-upsert` -> `HostPortSnapshotHandler`
+  - `/targets/:id/screenshots/bulk-upsert` -> `ScreenshotSnapshotHandler`

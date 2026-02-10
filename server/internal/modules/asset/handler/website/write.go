@@ -73,30 +73,3 @@ func (h *WebsiteHandler) BulkDelete(c *gin.Context) {
 
 	dto.Success(c, dto.BulkDeleteResponse{DeletedCount: deletedCount})
 }
-
-// BulkUpsert creates or updates multiple websites for a target.
-// POST /api/targets/:id/websites/bulk-upsert
-func (h *WebsiteHandler) BulkUpsert(c *gin.Context) {
-	targetID, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		dto.BadRequest(c, "Invalid target ID")
-		return
-	}
-
-	var req dto.BulkUpsertWebsitesRequest
-	if !dto.BindJSON(c, &req) {
-		return
-	}
-
-	upsertedCount, err := h.svc.BulkUpsert(targetID, req.Websites)
-	if err != nil {
-		if errors.Is(err, service.ErrTargetNotFound) {
-			dto.NotFound(c, "Target not found")
-			return
-		}
-		dto.InternalError(c, "Failed to upsert websites")
-		return
-	}
-
-	dto.Success(c, dto.BulkUpsertWebsitesResponse{UpsertedCount: int(upsertedCount)})
-}

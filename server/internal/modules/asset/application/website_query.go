@@ -11,17 +11,6 @@ import (
 
 var ErrWebsiteTargetNotFound = errors.New("target not found")
 
-type WebsiteQueryStore interface {
-	FindByTargetID(targetID int, page, pageSize int, filter string) ([]assetdomain.Website, int64, error)
-	StreamByTargetID(targetID int) (*sql.Rows, error)
-	CountByTargetID(targetID int) (int64, error)
-	ScanRow(rows *sql.Rows) (*assetdomain.Website, error)
-}
-
-type WebsiteTargetLookup interface {
-	GetActiveByID(id int) (*assetdomain.TargetRef, error)
-}
-
 type WebsiteQueryService struct {
 	store        WebsiteQueryStore
 	targetLookup WebsiteTargetLookup

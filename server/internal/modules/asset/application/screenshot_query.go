@@ -13,15 +13,6 @@ var (
 	ErrScreenshotNotFound       = errors.New("screenshot not found")
 )
 
-type ScreenshotQueryStore interface {
-	FindByTargetID(targetID int, page, pageSize int, filter string) ([]assetdomain.Screenshot, int64, error)
-	GetByID(id int) (*assetdomain.Screenshot, error)
-}
-
-type ScreenshotTargetLookup interface {
-	GetActiveByID(id int) (*assetdomain.TargetRef, error)
-}
-
 type ScreenshotQueryService struct {
 	store        ScreenshotQueryStore
 	targetLookup ScreenshotTargetLookup

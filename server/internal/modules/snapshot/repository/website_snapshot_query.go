@@ -2,33 +2,33 @@ package repository
 
 import (
 	"database/sql"
-	"github.com/yyhuni/lunafox/server/internal/modules/snapshot/repository/persistence"
+
+	snapshotdomain "github.com/yyhuni/lunafox/server/internal/modules/snapshot/domain"
+	model "github.com/yyhuni/lunafox/server/internal/modules/snapshot/repository/persistence"
 	"github.com/yyhuni/lunafox/server/internal/pkg/scope"
 )
 
 // FindByScanID finds website snapshots by scan ID with pagination and filter
-func (r *WebsiteSnapshotRepository) FindByScanID(scanID int, page, pageSize int, filter string) ([]model.WebsiteSnapshot, int64, error) {
+func (r *WebsiteSnapshotRepository) FindByScanID(scanID int, page, pageSize int, filter string) ([]snapshotdomain.WebsiteSnapshot, int64, error) {
 	var snapshots []model.WebsiteSnapshot
 	var total int64
 
-	// Base query
 	baseQuery := r.db.Model(&model.WebsiteSnapshot{}).Where("scan_id = ?", scanID)
-
-	// Apply filter scope
 	baseQuery = baseQuery.Scopes(scope.WithFilterDefault(filter, websiteSnapshotFilterMappingNormalized, "url"))
 
-	// Count total
 	if err := baseQuery.Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
 
-	// Fetch with pagination and default ordering
 	err := baseQuery.Scopes(
 		scope.WithPagination(page, pageSize),
 		scope.OrderByCreatedAtDesc(),
 	).Find(&snapshots).Error
+	if err != nil {
+		return nil, 0, err
+	}
 
-	return snapshots, total, err
+	return websiteSnapshotModelListToDomain(snapshots), total, nil
 }
 
 // StreamByScanID returns a sql.Rows cursor for streaming export
@@ -46,11 +46,11 @@ func (r *WebsiteSnapshotRepository) CountByScanID(scanID int) (int64, error) {
 	return count, err
 }
 
-// ScanRow scans a single row into WebsiteSnapshot model
-func (r *WebsiteSnapshotRepository) ScanRow(rows *sql.Rows) (*model.WebsiteSnapshot, error) {
+// ScanRow scans a single row into WebsiteSnapshot domain object
+func (r *WebsiteSnapshotRepository) ScanRow(rows *sql.Rows) (*snapshotdomain.WebsiteSnapshot, error) {
 	var snapshot model.WebsiteSnapshot
 	if err := r.db.ScanRows(rows, &snapshot); err != nil {
 		return nil, err
 	}
-	return &snapshot, nil
+	return websiteSnapshotModelToDomain(&snapshot), nil
 }

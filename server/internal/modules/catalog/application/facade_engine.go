@@ -8,11 +8,6 @@ import (
 	"github.com/yyhuni/lunafox/server/internal/modules/catalog/dto"
 )
 
-type EngineStore interface {
-	EngineQueryStore
-	EngineCommandStore
-}
-
 // EngineFacade handles engine business logic.
 type EngineFacade struct {
 	queryService *EngineQueryService

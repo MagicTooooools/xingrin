@@ -3,8 +3,8 @@
 scan 模块 repository 规范：
 
 - `scan.go` + `scan_query.go` + `scan_command.go`：Scan 仓储三分结构。
-- `scan_records.go`：`persistence model <-> domain query projection`（`domain.QueryScan/QueryTargetRef/QueryStatistics`）与写入记录结构。
-- `scan_adapter.go`：domain port 适配器（`domain <-> model` 映射）。
+- `scan_mapper.go`：`persistence model <-> domain projection` 映射（`domain.QueryScan/QueryTargetRef/QueryStatistics`）与创建写模型映射。
+- `scan_adapter.go`：domain port 适配器（`domain <-> repository`）。
 - `scan_log.go` + `scan_log_query.go` + `scan_log_command.go`：日志仓储三分结构。
 - `scan_task.go` + `scan_task_query.go` + `scan_task_command.go` + `scan_task_sql.go`：任务仓储与 SQL 常量。
 
@@ -13,4 +13,4 @@ scan 模块 repository 规范：
 - 禁止使用 `*_mutation.go` 命名。
 - 禁止使用泛名 `types.go`。
 - `*_query.go` 不得出现写操作方法；`*_command.go` 不得出现查询方法。
-- query 投影映射下沉到 repository，wiring 层仅做接口适配，不做字段级搬运。
+- query/projection 映射下沉到 repository，wiring 层只做接口适配，不做字段级搬运。

@@ -2,7 +2,7 @@
 
 snapshot 模块 DTO 规范：
 
-- `*_snapshot_models.go`：按资源拆分放置快照相关 DTO（endpoint/website/directory/host-port/screenshot/subdomain/vulnerability）。
+- `*_snapshot_dto.go`：按资源拆分放置快照相关 DTO（endpoint/website/directory/host-port/screenshot/subdomain/vulnerability）。
 - `common_http.go`：仅作为薄适配层，重导出 `server/internal/modules/httpdto` 的共享 HTTP DTO 能力（绑定、分页、统一错误响应）。
 
 关键约束：

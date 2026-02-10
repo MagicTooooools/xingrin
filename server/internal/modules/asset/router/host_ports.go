@@ -2,13 +2,13 @@ package router
 
 import (
 	"github.com/gin-gonic/gin"
-	assethandler "github.com/yyhuni/lunafox/server/internal/modules/asset/handler"
+	hostporthandler "github.com/yyhuni/lunafox/server/internal/modules/asset/handler/host_port"
 	snapshothandler "github.com/yyhuni/lunafox/server/internal/modules/snapshot/handler"
 )
 
 func registerHostPortRoutes(
 	protected *gin.RouterGroup,
-	hostPortHandler *assethandler.HostPortHandler,
+	hostPortHandler *hostporthandler.HostPortHandler,
 	hostPortSnapshotHandler *snapshothandler.HostPortSnapshotHandler,
 ) {
 	protected.GET("/targets/:id/host-ports", hostPortHandler.List)

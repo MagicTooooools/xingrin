@@ -52,30 +52,3 @@ func (h *DirectoryHandler) BulkDelete(c *gin.Context) {
 
 	dto.Success(c, dto.BulkDeleteResponse{DeletedCount: deletedCount})
 }
-
-// BulkUpsert creates or updates multiple directories for a target.
-// POST /api/targets/:id/directories/bulk-upsert
-func (h *DirectoryHandler) BulkUpsert(c *gin.Context) {
-	targetID, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		dto.BadRequest(c, "Invalid target ID")
-		return
-	}
-
-	var req dto.BulkUpsertDirectoriesRequest
-	if !dto.BindJSON(c, &req) {
-		return
-	}
-
-	affectedCount, err := h.svc.BulkUpsert(targetID, req.Directories)
-	if err != nil {
-		if errors.Is(err, service.ErrTargetNotFound) {
-			dto.NotFound(c, "Target not found")
-			return
-		}
-		dto.InternalError(c, "Failed to upsert directories")
-		return
-	}
-
-	dto.Success(c, dto.BulkUpsertDirectoriesResponse{AffectedCount: affectedCount})
-}

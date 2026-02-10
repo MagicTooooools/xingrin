@@ -2,8 +2,11 @@ package router
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/yyhuni/lunafox/server/internal/modules/asset/handler"
+	directoryhandler "github.com/yyhuni/lunafox/server/internal/modules/asset/handler/directory"
 	endpointhandler "github.com/yyhuni/lunafox/server/internal/modules/asset/handler/endpoint"
+	hostporthandler "github.com/yyhuni/lunafox/server/internal/modules/asset/handler/host_port"
+	screenshothandler "github.com/yyhuni/lunafox/server/internal/modules/asset/handler/screenshot"
+	subdomainhandler "github.com/yyhuni/lunafox/server/internal/modules/asset/handler/subdomain"
 	websitehandler "github.com/yyhuni/lunafox/server/internal/modules/asset/handler/website"
 	snapshothandler "github.com/yyhuni/lunafox/server/internal/modules/snapshot/handler"
 	snapshotrouter "github.com/yyhuni/lunafox/server/internal/modules/snapshot/router"
@@ -13,13 +16,13 @@ import (
 func RegisterAssetRoutes(
 	api *gin.RouterGroup,
 	protected *gin.RouterGroup,
-	screenshotHandler *handler.ScreenshotHandler,
+	screenshotHandler *screenshothandler.ScreenshotHandler,
 	screenshotSnapshotHandler *snapshothandler.ScreenshotSnapshotHandler,
 	websiteHandler *websitehandler.WebsiteHandler,
-	subdomainHandler *handler.SubdomainHandler,
+	subdomainHandler *subdomainhandler.SubdomainHandler,
 	endpointHandler *endpointhandler.EndpointHandler,
-	directoryHandler *handler.DirectoryHandler,
-	hostPortHandler *handler.HostPortHandler,
+	directoryHandler *directoryhandler.DirectoryHandler,
+	hostPortHandler *hostporthandler.HostPortHandler,
 	endpointSnapshotHandler *snapshothandler.EndpointSnapshotHandler,
 	hostPortSnapshotHandler *snapshothandler.HostPortSnapshotHandler,
 	websiteSnapshotHandler *snapshothandler.WebsiteSnapshotHandler,
@@ -27,13 +30,13 @@ func RegisterAssetRoutes(
 	directorySnapshotHandler *snapshothandler.DirectorySnapshotHandler,
 	vulnerabilitySnapshotHandler *snapshothandler.VulnerabilitySnapshotHandler,
 ) {
-	RegisterPublicRoutes(api, screenshotHandler, screenshotSnapshotHandler)
-	RegisterWebsiteRoutes(protected, websiteHandler)
-	RegisterSubdomainRoutes(protected, subdomainHandler)
-	RegisterEndpointRoutes(protected, endpointHandler, endpointSnapshotHandler)
-	RegisterDirectoryRoutes(protected, directoryHandler)
-	RegisterHostPortRoutes(protected, hostPortHandler, hostPortSnapshotHandler)
-	RegisterScreenshotRoutes(protected, screenshotHandler, screenshotSnapshotHandler)
+	registerPublicRoutes(api, screenshotHandler, screenshotSnapshotHandler)
+	registerWebsiteRoutes(protected, websiteHandler, websiteSnapshotHandler)
+	registerSubdomainRoutes(protected, subdomainHandler)
+	registerEndpointRoutes(protected, endpointHandler, endpointSnapshotHandler)
+	registerDirectoryRoutes(protected, directoryHandler, directorySnapshotHandler)
+	registerHostPortRoutes(protected, hostPortHandler, hostPortSnapshotHandler)
+	registerScreenshotRoutes(protected, screenshotHandler, screenshotSnapshotHandler)
 	snapshotrouter.RegisterScanSnapshotRoutes(
 		protected,
 		websiteSnapshotHandler,

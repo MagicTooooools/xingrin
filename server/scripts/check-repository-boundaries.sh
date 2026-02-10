@@ -33,6 +33,33 @@ if [[ -n "$types_files" ]]; then
   append_violation "禁止 repository 使用泛名 types.go（请改为具体资源文件）" "$types_files"
 fi
 
+# mapper 文件必须使用资源前缀：<resource>_mapper.go 且同目录存在 <resource>.go
+MAPPER_FILES=()
+while IFS= read -r file; do
+  MAPPER_FILES+=("$file")
+done < <(find "$MODULE_ROOT" -type f -path '*/repository/*_mapper.go' | sort)
+
+if [[ ${#MAPPER_FILES[@]} -gt 0 ]]; then
+  invalid_mapper_files=""
+  for file in "${MAPPER_FILES[@]}"; do
+    file_dir="$(dirname "$file")"
+    file_name="$(basename "$file")"
+    resource_name="${file_name%_mapper.go}"
+    resource_file="$file_dir/$resource_name.go"
+
+    if [[ ! -f "$resource_file" ]]; then
+      if [[ -n "$invalid_mapper_files" ]]; then
+        invalid_mapper_files+=$'\n'
+      fi
+      invalid_mapper_files+="$file -> 缺少对应资源文件: $resource_file"
+    fi
+  done
+
+  if [[ -n "$invalid_mapper_files" ]]; then
+    append_violation "禁止聚合式泛名 mapper：*_mapper.go 必须对应同名 <resource>.go" "$invalid_mapper_files"
+  fi
+fi
+
 QUERY_FILES=()
 while IFS= read -r file; do
   QUERY_FILES+=("$file")

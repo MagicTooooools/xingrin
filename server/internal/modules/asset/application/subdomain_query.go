@@ -11,17 +11,6 @@ import (
 
 var ErrSubdomainTargetNotFound = errors.New("target not found")
 
-type SubdomainQueryStore interface {
-	FindByTargetID(targetID int, page, pageSize int, filter string) ([]assetdomain.Subdomain, int64, error)
-	StreamByTargetID(targetID int) (*sql.Rows, error)
-	CountByTargetID(targetID int) (int64, error)
-	ScanRow(rows *sql.Rows) (*assetdomain.Subdomain, error)
-}
-
-type SubdomainTargetLookup interface {
-	GetActiveByID(id int) (*assetdomain.TargetRef, error)
-}
-
 type SubdomainQueryService struct {
 	store        SubdomainQueryStore
 	targetLookup SubdomainTargetLookup

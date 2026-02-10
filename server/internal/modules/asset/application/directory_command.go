@@ -7,12 +7,6 @@ import (
 	"github.com/yyhuni/lunafox/server/internal/pkg/dberrors"
 )
 
-type DirectoryCommandStore interface {
-	BulkCreate(directories []assetdomain.Directory) (int, error)
-	BulkDelete(ids []int) (int64, error)
-	BulkUpsert(directories []assetdomain.Directory) (int64, error)
-}
-
 type DirectoryUpsertItem struct {
 	URL           string
 	Status        *int

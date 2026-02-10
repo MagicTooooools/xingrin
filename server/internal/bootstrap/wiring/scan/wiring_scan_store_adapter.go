@@ -14,43 +14,19 @@ func newScanStoreAdapter(repo *scanrepo.ScanRepository) *scanStoreAdapter {
 }
 
 func (adapter *scanStoreAdapter) FindAll(page, pageSize int, targetID int, status, search string) ([]scanapp.QueryScan, int64, error) {
-	scans, total, err := adapter.repo.FindAll(page, pageSize, targetID, status, search)
-	if err != nil {
-		return nil, 0, err
-	}
-	results := make([]scanapp.QueryScan, 0, len(scans))
-	for index := range scans {
-		results = append(results, *scanRecordToQueryScan(&scans[index]))
-	}
-	return results, total, nil
+	return adapter.repo.FindAll(page, pageSize, targetID, status, search)
 }
 
 func (adapter *scanStoreAdapter) FindByIDWithTarget(id int) (*scanapp.QueryScan, error) {
-	scan, err := adapter.repo.FindByIDWithTarget(id)
-	if err != nil {
-		return nil, err
-	}
-	return scanRecordToQueryScan(scan), nil
+	return adapter.repo.FindByIDWithTarget(id)
 }
 
 func (adapter *scanStoreAdapter) GetActiveByID(id int) (*scanapp.QueryScan, error) {
-	scan, err := adapter.repo.GetActiveByID(id)
-	if err != nil {
-		return nil, err
-	}
-	return scanRecordToQueryScan(scan), nil
+	return adapter.repo.GetActiveByID(id)
 }
 
 func (adapter *scanStoreAdapter) FindByIDs(ids []int) ([]scanapp.QueryScan, error) {
-	scans, err := adapter.repo.FindByIDs(ids)
-	if err != nil {
-		return nil, err
-	}
-	results := make([]scanapp.QueryScan, 0, len(scans))
-	for index := range scans {
-		results = append(results, *scanRecordToQueryScan(&scans[index]))
-	}
-	return results, nil
+	return adapter.repo.FindByIDs(ids)
 }
 
 func (adapter *scanStoreAdapter) CreateWithInputTargetsAndTasks(scan *scanapp.CreateScan, inputs []scanapp.CreateScanInputTarget, tasks []scanapp.CreateScanTask) error {
@@ -87,21 +63,7 @@ func (adapter *scanStoreAdapter) BulkSoftDelete(ids []int) (int64, []string, err
 }
 
 func (adapter *scanStoreAdapter) GetStatistics() (*scanapp.QueryStatistics, error) {
-	stats, err := adapter.repo.GetStatistics()
-	if err != nil {
-		return nil, err
-	}
-	return &scanapp.QueryStatistics{
-		Total:           stats.Total,
-		Running:         stats.Running,
-		Completed:       stats.Completed,
-		Failed:          stats.Failed,
-		TotalVulns:      stats.TotalVulns,
-		TotalSubdomains: stats.TotalSubdomains,
-		TotalEndpoints:  stats.TotalEndpoints,
-		TotalWebsites:   stats.TotalWebsites,
-		TotalAssets:     stats.TotalAssets,
-	}, nil
+	return adapter.repo.GetStatistics()
 }
 
 func (adapter *scanStoreAdapter) UpdateStatus(id int, status string, errorMessage ...string) error {

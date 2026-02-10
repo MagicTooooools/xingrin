@@ -79,6 +79,29 @@ if [[ ${#REPO_FILES[@]} -gt 0 ]]; then
   fi
 fi
 
+# 4) catalog wiring 禁止承载 model<->domain 映射（应下沉 repository）
+CATALOG_WIRING_DIR="$ROOT_DIR/internal/bootstrap/wiring/catalog"
+if [[ -d "$CATALOG_WIRING_DIR" ]]; then
+  legacy_mapper_files="$(find "$CATALOG_WIRING_DIR" -type f -name '*mappers.go' ! -name '*_test.go' | sort || true)"
+  if [[ -n "$legacy_mapper_files" ]]; then
+    append_violation "禁止 catalog wiring 使用 *mappers.go（映射应下沉 repository）" "$legacy_mapper_files"
+  fi
+
+  CATALOG_WIRING_FILES=()
+  while IFS= read -r file; do CATALOG_WIRING_FILES+=("$file"); done < <(
+    find "$CATALOG_WIRING_DIR" -type f -name '*.go' ! -name '*_test.go' | sort
+  )
+  if [[ ${#CATALOG_WIRING_FILES[@]} -gt 0 ]]; then
+    output="$(rg -n --no-heading \
+      -e 'internal/modules/catalog/repository/persistence' \
+      -e 'func[[:space:]]*(\([^)]*\)[[:space:]]*)?[A-Za-z0-9_]*(ModelToDomain|DomainToModel)\(' \
+      "${CATALOG_WIRING_FILES[@]}" || true)"
+    if [[ -n "$output" ]]; then
+      append_violation "禁止 catalog wiring 出现 persistence 依赖或映射函数（ModelToDomain/DomainToModel）" "$output"
+    fi
+  fi
+fi
+
 if [[ -n "$VIOLATIONS" ]]; then
   echo "❌ layer 依赖检查失败"
   echo "$VIOLATIONS"

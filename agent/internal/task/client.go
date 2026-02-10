@@ -43,7 +43,7 @@ func NewClient(serverURL, apiKey string) *Client {
 
 // PullTask requests a task from the server. Returns nil when no task available.
 func (c *Client) PullTask(ctx context.Context) (*domain.Task, error) {
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.baseURL+"/api/agents/tasks/pull", nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.baseURL+"/api/agent/tasks/pull", nil)
 	if err != nil {
 		return nil, err
 	}
@@ -141,7 +141,7 @@ func marshalStatusPayload(status, errorMessage string) ([]byte, error) {
 }
 
 func (c *Client) sendStatusUpdate(ctx context.Context, taskID int, body []byte) (int, string, error) {
-	req, err := http.NewRequestWithContext(ctx, http.MethodPatch, fmt.Sprintf("%s/api/agents/tasks/%d/status", c.baseURL, taskID), bytes.NewReader(body))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPatch, fmt.Sprintf("%s/api/agent/tasks/%d/status", c.baseURL, taskID), bytes.NewReader(body))
 	if err != nil {
 		return 0, "", err
 	}

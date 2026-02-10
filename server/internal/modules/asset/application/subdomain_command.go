@@ -10,11 +10,6 @@ import (
 
 var ErrSubdomainInvalidTargetType = errors.New("target type must be domain for subdomains")
 
-type SubdomainCommandStore interface {
-	BulkCreate(subdomains []assetdomain.Subdomain) (int, error)
-	BulkDelete(ids []int) (int64, error)
-}
-
 type SubdomainCommandService struct {
 	store        SubdomainCommandStore
 	targetLookup SubdomainTargetLookup

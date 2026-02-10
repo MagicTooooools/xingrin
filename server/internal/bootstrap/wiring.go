@@ -11,11 +11,16 @@ import (
 	workerwiring "github.com/yyhuni/lunafox/server/internal/bootstrap/wiring/worker"
 	"github.com/yyhuni/lunafox/server/internal/config"
 	agentservice "github.com/yyhuni/lunafox/server/internal/modules/agent/application"
+	agentdomain "github.com/yyhuni/lunafox/server/internal/modules/agent/domain"
 	agenthandler "github.com/yyhuni/lunafox/server/internal/modules/agent/handler"
 	agentrepo "github.com/yyhuni/lunafox/server/internal/modules/agent/repository"
 	assetservice "github.com/yyhuni/lunafox/server/internal/modules/asset/application"
 	assethandler "github.com/yyhuni/lunafox/server/internal/modules/asset/handler"
+	directoryhandler "github.com/yyhuni/lunafox/server/internal/modules/asset/handler/directory"
 	endpointhandler "github.com/yyhuni/lunafox/server/internal/modules/asset/handler/endpoint"
+	hostporthandler "github.com/yyhuni/lunafox/server/internal/modules/asset/handler/host_port"
+	screenshothandler "github.com/yyhuni/lunafox/server/internal/modules/asset/handler/screenshot"
+	subdomainhandler "github.com/yyhuni/lunafox/server/internal/modules/asset/handler/subdomain"
 	websitehandler "github.com/yyhuni/lunafox/server/internal/modules/asset/handler/website"
 	assetrepo "github.com/yyhuni/lunafox/server/internal/modules/asset/repository"
 	catalogservice "github.com/yyhuni/lunafox/server/internal/modules/catalog/application"
@@ -34,6 +39,7 @@ import (
 	snapshothandler "github.com/yyhuni/lunafox/server/internal/modules/snapshot/handler"
 	snapshotrepo "github.com/yyhuni/lunafox/server/internal/modules/snapshot/repository"
 	"github.com/yyhuni/lunafox/server/internal/preset"
+	ws "github.com/yyhuni/lunafox/server/internal/websocket"
 )
 
 type deps struct {
@@ -45,11 +51,11 @@ type deps struct {
 	engineHandler        *cataloghandler.EngineHandler
 	wordlistHandler      *cataloghandler.WordlistHandler
 	websiteHandler       *websitehandler.WebsiteHandler
-	subdomainHandler     *assethandler.SubdomainHandler
+	subdomainHandler     *subdomainhandler.SubdomainHandler
 	endpointHandler      *endpointhandler.EndpointHandler
-	directoryHandler     *assethandler.DirectoryHandler
-	hostPortHandler      *assethandler.HostPortHandler
-	screenshotHandler    *assethandler.ScreenshotHandler
+	directoryHandler     *directoryhandler.DirectoryHandler
+	hostPortHandler      *hostporthandler.HostPortHandler
+	screenshotHandler    *screenshothandler.ScreenshotHandler
 	vulnerabilityHandler *securityhandler.VulnerabilityHandler
 	scanHandler          *scanhandler.ScanHandler
 	scanLogHandler       *scanhandler.ScanLogHandler
@@ -58,7 +64,7 @@ type deps struct {
 
 	agentHandler     *agenthandler.AgentHandler
 	agentWSHandler   *agenthandler.AgentWebSocketHandler
-	agentTaskHandler *scanhandler.AgentTaskHandler
+	agentTaskHandler *agenthandler.AgentTaskHandler
 
 	websiteSnapshotHandler       *snapshothandler.WebsiteSnapshotHandler
 	subdomainSnapshotHandler     *snapshothandler.SubdomainSnapshotHandler
@@ -69,7 +75,7 @@ type deps struct {
 	vulnerabilitySnapshotHandler *snapshothandler.VulnerabilitySnapshotHandler
 	presetHandler                *cataloghandler.PresetHandler
 
-	agentRepo    agentrepo.AgentRepository
+	agentRepo    agentdomain.AgentRepository
 	scanTaskRepo scanrepo.ScanTaskRepository
 }
 
@@ -130,6 +136,8 @@ func buildDependencies(infra *infra, cfg *config.Config) *deps {
 	workerSvc := workerwiring.NewApplicationService(scanRepo, subfinderProviderSettingsRepo)
 	scanTaskSvc := scanservice.NewScanTaskFacade(scanwiring.NewTaskStoreAdapter(scanTaskRepo), scanwiring.NewTaskRuntimeScanStoreAdapter(scanRepo))
 	agentSvc := agentservice.NewAgentFacade(agentRepo, registrationTokenRepo)
+	agentRuntimeSvc := agentservice.NewAgentRuntimeService(agentRepo, infra.heartbeatCache, ws.NewAgentMessagePublisher(infra.wsHub), infra.serverVersion, infra.agentImage)
+	agentTaskSvc := agentservice.NewAgentTaskService(scanTaskSvc)
 
 	snapshotScanLookup := snapshotwiring.NewScanLookupAdapter(scanRepo)
 
@@ -185,11 +193,11 @@ func buildDependencies(infra *infra, cfg *config.Config) *deps {
 		engineHandler:        cataloghandler.NewEngineHandler(engineSvc),
 		wordlistHandler:      cataloghandler.NewWordlistHandler(wordlistSvc),
 		websiteHandler:       websitehandler.NewWebsiteHandler(websiteSvc),
-		subdomainHandler:     assethandler.NewSubdomainHandler(subdomainSvc),
+		subdomainHandler:     subdomainhandler.NewSubdomainHandler(subdomainSvc),
 		endpointHandler:      endpointhandler.NewEndpointHandler(endpointSvc),
-		directoryHandler:     assethandler.NewDirectoryHandler(directorySvc),
-		hostPortHandler:      assethandler.NewHostPortHandler(hostPortSvc),
-		screenshotHandler:    assethandler.NewScreenshotHandler(screenshotSvc),
+		directoryHandler:     directoryhandler.NewDirectoryHandler(directorySvc),
+		hostPortHandler:      hostporthandler.NewHostPortHandler(hostPortSvc),
+		screenshotHandler:    screenshothandler.NewScreenshotHandler(screenshotSvc),
 		vulnerabilityHandler: securityhandler.NewVulnerabilityHandler(vulnerabilitySvc),
 		scanHandler:          scanhandler.NewScanHandler(scanSvc),
 		scanLogHandler:       scanhandler.NewScanLogHandler(scanLogSvc),
@@ -198,21 +206,18 @@ func buildDependencies(infra *infra, cfg *config.Config) *deps {
 
 		agentHandler: agenthandler.NewAgentHandler(
 			agentSvc,
+			agentRuntimeSvc,
 			cfg.PublicURL,
 			infra.serverVersion,
 			infra.agentImage,
 			cfg.Worker.Token,
 			infra.heartbeatCache,
-			infra.wsHub,
 		),
 		agentWSHandler: agenthandler.NewAgentWebSocketHandler(
 			infra.wsHub,
-			agentRepo,
-			infra.heartbeatCache,
-			infra.serverVersion,
-			infra.agentImage,
+			agentRuntimeSvc,
 		),
-		agentTaskHandler: scanhandler.NewAgentTaskHandler(scanTaskSvc),
+		agentTaskHandler: agenthandler.NewAgentTaskHandler(agentTaskSvc),
 
 		websiteSnapshotHandler:       snapshothandler.NewWebsiteSnapshotHandler(websiteSnapshotSvc),
 		subdomainSnapshotHandler:     snapshothandler.NewSubdomainSnapshotHandler(subdomainSnapshotSvc),

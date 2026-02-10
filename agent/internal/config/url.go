@@ -41,10 +41,10 @@ func BuildWebSocketURL(serverURL string) (string, error) {
 func buildWSPath(path string) string {
 	trimmed := strings.TrimRight(path, "/")
 	if trimmed == "" {
-		return "/api/agents/ws"
+		return "/api/agent/ws"
 	}
 	if strings.HasSuffix(trimmed, "/api") {
-		return trimmed + "/agents/ws"
+		return trimmed + "/agent/ws"
 	}
-	return trimmed + "/api/agents/ws"
+	return trimmed + "/api/agent/ws"
 }

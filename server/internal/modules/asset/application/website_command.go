@@ -25,14 +25,6 @@ type WebsiteUpsertItem struct {
 	ResponseHeaders string
 }
 
-type WebsiteCommandStore interface {
-	GetByID(id int) (*assetdomain.Website, error)
-	BulkCreate(websites []assetdomain.Website) (int, error)
-	Delete(id int) error
-	BulkDelete(ids []int) (int64, error)
-	BulkUpsert(websites []assetdomain.Website) (int64, error)
-}
-
 type WebsiteCommandService struct {
 	store        WebsiteCommandStore
 	targetLookup WebsiteTargetLookup

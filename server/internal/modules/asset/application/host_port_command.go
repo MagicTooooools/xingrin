@@ -13,11 +13,6 @@ type HostPortItem struct {
 	Port int
 }
 
-type HostPortCommandStore interface {
-	BulkUpsert(mappings []assetdomain.HostPort) (int64, error)
-	DeleteByIPs(ips []string) (int64, error)
-}
-
 type HostPortCommandService struct {
 	store        HostPortCommandStore
 	targetLookup HostPortTargetLookup

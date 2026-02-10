@@ -20,19 +20,6 @@ type HostPortResponse struct {
 	CreatedAt time.Time
 }
 
-type HostPortQueryStore interface {
-	GetIPAggregation(targetID int, page, pageSize int, filter string) ([]assetdomain.IPAggregationRow, int64, error)
-	GetHostsAndPortsByIP(targetID int, ip string, filter string) ([]string, []int, error)
-	StreamByTargetID(targetID int) (*sql.Rows, error)
-	StreamByTargetIDAndIPs(targetID int, ips []string) (*sql.Rows, error)
-	CountByTargetID(targetID int) (int64, error)
-	ScanRow(rows *sql.Rows) (*assetdomain.HostPort, error)
-}
-
-type HostPortTargetLookup interface {
-	GetActiveByID(id int) (*assetdomain.TargetRef, error)
-}
-
 type HostPortQueryService struct {
 	store        HostPortQueryStore
 	targetLookup HostPortTargetLookup
