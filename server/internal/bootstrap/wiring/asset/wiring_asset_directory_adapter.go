@@ -16,19 +16,11 @@ func newAssetDirectoryStoreAdapter(repo *assetrepo.DirectoryRepository) *assetDi
 }
 
 func (adapter *assetDirectoryStoreAdapter) FindByTargetID(targetID int, page, pageSize int, filter string) ([]assetdomain.Directory, int64, error) {
-	items, total, err := adapter.repo.FindByTargetID(targetID, page, pageSize, filter)
-	if err != nil {
-		return nil, 0, err
-	}
-	results := make([]assetdomain.Directory, 0, len(items))
-	for index := range items {
-		results = append(results, *assetModelDirectoryToDomain(&items[index]))
-	}
-	return results, total, nil
+	return adapter.repo.FindByTargetID(targetID, page, pageSize, filter)
 }
 
 func (adapter *assetDirectoryStoreAdapter) BulkCreate(items []assetdomain.Directory) (int, error) {
-	return adapter.repo.BulkCreate(assetDomainDirectoryListToModel(items))
+	return adapter.repo.BulkCreate(items)
 }
 
 func (adapter *assetDirectoryStoreAdapter) BulkDelete(ids []int) (int64, error) {
@@ -36,7 +28,7 @@ func (adapter *assetDirectoryStoreAdapter) BulkDelete(ids []int) (int64, error) 
 }
 
 func (adapter *assetDirectoryStoreAdapter) BulkUpsert(items []assetdomain.Directory) (int64, error) {
-	return adapter.repo.BulkUpsert(assetDomainDirectoryListToModel(items))
+	return adapter.repo.BulkUpsert(items)
 }
 
 func (adapter *assetDirectoryStoreAdapter) StreamByTargetID(targetID int) (*sql.Rows, error) {
@@ -48,9 +40,5 @@ func (adapter *assetDirectoryStoreAdapter) CountByTargetID(targetID int) (int64,
 }
 
 func (adapter *assetDirectoryStoreAdapter) ScanRow(rows *sql.Rows) (*assetdomain.Directory, error) {
-	item, err := adapter.repo.ScanRow(rows)
-	if err != nil {
-		return nil, err
-	}
-	return assetModelDirectoryToDomain(item), nil
+	return adapter.repo.ScanRow(rows)
 }

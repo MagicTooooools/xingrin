@@ -15,7 +15,7 @@ interface SearchResultsTableProps {
   onViewVulnerability?: (vuln: Vulnerability) => void
 }
 
-export function SearchResultsTable({ results, assetType: _assetType }: SearchResultsTableProps) {
+export function SearchResultsTable({ results }: SearchResultsTableProps) {
   const format = useFormatter()
 
   const formatDate = useCallback((dateString: string) => {

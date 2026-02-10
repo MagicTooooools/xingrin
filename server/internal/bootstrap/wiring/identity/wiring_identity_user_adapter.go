@@ -13,8 +13,8 @@ func newIdentityUserStoreAdapter(repo *identityrepo.UserRepository) *identityUse
 	return &identityUserStoreAdapter{repo: repo}
 }
 
-func (adapter *identityUserStoreAdapter) FindByID(id int) (*identitydomain.User, error) {
-	user, err := adapter.repo.FindByID(id)
+func (adapter *identityUserStoreAdapter) GetByID(id int) (*identitydomain.User, error) {
+	user, err := adapter.repo.GetByID(id)
 	if err != nil {
 		return nil, err
 	}

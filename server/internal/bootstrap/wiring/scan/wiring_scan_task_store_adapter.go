@@ -13,8 +13,8 @@ func newScanTaskStoreAdapter(repo scanrepo.ScanTaskRepository) *scanTaskStoreAda
 	return &scanTaskStoreAdapter{repo: repo}
 }
 
-func (adapter *scanTaskStoreAdapter) FindByID(ctx context.Context, id int) (*scanapp.TaskRecord, error) {
-	task, err := adapter.repo.FindByID(ctx, id)
+func (adapter *scanTaskStoreAdapter) GetByID(ctx context.Context, id int) (*scanapp.TaskRecord, error) {
+	task, err := adapter.repo.GetByID(ctx, id)
 	if err != nil {
 		return nil, err
 	}

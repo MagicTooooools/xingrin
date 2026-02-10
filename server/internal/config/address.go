@@ -5,8 +5,8 @@ import "fmt"
 // DSN returns the database connection string.
 func (c *DatabaseConfig) DSN() string {
 	return fmt.Sprintf(
-		"host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
-		c.Host, c.Port, c.User, c.Password, c.Name, c.SSLMode,
+		"host=%s port=%d user=%s password=%s dbname=%s sslmode=%s TimeZone=%s",
+		c.Host, c.Port, c.User, c.Password, c.Name, c.SSLMode, c.TimeZone,
 	)
 }
 

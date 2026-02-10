@@ -16,27 +16,15 @@ func newAssetEndpointStoreAdapter(repo *assetrepo.EndpointRepository) *assetEndp
 }
 
 func (adapter *assetEndpointStoreAdapter) FindByTargetID(targetID int, page, pageSize int, filter string) ([]assetdomain.Endpoint, int64, error) {
-	items, total, err := adapter.repo.FindByTargetID(targetID, page, pageSize, filter)
-	if err != nil {
-		return nil, 0, err
-	}
-	results := make([]assetdomain.Endpoint, 0, len(items))
-	for index := range items {
-		results = append(results, *assetModelEndpointToDomain(&items[index]))
-	}
-	return results, total, nil
+	return adapter.repo.FindByTargetID(targetID, page, pageSize, filter)
 }
 
-func (adapter *assetEndpointStoreAdapter) FindByID(id int) (*assetdomain.Endpoint, error) {
-	item, err := adapter.repo.FindByID(id)
-	if err != nil {
-		return nil, err
-	}
-	return assetModelEndpointToDomain(item), nil
+func (adapter *assetEndpointStoreAdapter) GetByID(id int) (*assetdomain.Endpoint, error) {
+	return adapter.repo.GetByID(id)
 }
 
 func (adapter *assetEndpointStoreAdapter) BulkCreate(items []assetdomain.Endpoint) (int, error) {
-	return adapter.repo.BulkCreate(assetDomainEndpointListToModel(items))
+	return adapter.repo.BulkCreate(items)
 }
 
 func (adapter *assetEndpointStoreAdapter) Delete(id int) error {
@@ -48,7 +36,7 @@ func (adapter *assetEndpointStoreAdapter) BulkDelete(ids []int) (int64, error) {
 }
 
 func (adapter *assetEndpointStoreAdapter) BulkUpsert(items []assetdomain.Endpoint) (int64, error) {
-	return adapter.repo.BulkUpsert(assetDomainEndpointListToModel(items))
+	return adapter.repo.BulkUpsert(items)
 }
 
 func (adapter *assetEndpointStoreAdapter) StreamByTargetID(targetID int) (*sql.Rows, error) {
@@ -60,9 +48,5 @@ func (adapter *assetEndpointStoreAdapter) CountByTargetID(targetID int) (int64, 
 }
 
 func (adapter *assetEndpointStoreAdapter) ScanRow(rows *sql.Rows) (*assetdomain.Endpoint, error) {
-	item, err := adapter.repo.ScanRow(rows)
-	if err != nil {
-		return nil, err
-	}
-	return assetModelEndpointToDomain(item), nil
+	return adapter.repo.ScanRow(rows)
 }

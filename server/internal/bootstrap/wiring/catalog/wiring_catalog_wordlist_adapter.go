@@ -29,8 +29,8 @@ func (adapter *catalogWordlistStoreAdapter) List() ([]catalogdomain.Wordlist, er
 	return catalogModelWordlistListToDomain(wordlists), nil
 }
 
-func (adapter *catalogWordlistStoreAdapter) FindByID(id int) (*catalogdomain.Wordlist, error) {
-	wordlist, err := adapter.repo.FindByID(id)
+func (adapter *catalogWordlistStoreAdapter) GetByID(id int) (*catalogdomain.Wordlist, error) {
+	wordlist, err := adapter.repo.GetByID(id)
 	if err != nil {
 		return nil, err
 	}

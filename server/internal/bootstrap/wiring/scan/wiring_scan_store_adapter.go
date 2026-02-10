@@ -3,7 +3,6 @@ package scanwiring
 import (
 	scanapp "github.com/yyhuni/lunafox/server/internal/modules/scan/application"
 	scanrepo "github.com/yyhuni/lunafox/server/internal/modules/scan/repository"
-	scanmodel "github.com/yyhuni/lunafox/server/internal/modules/scan/repository/persistence"
 )
 
 type scanStoreAdapter struct {
@@ -21,7 +20,7 @@ func (adapter *scanStoreAdapter) FindAll(page, pageSize int, targetID int, statu
 	}
 	results := make([]scanapp.QueryScan, 0, len(scans))
 	for index := range scans {
-		results = append(results, *scanModelToQueryScan(&scans[index]))
+		results = append(results, *scanRecordToQueryScan(&scans[index]))
 	}
 	return results, total, nil
 }
@@ -31,15 +30,15 @@ func (adapter *scanStoreAdapter) FindByIDWithTarget(id int) (*scanapp.QueryScan,
 	if err != nil {
 		return nil, err
 	}
-	return scanModelToQueryScan(scan), nil
+	return scanRecordToQueryScan(scan), nil
 }
 
-func (adapter *scanStoreAdapter) FindByID(id int) (*scanapp.QueryScan, error) {
-	scan, err := adapter.repo.FindByID(id)
+func (adapter *scanStoreAdapter) GetActiveByID(id int) (*scanapp.QueryScan, error) {
+	scan, err := adapter.repo.GetActiveByID(id)
 	if err != nil {
 		return nil, err
 	}
-	return scanModelToQueryScan(scan), nil
+	return scanRecordToQueryScan(scan), nil
 }
 
 func (adapter *scanStoreAdapter) FindByIDs(ids []int) ([]scanapp.QueryScan, error) {
@@ -49,37 +48,37 @@ func (adapter *scanStoreAdapter) FindByIDs(ids []int) ([]scanapp.QueryScan, erro
 	}
 	results := make([]scanapp.QueryScan, 0, len(scans))
 	for index := range scans {
-		results = append(results, *scanModelToQueryScan(&scans[index]))
+		results = append(results, *scanRecordToQueryScan(&scans[index]))
 	}
 	return results, nil
 }
 
 func (adapter *scanStoreAdapter) CreateWithInputTargetsAndTasks(scan *scanapp.CreateScan, inputs []scanapp.CreateScanInputTarget, tasks []scanapp.CreateScanTask) error {
-	modelScan := &scanmodel.Scan{
+	repoScan := &scanrepo.ScanCreateRecord{
 		TargetID:          scan.TargetID,
 		EngineIDs:         scan.EngineIDs,
-		EngineNames:       scan.EngineNames,
+		EngineNames:       append([]byte(nil), scan.EngineNames...),
 		YamlConfiguration: scan.YamlConfiguration,
 		ScanMode:          scan.ScanMode,
 		Status:            scan.Status,
 	}
 
-	modelInputs := make([]scanmodel.ScanInputTarget, 0, len(inputs))
+	repoInputs := make([]scanrepo.ScanInputTargetRecord, 0, len(inputs))
 	for index := range inputs {
-		modelInputs = append(modelInputs, scanmodel.ScanInputTarget{Value: inputs[index].Value, InputType: inputs[index].InputType})
+		repoInputs = append(repoInputs, scanrepo.ScanInputTargetRecord{Value: inputs[index].Value, InputType: inputs[index].InputType})
 	}
 
-	modelTasks := make([]scanmodel.ScanTask, 0, len(tasks))
+	repoTasks := make([]scanrepo.ScanTaskCreateRecord, 0, len(tasks))
 	for index := range tasks {
-		modelTasks = append(modelTasks, scanmodel.ScanTask{Stage: tasks[index].Stage, WorkflowName: tasks[index].WorkflowName, Status: tasks[index].Status})
+		repoTasks = append(repoTasks, scanrepo.ScanTaskCreateRecord{Stage: tasks[index].Stage, WorkflowName: tasks[index].WorkflowName, Status: tasks[index].Status})
 	}
 
-	if err := adapter.repo.CreateWithInputTargetsAndTasks(modelScan, modelInputs, modelTasks); err != nil {
+	if err := adapter.repo.CreateWithInputTargetsAndTasks(repoScan, repoInputs, repoTasks); err != nil {
 		return err
 	}
 
-	scan.ID = modelScan.ID
-	scan.CreatedAt = modelScan.CreatedAt
+	scan.ID = repoScan.ID
+	scan.CreatedAt = repoScan.CreatedAt
 	return nil
 }
 

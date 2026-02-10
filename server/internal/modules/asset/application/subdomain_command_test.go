@@ -37,7 +37,7 @@ type subdomainTargetLookupStub struct {
 	err     error
 }
 
-func (stub *subdomainTargetLookupStub) FindByID(id int) (*assetdomain.TargetRef, error) {
+func (stub *subdomainTargetLookupStub) GetActiveByID(id int) (*assetdomain.TargetRef, error) {
 	if stub.err != nil {
 		return nil, stub.err
 	}

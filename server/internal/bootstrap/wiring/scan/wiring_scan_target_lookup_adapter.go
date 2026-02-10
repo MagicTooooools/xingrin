@@ -3,6 +3,7 @@ package scanwiring
 import (
 	catalogrepo "github.com/yyhuni/lunafox/server/internal/modules/catalog/repository"
 	scanapp "github.com/yyhuni/lunafox/server/internal/modules/scan/application"
+	"github.com/yyhuni/lunafox/server/internal/pkg/timeutil"
 )
 
 type scanCreateTargetLookupAdapter struct {
@@ -13,10 +14,10 @@ func newScanCreateTargetLookupAdapter(repo *catalogrepo.TargetRepository) *scanC
 	return &scanCreateTargetLookupAdapter{repo: repo}
 }
 
-func (adapter *scanCreateTargetLookupAdapter) FindByID(id int) (*scanapp.TargetRef, error) {
-	target, err := adapter.repo.FindByID(id)
+func (adapter *scanCreateTargetLookupAdapter) GetActiveByID(id int) (*scanapp.TargetRef, error) {
+	target, err := adapter.repo.GetActiveByID(id)
 	if err != nil {
 		return nil, err
 	}
-	return &scanapp.TargetRef{ID: target.ID, Name: target.Name, Type: target.Type, CreatedAt: target.CreatedAt, LastScannedAt: target.LastScannedAt, DeletedAt: target.DeletedAt}, nil
+	return &scanapp.TargetRef{ID: target.ID, Name: target.Name, Type: target.Type, CreatedAt: timeutil.ToUTC(target.CreatedAt), LastScannedAt: timeutil.ToUTCPtr(target.LastScannedAt), DeletedAt: timeutil.ToUTCPtr(target.DeletedAt)}, nil
 }

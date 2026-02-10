@@ -4,10 +4,10 @@ import * as React from "react"
 import dynamic from "next/dynamic"
 import { cn } from "@/lib/utils"
 
-import type { ShuffleRef } from "@/components/Shuffle"
+import type { ShuffleRef } from "@/components/shuffle"
 
 // Dynamic import to avoid SSR issues with GSAP
-const Shuffle = dynamic(() => import("@/components/Shuffle"), { ssr: false })
+const Shuffle = dynamic(() => import("@/components/shuffle"), { ssr: false })
 
 type BootLine = {
   text: string

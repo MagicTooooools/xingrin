@@ -43,13 +43,3 @@ func WithNotDeleted() func(db *gorm.DB) *gorm.DB {
 		return db.Where("deleted_at IS NULL")
 	}
 }
-
-// WithSearch returns a GORM scope for ILIKE search on a column
-func WithSearch(column, search string) func(db *gorm.DB) *gorm.DB {
-	return func(db *gorm.DB) *gorm.DB {
-		if search == "" {
-			return db
-		}
-		return db.Where(column+" ILIKE ?", "%"+search+"%")
-	}
-}

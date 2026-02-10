@@ -207,8 +207,8 @@ export const businessDemoItems: BusinessDemoItem[] = [
     slug: "FaultyTerminal",
     title: "FaultyTerminal",
     group: "root",
-    modulePath: "@/components/FaultyTerminal",
-    loader: () => import("@/components/FaultyTerminal"),
+    modulePath: "@/components/faulty-terminal",
+    loader: () => import("@/components/faulty-terminal"),
   },
   {
     slug: "fingerprints-arl-fingerprint-data-table",
@@ -466,8 +466,8 @@ export const businessDemoItems: BusinessDemoItem[] = [
     slug: "PixelBlast",
     title: "PixelBlast",
     group: "root",
-    modulePath: "@/components/PixelBlast",
-    loader: () => import("@/components/PixelBlast"),
+    modulePath: "@/components/pixel-blast",
+    loader: () => import("@/components/pixel-blast"),
   },
   {
     slug: "prototypes-status-progress-demos",
@@ -753,8 +753,8 @@ export const businessDemoItems: BusinessDemoItem[] = [
     slug: "Shuffle",
     title: "Shuffle",
     group: "root",
-    modulePath: "@/components/Shuffle",
-    loader: () => import("@/components/Shuffle"),
+    modulePath: "@/components/shuffle",
+    loader: () => import("@/components/shuffle"),
   },
   {
     slug: "subdomains-bulk-add-subdomains-dialog",

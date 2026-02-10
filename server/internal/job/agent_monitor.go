@@ -4,14 +4,14 @@ import (
 	"context"
 	"time"
 
-	"github.com/yyhuni/lunafox/server/internal/modules/agent/model"
+	agentdomain "github.com/yyhuni/lunafox/server/internal/modules/agent/domain"
 	"github.com/yyhuni/lunafox/server/internal/pkg"
 	"go.uber.org/zap"
 )
 
 // AgentRepository defines behavior required by AgentMonitor.
 type AgentRepository interface {
-	FindStaleOnline(ctx context.Context, before time.Time) ([]*model.Agent, error)
+	FindStaleOnline(ctx context.Context, before time.Time) ([]*agentdomain.Agent, error)
 	UpdateStatus(ctx context.Context, id int, status string) error
 }
 
@@ -50,7 +50,7 @@ func (m *AgentMonitor) Run(ctx context.Context) {
 }
 
 func (m *AgentMonitor) check(ctx context.Context) {
-	cutoff := time.Now().Add(-m.timeout)
+	cutoff := time.Now().UTC().Add(-m.timeout)
 
 	agents, err := m.agentRepo.FindStaleOnline(ctx, cutoff)
 	if err != nil {

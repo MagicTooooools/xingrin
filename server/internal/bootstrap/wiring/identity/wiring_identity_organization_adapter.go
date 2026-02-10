@@ -15,8 +15,8 @@ func newIdentityOrganizationStoreAdapter(repo *identityrepo.OrganizationReposito
 	return &identityOrganizationStoreAdapter{repo: repo}
 }
 
-func (adapter *identityOrganizationStoreAdapter) FindByID(id int) (*identitydomain.Organization, error) {
-	org, err := adapter.repo.FindByID(id)
+func (adapter *identityOrganizationStoreAdapter) GetActiveByID(id int) (*identitydomain.Organization, error) {
+	org, err := adapter.repo.GetActiveByID(id)
 	if err != nil {
 		return nil, err
 	}

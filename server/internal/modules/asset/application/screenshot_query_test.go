@@ -28,7 +28,7 @@ func (stub *screenshotQueryStoreStub) FindByTargetID(targetID int, page, pageSiz
 	return append([]assetdomain.Screenshot(nil), stub.items...), stub.total, nil
 }
 
-func (stub *screenshotQueryStoreStub) FindByID(id int) (*assetdomain.Screenshot, error) {
+func (stub *screenshotQueryStoreStub) GetByID(id int) (*assetdomain.Screenshot, error) {
 	if stub.findByIDErr != nil {
 		return nil, stub.findByIDErr
 	}
@@ -45,7 +45,7 @@ type screenshotTargetLookupStub struct {
 	err     error
 }
 
-func (stub *screenshotTargetLookupStub) FindByID(id int) (*assetdomain.TargetRef, error) {
+func (stub *screenshotTargetLookupStub) GetActiveByID(id int) (*assetdomain.TargetRef, error) {
 	if stub.err != nil {
 		return nil, stub.err
 	}

@@ -2,6 +2,7 @@ package endpoint
 
 import (
 	"errors"
+	"github.com/yyhuni/lunafox/server/internal/pkg/timeutil"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -68,10 +69,6 @@ func toEndpointResponse(endpoint *service.Endpoint) dto.EndpointResponse {
 	if tech == nil {
 		tech = []string{}
 	}
-	matchedGFPatterns := []string(endpoint.MatchedGFPatterns)
-	if matchedGFPatterns == nil {
-		matchedGFPatterns = []string{}
-	}
 
 	return dto.EndpointResponse{
 		ID:                endpoint.ID,
@@ -87,8 +84,7 @@ func toEndpointResponse(endpoint *service.Endpoint) dto.EndpointResponse {
 		ResponseBody:      endpoint.ResponseBody,
 		Tech:              tech,
 		Vhost:             endpoint.Vhost,
-		MatchedGFPatterns: matchedGFPatterns,
 		ResponseHeaders:   endpoint.ResponseHeaders,
-		CreatedAt:         endpoint.CreatedAt,
+		CreatedAt:         timeutil.ToUTC(endpoint.CreatedAt),
 	}
 }

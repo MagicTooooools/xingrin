@@ -21,6 +21,9 @@ jobs:
         working-directory: worker
         run: make test
 
+      - name: Check repo naming conventions
+        run: bash ./scripts/check-repo-naming.sh
+
       - name: Check server DDD boundaries
         working-directory: server
         run: make check-ddd

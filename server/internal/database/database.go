@@ -21,6 +21,9 @@ func NewDatabase(cfg *config.DatabaseConfig) (*gorm.DB, error) {
 		NamingStrategy: schema.NamingStrategy{
 			SingularTable: true, // Use singular table names (e.g., "target" not "targets")
 		},
+		NowFunc: func() time.Time {
+			return time.Now().UTC()
+		},
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to database: %w", err)

@@ -54,6 +54,7 @@ type deps struct {
 	scanHandler          *scanhandler.ScanHandler
 	scanLogHandler       *scanhandler.ScanLogHandler
 	workerHandler        *cataloghandler.WorkerHandler
+	workerScanHandler    *scanhandler.WorkerScanHandler
 
 	agentHandler     *agenthandler.AgentHandler
 	agentWSHandler   *agenthandler.AgentWebSocketHandler
@@ -104,21 +105,21 @@ func buildDependencies(infra *infra, cfg *config.Config) *deps {
 
 	identityUserStore := identitywiring.NewUserStoreAdapter(userRepo)
 	identityOrgStore := identitywiring.NewOrganizationStoreAdapter(orgRepo)
-	userSvc := identityservice.NewUserService(identityUserStore)
-	authSvc := identityservice.NewAuthService(identityUserStore, infra.jwtManager)
-	orgSvc := identityservice.NewOrganizationService(identityOrgStore)
-	targetSvc := catalogservice.NewTargetService(catalogwiring.NewTargetStoreAdapter(targetRepo), catalogwiring.NewOrganizationStoreAdapter(orgRepo))
-	engineSvc := catalogservice.NewEngineService(catalogwiring.NewEngineStoreAdapter(engineRepo))
-	wordlistSvc := catalogservice.NewWordlistService(catalogwiring.NewWordlistStoreAdapter(wordlistRepo), cfg.Storage.WordlistsBasePath)
+	userSvc := identityservice.NewUserFacade(identityUserStore)
+	authSvc := identityservice.NewAuthFacade(identityUserStore, infra.jwtManager)
+	orgSvc := identityservice.NewOrganizationFacade(identityOrgStore)
+	targetSvc := catalogservice.NewTargetFacade(catalogwiring.NewTargetStoreAdapter(targetRepo), catalogwiring.NewOrganizationStoreAdapter(orgRepo))
+	engineSvc := catalogservice.NewEngineFacade(catalogwiring.NewEngineStoreAdapter(engineRepo))
+	wordlistSvc := catalogservice.NewWordlistFacade(catalogwiring.NewWordlistStoreAdapter(wordlistRepo), cfg.Storage.WordlistsBasePath)
 	assetTargetLookup := assetwiring.NewTargetLookupAdapter(targetRepo)
-	websiteSvc := assetservice.NewWebsiteService(assetwiring.NewWebsiteStoreAdapter(websiteRepo), assetTargetLookup)
-	subdomainSvc := assetservice.NewSubdomainService(assetwiring.NewSubdomainStoreAdapter(subdomainRepo), assetTargetLookup)
-	endpointSvc := assetservice.NewEndpointService(assetwiring.NewEndpointStoreAdapter(endpointRepo), assetTargetLookup)
-	directorySvc := assetservice.NewDirectoryService(assetwiring.NewDirectoryStoreAdapter(directoryRepo), assetTargetLookup)
-	hostPortSvc := assetservice.NewHostPortService(assetwiring.NewHostPortStoreAdapter(hostPortRepo), assetTargetLookup)
-	screenshotSvc := assetservice.NewScreenshotService(assetwiring.NewScreenshotStoreAdapter(screenshotRepo), assetTargetLookup)
-	vulnerabilitySvc := securityservice.NewVulnerabilityService(vulnerabilityRepo, securitywiring.NewTargetLookupAdapter(targetRepo))
-	scanSvc := scanservice.NewScanService(
+	websiteSvc := assetservice.NewWebsiteFacade(assetwiring.NewWebsiteStoreAdapter(websiteRepo), assetTargetLookup)
+	subdomainSvc := assetservice.NewSubdomainFacade(assetwiring.NewSubdomainStoreAdapter(subdomainRepo), assetTargetLookup)
+	endpointSvc := assetservice.NewEndpointFacade(assetwiring.NewEndpointStoreAdapter(endpointRepo), assetTargetLookup)
+	directorySvc := assetservice.NewDirectoryFacade(assetwiring.NewDirectoryStoreAdapter(directoryRepo), assetTargetLookup)
+	hostPortSvc := assetservice.NewHostPortFacade(assetwiring.NewHostPortStoreAdapter(hostPortRepo), assetTargetLookup)
+	screenshotSvc := assetservice.NewScreenshotFacade(assetwiring.NewScreenshotStoreAdapter(screenshotRepo), assetTargetLookup)
+	vulnerabilitySvc := securityservice.NewVulnerabilityFacade(vulnerabilityRepo, securitywiring.NewTargetLookupAdapter(targetRepo))
+	scanSvc := scanservice.NewScanFacade(
 		scanwiring.NewStoreAdapter(scanRepo),
 		scanwiring.NewCommandStore(scanRepo),
 		scanwiring.NewTaskCancellerAdapter(scanTaskRepo),
@@ -127,49 +128,49 @@ func buildDependencies(infra *infra, cfg *config.Config) *deps {
 	)
 	scanLogSvc := scanlogwiring.NewApplicationService(scanLogRepo, scanRepo)
 	workerSvc := workerwiring.NewApplicationService(scanRepo, subfinderProviderSettingsRepo)
-	scanTaskSvc := scanservice.NewScanTaskService(scanwiring.NewTaskStoreAdapter(scanTaskRepo), scanwiring.NewTaskRuntimeScanStoreAdapter(scanRepo))
-	agentSvc := agentservice.NewAgentService(agentRepo, registrationTokenRepo)
+	scanTaskSvc := scanservice.NewScanTaskFacade(scanwiring.NewTaskStoreAdapter(scanTaskRepo), scanwiring.NewTaskRuntimeScanStoreAdapter(scanRepo))
+	agentSvc := agentservice.NewAgentFacade(agentRepo, registrationTokenRepo)
 
 	snapshotScanLookup := snapshotwiring.NewScanLookupAdapter(scanRepo)
 
 	websiteSnapshotStore := snapshotwiring.NewWebsiteStoreAdapter(websiteSnapshotRepo)
-	websiteSnapshotSvc := snapshotservice.NewWebsiteSnapshotService(
+	websiteSnapshotSvc := snapshotservice.NewWebsiteSnapshotFacade(
 		snapshotservice.NewWebsiteSnapshotQueryService(websiteSnapshotStore, snapshotScanLookup),
 		snapshotservice.NewWebsiteSnapshotCommandService(websiteSnapshotStore, snapshotScanLookup, snapshotwiring.NewWebsiteAssetSyncAdapter(websiteSvc)),
 	)
 
 	subdomainSnapshotStore := snapshotwiring.NewSubdomainStoreAdapter(subdomainSnapshotRepo)
-	subdomainSnapshotSvc := snapshotservice.NewSubdomainSnapshotService(
+	subdomainSnapshotSvc := snapshotservice.NewSubdomainSnapshotFacade(
 		snapshotservice.NewSubdomainSnapshotQueryService(subdomainSnapshotStore, snapshotScanLookup),
 		snapshotservice.NewSubdomainSnapshotCommandService(subdomainSnapshotStore, snapshotScanLookup, snapshotwiring.NewSubdomainAssetSyncAdapter(subdomainSvc)),
 	)
 
 	endpointSnapshotStore := snapshotwiring.NewEndpointStoreAdapter(endpointSnapshotRepo)
-	endpointSnapshotSvc := snapshotservice.NewEndpointSnapshotService(
+	endpointSnapshotSvc := snapshotservice.NewEndpointSnapshotFacade(
 		snapshotservice.NewEndpointSnapshotQueryService(endpointSnapshotStore, snapshotScanLookup),
 		snapshotservice.NewEndpointSnapshotCommandService(endpointSnapshotStore, snapshotScanLookup, snapshotwiring.NewEndpointAssetSyncAdapter(endpointSvc)),
 	)
 
 	directorySnapshotStore := snapshotwiring.NewDirectoryStoreAdapter(directorySnapshotRepo)
-	directorySnapshotSvc := snapshotservice.NewDirectorySnapshotService(
+	directorySnapshotSvc := snapshotservice.NewDirectorySnapshotFacade(
 		snapshotservice.NewDirectorySnapshotQueryService(directorySnapshotStore, snapshotScanLookup),
 		snapshotservice.NewDirectorySnapshotCommandService(directorySnapshotStore, snapshotScanLookup, snapshotwiring.NewDirectoryAssetSyncAdapter(directorySvc)),
 	)
 
 	hostPortSnapshotStore := snapshotwiring.NewHostPortStoreAdapter(hostPortSnapshotRepo)
-	hostPortSnapshotSvc := snapshotservice.NewHostPortSnapshotService(
+	hostPortSnapshotSvc := snapshotservice.NewHostPortSnapshotFacade(
 		snapshotservice.NewHostPortSnapshotQueryService(hostPortSnapshotStore, snapshotScanLookup),
 		snapshotservice.NewHostPortSnapshotCommandService(hostPortSnapshotStore, snapshotScanLookup, snapshotwiring.NewHostPortAssetSyncAdapter(hostPortSvc)),
 	)
 
 	screenshotSnapshotStore := snapshotwiring.NewScreenshotStoreAdapter(screenshotSnapshotRepo)
-	screenshotSnapshotSvc := snapshotservice.NewScreenshotSnapshotService(
+	screenshotSnapshotSvc := snapshotservice.NewScreenshotSnapshotFacade(
 		snapshotservice.NewScreenshotSnapshotQueryService(screenshotSnapshotStore, snapshotScanLookup),
 		snapshotservice.NewScreenshotSnapshotCommandService(screenshotSnapshotStore, snapshotScanLookup, snapshotwiring.NewScreenshotAssetSyncAdapter(screenshotSvc)),
 	)
 
 	vulnerabilitySnapshotStore := snapshotwiring.NewVulnerabilityStoreAdapter(vulnerabilitySnapshotRepo)
-	vulnerabilitySnapshotSvc := snapshotservice.NewVulnerabilitySnapshotService(
+	vulnerabilitySnapshotSvc := snapshotservice.NewVulnerabilitySnapshotFacade(
 		snapshotservice.NewVulnerabilitySnapshotQueryService(vulnerabilitySnapshotStore, snapshotScanLookup),
 		snapshotservice.NewVulnerabilitySnapshotCommandService(vulnerabilitySnapshotStore, snapshotScanLookup, snapshotwiring.NewVulnerabilityAssetSyncAdapter(vulnerabilitySvc), snapshotwiring.NewVulnerabilityRawOutputCodec()),
 	)
@@ -193,6 +194,7 @@ func buildDependencies(infra *infra, cfg *config.Config) *deps {
 		scanHandler:          scanhandler.NewScanHandler(scanSvc),
 		scanLogHandler:       scanhandler.NewScanLogHandler(scanLogSvc),
 		workerHandler:        cataloghandler.NewWorkerHandler(workerSvc),
+		workerScanHandler:    scanhandler.NewWorkerScanHandler(scanSvc),
 
 		agentHandler: agenthandler.NewAgentHandler(
 			agentSvc,

@@ -9,8 +9,8 @@ type scanLogLookupAdapter struct {
 	repo *scanrepo.ScanRepository
 }
 
-func (adapter *scanLogLookupAdapter) FindByID(id int) (*scanapp.ScanLogScanRef, error) {
-	scan, err := adapter.repo.FindByID(id)
+func (adapter *scanLogLookupAdapter) GetActiveByID(id int) (*scanapp.ScanLogScanRef, error) {
+	scan, err := adapter.repo.GetActiveByID(id)
 	if err != nil {
 		return nil, err
 	}

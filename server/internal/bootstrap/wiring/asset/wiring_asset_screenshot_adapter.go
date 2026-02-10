@@ -14,23 +14,11 @@ func newAssetScreenshotStoreAdapter(repo *assetrepo.ScreenshotRepository) *asset
 }
 
 func (adapter *assetScreenshotStoreAdapter) FindByTargetID(targetID int, page, pageSize int, filter string) ([]assetdomain.Screenshot, int64, error) {
-	items, total, err := adapter.repo.FindByTargetID(targetID, page, pageSize, filter)
-	if err != nil {
-		return nil, 0, err
-	}
-	results := make([]assetdomain.Screenshot, 0, len(items))
-	for index := range items {
-		results = append(results, *assetModelScreenshotToDomain(&items[index]))
-	}
-	return results, total, nil
+	return adapter.repo.FindByTargetID(targetID, page, pageSize, filter)
 }
 
-func (adapter *assetScreenshotStoreAdapter) FindByID(id int) (*assetdomain.Screenshot, error) {
-	item, err := adapter.repo.FindByID(id)
-	if err != nil {
-		return nil, err
-	}
-	return assetModelScreenshotToDomain(item), nil
+func (adapter *assetScreenshotStoreAdapter) GetByID(id int) (*assetdomain.Screenshot, error) {
+	return adapter.repo.GetByID(id)
 }
 
 func (adapter *assetScreenshotStoreAdapter) BulkDelete(ids []int) (int64, error) {
@@ -38,5 +26,5 @@ func (adapter *assetScreenshotStoreAdapter) BulkDelete(ids []int) (int64, error)
 }
 
 func (adapter *assetScreenshotStoreAdapter) BulkUpsert(items []assetdomain.Screenshot) (int64, error) {
-	return adapter.repo.BulkUpsert(assetDomainScreenshotListToModel(items))
+	return adapter.repo.BulkUpsert(items)
 }

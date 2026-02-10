@@ -303,14 +303,6 @@ class DataGenerator:
         ["cloudflare", "Rust", "Actix"],
     ]
     
-    GF_PATTERNS = [
-        ["debug-pages", "potential-takeover"],
-        ["cors", "ssrf"],
-        ["sqli", "xss"],
-        ["lfi", "rce"],
-        [],
-    ]
-    
     @staticmethod
     def generate_endpoints(target: Dict[str, Any], count: int) -> List[Dict[str, Any]]:
         """
@@ -367,7 +359,6 @@ class DataGenerator:
             status_code = DataGenerator.STATUS_CODES[len(endpoints) % len(DataGenerator.STATUS_CODES)]
             content_length = 500 + (len(endpoints) * 50)
             tech = DataGenerator.API_TECH_STACKS[len(endpoints) % len(DataGenerator.API_TECH_STACKS)]
-            matched_gf = DataGenerator.GF_PATTERNS[len(endpoints) % len(DataGenerator.GF_PATTERNS)]
             vhost = (len(endpoints) % 10 == 0)  # 10% are vhost
 
             endpoints.append({
@@ -378,7 +369,6 @@ class DataGenerator:
                 "contentType": "application/json",
                 "webserver": DataGenerator.WEBSERVERS[len(endpoints) % len(DataGenerator.WEBSERVERS)],
                 "tech": tech,
-                "matchedGfPatterns": matched_gf,
                 "vhost": vhost,
             })
 

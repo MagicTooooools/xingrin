@@ -3,6 +3,7 @@ package catalogwiring
 import (
 	catalogdomain "github.com/yyhuni/lunafox/server/internal/modules/catalog/domain"
 	catalogmodel "github.com/yyhuni/lunafox/server/internal/modules/catalog/repository/persistence"
+	"github.com/yyhuni/lunafox/server/internal/pkg/timeutil"
 )
 
 func catalogModelEngineToDomain(engine *catalogmodel.ScanEngine) *catalogdomain.ScanEngine {
@@ -13,8 +14,8 @@ func catalogModelEngineToDomain(engine *catalogmodel.ScanEngine) *catalogdomain.
 		ID:            engine.ID,
 		Name:          engine.Name,
 		Configuration: engine.Configuration,
-		CreatedAt:     engine.CreatedAt,
-		UpdatedAt:     engine.UpdatedAt,
+		CreatedAt:     timeutil.ToUTC(engine.CreatedAt),
+		UpdatedAt:     timeutil.ToUTC(engine.UpdatedAt),
 	}
 }
 
@@ -26,8 +27,8 @@ func catalogDomainEngineToModel(engine *catalogdomain.ScanEngine) *catalogmodel.
 		ID:            engine.ID,
 		Name:          engine.Name,
 		Configuration: engine.Configuration,
-		CreatedAt:     engine.CreatedAt,
-		UpdatedAt:     engine.UpdatedAt,
+		CreatedAt:     timeutil.ToUTC(engine.CreatedAt),
+		UpdatedAt:     timeutil.ToUTC(engine.UpdatedAt),
 	}
 }
 
@@ -50,8 +51,8 @@ func catalogModelTargetToDomain(target *catalogmodel.Target) *catalogdomain.Targ
 			ID:          organization.ID,
 			Name:        organization.Name,
 			Description: organization.Description,
-			CreatedAt:   organization.CreatedAt,
-			DeletedAt:   organization.DeletedAt,
+			CreatedAt:   timeutil.ToUTC(organization.CreatedAt),
+			DeletedAt:   timeutil.ToUTCPtr(organization.DeletedAt),
 		})
 	}
 
@@ -59,9 +60,9 @@ func catalogModelTargetToDomain(target *catalogmodel.Target) *catalogdomain.Targ
 		ID:            target.ID,
 		Name:          target.Name,
 		Type:          target.Type,
-		CreatedAt:     target.CreatedAt,
-		LastScannedAt: target.LastScannedAt,
-		DeletedAt:     target.DeletedAt,
+		CreatedAt:     timeutil.ToUTC(target.CreatedAt),
+		LastScannedAt: timeutil.ToUTCPtr(target.LastScannedAt),
+		DeletedAt:     timeutil.ToUTCPtr(target.DeletedAt),
 		Organizations: organizations,
 	}
 }
@@ -77,8 +78,8 @@ func catalogDomainTargetToModel(target *catalogdomain.Target) *catalogmodel.Targ
 			ID:          organization.ID,
 			Name:        organization.Name,
 			Description: organization.Description,
-			CreatedAt:   organization.CreatedAt,
-			DeletedAt:   organization.DeletedAt,
+			CreatedAt:   timeutil.ToUTC(organization.CreatedAt),
+			DeletedAt:   timeutil.ToUTCPtr(organization.DeletedAt),
 		})
 	}
 
@@ -86,9 +87,9 @@ func catalogDomainTargetToModel(target *catalogdomain.Target) *catalogmodel.Targ
 		ID:            target.ID,
 		Name:          target.Name,
 		Type:          target.Type,
-		CreatedAt:     target.CreatedAt,
-		LastScannedAt: target.LastScannedAt,
-		DeletedAt:     target.DeletedAt,
+		CreatedAt:     timeutil.ToUTC(target.CreatedAt),
+		LastScannedAt: timeutil.ToUTCPtr(target.LastScannedAt),
+		DeletedAt:     timeutil.ToUTCPtr(target.DeletedAt),
 		Organizations: organizations,
 	}
 }
@@ -121,8 +122,8 @@ func catalogModelWordlistToDomain(wordlist *catalogmodel.Wordlist) *catalogdomai
 		FileSize:    wordlist.FileSize,
 		LineCount:   wordlist.LineCount,
 		FileHash:    wordlist.FileHash,
-		CreatedAt:   wordlist.CreatedAt,
-		UpdatedAt:   wordlist.UpdatedAt,
+		CreatedAt:   timeutil.ToUTC(wordlist.CreatedAt),
+		UpdatedAt:   timeutil.ToUTC(wordlist.UpdatedAt),
 	}
 }
 
@@ -138,8 +139,8 @@ func catalogDomainWordlistToModel(wordlist *catalogdomain.Wordlist) *catalogmode
 		FileSize:    wordlist.FileSize,
 		LineCount:   wordlist.LineCount,
 		FileHash:    wordlist.FileHash,
-		CreatedAt:   wordlist.CreatedAt,
-		UpdatedAt:   wordlist.UpdatedAt,
+		CreatedAt:   timeutil.ToUTC(wordlist.CreatedAt),
+		UpdatedAt:   timeutil.ToUTC(wordlist.UpdatedAt),
 	}
 }
 

@@ -6,10 +6,10 @@ import (
 
 // EndpointHandler handles endpoint endpoints.
 type EndpointHandler struct {
-	svc *service.EndpointService
+	svc *service.EndpointFacade
 }
 
 // NewEndpointHandler creates a new endpoint handler.
-func NewEndpointHandler(svc *service.EndpointService) *EndpointHandler {
+func NewEndpointHandler(svc *service.EndpointFacade) *EndpointHandler {
 	return &EndpointHandler{svc: svc}
 }

@@ -14,8 +14,8 @@ func newAssetTargetLookupAdapter(repo *catalogrepo.TargetRepository) *assetTarge
 	return &assetTargetLookupAdapter{repo: repo}
 }
 
-func (adapter *assetTargetLookupAdapter) FindByID(id int) (*assetdomain.TargetRef, error) {
-	target, err := adapter.repo.FindByID(id)
+func (adapter *assetTargetLookupAdapter) GetActiveByID(id int) (*assetdomain.TargetRef, error) {
+	target, err := adapter.repo.GetActiveByID(id)
 	if err != nil {
 		return nil, err
 	}

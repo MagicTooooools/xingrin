@@ -52,6 +52,7 @@ func configFromViper(v *viper.Viper) *Config {
 			Password:        v.GetString("DB_PASSWORD"),
 			Name:            v.GetString("DB_NAME"),
 			SSLMode:         v.GetString("DB_SSLMODE"),
+			TimeZone:        v.GetString("DB_TIMEZONE"),
 			MaxOpenConns:    v.GetInt("DB_MAX_OPEN_CONNS"),
 			MaxIdleConns:    v.GetInt("DB_MAX_IDLE_CONNS"),
 			ConnMaxLifetime: v.GetInt("DB_CONN_MAX_LIFETIME"),

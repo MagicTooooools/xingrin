@@ -17,6 +17,7 @@ func setDefaults(v *viper.Viper) {
 	v.SetDefault("DB_PASSWORD", "")
 	v.SetDefault("DB_NAME", "lunafox")
 	v.SetDefault("DB_SSLMODE", "disable")
+	v.SetDefault("DB_TIMEZONE", "UTC")
 	v.SetDefault("DB_MAX_OPEN_CONNS", 25)
 	v.SetDefault("DB_MAX_IDLE_CONNS", 5)
 	v.SetDefault("DB_CONN_MAX_LIFETIME", 300)
@@ -52,6 +53,7 @@ func GetDefaults() *Config {
 			Password:        "",
 			Name:            "lunafox",
 			SSLMode:         "disable",
+			TimeZone:        "UTC",
 			MaxOpenConns:    25,
 			MaxIdleConns:    5,
 			ConnMaxLifetime: 300,

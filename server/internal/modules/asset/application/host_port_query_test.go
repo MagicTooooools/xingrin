@@ -104,7 +104,7 @@ type hostPortTargetLookupStub struct {
 	err     error
 }
 
-func (stub *hostPortTargetLookupStub) FindByID(id int) (*assetdomain.TargetRef, error) {
+func (stub *hostPortTargetLookupStub) GetActiveByID(id int) (*assetdomain.TargetRef, error) {
 	if stub.err != nil {
 		return nil, stub.err
 	}

@@ -4,6 +4,7 @@ import (
 	identitydomain "github.com/yyhuni/lunafox/server/internal/modules/identity/domain"
 	identityrepo "github.com/yyhuni/lunafox/server/internal/modules/identity/repository"
 	identitymodel "github.com/yyhuni/lunafox/server/internal/modules/identity/repository/persistence"
+	"github.com/yyhuni/lunafox/server/internal/pkg/timeutil"
 )
 
 func identityModelUserToDomain(user *identitymodel.User) *identitydomain.User {
@@ -52,8 +53,8 @@ func identityModelOrganizationToDomain(org *identitymodel.Organization) *identit
 		ID:          org.ID,
 		Name:        org.Name,
 		Description: org.Description,
-		CreatedAt:   org.CreatedAt,
-		DeletedAt:   org.DeletedAt,
+		CreatedAt:   timeutil.ToUTC(org.CreatedAt),
+		DeletedAt:   timeutil.ToUTCPtr(org.DeletedAt),
 	}
 }
 
@@ -65,8 +66,8 @@ func identityDomainOrganizationToModel(org *identitydomain.Organization) *identi
 		ID:          org.ID,
 		Name:        org.Name,
 		Description: org.Description,
-		CreatedAt:   org.CreatedAt,
-		DeletedAt:   org.DeletedAt,
+		CreatedAt:   timeutil.ToUTC(org.CreatedAt),
+		DeletedAt:   timeutil.ToUTCPtr(org.DeletedAt),
 	}
 }
 
@@ -78,9 +79,9 @@ func identityModelTargetRefToDomain(target *identitymodel.OrganizationTargetRef)
 		ID:            target.ID,
 		Name:          target.Name,
 		Type:          target.Type,
-		CreatedAt:     target.CreatedAt,
-		LastScannedAt: target.LastScannedAt,
-		DeletedAt:     target.DeletedAt,
+		CreatedAt:     timeutil.ToUTC(target.CreatedAt),
+		LastScannedAt: timeutil.ToUTCPtr(target.LastScannedAt),
+		DeletedAt:     timeutil.ToUTCPtr(target.DeletedAt),
 	}
 }
 
@@ -93,8 +94,8 @@ func identityRepositoryOrganizationWithCountToDomain(org *identityrepo.Organizat
 			ID:          org.ID,
 			Name:        org.Name,
 			Description: org.Description,
-			CreatedAt:   org.CreatedAt,
-			DeletedAt:   org.DeletedAt,
+			CreatedAt:   timeutil.ToUTC(org.CreatedAt),
+			DeletedAt:   timeutil.ToUTCPtr(org.DeletedAt),
 		},
 		TargetCount: org.TargetCount,
 	}

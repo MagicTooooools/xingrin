@@ -1,17 +1,23 @@
 package assetwiring
 
-import assetapp "github.com/yyhuni/lunafox/server/internal/modules/asset/application"
+import assetdomain "github.com/yyhuni/lunafox/server/internal/modules/asset/domain"
 
-var _ assetapp.WebsiteStore = (*assetWebsiteStoreAdapter)(nil)
-var _ assetapp.EndpointStore = (*assetEndpointStoreAdapter)(nil)
-var _ assetapp.DirectoryStore = (*assetDirectoryStoreAdapter)(nil)
-var _ assetapp.SubdomainStore = (*assetSubdomainStoreAdapter)(nil)
-var _ assetapp.ScreenshotStore = (*assetScreenshotStoreAdapter)(nil)
-var _ assetapp.HostPortStore = (*assetHostPortStoreAdapter)(nil)
+var _ assetdomain.TargetLookup = (*assetTargetLookupAdapter)(nil)
 
-var _ assetapp.WebsiteTargetLookup = (*assetTargetLookupAdapter)(nil)
-var _ assetapp.EndpointTargetLookup = (*assetTargetLookupAdapter)(nil)
-var _ assetapp.DirectoryTargetLookup = (*assetTargetLookupAdapter)(nil)
-var _ assetapp.SubdomainTargetLookup = (*assetTargetLookupAdapter)(nil)
-var _ assetapp.ScreenshotTargetLookup = (*assetTargetLookupAdapter)(nil)
-var _ assetapp.HostPortTargetLookup = (*assetTargetLookupAdapter)(nil)
+var _ assetdomain.WebsiteQueryStore = (*assetWebsiteStoreAdapter)(nil)
+var _ assetdomain.WebsiteCommandStore = (*assetWebsiteStoreAdapter)(nil)
+
+var _ assetdomain.EndpointQueryStore = (*assetEndpointStoreAdapter)(nil)
+var _ assetdomain.EndpointCommandStore = (*assetEndpointStoreAdapter)(nil)
+
+var _ assetdomain.DirectoryQueryStore = (*assetDirectoryStoreAdapter)(nil)
+var _ assetdomain.DirectoryCommandStore = (*assetDirectoryStoreAdapter)(nil)
+
+var _ assetdomain.SubdomainQueryStore = (*assetSubdomainStoreAdapter)(nil)
+var _ assetdomain.SubdomainCommandStore = (*assetSubdomainStoreAdapter)(nil)
+
+var _ assetdomain.HostPortQueryStore = (*assetHostPortStoreAdapter)(nil)
+var _ assetdomain.HostPortCommandStore = (*assetHostPortStoreAdapter)(nil)
+
+var _ assetdomain.ScreenshotQueryStore = (*assetScreenshotStoreAdapter)(nil)
+var _ assetdomain.ScreenshotCommandStore = (*assetScreenshotStoreAdapter)(nil)

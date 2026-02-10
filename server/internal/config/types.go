@@ -33,6 +33,7 @@ type DatabaseConfig struct {
 	Password        string `mapstructure:"DB_PASSWORD"`
 	Name            string `mapstructure:"DB_NAME"`
 	SSLMode         string `mapstructure:"DB_SSLMODE"`
+	TimeZone        string `mapstructure:"DB_TIMEZONE"`
 	MaxOpenConns    int    `mapstructure:"DB_MAX_OPEN_CONNS"`
 	MaxIdleConns    int    `mapstructure:"DB_MAX_IDLE_CONNS"`
 	ConnMaxLifetime int    `mapstructure:"DB_CONN_MAX_LIFETIME"`

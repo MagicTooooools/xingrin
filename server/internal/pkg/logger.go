@@ -15,6 +15,14 @@ var (
 	Sugar *zap.SugaredLogger
 )
 
+func ensureLogger() {
+	if Logger != nil {
+		return
+	}
+	Logger = zap.NewNop()
+	Sugar = Logger.Sugar()
+}
+
 // LogConfig holds logging configuration
 type LogConfig struct {
 	Level  string
@@ -67,7 +75,6 @@ func parseLogLevel(level string) zapcore.Level {
 	}
 }
 
-
 // Sync flushes any buffered log entries
 func Sync() {
 	if Logger != nil {
@@ -77,36 +84,43 @@ func Sync() {
 
 // Debug logs a debug message
 func Debug(msg string, fields ...zap.Field) {
+	ensureLogger()
 	Logger.Debug(msg, fields...)
 }
 
 // Info logs an info message
 func Info(msg string, fields ...zap.Field) {
+	ensureLogger()
 	Logger.Info(msg, fields...)
 }
 
 // Warn logs a warning message
 func Warn(msg string, fields ...zap.Field) {
+	ensureLogger()
 	Logger.Warn(msg, fields...)
 }
 
 // Error logs an error message
 func Error(msg string, fields ...zap.Field) {
+	ensureLogger()
 	Logger.Error(msg, fields...)
 }
 
 // Fatal logs a fatal message and exits
 func Fatal(msg string, fields ...zap.Field) {
+	ensureLogger()
 	Logger.Fatal(msg, fields...)
 }
 
 // With creates a child logger with additional fields
 func With(fields ...zap.Field) *zap.Logger {
+	ensureLogger()
 	return Logger.With(fields...)
 }
 
 // WithRequestID creates a logger with request ID field
 func WithRequestID(requestID string) *zap.Logger {
+	ensureLogger()
 	return Logger.With(zap.String("requestId", requestID))
 }
 

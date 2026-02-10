@@ -39,31 +39,31 @@ func NewVulnerabilityStoreAdapter(repo *snapshotrepo.VulnerabilitySnapshotReposi
 	return newSnapshotVulnerabilityStoreAdapter(repo)
 }
 
-func NewWebsiteAssetSyncAdapter(service *assetapp.WebsiteService) *snapshotWebsiteAssetSyncAdapter {
+func NewWebsiteAssetSyncAdapter(service *assetapp.WebsiteFacade) *snapshotWebsiteAssetSyncAdapter {
 	return newSnapshotWebsiteAssetSyncAdapter(service)
 }
 
-func NewSubdomainAssetSyncAdapter(service *assetapp.SubdomainService) *snapshotSubdomainAssetSyncAdapter {
+func NewSubdomainAssetSyncAdapter(service *assetapp.SubdomainFacade) *snapshotSubdomainAssetSyncAdapter {
 	return newSnapshotSubdomainAssetSyncAdapter(service)
 }
 
-func NewEndpointAssetSyncAdapter(service *assetapp.EndpointService) *snapshotEndpointAssetSyncAdapter {
+func NewEndpointAssetSyncAdapter(service *assetapp.EndpointFacade) *snapshotEndpointAssetSyncAdapter {
 	return newSnapshotEndpointAssetSyncAdapter(service)
 }
 
-func NewDirectoryAssetSyncAdapter(service *assetapp.DirectoryService) *snapshotDirectoryAssetSyncAdapter {
+func NewDirectoryAssetSyncAdapter(service *assetapp.DirectoryFacade) *snapshotDirectoryAssetSyncAdapter {
 	return newSnapshotDirectoryAssetSyncAdapter(service)
 }
 
-func NewHostPortAssetSyncAdapter(service *assetapp.HostPortService) *snapshotHostPortAssetSyncAdapter {
+func NewHostPortAssetSyncAdapter(service *assetapp.HostPortFacade) *snapshotHostPortAssetSyncAdapter {
 	return newSnapshotHostPortAssetSyncAdapter(service)
 }
 
-func NewScreenshotAssetSyncAdapter(service *assetapp.ScreenshotService) *snapshotScreenshotAssetSyncAdapter {
+func NewScreenshotAssetSyncAdapter(service *assetapp.ScreenshotFacade) *snapshotScreenshotAssetSyncAdapter {
 	return newSnapshotScreenshotAssetSyncAdapter(service)
 }
 
-func NewVulnerabilityAssetSyncAdapter(service *securityapp.VulnerabilityService) *snapshotVulnerabilityAssetSyncAdapter {
+func NewVulnerabilityAssetSyncAdapter(service *securityapp.VulnerabilityFacade) *snapshotVulnerabilityAssetSyncAdapter {
 	return newSnapshotVulnerabilityAssetSyncAdapter(service)
 }
 

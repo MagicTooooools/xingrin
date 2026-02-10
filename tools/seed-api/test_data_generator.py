@@ -117,9 +117,7 @@ class TestDataGenerator:
             assert "url" in endpoint
             assert "statusCode" in endpoint
             assert "tech" in endpoint
-            assert "matchedGfPatterns" in endpoint
             assert isinstance(endpoint["tech"], list)
-            assert isinstance(endpoint["matchedGfPatterns"], list)
     
     def test_generate_directories(self):
         """Test directory generation."""

@@ -13,8 +13,8 @@ func newCatalogEngineStoreAdapter(repo *catalogrepo.EngineRepository) *catalogEn
 	return &catalogEngineStoreAdapter{repo: repo}
 }
 
-func (adapter *catalogEngineStoreAdapter) FindByID(id int) (*catalogdomain.ScanEngine, error) {
-	engine, err := adapter.repo.FindByID(id)
+func (adapter *catalogEngineStoreAdapter) GetByID(id int) (*catalogdomain.ScanEngine, error) {
+	engine, err := adapter.repo.GetByID(id)
 	if err != nil {
 		return nil, err
 	}

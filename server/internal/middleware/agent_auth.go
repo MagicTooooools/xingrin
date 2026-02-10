@@ -5,12 +5,12 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/yyhuni/lunafox/server/internal/modules/agent/model"
+	agentdomain "github.com/yyhuni/lunafox/server/internal/modules/agent/domain"
 )
 
 // AgentFinder defines behavior required for agent auth.
 type AgentFinder interface {
-	FindByAPIKey(ctx context.Context, apiKey string) (*model.Agent, error)
+	FindByAPIKey(ctx context.Context, apiKey string) (*agentdomain.Agent, error)
 }
 
 // AgentAuthMiddleware creates a middleware for agent authentication.

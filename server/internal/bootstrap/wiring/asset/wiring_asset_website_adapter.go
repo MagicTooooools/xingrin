@@ -16,27 +16,15 @@ func newAssetWebsiteStoreAdapter(repo *assetrepo.WebsiteRepository) *assetWebsit
 }
 
 func (adapter *assetWebsiteStoreAdapter) FindByTargetID(targetID int, page, pageSize int, filter string) ([]assetdomain.Website, int64, error) {
-	items, total, err := adapter.repo.FindByTargetID(targetID, page, pageSize, filter)
-	if err != nil {
-		return nil, 0, err
-	}
-	results := make([]assetdomain.Website, 0, len(items))
-	for index := range items {
-		results = append(results, *assetModelWebsiteToDomain(&items[index]))
-	}
-	return results, total, nil
+	return adapter.repo.FindByTargetID(targetID, page, pageSize, filter)
 }
 
-func (adapter *assetWebsiteStoreAdapter) FindByID(id int) (*assetdomain.Website, error) {
-	item, err := adapter.repo.FindByID(id)
-	if err != nil {
-		return nil, err
-	}
-	return assetModelWebsiteToDomain(item), nil
+func (adapter *assetWebsiteStoreAdapter) GetByID(id int) (*assetdomain.Website, error) {
+	return adapter.repo.GetByID(id)
 }
 
 func (adapter *assetWebsiteStoreAdapter) BulkCreate(items []assetdomain.Website) (int, error) {
-	return adapter.repo.BulkCreate(assetDomainWebsiteListToModel(items))
+	return adapter.repo.BulkCreate(items)
 }
 
 func (adapter *assetWebsiteStoreAdapter) Delete(id int) error {
@@ -48,7 +36,7 @@ func (adapter *assetWebsiteStoreAdapter) BulkDelete(ids []int) (int64, error) {
 }
 
 func (adapter *assetWebsiteStoreAdapter) BulkUpsert(items []assetdomain.Website) (int64, error) {
-	return adapter.repo.BulkUpsert(assetDomainWebsiteListToModel(items))
+	return adapter.repo.BulkUpsert(items)
 }
 
 func (adapter *assetWebsiteStoreAdapter) StreamByTargetID(targetID int) (*sql.Rows, error) {
@@ -60,9 +48,5 @@ func (adapter *assetWebsiteStoreAdapter) CountByTargetID(targetID int) (int64, e
 }
 
 func (adapter *assetWebsiteStoreAdapter) ScanRow(rows *sql.Rows) (*assetdomain.Website, error) {
-	item, err := adapter.repo.ScanRow(rows)
-	if err != nil {
-		return nil, err
-	}
-	return assetModelWebsiteToDomain(item), nil
+	return adapter.repo.ScanRow(rows)
 }

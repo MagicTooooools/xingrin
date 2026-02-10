@@ -5,7 +5,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useToastMessages } from '@/lib/toast-helpers'
 import { getErrorCode, getErrorResponseData } from '@/lib/response-parser'
-import { nucleiRepoApi } from "../services/nuclei-repo.api"
+import { nucleiRepoApi } from "../services/nuclei-repo.service"
 import type { NucleiTemplateTreeNode, NucleiTemplateContent } from "@/types/nuclei.types"
 
 // ==================== 仓库 CRUD ====================

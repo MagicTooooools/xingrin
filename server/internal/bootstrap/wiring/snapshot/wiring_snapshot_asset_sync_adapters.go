@@ -7,10 +7,10 @@ import (
 )
 
 type snapshotWebsiteAssetSyncAdapter struct {
-	service *assetapp.WebsiteService
+	service *assetapp.WebsiteFacade
 }
 
-func newSnapshotWebsiteAssetSyncAdapter(service *assetapp.WebsiteService) *snapshotWebsiteAssetSyncAdapter {
+func newSnapshotWebsiteAssetSyncAdapter(service *assetapp.WebsiteFacade) *snapshotWebsiteAssetSyncAdapter {
 	return &snapshotWebsiteAssetSyncAdapter{service: service}
 }
 
@@ -19,10 +19,10 @@ func (adapter *snapshotWebsiteAssetSyncAdapter) BulkUpsert(targetID int, items [
 }
 
 type snapshotEndpointAssetSyncAdapter struct {
-	service *assetapp.EndpointService
+	service *assetapp.EndpointFacade
 }
 
-func newSnapshotEndpointAssetSyncAdapter(service *assetapp.EndpointService) *snapshotEndpointAssetSyncAdapter {
+func newSnapshotEndpointAssetSyncAdapter(service *assetapp.EndpointFacade) *snapshotEndpointAssetSyncAdapter {
 	return &snapshotEndpointAssetSyncAdapter{service: service}
 }
 
@@ -31,10 +31,10 @@ func (adapter *snapshotEndpointAssetSyncAdapter) BulkUpsert(targetID int, items 
 }
 
 type snapshotDirectoryAssetSyncAdapter struct {
-	service *assetapp.DirectoryService
+	service *assetapp.DirectoryFacade
 }
 
-func newSnapshotDirectoryAssetSyncAdapter(service *assetapp.DirectoryService) *snapshotDirectoryAssetSyncAdapter {
+func newSnapshotDirectoryAssetSyncAdapter(service *assetapp.DirectoryFacade) *snapshotDirectoryAssetSyncAdapter {
 	return &snapshotDirectoryAssetSyncAdapter{service: service}
 }
 
@@ -43,10 +43,10 @@ func (adapter *snapshotDirectoryAssetSyncAdapter) BulkUpsert(targetID int, items
 }
 
 type snapshotSubdomainAssetSyncAdapter struct {
-	service *assetapp.SubdomainService
+	service *assetapp.SubdomainFacade
 }
 
-func newSnapshotSubdomainAssetSyncAdapter(service *assetapp.SubdomainService) *snapshotSubdomainAssetSyncAdapter {
+func newSnapshotSubdomainAssetSyncAdapter(service *assetapp.SubdomainFacade) *snapshotSubdomainAssetSyncAdapter {
 	return &snapshotSubdomainAssetSyncAdapter{service: service}
 }
 
@@ -55,10 +55,10 @@ func (adapter *snapshotSubdomainAssetSyncAdapter) BulkCreate(targetID int, names
 }
 
 type snapshotHostPortAssetSyncAdapter struct {
-	service *assetapp.HostPortService
+	service *assetapp.HostPortFacade
 }
 
-func newSnapshotHostPortAssetSyncAdapter(service *assetapp.HostPortService) *snapshotHostPortAssetSyncAdapter {
+func newSnapshotHostPortAssetSyncAdapter(service *assetapp.HostPortFacade) *snapshotHostPortAssetSyncAdapter {
 	return &snapshotHostPortAssetSyncAdapter{service: service}
 }
 
@@ -67,10 +67,10 @@ func (adapter *snapshotHostPortAssetSyncAdapter) BulkUpsert(targetID int, items 
 }
 
 type snapshotScreenshotAssetSyncAdapter struct {
-	service *assetapp.ScreenshotService
+	service *assetapp.ScreenshotFacade
 }
 
-func newSnapshotScreenshotAssetSyncAdapter(service *assetapp.ScreenshotService) *snapshotScreenshotAssetSyncAdapter {
+func newSnapshotScreenshotAssetSyncAdapter(service *assetapp.ScreenshotFacade) *snapshotScreenshotAssetSyncAdapter {
 	return &snapshotScreenshotAssetSyncAdapter{service: service}
 }
 
@@ -79,10 +79,10 @@ func (adapter *snapshotScreenshotAssetSyncAdapter) BulkUpsert(targetID int, req 
 }
 
 type snapshotVulnerabilityAssetSyncAdapter struct {
-	service *securityapp.VulnerabilityService
+	service *securityapp.VulnerabilityFacade
 }
 
-func newSnapshotVulnerabilityAssetSyncAdapter(service *securityapp.VulnerabilityService) *snapshotVulnerabilityAssetSyncAdapter {
+func newSnapshotVulnerabilityAssetSyncAdapter(service *securityapp.VulnerabilityFacade) *snapshotVulnerabilityAssetSyncAdapter {
 	return &snapshotVulnerabilityAssetSyncAdapter{service: service}
 }
 

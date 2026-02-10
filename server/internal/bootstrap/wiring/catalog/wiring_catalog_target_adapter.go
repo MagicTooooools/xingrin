@@ -13,20 +13,12 @@ func newCatalogTargetStoreAdapter(repo *catalogrepo.TargetRepository) *catalogTa
 	return &catalogTargetStoreAdapter{repo: repo}
 }
 
-func (adapter *catalogTargetStoreAdapter) FindByID(id int) (*catalogdomain.Target, error) {
-	target, err := adapter.repo.FindByID(id)
-	if err != nil {
-		return nil, err
-	}
-	return catalogModelTargetToDomain(target), nil
+func (adapter *catalogTargetStoreAdapter) GetActiveByID(id int) (*catalogdomain.Target, error) {
+	return adapter.repo.GetActiveByID(id)
 }
 
 func (adapter *catalogTargetStoreAdapter) FindAll(page, pageSize int, targetType, filter string) ([]catalogdomain.Target, int64, error) {
-	targets, total, err := adapter.repo.FindAll(page, pageSize, targetType, filter)
-	if err != nil {
-		return nil, 0, err
-	}
-	return catalogModelTargetListToDomain(targets), total, nil
+	return adapter.repo.FindAll(page, pageSize, targetType, filter)
 }
 
 func (adapter *catalogTargetStoreAdapter) GetAssetCounts(targetID int) (*catalogdomain.TargetAssetCounts, error) {
@@ -63,16 +55,11 @@ func (adapter *catalogTargetStoreAdapter) ExistsByName(name string, excludeID ..
 }
 
 func (adapter *catalogTargetStoreAdapter) Create(target *catalogdomain.Target) error {
-	modelTarget := catalogDomainTargetToModel(target)
-	if err := adapter.repo.Create(modelTarget); err != nil {
-		return err
-	}
-	*target = *catalogModelTargetToDomain(modelTarget)
-	return nil
+	return adapter.repo.Create(target)
 }
 
 func (adapter *catalogTargetStoreAdapter) Update(target *catalogdomain.Target) error {
-	return adapter.repo.Update(catalogDomainTargetToModel(target))
+	return adapter.repo.Update(target)
 }
 
 func (adapter *catalogTargetStoreAdapter) SoftDelete(id int) error {
@@ -84,14 +71,9 @@ func (adapter *catalogTargetStoreAdapter) BulkSoftDelete(ids []int) (int64, erro
 }
 
 func (adapter *catalogTargetStoreAdapter) BulkCreateIgnoreConflicts(targets []catalogdomain.Target) (int, error) {
-	modelTargets := catalogDomainTargetListToModel(targets)
-	return adapter.repo.BulkCreateIgnoreConflicts(modelTargets)
+	return adapter.repo.BulkCreateIgnoreConflicts(targets)
 }
 
 func (adapter *catalogTargetStoreAdapter) FindByNames(names []string) ([]catalogdomain.Target, error) {
-	targets, err := adapter.repo.FindByNames(names)
-	if err != nil {
-		return nil, err
-	}
-	return catalogModelTargetListToDomain(targets), nil
+	return adapter.repo.FindByNames(names)
 }

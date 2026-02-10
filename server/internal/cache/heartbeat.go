@@ -52,7 +52,7 @@ func (c *heartbeatCache) Set(ctx context.Context, agentID int, data *HeartbeatDa
 	key := fmt.Sprintf("agent:%d:heartbeat", agentID)
 
 	// Set updated_at to current time
-	data.UpdatedAt = time.Now()
+	data.UpdatedAt = time.Now().UTC()
 
 	// Marshal to JSON
 	jsonData, err := json.Marshal(data)
