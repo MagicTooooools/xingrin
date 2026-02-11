@@ -14,11 +14,11 @@ type WordlistFacade struct {
 }
 
 // NewWordlistFacade creates a new wordlist service.
-func NewWordlistFacade(store WordlistStore, basePath string) *WordlistFacade {
+func NewWordlistFacade(queryStore WordlistQueryStore, commandStore WordlistCommandStore, basePath string) *WordlistFacade {
 	fileStore := NewLocalWordlistFileStore()
 	return &WordlistFacade{
-		queryService: NewWordlistQueryService(store, fileStore),
-		cmdService:   NewWordlistCommandService(store, basePath, fileStore),
+		queryService: NewWordlistQueryService(queryStore, fileStore),
+		cmdService:   NewWordlistCommandService(commandStore, basePath, fileStore),
 	}
 }
 

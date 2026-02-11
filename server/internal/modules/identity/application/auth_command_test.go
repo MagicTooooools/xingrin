@@ -17,7 +17,7 @@ type authUserStoreStub struct {
 	errByName  error
 }
 
-func (stub *authUserStoreStub) GetByID(id int) (*identitydomain.User, error) {
+func (stub *authUserStoreStub) GetAuthUserByID(id int) (*identitydomain.User, error) {
 	if stub.errByID != nil {
 		return nil, stub.errByID
 	}
@@ -29,7 +29,7 @@ func (stub *authUserStoreStub) GetByID(id int) (*identitydomain.User, error) {
 	return &copyUser, nil
 }
 
-func (stub *authUserStoreStub) FindByUsername(username string) (*identitydomain.User, error) {
+func (stub *authUserStoreStub) FindAuthUserByUsername(username string) (*identitydomain.User, error) {
 	if stub.errByName != nil {
 		return nil, stub.errByName
 	}

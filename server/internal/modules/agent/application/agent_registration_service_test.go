@@ -84,9 +84,12 @@ func (repo *tokenRepoStub) DeleteExpired(_ context.Context, _ time.Time) error {
 func TestAgentRegistrationServiceCreateToken(t *testing.T) {
 	agentRepo := &agentRepoStub{}
 	tokenRepo := &tokenRepoStub{}
-	service := NewAgentRegistrationService(agentRepo, tokenRepo)
-	service.clock = fixedClock{now: time.Date(2026, 1, 1, 10, 0, 0, 0, time.UTC)}
-	service.tokenGenerator = &tokenGenStub{values: []string{"abcd1234"}}
+	service := NewAgentRegistrationService(
+		agentRepo,
+		tokenRepo,
+		fixedClock{now: time.Date(2026, 1, 1, 10, 0, 0, 0, time.UTC)},
+		&tokenGenStub{values: []string{"abcd1234"}},
+	)
 
 	token, err := service.CreateRegistrationToken(context.Background())
 	if err != nil {
@@ -106,7 +109,7 @@ func TestAgentRegistrationServiceCreateToken(t *testing.T) {
 func TestAgentRegistrationServiceRegisterInvalidToken(t *testing.T) {
 	agentRepo := &agentRepoStub{}
 	tokenRepo := &tokenRepoStub{}
-	service := NewAgentRegistrationService(agentRepo, tokenRepo)
+	service := NewAgentRegistrationService(agentRepo, tokenRepo, fixedClock{now: time.Now().UTC()}, &tokenGenStub{})
 
 	_, err := service.RegisterAgent(context.Background(), "", "host", "1.0", "127.0.0.1", agentdomain.AgentRegistrationOptions{})
 	if !errors.Is(err, ErrRegistrationTokenInvalid) {
@@ -117,7 +120,7 @@ func TestAgentRegistrationServiceRegisterInvalidToken(t *testing.T) {
 func TestAgentRegistrationServiceValidateTokenRecordNotFound(t *testing.T) {
 	agentRepo := &agentRepoStub{}
 	tokenRepo := &tokenRepoStub{findErr: gorm.ErrRecordNotFound}
-	service := NewAgentRegistrationService(agentRepo, tokenRepo)
+	service := NewAgentRegistrationService(agentRepo, tokenRepo, fixedClock{now: time.Now().UTC()}, &tokenGenStub{})
 
 	err := service.ValidateRegistrationToken(context.Background(), "abc123")
 	if !errors.Is(err, ErrRegistrationTokenInvalid) {
@@ -128,7 +131,7 @@ func TestAgentRegistrationServiceValidateTokenRecordNotFound(t *testing.T) {
 func TestAgentRegistrationServiceRegisterTokenRecordNotFound(t *testing.T) {
 	agentRepo := &agentRepoStub{}
 	tokenRepo := &tokenRepoStub{findErr: gorm.ErrRecordNotFound}
-	service := NewAgentRegistrationService(agentRepo, tokenRepo)
+	service := NewAgentRegistrationService(agentRepo, tokenRepo, fixedClock{now: time.Now().UTC()}, &tokenGenStub{})
 
 	_, err := service.RegisterAgent(context.Background(), "abc123", "host", "1.0", "127.0.0.1", agentdomain.AgentRegistrationOptions{})
 	if !errors.Is(err, ErrRegistrationTokenInvalid) {

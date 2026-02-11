@@ -15,10 +15,10 @@ type EngineFacade struct {
 }
 
 // NewEngineFacade creates a new engine service.
-func NewEngineFacade(store EngineStore) *EngineFacade {
+func NewEngineFacade(queryStore EngineQueryStore, commandStore EngineCommandStore) *EngineFacade {
 	return &EngineFacade{
-		queryService: NewEngineQueryService(store),
-		cmdService:   NewEngineCommandService(store),
+		queryService: NewEngineQueryService(queryStore),
+		cmdService:   NewEngineCommandService(commandStore),
 	}
 }
 

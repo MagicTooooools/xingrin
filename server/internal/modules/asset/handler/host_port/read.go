@@ -23,7 +23,7 @@ func (h *HostPortHandler) List(c *gin.Context) {
 		return
 	}
 
-	results, total, err := h.svc.ListByTarget(targetID, &query)
+	results, total, err := h.svc.ListByTarget(targetID, query.GetPage(), query.GetPageSize(), query.Filter)
 	if err != nil {
 		if errors.Is(err, service.ErrTargetNotFound) {
 			dto.NotFound(c, "Target not found")
@@ -33,14 +33,22 @@ func (h *HostPortHandler) List(c *gin.Context) {
 		return
 	}
 
-	for i := range results {
-		if results[i].Hosts == nil {
-			results[i].Hosts = []string{}
+	resp := make([]dto.HostPortResponse, 0, len(results))
+	for index := range results {
+		item := results[index]
+		if item.Hosts == nil {
+			item.Hosts = []string{}
 		}
-		if results[i].Ports == nil {
-			results[i].Ports = []int{}
+		if item.Ports == nil {
+			item.Ports = []int{}
 		}
+		resp = append(resp, dto.HostPortResponse{
+			IP:        item.IP,
+			Hosts:     item.Hosts,
+			Ports:     item.Ports,
+			CreatedAt: item.CreatedAt,
+		})
 	}
 
-	dto.Paginated(c, results, total, query.GetPage(), query.GetPageSize())
+	dto.Paginated(c, resp, total, query.GetPage(), query.GetPageSize())
 }

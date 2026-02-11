@@ -15,10 +15,10 @@ type TargetFacade struct {
 }
 
 // NewTargetFacade creates a new target service.
-func NewTargetFacade(store TargetStore, organizationStore OrganizationStore) *TargetFacade {
+func NewTargetFacade(queryStore TargetQueryStore, commandStore TargetCommandStore, organizationBindingStore OrganizationTargetBindingStore) *TargetFacade {
 	return &TargetFacade{
-		queryService:   NewTargetQueryService(store),
-		commandService: NewTargetCommandService(store, organizationStore),
+		queryService:   NewTargetQueryService(queryStore),
+		commandService: NewTargetCommandService(commandStore, organizationBindingStore),
 	}
 }
 

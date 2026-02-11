@@ -7,12 +7,13 @@ import (
 
 	"github.com/gin-gonic/gin"
 	agentapp "github.com/yyhuni/lunafox/server/internal/modules/agent/application"
+	agentinfra "github.com/yyhuni/lunafox/server/internal/modules/agent/infrastructure"
 	ws "github.com/yyhuni/lunafox/server/internal/websocket"
 )
 
 func TestAgentWSHandlerUnauthorizedWithoutAgentContext(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	handler := NewAgentWebSocketHandler(ws.NewHub(), agentapp.NewAgentRuntimeService(nil, nil, nil, "", ""))
+	handler := NewAgentWebSocketHandler(ws.NewHub(), agentapp.NewAgentRuntimeService(nil, nil, nil, agentinfra.NewSystemClock(), "", ""))
 	router := gin.New()
 	router.GET("/api/agent/ws", handler.Handle)
 

@@ -102,7 +102,7 @@ type organizationStoreStub struct {
 	boundIDs     []int
 }
 
-func (stub *organizationStoreStub) Exists(id int) (bool, error) {
+func (stub *organizationStoreStub) ExistsByID(id int) (bool, error) {
 	_ = id
 	if stub.existsErr != nil {
 		return false, stub.existsErr

@@ -24,7 +24,7 @@ func (h *EndpointHandler) List(c *gin.Context) {
 		return
 	}
 
-	endpoints, total, err := h.svc.ListByTarget(targetID, &query)
+	endpoints, total, err := h.svc.ListByTarget(targetID, query.GetPage(), query.GetPageSize(), query.Filter)
 	if err != nil {
 		if errors.Is(err, service.ErrTargetNotFound) {
 			dto.NotFound(c, "Target not found")
@@ -71,20 +71,20 @@ func toEndpointResponse(endpoint *service.Endpoint) dto.EndpointResponse {
 	}
 
 	return dto.EndpointResponse{
-		ID:                endpoint.ID,
-		TargetID:          endpoint.TargetID,
-		URL:               endpoint.URL,
-		Host:              endpoint.Host,
-		Location:          endpoint.Location,
-		Title:             endpoint.Title,
-		Webserver:         endpoint.Webserver,
-		ContentType:       endpoint.ContentType,
-		StatusCode:        endpoint.StatusCode,
-		ContentLength:     endpoint.ContentLength,
-		ResponseBody:      endpoint.ResponseBody,
-		Tech:              tech,
-		Vhost:             endpoint.Vhost,
-		ResponseHeaders:   endpoint.ResponseHeaders,
-		CreatedAt:         timeutil.ToUTC(endpoint.CreatedAt),
+		ID:              endpoint.ID,
+		TargetID:        endpoint.TargetID,
+		URL:             endpoint.URL,
+		Host:            endpoint.Host,
+		Location:        endpoint.Location,
+		Title:           endpoint.Title,
+		Webserver:       endpoint.Webserver,
+		ContentType:     endpoint.ContentType,
+		StatusCode:      endpoint.StatusCode,
+		ContentLength:   endpoint.ContentLength,
+		ResponseBody:    endpoint.ResponseBody,
+		Tech:            tech,
+		Vhost:           endpoint.Vhost,
+		ResponseHeaders: endpoint.ResponseHeaders,
+		CreatedAt:       timeutil.ToUTC(endpoint.CreatedAt),
 	}
 }

@@ -24,7 +24,7 @@ func (h *SubdomainHandler) List(c *gin.Context) {
 		return
 	}
 
-	subdomains, total, err := h.svc.ListByTarget(targetID, &query)
+	subdomains, total, err := h.svc.ListByTarget(targetID, query.GetPage(), query.GetPageSize(), query.Filter)
 	if err != nil {
 		if errors.Is(err, service.ErrTargetNotFound) {
 			dto.NotFound(c, "Target not found")

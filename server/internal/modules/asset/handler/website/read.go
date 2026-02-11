@@ -24,7 +24,7 @@ func (h *WebsiteHandler) List(c *gin.Context) {
 		return
 	}
 
-	websites, total, err := h.svc.ListByTarget(targetID, &query)
+	websites, total, err := h.svc.ListByTarget(targetID, query.GetPage(), query.GetPageSize(), query.Filter)
 	if err != nil {
 		if errors.Is(err, service.ErrTargetNotFound) {
 			dto.NotFound(c, "Target not found")

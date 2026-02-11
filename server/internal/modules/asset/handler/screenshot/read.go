@@ -24,7 +24,7 @@ func (h *ScreenshotHandler) ListByTargetID(c *gin.Context) {
 		return
 	}
 
-	screenshots, total, err := h.svc.ListByTargetID(targetID, &query)
+	screenshots, total, err := h.svc.ListByTargetID(targetID, query.GetPage(), query.GetPageSize(), query.Filter)
 	if err != nil {
 		if errors.Is(err, service.ErrTargetNotFound) {
 			dto.NotFound(c, "Target not found")

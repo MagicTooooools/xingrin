@@ -1,16 +1,16 @@
 # scan/repository
 
-scan 模块 repository 规范：
+Repository conventions for the scan module:
 
-- `scan.go` + `scan_query.go` + `scan_command.go`：Scan 仓储三分结构。
-- `scan_mapper.go`：`persistence model <-> domain projection` 映射（`domain.QueryScan/QueryTargetRef/QueryStatistics`）与创建写模型映射。
-- `scan_adapter.go`：domain port 适配器（`domain <-> repository`）。
-- `scan_log.go` + `scan_log_query.go` + `scan_log_command.go`：日志仓储三分结构。
-- `scan_task.go` + `scan_task_query.go` + `scan_task_command.go` + `scan_task_sql.go`：任务仓储与 SQL 常量。
+- `scan.go` + `scan_query.go` + `scan_command.go`: three-way split for scan repository operations.
+- `scan_mapper.go`: mapping between `persistence model <-> domain projection` (`domain.QueryScan/QueryTargetRef/QueryStatistics`) and create write models.
+- `scan_domain_repository_adapter.go`: domain port adapter (`domain <-> repository`).
+- `scan_log.go` + `scan_log_query.go` + `scan_log_command.go`: three-way split for log repository operations.
+- `scan_task.go` + `scan_task_query.go` + `scan_task_command.go` + `scan_task_sql.go`: task repository and SQL constants.
 
-约束：
+Constraints:
 
-- 禁止使用 `*_mutation.go` 命名。
-- 禁止使用泛名 `types.go`。
-- `*_query.go` 不得出现写操作方法；`*_command.go` 不得出现查询方法。
-- query/projection 映射下沉到 repository，wiring 层只做接口适配，不做字段级搬运。
+- Do not use `*_mutation.go` naming.
+- Do not use generic filenames like `types.go`.
+- `*_query.go` must not contain write methods; `*_command.go` must not contain query methods.
+- Keep query/projection mapping in repository; wiring should only adapt interfaces, not move fields.

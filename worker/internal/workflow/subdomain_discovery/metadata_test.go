@@ -9,22 +9,22 @@ import (
 	"go.uber.org/zap"
 )
 
-// init 初始化测试环境
+// init initializes the test environment
 func init() {
-	// 为测试环境初始化 logger（如果还没有初始化）
+	// Initialize logger for the test environment (if not initialized yet)
 	if pkg.Logger == nil {
 		logger, _ := zap.NewDevelopment()
 		pkg.Logger = logger
 	}
 }
 
-// TestStagesMatchMetadata 验证代码中的 stage 常量和 templates.yaml 中的定义一致
+// TestStagesMatchMetadata verifies stage constants in code match templates.yaml definitions
 func TestStagesMatchMetadata(t *testing.T) {
-	// 从 templates.yaml 加载 metadata
+	// Load metadata from templates.yaml
 	metadata, err := loader.GetMetadata()
 	require.NoError(t, err, "Failed to load metadata from templates.yaml")
 
-	// 代码中定义的 stage 名称
+	// Stage names defined in code
 	codeStages := map[string]bool{
 		stageRecon:       true,
 		stageBruteforce:  true,
@@ -32,32 +32,32 @@ func TestStagesMatchMetadata(t *testing.T) {
 		stageResolve:     true,
 	}
 
-	// 从 metadata 中提取 stage IDs
+	// Extract stage IDs from metadata
 	metadataStages := make(map[string]bool)
 	for _, stage := range metadata.Stages {
 		metadataStages[stage.ID] = true
 	}
 
-	// 检查代码中的每个 stage 是否在 metadata 中存在
+	// Check each stage defined in code exists in metadata
 	for stageName := range codeStages {
 		assert.True(t, metadataStages[stageName],
 			"Stage '%s' is defined in code but missing in templates.yaml metadata", stageName)
 	}
 
-	// 检查 metadata 中的每个 stage 是否在代码中存在
+	// Check each stage in metadata exists in code
 	for stageName := range metadataStages {
 		assert.True(t, codeStages[stageName],
 			"Stage '%s' is defined in templates.yaml but missing in code constants", stageName)
 	}
 }
 
-// TestToolsMatchMetadata 验证代码中的 tool 常量和 templates.yaml 中的定义一致
+// TestToolsMatchMetadata verifies tool constants in code match templates.yaml definitions
 func TestToolsMatchMetadata(t *testing.T) {
-	// 从 templates.yaml 加载所有工具模板
+	// Load all tool templates from templates.yaml
 	templates, err := loader.Load()
 	require.NoError(t, err, "Failed to load templates from templates.yaml")
 
-	// 代码中定义的 tool 名称
+	// Tool names defined in code
 	codeTools := map[string]bool{
 		toolSubfinder:                   true,
 		toolAssetfinder:                 true,
@@ -66,34 +66,34 @@ func TestToolsMatchMetadata(t *testing.T) {
 		toolSubdomainResolve:            true,
 	}
 
-	// 从 templates 中提取 tool 名称
+	// Extract tool names from templates
 	metadataTools := make(map[string]bool)
 	for toolName := range templates {
 		metadataTools[toolName] = true
 	}
 
-	// 检查代码中的每个 tool 是否在 templates 中存在
+	// Check each tool defined in code exists in templates
 	for toolName := range codeTools {
 		assert.True(t, metadataTools[toolName],
 			"Tool '%s' is defined in code but missing in templates.yaml", toolName)
 	}
 
-	// 注意：不检查反向（templates 中有但代码中没有），因为可能有未使用的工具定义
+	// Note: reverse check is skipped (templates may contain unused tool definitions)
 }
 
-// TestStageToolMapping 验证每个 stage 都有对应的工具
+// TestStageToolMapping verifies each stage has mapped tools
 func TestStageToolMapping(t *testing.T) {
-	// 加载所有工具模板
+	// Load all tool templates
 	templates, err := loader.Load()
 	require.NoError(t, err, "Failed to load templates")
 
-	// 统计每个 stage 的工具数量
+	// Count tools per stage
 	stageTools := make(map[string][]string)
 	for toolName, tmpl := range templates {
 		stageTools[tmpl.Metadata.Stage] = append(stageTools[tmpl.Metadata.Stage], toolName)
 	}
 
-	// 验证每个 stage 至少有一个工具
+	// Verify each stage has at least one tool
 	metadata, err := loader.GetMetadata()
 	require.NoError(t, err, "Failed to load metadata")
 
@@ -106,15 +106,15 @@ func TestStageToolMapping(t *testing.T) {
 	}
 }
 
-// TestGeneratedConstantsNotEmpty 验证生成的常量不为空
+// TestGeneratedConstantsNotEmpty verifies generated constants are not empty
 func TestGeneratedConstantsNotEmpty(t *testing.T) {
-	// 验证 stage 常量
+	// Verify stage constants
 	assert.NotEmpty(t, stageRecon, "stageRecon should not be empty")
 	assert.NotEmpty(t, stageBruteforce, "stageBruteforce should not be empty")
 	assert.NotEmpty(t, stagePermutation, "stagePermutation should not be empty")
 	assert.NotEmpty(t, stageResolve, "stageResolve should not be empty")
 
-	// 验证 tool 常量
+	// Verify tool constants
 	assert.NotEmpty(t, toolSubfinder, "toolSubfinder should not be empty")
 	assert.NotEmpty(t, toolAssetfinder, "toolAssetfinder should not be empty")
 	assert.NotEmpty(t, toolSubdomainBruteforce, "toolSubdomainBruteforce should not be empty")
@@ -122,12 +122,12 @@ func TestGeneratedConstantsNotEmpty(t *testing.T) {
 	assert.NotEmpty(t, toolSubdomainResolve, "toolSubdomainResolve should not be empty")
 }
 
-// TestTemplateYAMLStructure 验证 templates.yaml 的基本结构
+// TestTemplateYAMLStructure verifies the basic templates.yaml structure
 func TestTemplateYAMLStructure(t *testing.T) {
 	metadata, err := loader.GetMetadata()
 	require.NoError(t, err, "Failed to load metadata")
 
-	// 验证 workflow metadata
+	// Verify workflow metadata
 	assert.NotEmpty(t, metadata.Name, "Workflow name should not be empty")
 	assert.NotEmpty(t, metadata.DisplayName, "Workflow display name should not be empty")
 	assert.NotEmpty(t, metadata.Version, "Workflow version should not be empty")

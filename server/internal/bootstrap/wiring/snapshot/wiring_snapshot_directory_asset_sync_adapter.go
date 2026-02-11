@@ -14,5 +14,5 @@ func newSnapshotDirectoryAssetSyncAdapter(service *assetapp.DirectoryFacade) *sn
 }
 
 func (adapter *snapshotDirectoryAssetSyncAdapter) BulkUpsert(targetID int, items []snapshotapp.DirectoryAssetUpsertItem) (int64, error) {
-	return adapter.service.BulkUpsert(targetID, snapshotDirectoryAssetUpsertItemsToDTO(items))
+	return adapter.service.BulkUpsert(targetID, snapshotDirectoryAssetUpsertItemsToApplication(items))
 }

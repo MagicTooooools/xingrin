@@ -15,11 +15,16 @@ type AgentFacade struct {
 }
 
 // NewAgentFacade creates a new agent facade.
-func NewAgentFacade(agentStore AgentStore, tokenStore RegistrationTokenStore) *AgentFacade {
+func NewAgentFacade(
+	agentStore AgentStore,
+	tokenStore RegistrationTokenStore,
+	clock Clock,
+	tokenGenerator TokenGenerator,
+) *AgentFacade {
 	return &AgentFacade{
 		queryService:        NewAgentQueryService(agentStore),
 		commandService:      NewAgentCommandService(agentStore),
-		registrationService: NewAgentRegistrationService(agentStore, tokenStore),
+		registrationService: NewAgentRegistrationService(agentStore, tokenStore, clock, tokenGenerator),
 	}
 }
 

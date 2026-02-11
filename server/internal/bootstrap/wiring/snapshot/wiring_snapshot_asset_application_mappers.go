@@ -1,15 +1,15 @@
 package snapshotwiring
 
 import (
-	assetdto "github.com/yyhuni/lunafox/server/internal/modules/asset/dto"
+	assetapp "github.com/yyhuni/lunafox/server/internal/modules/asset/application"
 	snapshotapp "github.com/yyhuni/lunafox/server/internal/modules/snapshot/application"
 )
 
-func snapshotWebsiteAssetUpsertItemsToDTO(items []snapshotapp.WebsiteAssetUpsertItem) []assetdto.WebsiteUpsertItem {
-	results := make([]assetdto.WebsiteUpsertItem, 0, len(items))
+func snapshotWebsiteAssetUpsertItemsToApplication(items []snapshotapp.WebsiteAssetUpsertItem) []assetapp.WebsiteUpsertItem {
+	results := make([]assetapp.WebsiteUpsertItem, 0, len(items))
 	for index := range items {
 		item := items[index]
-		results = append(results, assetdto.WebsiteUpsertItem{
+		results = append(results, assetapp.WebsiteUpsertItem{
 			URL:             item.URL,
 			Host:            item.Host,
 			Location:        item.Location,
@@ -27,11 +27,11 @@ func snapshotWebsiteAssetUpsertItemsToDTO(items []snapshotapp.WebsiteAssetUpsert
 	return results
 }
 
-func snapshotEndpointAssetUpsertItemsToDTO(items []snapshotapp.EndpointAssetUpsertItem) []assetdto.EndpointUpsertItem {
-	results := make([]assetdto.EndpointUpsertItem, 0, len(items))
+func snapshotEndpointAssetUpsertItemsToApplication(items []snapshotapp.EndpointAssetUpsertItem) []assetapp.EndpointUpsertItem {
+	results := make([]assetapp.EndpointUpsertItem, 0, len(items))
 	for index := range items {
 		item := items[index]
-		results = append(results, assetdto.EndpointUpsertItem{
+		results = append(results, assetapp.EndpointUpsertItem{
 			URL:             item.URL,
 			Host:            item.Host,
 			Location:        item.Location,
@@ -49,11 +49,11 @@ func snapshotEndpointAssetUpsertItemsToDTO(items []snapshotapp.EndpointAssetUpse
 	return results
 }
 
-func snapshotDirectoryAssetUpsertItemsToDTO(items []snapshotapp.DirectoryAssetUpsertItem) []assetdto.DirectoryUpsertItem {
-	results := make([]assetdto.DirectoryUpsertItem, 0, len(items))
+func snapshotDirectoryAssetUpsertItemsToApplication(items []snapshotapp.DirectoryAssetUpsertItem) []assetapp.DirectoryUpsertItem {
+	results := make([]assetapp.DirectoryUpsertItem, 0, len(items))
 	for index := range items {
 		item := items[index]
-		results = append(results, assetdto.DirectoryUpsertItem{
+		results = append(results, assetapp.DirectoryUpsertItem{
 			URL:           item.URL,
 			Status:        item.Status,
 			ContentLength: item.ContentLength,
@@ -64,23 +64,23 @@ func snapshotDirectoryAssetUpsertItemsToDTO(items []snapshotapp.DirectoryAssetUp
 	return results
 }
 
-func snapshotHostPortAssetItemsToDTO(items []snapshotapp.HostPortAssetItem) []assetdto.HostPortItem {
-	results := make([]assetdto.HostPortItem, 0, len(items))
+func snapshotHostPortAssetItemsToApplication(items []snapshotapp.HostPortAssetItem) []assetapp.HostPortItem {
+	results := make([]assetapp.HostPortItem, 0, len(items))
 	for index := range items {
 		item := items[index]
-		results = append(results, assetdto.HostPortItem{Host: item.Host, IP: item.IP, Port: item.Port})
+		results = append(results, assetapp.HostPortItem{Host: item.Host, IP: item.IP, Port: item.Port})
 	}
 	return results
 }
 
-func snapshotScreenshotAssetRequestToDTO(req *snapshotapp.ScreenshotAssetUpsertRequest) *assetdto.BulkUpsertScreenshotRequest {
+func snapshotScreenshotAssetRequestToApplication(req *snapshotapp.ScreenshotAssetUpsertRequest) *assetapp.BulkUpsertScreenshotRequest {
 	if req == nil {
 		return nil
 	}
-	items := make([]assetdto.ScreenshotItem, 0, len(req.Screenshots))
+	items := make([]assetapp.ScreenshotItem, 0, len(req.Screenshots))
 	for index := range req.Screenshots {
 		item := req.Screenshots[index]
-		items = append(items, assetdto.ScreenshotItem{URL: item.URL, StatusCode: item.StatusCode, Image: item.Image})
+		items = append(items, assetapp.ScreenshotItem{URL: item.URL, StatusCode: item.StatusCode, Image: item.Image})
 	}
-	return &assetdto.BulkUpsertScreenshotRequest{Screenshots: items}
+	return &assetapp.BulkUpsertScreenshotRequest{Screenshots: items}
 }

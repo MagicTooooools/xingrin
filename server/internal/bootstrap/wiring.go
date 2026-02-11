@@ -13,6 +13,7 @@ import (
 	agentservice "github.com/yyhuni/lunafox/server/internal/modules/agent/application"
 	agentdomain "github.com/yyhuni/lunafox/server/internal/modules/agent/domain"
 	agenthandler "github.com/yyhuni/lunafox/server/internal/modules/agent/handler"
+	agentinfra "github.com/yyhuni/lunafox/server/internal/modules/agent/infrastructure"
 	agentrepo "github.com/yyhuni/lunafox/server/internal/modules/agent/repository"
 	assetservice "github.com/yyhuni/lunafox/server/internal/modules/asset/application"
 	assethandler "github.com/yyhuni/lunafox/server/internal/modules/asset/handler"
@@ -183,8 +184,10 @@ func buildDependencies(infra *infra, cfg *config.Config) *deps {
 	workerSettingsStore := workerwiring.NewWorkerProviderSettingsStoreAdapter(subfinderProviderSettingsRepo)
 	workerSvc := workerwiring.NewWorkerApplicationService(workerScanGuard, workerSettingsStore)
 	// Agent module services
-	agentSvc := agentservice.NewAgentFacade(agentRepo, registrationTokenRepo)
-	agentRuntimeSvc := agentservice.NewAgentRuntimeService(agentRepo, infra.heartbeatCache, ws.NewAgentMessagePublisher(infra.wsHub), infra.serverVersion, infra.agentImage)
+	agentClock := agentinfra.NewSystemClock()
+	agentTokenGenerator := agentinfra.NewCryptoTokenGenerator()
+	agentSvc := agentservice.NewAgentFacade(agentRepo, registrationTokenRepo, agentClock, agentTokenGenerator)
+	agentRuntimeSvc := agentservice.NewAgentRuntimeService(agentRepo, infra.heartbeatCache, ws.NewAgentMessagePublisher(infra.wsHub), agentClock, infra.serverVersion, infra.agentImage)
 	agentTaskSvc := agentservice.NewAgentTaskService(scanTaskSvc)
 
 	// Snapshot module: lookup, stores, sync adapters, and services

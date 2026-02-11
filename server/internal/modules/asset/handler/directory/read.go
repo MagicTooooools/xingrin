@@ -24,7 +24,7 @@ func (h *DirectoryHandler) List(c *gin.Context) {
 		return
 	}
 
-	directories, total, err := h.svc.ListByTarget(targetID, &query)
+	directories, total, err := h.svc.ListByTarget(targetID, query.GetPage(), query.GetPageSize(), query.Filter)
 	if err != nil {
 		if errors.Is(err, service.ErrTargetNotFound) {
 			dto.NotFound(c, "Target not found")

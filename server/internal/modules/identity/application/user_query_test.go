@@ -16,7 +16,7 @@ type userQueryStoreStub struct {
 	getErr   error
 }
 
-func (stub *userQueryStoreStub) GetByID(id int) (*identitydomain.User, error) {
+func (stub *userQueryStoreStub) GetUserByID(id int) (*identitydomain.User, error) {
 	if stub.getErr != nil {
 		return nil, stub.getErr
 	}

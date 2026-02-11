@@ -64,8 +64,14 @@ func TestAgentRuntimeServiceHeartbeatAndUpdateRequired(t *testing.T) {
 	repo := &runtimeRepoStub{}
 	cacheStore := &cacheStub{}
 	publisher := &publisherStub{updateSendSuccess: true}
-	service := NewAgentRuntimeService(repo, cacheStore, publisher, "2.0.0", "img")
-	service.clock = fixedClock{now: time.Date(2026, 1, 2, 10, 0, 0, 0, time.UTC)}
+	service := NewAgentRuntimeService(
+		repo,
+		cacheStore,
+		publisher,
+		fixedClock{now: time.Date(2026, 1, 2, 10, 0, 0, 0, time.UTC)},
+		"2.0.0",
+		"img",
+	)
 
 	payload, _ := json.Marshal(agentproto.Message{
 		Type: agentproto.MessageTypeHeartbeat,
@@ -94,7 +100,7 @@ func TestAgentRuntimeServiceHeartbeatAndUpdateRequired(t *testing.T) {
 func TestAgentRuntimeServiceOnDisconnected(t *testing.T) {
 	repo := &runtimeRepoStub{}
 	cacheStore := &cacheStub{}
-	service := NewAgentRuntimeService(repo, cacheStore, &publisherStub{}, "", "")
+	service := NewAgentRuntimeService(repo, cacheStore, &publisherStub{}, fixedClock{now: time.Now().UTC()}, "", "")
 	if err := service.OnDisconnected(context.Background(), 1); err != nil {
 		t.Fatalf("OnDisconnected error: %v", err)
 	}
@@ -109,7 +115,7 @@ func TestAgentRuntimeServiceOnDisconnected(t *testing.T) {
 func TestAgentRuntimeServiceCacheFailureNonBlocking(t *testing.T) {
 	repo := &runtimeRepoStub{}
 	cacheStore := &cacheStub{setErr: errors.New("boom")}
-	service := NewAgentRuntimeService(repo, cacheStore, &publisherStub{}, "", "")
+	service := NewAgentRuntimeService(repo, cacheStore, &publisherStub{}, fixedClock{now: time.Now().UTC()}, "", "")
 	payload, _ := json.Marshal(agentproto.Message{
 		Type: agentproto.MessageTypeHeartbeat,
 		Payload: func() json.RawMessage {

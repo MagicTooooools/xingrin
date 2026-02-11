@@ -21,15 +21,15 @@ type OrganizationFacade struct {
 }
 
 // NewOrganizationFacade creates a new organization service.
-func NewOrganizationFacade(store OrganizationStore) *OrganizationFacade {
+func NewOrganizationFacade(queryStore OrganizationQueryStore, commandStore OrganizationCommandStore) *OrganizationFacade {
 	return &OrganizationFacade{
-		queryService: NewOrganizationQueryService(store),
-		cmdService:   NewOrganizationCommandService(store),
+		queryService: NewOrganizationQueryService(queryStore),
+		cmdService:   NewOrganizationCommandService(commandStore),
 	}
 }
 
-// Create creates a new organization.
-func (service *OrganizationFacade) Create(req *dto.CreateOrganizationRequest) (*Organization, error) {
+// CreateOrganization creates a new organization.
+func (service *OrganizationFacade) CreateOrganization(req *dto.CreateOrganizationRequest) (*Organization, error) {
 	org, err := service.cmdService.CreateOrganization(context.Background(), req.Name, req.Description)
 	if err != nil {
 		if errors.Is(err, ErrOrganizationExists) {
@@ -40,8 +40,8 @@ func (service *OrganizationFacade) Create(req *dto.CreateOrganizationRequest) (*
 	return org, nil
 }
 
-// List returns paginated organizations with target count.
-func (service *OrganizationFacade) List(query *dto.OrganizationListQuery) ([]OrganizationWithCount, int64, error) {
+// ListOrganizations returns paginated organizations with target count.
+func (service *OrganizationFacade) ListOrganizations(query *dto.OrganizationListQuery) ([]OrganizationWithCount, int64, error) {
 	orgs, total, err := service.queryService.ListOrganizations(context.Background(), query.GetPage(), query.GetPageSize(), query.Filter)
 	if err != nil {
 		return nil, 0, err
@@ -57,8 +57,8 @@ func (service *OrganizationFacade) List(query *dto.OrganizationListQuery) ([]Org
 	return results, total, nil
 }
 
-// GetByID returns an organization by ID with target count.
-func (service *OrganizationFacade) GetByID(id int) (*OrganizationWithCount, error) {
+// GetOrganizationByID returns an organization by ID with target count.
+func (service *OrganizationFacade) GetOrganizationByID(id int) (*OrganizationWithCount, error) {
 	org, err := service.queryService.GetOrganizationByID(context.Background(), id)
 	if err != nil {
 		if dberrors.IsRecordNotFound(err) {
@@ -73,8 +73,8 @@ func (service *OrganizationFacade) GetByID(id int) (*OrganizationWithCount, erro
 	}, nil
 }
 
-// Update updates an organization.
-func (service *OrganizationFacade) Update(id int, req *dto.UpdateOrganizationRequest) (*Organization, error) {
+// UpdateOrganization updates an organization.
+func (service *OrganizationFacade) UpdateOrganization(id int, req *dto.UpdateOrganizationRequest) (*Organization, error) {
 	org, err := service.cmdService.UpdateOrganization(context.Background(), id, req.Name, req.Description)
 	if err != nil {
 		if dberrors.IsRecordNotFound(err) {
@@ -88,8 +88,8 @@ func (service *OrganizationFacade) Update(id int, req *dto.UpdateOrganizationReq
 	return org, nil
 }
 
-// Delete soft deletes an organization.
-func (service *OrganizationFacade) Delete(id int) error {
+// DeleteOrganization soft deletes an organization.
+func (service *OrganizationFacade) DeleteOrganization(id int) error {
 	err := service.cmdService.DeleteOrganization(context.Background(), id)
 	if err != nil {
 		if dberrors.IsRecordNotFound(err) {
@@ -100,13 +100,13 @@ func (service *OrganizationFacade) Delete(id int) error {
 	return nil
 }
 
-// BulkDelete soft deletes multiple organizations.
-func (service *OrganizationFacade) BulkDelete(ids []int) (int64, error) {
+// BulkDeleteOrganizations soft deletes multiple organizations.
+func (service *OrganizationFacade) BulkDeleteOrganizations(ids []int) (int64, error) {
 	return service.cmdService.BulkDeleteOrganizations(context.Background(), ids)
 }
 
-// ListTargets returns paginated targets for an organization.
-func (service *OrganizationFacade) ListTargets(organizationID int, query *dto.TargetListQuery) ([]OrganizationTargetRef, int64, error) {
+// ListOrganizationTargets returns paginated targets for an organization.
+func (service *OrganizationFacade) ListOrganizationTargets(organizationID int, query *dto.TargetListQuery) ([]OrganizationTargetRef, int64, error) {
 	targets, total, err := service.queryService.ListOrganizationTargets(
 		context.Background(),
 		organizationID,
@@ -129,8 +129,8 @@ func (service *OrganizationFacade) ListTargets(organizationID int, query *dto.Ta
 	return results, total, nil
 }
 
-// LinkTargets adds targets to an organization.
-func (service *OrganizationFacade) LinkTargets(organizationID int, targetIDs []int) error {
+// LinkOrganizationTargets adds targets to an organization.
+func (service *OrganizationFacade) LinkOrganizationTargets(organizationID int, targetIDs []int) error {
 	err := service.cmdService.LinkTargets(context.Background(), organizationID, targetIDs)
 	if err != nil {
 		if dberrors.IsRecordNotFound(err) {
@@ -144,8 +144,8 @@ func (service *OrganizationFacade) LinkTargets(organizationID int, targetIDs []i
 	return nil
 }
 
-// UnlinkTargets removes targets from an organization.
-func (service *OrganizationFacade) UnlinkTargets(organizationID int, targetIDs []int) (int64, error) {
+// UnlinkOrganizationTargets removes targets from an organization.
+func (service *OrganizationFacade) UnlinkOrganizationTargets(organizationID int, targetIDs []int) (int64, error) {
 	unlinkedCount, err := service.cmdService.UnlinkTargets(context.Background(), organizationID, targetIDs)
 	if err != nil {
 		if dberrors.IsRecordNotFound(err) {
