@@ -14,5 +14,5 @@ func newSnapshotHostPortAssetSyncAdapter(service *assetapp.HostPortFacade) *snap
 }
 
 func (adapter *snapshotHostPortAssetSyncAdapter) BulkUpsert(targetID int, items []snapshotapp.HostPortAssetItem) (int64, error) {
-	return adapter.service.BulkUpsert(targetID, snapshotHostPortAssetItemsToDTO(items))
+	return adapter.service.BulkUpsert(targetID, snapshotHostPortAssetItemsToApplication(items))
 }

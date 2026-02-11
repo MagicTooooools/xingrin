@@ -14,5 +14,5 @@ func newSnapshotScreenshotAssetSyncAdapter(service *assetapp.ScreenshotFacade) *
 }
 
 func (adapter *snapshotScreenshotAssetSyncAdapter) BulkUpsert(targetID int, req *snapshotapp.ScreenshotAssetUpsertRequest) (int64, error) {
-	return adapter.service.BulkUpsert(targetID, snapshotScreenshotAssetRequestToDTO(req))
+	return adapter.service.BulkUpsert(targetID, snapshotScreenshotAssetRequestToApplication(req))
 }

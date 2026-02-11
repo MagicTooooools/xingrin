@@ -14,5 +14,5 @@ func newSnapshotWebsiteAssetSyncAdapter(service *assetapp.WebsiteFacade) *snapsh
 }
 
 func (adapter *snapshotWebsiteAssetSyncAdapter) BulkUpsert(targetID int, items []snapshotapp.WebsiteAssetUpsertItem) (int64, error) {
-	return adapter.service.BulkUpsert(targetID, snapshotWebsiteAssetUpsertItemsToDTO(items))
+	return adapter.service.BulkUpsert(targetID, snapshotWebsiteAssetUpsertItemsToApplication(items))
 }

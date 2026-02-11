@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"errors"
 
-	"github.com/yyhuni/lunafox/server/internal/modules/asset/dto"
 	"github.com/yyhuni/lunafox/server/internal/pkg/dberrors"
 )
 
@@ -27,8 +26,8 @@ func NewSubdomainFacade(store SubdomainStore, targetLookup SubdomainTargetLookup
 	}
 }
 
-func (service *SubdomainFacade) ListByTarget(targetID int, query *dto.SubdomainListQuery) ([]Subdomain, int64, error) {
-	items, total, err := service.queryService.ListByTarget(context.Background(), targetID, query.GetPage(), query.GetPageSize(), query.Filter)
+func (service *SubdomainFacade) ListByTarget(targetID, page, pageSize int, filter string) ([]Subdomain, int64, error) {
+	items, total, err := service.queryService.ListByTarget(context.Background(), targetID, page, pageSize, filter)
 	if err != nil {
 		if errors.Is(err, ErrSubdomainTargetNotFound) || dberrors.IsRecordNotFound(err) {
 			return nil, 0, ErrTargetNotFound

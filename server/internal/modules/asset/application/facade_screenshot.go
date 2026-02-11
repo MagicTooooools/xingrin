@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 
-	"github.com/yyhuni/lunafox/server/internal/modules/asset/dto"
 	"github.com/yyhuni/lunafox/server/internal/pkg/dberrors"
 )
 
@@ -20,8 +19,8 @@ func NewScreenshotFacade(store ScreenshotStore, targetLookup ScreenshotTargetLoo
 	}
 }
 
-func (service *ScreenshotFacade) ListByTargetID(targetID int, query *dto.ScreenshotListQuery) ([]Screenshot, int64, error) {
-	items, total, err := service.queryService.ListByTargetID(context.Background(), targetID, query.GetPage(), query.GetPageSize(), query.Filter)
+func (service *ScreenshotFacade) ListByTargetID(targetID, page, pageSize int, filter string) ([]Screenshot, int64, error) {
+	items, total, err := service.queryService.ListByTargetID(context.Background(), targetID, page, pageSize, filter)
 	if err != nil {
 		if errors.Is(err, ErrScreenshotTargetNotFound) || dberrors.IsRecordNotFound(err) {
 			return nil, 0, ErrTargetNotFound
@@ -46,8 +45,8 @@ func (service *ScreenshotFacade) BulkDelete(ids []int) (int64, error) {
 	return service.cmdService.BulkDelete(context.Background(), ids)
 }
 
-func (service *ScreenshotFacade) BulkUpsert(targetID int, req *dto.BulkUpsertScreenshotRequest) (int64, error) {
-	count, err := service.cmdService.BulkUpsert(context.Background(), targetID, screenshotUpsertRequestFromDTO(req))
+func (service *ScreenshotFacade) BulkUpsert(targetID int, req *BulkUpsertScreenshotRequest) (int64, error) {
+	count, err := service.cmdService.BulkUpsert(context.Background(), targetID, req)
 	if err != nil {
 		if errors.Is(err, ErrScreenshotTargetNotFound) || dberrors.IsRecordNotFound(err) {
 			return 0, ErrTargetNotFound

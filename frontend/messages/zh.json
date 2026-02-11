@@ -1504,6 +1504,7 @@
       "status": {
         "online": "在线",
         "offline": "离线",
+        "maintenance": "维护中",
         "unknown": "未知"
       },
       "health": {

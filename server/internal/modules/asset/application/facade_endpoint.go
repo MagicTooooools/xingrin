@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"errors"
 
-	"github.com/yyhuni/lunafox/server/internal/modules/asset/dto"
 	"github.com/yyhuni/lunafox/server/internal/pkg/dberrors"
 )
 
@@ -21,8 +20,8 @@ func NewEndpointFacade(store EndpointStore, targetLookup EndpointTargetLookup) *
 	}
 }
 
-func (service *EndpointFacade) ListByTarget(targetID int, query *dto.EndpointListQuery) ([]Endpoint, int64, error) {
-	items, total, err := service.queryService.ListByTarget(context.Background(), targetID, query.GetPage(), query.GetPageSize(), query.Filter)
+func (service *EndpointFacade) ListByTarget(targetID, page, pageSize int, filter string) ([]Endpoint, int64, error) {
+	items, total, err := service.queryService.ListByTarget(context.Background(), targetID, page, pageSize, filter)
 	if err != nil {
 		if errors.Is(err, ErrEndpointTargetNotFound) || dberrors.IsRecordNotFound(err) {
 			return nil, 0, ErrTargetNotFound
@@ -99,8 +98,8 @@ func (service *EndpointFacade) ScanRow(rows *sql.Rows) (*Endpoint, error) {
 	return item, nil
 }
 
-func (service *EndpointFacade) BulkUpsert(targetID int, items []dto.EndpointUpsertItem) (int64, error) {
-	affected, err := service.cmdService.BulkUpsert(context.Background(), targetID, endpointUpsertItemsFromDTO(items))
+func (service *EndpointFacade) BulkUpsert(targetID int, items []EndpointUpsertItem) (int64, error) {
+	affected, err := service.cmdService.BulkUpsert(context.Background(), targetID, items)
 	if err != nil {
 		if errors.Is(err, ErrEndpointTargetNotFound) || dberrors.IsRecordNotFound(err) {
 			return 0, ErrTargetNotFound

@@ -59,7 +59,7 @@
   --font-mono: "IBM Plex Mono", "JetBrains Mono", monospace;
 
   /* 基础排版与阴影变量（保证全局布局/组件尺寸稳定） */
-  --font-sans: 'MiSans', 'IBM Plex Sans', 'Segoe UI', system-ui, -apple-system, PingFang SC, Hiragino Sans GB, Microsoft YaHei, sans-serif;
+  --font-sans: 'HarmonyOS Sans SC', 'IBM Plex Sans', 'Segoe UI', system-ui, -apple-system, PingFang SC, Hiragino Sans GB, Microsoft YaHei, sans-serif;
   --font-serif: Georgia, 'Noto Serif SC', serif;
   --shadow-color: hsl(0 0% 0% / 0.12);
   --shadow-2xs: 0px 1px 2px 0px hsl(0 0% 0% / 0.06);

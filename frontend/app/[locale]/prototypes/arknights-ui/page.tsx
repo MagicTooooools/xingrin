@@ -28,7 +28,7 @@ const themeVars = {
   "--ark-accent-2": "#20252B",
   "--ark-warn": "#20252B",
   "--ark-danger": "#20252B",
-  fontFamily: "\"MiSans\", \"IBM Plex Sans\", \"Segoe UI\", sans-serif",
+  fontFamily: "\"HarmonyOS Sans SC\", \"IBM Plex Sans\", \"Segoe UI\", sans-serif",
 } as CSSProperties
 
 const quickStats = [
@@ -430,7 +430,7 @@ export default function ArknightsUiPrototypePage() {
           text-transform: uppercase;
           color: var(--ark-text-2);
           font-weight: 600;
-          font-family: "IBM Plex Mono", "MiSans", sans-serif;
+          font-family: "IBM Plex Mono", "HarmonyOS Sans SC", sans-serif;
         }
 
         .ark-tag {
@@ -444,7 +444,7 @@ export default function ArknightsUiPrototypePage() {
           text-transform: uppercase;
           color: var(--ark-text-2);
           background: var(--ark-bg-2);
-          font-family: "IBM Plex Mono", "MiSans", sans-serif;
+          font-family: "IBM Plex Mono", "HarmonyOS Sans SC", sans-serif;
           box-shadow: inset 0 0 0 1px rgba(29, 36, 44, 0.04);
         }
 
@@ -456,7 +456,7 @@ export default function ArknightsUiPrototypePage() {
           letter-spacing: 0.2em;
           color: var(--ark-text-2);
           background: transparent;
-          font-family: "IBM Plex Mono", "MiSans", sans-serif;
+          font-family: "IBM Plex Mono", "HarmonyOS Sans SC", sans-serif;
         }
 
         .ark-button {
@@ -467,7 +467,7 @@ export default function ArknightsUiPrototypePage() {
           font-size: 12px;
           text-transform: uppercase;
           letter-spacing: 0.22em;
-          font-family: "IBM Plex Mono", "MiSans", sans-serif;
+          font-family: "IBM Plex Mono", "HarmonyOS Sans SC", sans-serif;
           transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
           box-shadow: 0 4px 8px rgba(21, 26, 32, 0.08);
         }

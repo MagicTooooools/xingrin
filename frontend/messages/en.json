@@ -1481,6 +1481,7 @@
       "status": {
         "online": "Online",
         "offline": "Offline",
+        "maintenance": "Maintenance",
         "unknown": "Unknown"
       },
       "health": {

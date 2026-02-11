@@ -30,7 +30,7 @@ const themeVars = {
   "--ark-accent": "#1A1D21",     // 深黑作为主强调色
   "--ark-accent-2": "#4C5159",   // 次级强调
   "--ark-active": "#2563EB",     // 激活状态（可选蓝）
-  fontFamily: "\"MiSans\", \"IBM Plex Sans\", \"Segoe UI\", sans-serif",
+  fontFamily: "\"HarmonyOS Sans SC\", \"IBM Plex Sans\", \"Segoe UI\", sans-serif",
 } as CSSProperties
 
 const stats = [

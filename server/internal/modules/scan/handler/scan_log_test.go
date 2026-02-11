@@ -11,14 +11,14 @@ import (
 	"gorm.io/gorm"
 )
 
-type scanLogStoreForHandlerStub struct {
+type scanLogQueryCommandStoreForHandlerStub struct {
 	rows        []scanapp.ScanLogEntry
 	err         error
 	lastAfterID int64
 	lastLimit   int
 }
 
-func (stub *scanLogStoreForHandlerStub) FindByScanIDWithCursor(scanID int, afterID int64, limit int) ([]scanapp.ScanLogEntry, error) {
+func (stub *scanLogQueryCommandStoreForHandlerStub) FindByScanIDWithCursor(scanID int, afterID int64, limit int) ([]scanapp.ScanLogEntry, error) {
 	_ = scanID
 	stub.lastAfterID = afterID
 	stub.lastLimit = limit
@@ -30,7 +30,7 @@ func (stub *scanLogStoreForHandlerStub) FindByScanIDWithCursor(scanID int, after
 	return items, nil
 }
 
-func (stub *scanLogStoreForHandlerStub) BulkCreate(logs []scanapp.ScanLogEntry) error {
+func (stub *scanLogQueryCommandStoreForHandlerStub) BulkCreate(logs []scanapp.ScanLogEntry) error {
 	_ = logs
 	return nil
 }
@@ -39,21 +39,26 @@ type scanLookupForHandlerStub struct {
 	err error
 }
 
-func (stub *scanLookupForHandlerStub) GetActiveByID(id int) (*scanapp.ScanLogScanRef, error) {
+func (stub *scanLookupForHandlerStub) GetScanLogRefByID(id int) (*scanapp.ScanLogScanRef, error) {
 	if stub.err != nil {
 		return nil, stub.err
 	}
 	return &scanapp.ScanLogScanRef{ID: id}, nil
 }
 
-func newScanLogHandlerForTest(store scanapp.ScanLogStore, lookup scanapp.ScanLookup) *ScanLogHandler {
-	service := scanapp.NewScanLogService(store, lookup)
+func newScanLogHandlerForTest(
+	queryStore scanapp.ScanLogQueryStore,
+	commandStore scanapp.ScanLogCommandStore,
+	lookup scanapp.ScanLogScanLookup,
+) *ScanLogHandler {
+	service := scanapp.NewScanLogService(queryStore, commandStore, lookup)
 	return NewScanLogHandler(service)
 }
 
 func TestScanLogHandlerRejectCursorParam(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	h := newScanLogHandlerForTest(&scanLogStoreForHandlerStub{}, &scanLookupForHandlerStub{})
+	queryCommandStore := &scanLogQueryCommandStoreForHandlerStub{}
+	h := newScanLogHandlerForTest(queryCommandStore, queryCommandStore, &scanLookupForHandlerStub{})
 	router := gin.New()
 	router.GET("/api/scans/:id/logs", h.List)
 
@@ -71,8 +76,8 @@ func TestScanLogHandlerRejectCursorParam(t *testing.T) {
 
 func TestScanLogHandlerListWithAfterID(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	store := &scanLogStoreForHandlerStub{rows: []scanapp.ScanLogEntry{{ID: 11}, {ID: 12}, {ID: 13}}}
-	h := newScanLogHandlerForTest(store, &scanLookupForHandlerStub{})
+	queryCommandStore := &scanLogQueryCommandStoreForHandlerStub{rows: []scanapp.ScanLogEntry{{ID: 11}, {ID: 12}, {ID: 13}}}
+	h := newScanLogHandlerForTest(queryCommandStore, queryCommandStore, &scanLookupForHandlerStub{})
 	router := gin.New()
 	router.GET("/api/scans/:id/logs", h.List)
 
@@ -83,8 +88,8 @@ func TestScanLogHandlerListWithAfterID(t *testing.T) {
 	if resp.Code != http.StatusOK {
 		t.Fatalf("expected 200, got %d", resp.Code)
 	}
-	if store.lastAfterID != 10 || store.lastLimit != 3 {
-		t.Fatalf("unexpected paging args: afterId=%d limit=%d", store.lastAfterID, store.lastLimit)
+	if queryCommandStore.lastAfterID != 10 || queryCommandStore.lastLimit != 3 {
+		t.Fatalf("unexpected paging args: afterId=%d limit=%d", queryCommandStore.lastAfterID, queryCommandStore.lastLimit)
 	}
 	body := resp.Body.String()
 	if !contains(body, "\"hasMore\":true") {
@@ -102,8 +107,10 @@ func TestScanLogHandlerListWithAfterID(t *testing.T) {
 
 func TestScanLogHandlerScanNotFound(t *testing.T) {
 	gin.SetMode(gin.TestMode)
+	queryCommandStore := &scanLogQueryCommandStoreForHandlerStub{}
 	h := newScanLogHandlerForTest(
-		&scanLogStoreForHandlerStub{},
+		queryCommandStore,
+		queryCommandStore,
 		&scanLookupForHandlerStub{err: gorm.ErrRecordNotFound},
 	)
 	router := gin.New()

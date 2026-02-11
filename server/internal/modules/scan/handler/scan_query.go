@@ -27,7 +27,7 @@ func (h *ScanHandler) List(c *gin.Context) {
 		return
 	}
 
-	scans, total, err := h.service.List(&query)
+	scans, total, err := h.service.List(toScanListQuery(&query))
 	if err != nil {
 		dto.InternalError(c, "Failed to list scans")
 		return
@@ -35,7 +35,7 @@ func (h *ScanHandler) List(c *gin.Context) {
 
 	items := make([]dto.ScanResponse, len(scans))
 	for i, scan := range scans {
-		items[i] = *h.service.ToScanResponse(&scan)
+		items[i] = toScanResponse(&scan)
 	}
 
 	dto.Paginated(c, items, total, query.GetPage(), query.GetPageSize())
@@ -60,11 +60,11 @@ func (h *ScanHandler) GetByID(c *gin.Context) {
 		return
 	}
 
-	dto.Success(c, h.service.ToScanDetailResponse(scan))
+	dto.Success(c, toScanDetailResponse(scan))
 }
 
 // Statistics returns scan statistics.
-// GET /api/scans/statistics
+// GET /api/scans/stats
 func (h *ScanHandler) Statistics(c *gin.Context) {
 	stats, err := h.service.GetStatistics()
 	if err != nil {
@@ -72,5 +72,5 @@ func (h *ScanHandler) Statistics(c *gin.Context) {
 		return
 	}
 
-	dto.Success(c, stats)
+	dto.Success(c, toScanStatisticsResponse(stats))
 }

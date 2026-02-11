@@ -53,11 +53,11 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   }
 }
 
-// Use MiSans + system font fallback, fully loaded locally
+// Use HarmonyOS Sans SC + system font fallback, fully loaded locally
 const fontConfig = {
   className: "font-sans",
   style: {
-    fontFamily: "'MiSans', system-ui, -apple-system, PingFang SC, Hiragino Sans GB, Microsoft YaHei, sans-serif"
+    fontFamily: "'HarmonyOS Sans SC', system-ui, -apple-system, PingFang SC, Hiragino Sans GB, Microsoft YaHei, sans-serif"
   }
 }
 

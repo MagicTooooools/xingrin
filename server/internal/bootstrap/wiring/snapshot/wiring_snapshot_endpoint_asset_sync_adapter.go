@@ -14,5 +14,5 @@ func newSnapshotEndpointAssetSyncAdapter(service *assetapp.EndpointFacade) *snap
 }
 
 func (adapter *snapshotEndpointAssetSyncAdapter) BulkUpsert(targetID int, items []snapshotapp.EndpointAssetUpsertItem) (int64, error) {
-	return adapter.service.BulkUpsert(targetID, snapshotEndpointAssetUpsertItemsToDTO(items))
+	return adapter.service.BulkUpsert(targetID, snapshotEndpointAssetUpsertItemsToApplication(items))
 }

@@ -353,7 +353,7 @@ export default function DashboardDemoPage() {
           font-size: 12px;
           letter-spacing: 0.12em;
           text-transform: uppercase;
-          font-family: "IBM Plex Mono", "MiSans", sans-serif;
+          font-family: "IBM Plex Mono", "HarmonyOS Sans SC", sans-serif;
           transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
           clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
           position: relative;
@@ -407,7 +407,7 @@ export default function DashboardDemoPage() {
           text-transform: uppercase;
           color: var(--text-2);
           font-weight: 600;
-          font-family: "IBM Plex Mono", "MiSans", sans-serif;
+          font-family: "IBM Plex Mono", "HarmonyOS Sans SC", sans-serif;
         }
 
         .tag {
@@ -420,7 +420,7 @@ export default function DashboardDemoPage() {
           text-transform: uppercase;
           color: var(--text-2);
           background: var(--panel-muted);
-          font-family: "IBM Plex Mono", "MiSans", sans-serif;
+          font-family: "IBM Plex Mono", "HarmonyOS Sans SC", sans-serif;
           clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
         }
 

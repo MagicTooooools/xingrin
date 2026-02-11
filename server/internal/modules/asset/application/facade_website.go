@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"errors"
 
-	"github.com/yyhuni/lunafox/server/internal/modules/asset/dto"
 	"github.com/yyhuni/lunafox/server/internal/pkg/dberrors"
 )
 
@@ -21,8 +20,8 @@ func NewWebsiteFacade(store WebsiteStore, targetLookup WebsiteTargetLookup) *Web
 	}
 }
 
-func (service *WebsiteFacade) ListByTarget(targetID int, query *dto.WebsiteListQuery) ([]Website, int64, error) {
-	items, total, err := service.queryService.ListByTarget(context.Background(), targetID, query.GetPage(), query.GetPageSize(), query.Filter)
+func (service *WebsiteFacade) ListByTarget(targetID, page, pageSize int, filter string) ([]Website, int64, error) {
+	items, total, err := service.queryService.ListByTarget(context.Background(), targetID, page, pageSize, filter)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -85,8 +84,8 @@ func (service *WebsiteFacade) ScanRow(rows *sql.Rows) (*Website, error) {
 	return item, nil
 }
 
-func (service *WebsiteFacade) BulkUpsert(targetID int, items []dto.WebsiteUpsertItem) (int64, error) {
-	count, err := service.cmdService.BulkUpsert(context.Background(), targetID, websiteUpsertItemsFromDTO(items))
+func (service *WebsiteFacade) BulkUpsert(targetID int, items []WebsiteUpsertItem) (int64, error) {
+	count, err := service.cmdService.BulkUpsert(context.Background(), targetID, items)
 	if err != nil {
 		if errors.Is(err, ErrWebsiteTargetNotFound) {
 			return 0, ErrTargetNotFound

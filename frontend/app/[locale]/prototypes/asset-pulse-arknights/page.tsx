@@ -23,7 +23,7 @@ const themeVars = {
   "--ark-muted": "#A0A7B2",
   "--ark-accent": "#20252B",
   "--ark-accent-2": "#20252B",
-  fontFamily: "\"MiSans\", \"IBM Plex Sans\", \"Segoe UI\", sans-serif",
+  fontFamily: "\"HarmonyOS Sans SC\", \"IBM Plex Sans\", \"Segoe UI\", sans-serif",
 } as CSSProperties
 
 const pulseSeries = [182, 196, 210, 204, 228, 246, 260]
@@ -411,7 +411,7 @@ export default function AssetPulseArknightsPage() {
           text-transform: uppercase;
           color: var(--ark-text-2);
           font-weight: 600;
-          font-family: "IBM Plex Mono", "MiSans", sans-serif;
+          font-family: "IBM Plex Mono", "HarmonyOS Sans SC", sans-serif;
         }
 
         .ark-tag {
@@ -425,7 +425,7 @@ export default function AssetPulseArknightsPage() {
           text-transform: uppercase;
           color: var(--ark-text-2);
           background: var(--ark-bg-2);
-          font-family: "IBM Plex Mono", "MiSans", sans-serif;
+          font-family: "IBM Plex Mono", "HarmonyOS Sans SC", sans-serif;
           box-shadow: inset 0 0 0 1px rgba(29, 36, 44, 0.04);
         }
 
@@ -437,7 +437,7 @@ export default function AssetPulseArknightsPage() {
           letter-spacing: 0.2em;
           color: var(--ark-text-2);
           background: transparent;
-          font-family: "IBM Plex Mono", "MiSans", sans-serif;
+          font-family: "IBM Plex Mono", "HarmonyOS Sans SC", sans-serif;
         }
 
         .arkp-radar {

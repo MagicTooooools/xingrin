@@ -37,7 +37,7 @@ func (h *DirectorySnapshotHandler) BulkUpsert(c *gin.Context) {
 		return
 	}
 
-	snapshotCount, assetCount, err := h.svc.SaveAndSync(scanID, req.TargetID, req.Directories)
+	snapshotCount, assetCount, err := h.svc.SaveAndSync(scanID, req.TargetID, toDirectorySnapshotItems(req.Directories))
 	if err != nil {
 		if errors.Is(err, service.ErrScanNotFoundForSnapshot) {
 			dto.NotFound(c, "Scan not found")
@@ -71,7 +71,7 @@ func (h *DirectorySnapshotHandler) List(c *gin.Context) {
 		return
 	}
 
-	snapshots, total, err := h.svc.ListByScan(scanID, &query)
+	snapshots, total, err := h.svc.ListByScan(scanID, toSnapshotListQuery(query.GetPage(), query.GetPageSize(), query.Filter))
 	if err != nil {
 		if errors.Is(err, service.ErrScanNotFoundForSnapshot) {
 			dto.NotFound(c, "Scan not found")

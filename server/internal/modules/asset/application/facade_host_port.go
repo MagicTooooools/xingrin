@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"errors"
 
-	"github.com/yyhuni/lunafox/server/internal/modules/asset/dto"
 	"github.com/yyhuni/lunafox/server/internal/pkg/dberrors"
 )
 
@@ -21,15 +20,15 @@ func NewHostPortFacade(store HostPortStore, targetLookup HostPortTargetLookup) *
 	}
 }
 
-func (service *HostPortFacade) ListByTarget(targetID int, query *dto.HostPortListQuery) ([]dto.HostPortResponse, int64, error) {
-	items, total, err := service.queryService.ListByTarget(context.Background(), targetID, query.GetPage(), query.GetPageSize(), query.Filter)
+func (service *HostPortFacade) ListByTarget(targetID, page, pageSize int, filter string) ([]HostPortResponse, int64, error) {
+	items, total, err := service.queryService.ListByTarget(context.Background(), targetID, page, pageSize, filter)
 	if err != nil {
 		if errors.Is(err, ErrHostPortTargetNotFound) || dberrors.IsRecordNotFound(err) {
 			return nil, 0, ErrTargetNotFound
 		}
 		return nil, 0, err
 	}
-	return hostPortResponsesToDTO(items), total, nil
+	return items, total, nil
 }
 
 func (service *HostPortFacade) StreamByTarget(targetID int) (*sql.Rows, error) {
@@ -73,8 +72,8 @@ func (service *HostPortFacade) ScanRow(rows *sql.Rows) (*HostPort, error) {
 	return item, nil
 }
 
-func (service *HostPortFacade) BulkUpsert(targetID int, items []dto.HostPortItem) (int64, error) {
-	count, err := service.cmdService.BulkUpsert(context.Background(), targetID, hostPortItemsFromDTO(items))
+func (service *HostPortFacade) BulkUpsert(targetID int, items []HostPortItem) (int64, error) {
+	count, err := service.cmdService.BulkUpsert(context.Background(), targetID, items)
 	if err != nil {
 		if errors.Is(err, ErrHostPortTargetNotFound) || dberrors.IsRecordNotFound(err) {
 			return 0, ErrTargetNotFound

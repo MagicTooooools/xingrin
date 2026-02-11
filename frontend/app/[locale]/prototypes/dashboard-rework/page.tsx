@@ -31,7 +31,7 @@ const themeVars = {
   "--ark-accent-light": "rgba(24, 26, 31, 0.05)",
   "--ark-highlight": "#FF4C24", // 橙红色作为点缀（类似终末地Logo色）
   "--font-mono": "\"IBM Plex Mono\", \"JetBrains Mono\", monospace",
-  "--font-sans": "\"MiSans\", \"Inter\", sans-serif",
+  "--font-sans": "\"HarmonyOS Sans SC\", \"Inter\", sans-serif",
 } as CSSProperties
 
 const stats = [

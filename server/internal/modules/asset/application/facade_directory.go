@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"errors"
 
-	"github.com/yyhuni/lunafox/server/internal/modules/asset/dto"
 	"github.com/yyhuni/lunafox/server/internal/pkg/dberrors"
 )
 
@@ -23,8 +22,8 @@ func NewDirectoryFacade(store DirectoryStore, targetLookup DirectoryTargetLookup
 	}
 }
 
-func (service *DirectoryFacade) ListByTarget(targetID int, query *dto.DirectoryListQuery) ([]Directory, int64, error) {
-	items, total, err := service.queryService.ListByTarget(context.Background(), targetID, query.GetPage(), query.GetPageSize(), query.Filter)
+func (service *DirectoryFacade) ListByTarget(targetID, page, pageSize int, filter string) ([]Directory, int64, error) {
+	items, total, err := service.queryService.ListByTarget(context.Background(), targetID, page, pageSize, filter)
 	if err != nil {
 		if errors.Is(err, ErrDirectoryTargetNotFound) || dberrors.IsRecordNotFound(err) {
 			return nil, 0, ErrTargetNotFound
@@ -79,8 +78,8 @@ func (service *DirectoryFacade) ScanRow(rows *sql.Rows) (*Directory, error) {
 	return item, nil
 }
 
-func (service *DirectoryFacade) BulkUpsert(targetID int, items []dto.DirectoryUpsertItem) (int64, error) {
-	affected, err := service.cmdService.BulkUpsert(context.Background(), targetID, directoryUpsertItemsFromDTO(items))
+func (service *DirectoryFacade) BulkUpsert(targetID int, items []DirectoryUpsertItem) (int64, error) {
+	affected, err := service.cmdService.BulkUpsert(context.Background(), targetID, items)
 	if err != nil {
 		if errors.Is(err, ErrDirectoryTargetNotFound) || dberrors.IsRecordNotFound(err) {
 			return 0, ErrTargetNotFound

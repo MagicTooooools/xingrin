@@ -38,7 +38,7 @@ func (h *EndpointSnapshotHandler) BulkUpsert(c *gin.Context) {
 		return
 	}
 
-	snapshotCount, assetCount, err := h.svc.SaveAndSync(scanID, req.TargetID, req.Endpoints)
+	snapshotCount, assetCount, err := h.svc.SaveAndSync(scanID, req.TargetID, toEndpointSnapshotItems(req.Endpoints))
 	if err != nil {
 		if errors.Is(err, service.ErrScanNotFoundForSnapshot) {
 			dto.NotFound(c, "Scan not found")
@@ -68,7 +68,7 @@ func (h *EndpointSnapshotHandler) List(c *gin.Context) {
 		return
 	}
 
-	snapshots, total, err := h.svc.ListByScan(scanID, &query)
+	snapshots, total, err := h.svc.ListByScan(scanID, toSnapshotListQuery(query.GetPage(), query.GetPageSize(), query.Filter))
 	if err != nil {
 		if errors.Is(err, service.ErrScanNotFoundForSnapshot) {
 			dto.NotFound(c, "Scan not found")

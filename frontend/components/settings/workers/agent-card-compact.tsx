@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo } from "react"
+import { type ReactNode, useMemo } from "react"
 import { useTranslations } from "next-intl"
 import {
   IconDotsVertical,
@@ -8,6 +8,9 @@ import {
   IconTrash,
   IconActivity,
   IconClock,
+  IconCpu,
+  IconDatabase,
+  HardDrive,
 } from "@/components/icons"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -24,19 +27,31 @@ import { useFormatNumber, useFormatRelativeTime } from "@/lib/i18n-format"
 import { cn } from "@/lib/utils"
 import type { Agent } from "@/types/agent.types"
 
-function StatusDot({ status }: { status: string }) {
-  const color = status === "online"
-    ? "bg-[var(--success)]"
-    : status === "offline"
-      ? "bg-[var(--error)]"
-      : "bg-[var(--warning)]"
+function getStatusVariant(status: string) {
+  const normalized = status.toLowerCase()
+  if (normalized === "online") return "online"
+  if (normalized === "offline") return "offline"
+  if (normalized === "maintenance") return "maintenance"
+  return "unknown"
+}
+
+function StatusBadge({ status, label }: { status: string; label: string }) {
+  const variant = getStatusVariant(status)
+  const styles = {
+    online: "bg-[var(--success)]/15 text-[var(--success)] border-[var(--success)]/25",
+    offline: "bg-muted text-muted-foreground border-border",
+    maintenance: "bg-[var(--warning)]/15 text-[var(--warning)] border-[var(--warning)]/25",
+    unknown: "bg-muted text-muted-foreground border-border",
+  }
 
   return (
-    <span className="flex h-2 w-2 relative">
-      {status === "online" && (
-        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+    <span
+      className={cn(
+        "inline-flex shrink-0 items-center rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide",
+        styles[variant]
       )}
-      <span className={cn("relative inline-flex rounded-full h-2 w-2", color)} />
+    >
+      {label}
     </span>
   )
 }
@@ -56,9 +71,10 @@ interface MetricSegmentedProgressProps {
   label: string
   value: number
   threshold?: number
+  icon?: ReactNode
 }
 
-function MetricSegmentedProgress({ label, value, threshold }: MetricSegmentedProgressProps) {
+function MetricSegmentedProgress({ label, value, threshold, icon }: MetricSegmentedProgressProps) {
   const percentage = Math.min(100, Math.max(0, value))
   const segmentCount = 25
 
@@ -74,7 +90,10 @@ function MetricSegmentedProgress({ label, value, threshold }: MetricSegmentedPro
   return (
     <div className="space-y-1">
       <div className="flex items-center justify-between text-[10px]">
-        <span>{label}</span>
+        <div className="flex items-center gap-1.5">
+          {icon && <span className="text-muted-foreground/80">{icon}</span>}
+          <span>{label}</span>
+        </div>
         <div className="flex items-center gap-1.5">
           <span className={cn("tabular-nums", isCritical && "text-[var(--error)]")}>
             {percentage.toFixed(0)}%
@@ -135,13 +154,20 @@ export function AgentCardCompact({
 
   const isHeartbeatStale = lastHeartbeatSeconds !== null && lastHeartbeatSeconds > 30
   const lastSeenText = formatRelativeTime(agent.lastHeartbeat)
+  const statusVariant = getStatusVariant(agent.status)
+  const statusLabel = statusVariant === "online"
+    ? t("status.online")
+    : statusVariant === "offline"
+      ? t("status.offline")
+      : statusVariant === "maintenance"
+        ? t("status.maintenance")
+        : t("status.unknown")
 
   return (
     <Card className="group flex flex-col rounded-lg border border-border bg-card text-card-foreground shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden gap-0 py-0">
       <div className="flex items-center justify-between p-3 border-b border-border/50 bg-muted/20">
-        <div className="flex items-center gap-3 min-w-0">
-          <StatusDot status={agent.status} />
-
+        <div className="min-w-0 flex flex-1 items-center gap-2.5">
+          <StatusBadge status={agent.status} label={statusLabel} />
           <div className="min-w-0">
             <div className="font-bold text-sm leading-none truncate" title={agent.name}>
               {agent.name}
@@ -196,16 +222,19 @@ export function AgentCardCompact({
               label={t("metrics.cpu")}
               value={heartbeat.cpu}
               threshold={agent.cpuThreshold}
+              icon={<IconCpu className="h-3 w-3" />}
             />
             <MetricSegmentedProgress
               label={t("metrics.mem")}
               value={heartbeat.mem}
               threshold={agent.memThreshold}
+              icon={<IconDatabase className="h-3 w-3" />}
             />
             <MetricSegmentedProgress
               label={t("metrics.disk")}
               value={heartbeat.disk}
               threshold={agent.diskThreshold}
+              icon={<HardDrive className="h-3 w-3" />}
             />
           </div>
         ) : (
