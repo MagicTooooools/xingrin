@@ -1,16 +1,16 @@
 # catalog/router
 
-## 结构说明
-- 公开入口：`routes.go`（`RegisterCatalogRoutes`）
-- 其余文件为包内私有子注册函数（`register*Routes`）
+## Structure
+- Public entry: `routes.go` (`RegisterCatalogRoutes`)
+- Other files contain package-private sub-route registrars (`register*Routes`)
 
-## 文件
-- `targets.go`：target 路由
-- `engines.go`：engine 路由
-- `presets.go`：preset 路由
-- `wordlists.go`：wordlist 路由
-- `worker.go`：worker 路由
+## Files
+- `targets.go`: target routes
+- `engines.go`: engine routes
+- `presets.go`: preset routes
+- `wordlists.go`: wordlist routes
+- `worker.go`: worker routes
 
-## 约束
-- 外部只调用 `RegisterCatalogRoutes`
-- 子路由按资源拆分，函数保持私有
+## Constraints
+- External callers should only use `RegisterCatalogRoutes`
+- Keep resource route registration split by resource, with private helper functions
