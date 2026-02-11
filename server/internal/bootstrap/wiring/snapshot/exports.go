@@ -5,6 +5,7 @@ import (
 	scanrepo "github.com/yyhuni/lunafox/server/internal/modules/scan/repository"
 	securityapp "github.com/yyhuni/lunafox/server/internal/modules/security/application"
 	snapshotapp "github.com/yyhuni/lunafox/server/internal/modules/snapshot/application"
+	snapshotinfra "github.com/yyhuni/lunafox/server/internal/modules/snapshot/infrastructure"
 	snapshotrepo "github.com/yyhuni/lunafox/server/internal/modules/snapshot/repository"
 )
 
@@ -12,32 +13,60 @@ func NewSnapshotScanRefLookupAdapter(repo *scanrepo.ScanRepository) snapshotapp.
 	return newSnapshotScanRefLookupAdapter(repo)
 }
 
-func NewSnapshotWebsiteStoreAdapter(repo *snapshotrepo.WebsiteSnapshotRepository) snapshotapp.WebsiteSnapshotStore {
-	return newSnapshotWebsiteStoreAdapter(repo)
+func NewSnapshotWebsiteQueryStoreAdapter(repo *snapshotrepo.WebsiteSnapshotRepository) snapshotapp.WebsiteSnapshotQueryStore {
+	return newSnapshotWebsiteQueryStoreAdapter(repo)
 }
 
-func NewSnapshotSubdomainStoreAdapter(repo *snapshotrepo.SubdomainSnapshotRepository) snapshotapp.SubdomainSnapshotStore {
-	return newSnapshotSubdomainStoreAdapter(repo)
+func NewSnapshotSubdomainQueryStoreAdapter(repo *snapshotrepo.SubdomainSnapshotRepository) snapshotapp.SubdomainSnapshotQueryStore {
+	return newSnapshotSubdomainQueryStoreAdapter(repo)
 }
 
-func NewSnapshotEndpointStoreAdapter(repo *snapshotrepo.EndpointSnapshotRepository) snapshotapp.EndpointSnapshotStore {
-	return newSnapshotEndpointStoreAdapter(repo)
+func NewSnapshotEndpointQueryStoreAdapter(repo *snapshotrepo.EndpointSnapshotRepository) snapshotapp.EndpointSnapshotQueryStore {
+	return newSnapshotEndpointQueryStoreAdapter(repo)
 }
 
-func NewSnapshotDirectoryStoreAdapter(repo *snapshotrepo.DirectorySnapshotRepository) snapshotapp.DirectorySnapshotStore {
-	return newSnapshotDirectoryStoreAdapter(repo)
+func NewSnapshotDirectoryQueryStoreAdapter(repo *snapshotrepo.DirectorySnapshotRepository) snapshotapp.DirectorySnapshotQueryStore {
+	return newSnapshotDirectoryQueryStoreAdapter(repo)
 }
 
-func NewSnapshotHostPortStoreAdapter(repo *snapshotrepo.HostPortSnapshotRepository) snapshotapp.HostPortSnapshotStore {
-	return newSnapshotHostPortStoreAdapter(repo)
+func NewSnapshotHostPortQueryStoreAdapter(repo *snapshotrepo.HostPortSnapshotRepository) snapshotapp.HostPortSnapshotQueryStore {
+	return newSnapshotHostPortQueryStoreAdapter(repo)
 }
 
-func NewSnapshotScreenshotStoreAdapter(repo *snapshotrepo.ScreenshotSnapshotRepository) snapshotapp.ScreenshotSnapshotStore {
-	return newSnapshotScreenshotStoreAdapter(repo)
+func NewSnapshotScreenshotQueryStoreAdapter(repo *snapshotrepo.ScreenshotSnapshotRepository) snapshotapp.ScreenshotSnapshotQueryStore {
+	return newSnapshotScreenshotQueryStoreAdapter(repo)
 }
 
-func NewSnapshotVulnerabilityStoreAdapter(repo *snapshotrepo.VulnerabilitySnapshotRepository) snapshotapp.VulnerabilitySnapshotStore {
-	return newSnapshotVulnerabilityStoreAdapter(repo)
+func NewSnapshotVulnerabilityQueryStoreAdapter(repo *snapshotrepo.VulnerabilitySnapshotRepository) snapshotapp.VulnerabilitySnapshotQueryStore {
+	return newSnapshotVulnerabilityQueryStoreAdapter(repo)
+}
+
+func NewSnapshotWebsiteCommandStoreAdapter(repo *snapshotrepo.WebsiteSnapshotRepository) snapshotapp.WebsiteSnapshotCommandStore {
+	return newSnapshotWebsiteCommandStoreAdapter(repo)
+}
+
+func NewSnapshotSubdomainCommandStoreAdapter(repo *snapshotrepo.SubdomainSnapshotRepository) snapshotapp.SubdomainSnapshotCommandStore {
+	return newSnapshotSubdomainCommandStoreAdapter(repo)
+}
+
+func NewSnapshotEndpointCommandStoreAdapter(repo *snapshotrepo.EndpointSnapshotRepository) snapshotapp.EndpointSnapshotCommandStore {
+	return newSnapshotEndpointCommandStoreAdapter(repo)
+}
+
+func NewSnapshotDirectoryCommandStoreAdapter(repo *snapshotrepo.DirectorySnapshotRepository) snapshotapp.DirectorySnapshotCommandStore {
+	return newSnapshotDirectoryCommandStoreAdapter(repo)
+}
+
+func NewSnapshotHostPortCommandStoreAdapter(repo *snapshotrepo.HostPortSnapshotRepository) snapshotapp.HostPortSnapshotCommandStore {
+	return newSnapshotHostPortCommandStoreAdapter(repo)
+}
+
+func NewSnapshotScreenshotCommandStoreAdapter(repo *snapshotrepo.ScreenshotSnapshotRepository) snapshotapp.ScreenshotSnapshotCommandStore {
+	return newSnapshotScreenshotCommandStoreAdapter(repo)
+}
+
+func NewSnapshotVulnerabilityCommandStoreAdapter(repo *snapshotrepo.VulnerabilitySnapshotRepository) snapshotapp.VulnerabilitySnapshotCommandStore {
+	return newSnapshotVulnerabilityCommandStoreAdapter(repo)
 }
 
 func NewSnapshotWebsiteAssetSyncAdapter(service *assetapp.WebsiteFacade) snapshotapp.WebsiteAssetSync {
@@ -69,76 +98,83 @@ func NewSnapshotVulnerabilityAssetSyncAdapter(service *securityapp.Vulnerability
 }
 
 func NewSnapshotVulnerabilityRawOutputCodec() snapshotapp.VulnerabilityRawOutputCodec {
-	return newSnapshotVulnerabilityRawOutputCodec()
+	return snapshotinfra.NewVulnerabilityRawOutputCodec()
 }
 
 func NewSnapshotWebsiteApplicationService(
-	store snapshotapp.WebsiteSnapshotStore,
+	queryStore snapshotapp.WebsiteSnapshotQueryStore,
+	commandStore snapshotapp.WebsiteSnapshotCommandStore,
 	scanLookup snapshotapp.SnapshotScanRefLookup,
 	assetSync snapshotapp.WebsiteAssetSync,
 ) *snapshotapp.WebsiteSnapshotFacade {
-	queryService := snapshotapp.NewWebsiteSnapshotQueryService(store, scanLookup)
-	commandService := snapshotapp.NewWebsiteSnapshotCommandService(store, scanLookup, assetSync)
+	queryService := snapshotapp.NewWebsiteSnapshotQueryService(queryStore, scanLookup)
+	commandService := snapshotapp.NewWebsiteSnapshotCommandService(commandStore, scanLookup, assetSync)
 	return snapshotapp.NewWebsiteSnapshotFacade(queryService, commandService)
 }
 
 func NewSnapshotSubdomainApplicationService(
-	store snapshotapp.SubdomainSnapshotStore,
+	queryStore snapshotapp.SubdomainSnapshotQueryStore,
+	commandStore snapshotapp.SubdomainSnapshotCommandStore,
 	scanLookup snapshotapp.SnapshotScanRefLookup,
 	assetSync snapshotapp.SubdomainAssetSync,
 ) *snapshotapp.SubdomainSnapshotFacade {
-	queryService := snapshotapp.NewSubdomainSnapshotQueryService(store, scanLookup)
-	commandService := snapshotapp.NewSubdomainSnapshotCommandService(store, scanLookup, assetSync)
+	queryService := snapshotapp.NewSubdomainSnapshotQueryService(queryStore, scanLookup)
+	commandService := snapshotapp.NewSubdomainSnapshotCommandService(commandStore, scanLookup, assetSync)
 	return snapshotapp.NewSubdomainSnapshotFacade(queryService, commandService)
 }
 
 func NewSnapshotEndpointApplicationService(
-	store snapshotapp.EndpointSnapshotStore,
+	queryStore snapshotapp.EndpointSnapshotQueryStore,
+	commandStore snapshotapp.EndpointSnapshotCommandStore,
 	scanLookup snapshotapp.SnapshotScanRefLookup,
 	assetSync snapshotapp.EndpointAssetSync,
 ) *snapshotapp.EndpointSnapshotFacade {
-	queryService := snapshotapp.NewEndpointSnapshotQueryService(store, scanLookup)
-	commandService := snapshotapp.NewEndpointSnapshotCommandService(store, scanLookup, assetSync)
+	queryService := snapshotapp.NewEndpointSnapshotQueryService(queryStore, scanLookup)
+	commandService := snapshotapp.NewEndpointSnapshotCommandService(commandStore, scanLookup, assetSync)
 	return snapshotapp.NewEndpointSnapshotFacade(queryService, commandService)
 }
 
 func NewSnapshotDirectoryApplicationService(
-	store snapshotapp.DirectorySnapshotStore,
+	queryStore snapshotapp.DirectorySnapshotQueryStore,
+	commandStore snapshotapp.DirectorySnapshotCommandStore,
 	scanLookup snapshotapp.SnapshotScanRefLookup,
 	assetSync snapshotapp.DirectoryAssetSync,
 ) *snapshotapp.DirectorySnapshotFacade {
-	queryService := snapshotapp.NewDirectorySnapshotQueryService(store, scanLookup)
-	commandService := snapshotapp.NewDirectorySnapshotCommandService(store, scanLookup, assetSync)
+	queryService := snapshotapp.NewDirectorySnapshotQueryService(queryStore, scanLookup)
+	commandService := snapshotapp.NewDirectorySnapshotCommandService(commandStore, scanLookup, assetSync)
 	return snapshotapp.NewDirectorySnapshotFacade(queryService, commandService)
 }
 
 func NewSnapshotHostPortApplicationService(
-	store snapshotapp.HostPortSnapshotStore,
+	queryStore snapshotapp.HostPortSnapshotQueryStore,
+	commandStore snapshotapp.HostPortSnapshotCommandStore,
 	scanLookup snapshotapp.SnapshotScanRefLookup,
 	assetSync snapshotapp.HostPortAssetSync,
 ) *snapshotapp.HostPortSnapshotFacade {
-	queryService := snapshotapp.NewHostPortSnapshotQueryService(store, scanLookup)
-	commandService := snapshotapp.NewHostPortSnapshotCommandService(store, scanLookup, assetSync)
+	queryService := snapshotapp.NewHostPortSnapshotQueryService(queryStore, scanLookup)
+	commandService := snapshotapp.NewHostPortSnapshotCommandService(commandStore, scanLookup, assetSync)
 	return snapshotapp.NewHostPortSnapshotFacade(queryService, commandService)
 }
 
 func NewSnapshotScreenshotApplicationService(
-	store snapshotapp.ScreenshotSnapshotStore,
+	queryStore snapshotapp.ScreenshotSnapshotQueryStore,
+	commandStore snapshotapp.ScreenshotSnapshotCommandStore,
 	scanLookup snapshotapp.SnapshotScanRefLookup,
 	assetSync snapshotapp.ScreenshotAssetSync,
 ) *snapshotapp.ScreenshotSnapshotFacade {
-	queryService := snapshotapp.NewScreenshotSnapshotQueryService(store, scanLookup)
-	commandService := snapshotapp.NewScreenshotSnapshotCommandService(store, scanLookup, assetSync)
+	queryService := snapshotapp.NewScreenshotSnapshotQueryService(queryStore, scanLookup)
+	commandService := snapshotapp.NewScreenshotSnapshotCommandService(commandStore, scanLookup, assetSync)
 	return snapshotapp.NewScreenshotSnapshotFacade(queryService, commandService)
 }
 
 func NewSnapshotVulnerabilityApplicationService(
-	store snapshotapp.VulnerabilitySnapshotStore,
+	queryStore snapshotapp.VulnerabilitySnapshotQueryStore,
+	commandStore snapshotapp.VulnerabilitySnapshotCommandStore,
 	scanLookup snapshotapp.SnapshotScanRefLookup,
 	assetSync snapshotapp.VulnerabilityAssetSync,
 	rawOutputCodec snapshotapp.VulnerabilityRawOutputCodec,
 ) *snapshotapp.VulnerabilitySnapshotFacade {
-	queryService := snapshotapp.NewVulnerabilitySnapshotQueryService(store, scanLookup)
-	commandService := snapshotapp.NewVulnerabilitySnapshotCommandService(store, scanLookup, assetSync, rawOutputCodec)
+	queryService := snapshotapp.NewVulnerabilitySnapshotQueryService(queryStore, scanLookup)
+	commandService := snapshotapp.NewVulnerabilitySnapshotCommandService(commandStore, scanLookup, assetSync, rawOutputCodec)
 	return snapshotapp.NewVulnerabilitySnapshotFacade(queryService, commandService)
 }

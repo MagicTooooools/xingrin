@@ -9,7 +9,7 @@ metadata:
 tools:
   subfinder:
     metadata:
-      # display_name 缺失
+      # display_name missing
       stage: "recon"
     base_command: "subfinder -d {{.Domain}}"
     cli_params: []

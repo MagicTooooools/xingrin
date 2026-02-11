@@ -11,10 +11,6 @@ import {
 import { Button } from "@/components/ui/button"
 import {
   Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
 } from "@/components/ui/card"
 import {
   Dialog,
@@ -31,6 +27,7 @@ import type { Agent, RegistrationTokenResponse } from "@/types/agent.types"
 import { AgentConfigDialog } from "./worker-dialog"
 import { AgentCardCompact } from "./agent-card-compact"
 import { AgentInstallDialog } from "./agent-install-dialog"
+import { ArchitectureDialog } from "./architecture-dialog"
 
 function EmptyState({ onOpenInstall }: { onOpenInstall: () => void }) {
   const t = useTranslations("settings.workers")
@@ -134,16 +131,10 @@ export function AgentList() {
         </div>
       )}
 
-      <Card>
-        <CardHeader>
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <CardTitle className="flex items-center gap-2">
-                <IconServer className="h-5 w-5" />
-                {t("agents.title")}
-              </CardTitle>
-              <CardDescription>{t("agents.desc")}</CardDescription>
-            </div>
+      <div className="space-y-4">
+        <div className="flex justify-end">
+          <div className="flex items-center gap-2">
+            <ArchitectureDialog />
             <Dialog open={installOpen} onOpenChange={setInstallOpen}>
               <DialogTrigger asChild>
                 <Button size="sm">
@@ -160,30 +151,29 @@ export function AgentList() {
 
             </Dialog>
           </div>
-        </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {[...Array(3)].map((_, i) => (
-                <Skeleton key={i} className="h-52 w-full rounded-lg" />
-              ))}
-            </div>
-          ) : !hasAgents ? (
-            <EmptyState onOpenInstall={() => setInstallOpen(true)} />
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {agents.map((agent) => (
-                <AgentCardCompact
-                  key={agent.id}
-                  agent={agent}
-                  onConfig={handleConfigure}
-                  onDelete={handleDelete}
-                />
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+        </div>
+
+        {isLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[...Array(3)].map((_, i) => (
+              <Skeleton key={i} className="h-52 w-full rounded-lg" />
+            ))}
+          </div>
+        ) : !hasAgents ? (
+          <EmptyState onOpenInstall={() => setInstallOpen(true)} />
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {agents.map((agent) => (
+              <AgentCardCompact
+                key={agent.id}
+                agent={agent}
+                onConfig={handleConfigure}
+                onDelete={handleDelete}
+              />
+            ))}
+          </div>
+        )}
+      </div>
 
       <AgentConfigDialog
         open={configDialogOpen}

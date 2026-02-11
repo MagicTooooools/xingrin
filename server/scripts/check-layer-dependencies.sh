@@ -26,7 +26,7 @@ collect_files() {
   find "$MODULE_ROOT" -type f -path "$pattern" ! -name '*_test.go' | sort
 }
 
-# 1) handler 层禁止依赖 legacy/service、legacy model 与 persistence 实现
+# 1) handler layer must not depend on legacy/service, legacy model, or persistence implementations
 HANDLER_FILES=()
 while IFS= read -r file; do HANDLER_FILES+=("$file"); done < <(collect_files '*/handler/*.go')
 while IFS= read -r file; do HANDLER_FILES+=("$file"); done < <(collect_files '*/handler/*/*.go')
@@ -41,7 +41,7 @@ if [[ ${#HANDLER_FILES[@]} -gt 0 ]]; then
   fi
 fi
 
-# 2) application（核心）禁止回退到 web/中间件层
+# 2) core application layer must not depend on web/middleware layers
 APP_CORE_FILES=()
 while IFS= read -r file; do APP_CORE_FILES+=("$file"); done < <(
   find "$MODULE_ROOT" -type f -path '*/application/*.go' ! -name '*_test.go' ! -name 'facade_*.go' | sort
@@ -53,7 +53,7 @@ if [[ ${#APP_CORE_FILES[@]} -gt 0 ]]; then
   fi
 fi
 
-# 2.1) 已 strict 收口模块：application 禁止依赖 repository 实现层
+# 2.1) strict modules: application must not depend on repository implementations
 STRICT_MODULES=(agent security catalog identity asset scan snapshot)
 for module in "${STRICT_MODULES[@]}"; do
   APP_FILES=()
@@ -69,7 +69,7 @@ for module in "${STRICT_MODULES[@]}"; do
   fi
 done
 
-# 3) repository 层禁止依赖 handler/router
+# 3) repository layer must not depend on handler/router
 REPO_FILES=()
 while IFS= read -r file; do REPO_FILES+=("$file"); done < <(collect_files '*/repository/*.go')
 if [[ ${#REPO_FILES[@]} -gt 0 ]]; then
@@ -79,7 +79,7 @@ if [[ ${#REPO_FILES[@]} -gt 0 ]]; then
   fi
 fi
 
-# 4) catalog wiring 禁止承载 model<->domain 映射（应下沉 repository）
+# 4) catalog wiring must not host model<->domain mapping (should be in repository)
 CATALOG_WIRING_DIR="$ROOT_DIR/internal/bootstrap/wiring/catalog"
 if [[ -d "$CATALOG_WIRING_DIR" ]]; then
   legacy_mapper_files="$(find "$CATALOG_WIRING_DIR" -type f -name '*mappers.go' ! -name '*_test.go' | sort || true)"

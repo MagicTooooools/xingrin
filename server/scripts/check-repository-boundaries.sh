@@ -33,7 +33,7 @@ if [[ -n "$types_files" ]]; then
   append_violation "禁止 repository 使用泛名 types.go（请改为具体资源文件）" "$types_files"
 fi
 
-# mapper 文件必须使用资源前缀：<resource>_mapper.go 且同目录存在 <resource>.go
+# Mapper files must use resource prefix: <resource>_mapper.go and have sibling <resource>.go
 MAPPER_FILES=()
 while IFS= read -r file; do
   MAPPER_FILES+=("$file")

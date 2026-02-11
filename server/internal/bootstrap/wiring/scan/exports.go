@@ -8,11 +8,11 @@ import (
 )
 
 func NewScanQueryStoreAdapter(repo *scanrepo.ScanRepository) scanapp.ScanQueryStore {
-	return newScanStoreAdapter(repo)
+	return newScanQueryStoreAdapter(repo)
 }
 
 func NewScanCommandStoreAdapter(repo *scanrepo.ScanRepository) scanapp.ScanCommandStore {
-	return newScanStoreAdapter(repo)
+	return newScanCommandStoreAdapter(repo)
 }
 
 func NewScanDomainRepositoryAdapter(repo *scanrepo.ScanRepository) scandomain.ScanRepository {

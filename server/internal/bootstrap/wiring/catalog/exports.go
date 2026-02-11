@@ -6,18 +6,30 @@ import (
 	identityrepo "github.com/yyhuni/lunafox/server/internal/modules/identity/repository"
 )
 
-func NewCatalogEngineStoreAdapter(repo *catalogrepo.EngineRepository) catalogapp.EngineStore {
+func NewCatalogEngineQueryStoreAdapter(repo *catalogrepo.EngineRepository) catalogapp.EngineQueryStore {
 	return newCatalogEngineStoreAdapter(repo)
 }
 
-func NewCatalogTargetStoreAdapter(repo *catalogrepo.TargetRepository) catalogapp.TargetStore {
+func NewCatalogEngineCommandStoreAdapter(repo *catalogrepo.EngineRepository) catalogapp.EngineCommandStore {
+	return newCatalogEngineStoreAdapter(repo)
+}
+
+func NewCatalogTargetQueryStoreAdapter(repo *catalogrepo.TargetRepository) catalogapp.TargetQueryStore {
 	return newCatalogTargetStoreAdapter(repo)
 }
 
-func NewCatalogOrganizationStoreAdapter(repo *identityrepo.OrganizationRepository) catalogapp.OrganizationStore {
-	return newCatalogOrganizationStoreAdapter(repo)
+func NewCatalogTargetCommandStoreAdapter(repo *catalogrepo.TargetRepository) catalogapp.TargetCommandStore {
+	return newCatalogTargetStoreAdapter(repo)
 }
 
-func NewCatalogWordlistStoreAdapter(repo *catalogrepo.WordlistRepository) catalogapp.WordlistStore {
+func NewCatalogOrganizationTargetBindingStoreAdapter(repo *identityrepo.OrganizationRepository) catalogapp.OrganizationTargetBindingStore {
+	return newCatalogOrganizationTargetBindingStoreAdapter(repo)
+}
+
+func NewCatalogWordlistQueryStoreAdapter(repo *catalogrepo.WordlistRepository) catalogapp.WordlistQueryStore {
+	return newCatalogWordlistStoreAdapter(repo)
+}
+
+func NewCatalogWordlistCommandStoreAdapter(repo *catalogrepo.WordlistRepository) catalogapp.WordlistCommandStore {
 	return newCatalogWordlistStoreAdapter(repo)
 }

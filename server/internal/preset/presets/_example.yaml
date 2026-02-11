@@ -1,17 +1,17 @@
-# _example.yaml - 预设引擎模板示例（此文件不会被加载）
-# 复制此文件并重命名为 <id>.yaml 来创建新预设
+# _example.yaml - example preset engine template (this file is not loaded)
+# Copy this file and rename it to <id>.yaml to create a new preset
 #
-# 字段说明：
-#   id:            唯一标识符，建议与文件名一致
-#   name:          显示名称，支持中文
-#   description:   描述，说明预设用途（可选）
-#   configuration: YAML 配置内容，使用 | 多行字符串
+# Field descriptions:
+#   id:            Unique identifier; recommended to match the filename
+#   name:          Display name (Unicode supported)
+#   description:   Optional description of preset purpose
+#   configuration: YAML configuration content, use | for multi-line string
 #
-# 前端会从 configuration 自动解析出启用的功能（enabledFeatures）
-# 支持的功能: subdomain_discovery, port_scan, site_scan, fingerprint_detect,
+# Frontend automatically parses enabled features (enabledFeatures) from configuration
+# Supported features: subdomain_discovery, port_scan, site_scan, fingerprint_detect,
 #            directory_scan, url_fetch, vuln_scan, waf_detection, screenshot, osint
 #
-# 注意：configuration 内容会在服务启动时用 JSON Schema 校验，请确保格式正确
+# Note: configuration content is validated by JSON Schema at startup; ensure valid format
 
 id: example_preset
 name: 示例预设

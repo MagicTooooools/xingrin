@@ -13,20 +13,16 @@ func newIdentityUserStoreAdapter(repo *identityrepo.UserRepository) *identityUse
 	return &identityUserStoreAdapter{repo: repo}
 }
 
-func (adapter *identityUserStoreAdapter) GetByID(id int) (*identitydomain.User, error) {
-	user, err := adapter.repo.GetByID(id)
-	if err != nil {
-		return nil, err
-	}
-	return identityModelUserToDomain(user), nil
+func (adapter *identityUserStoreAdapter) GetUserByID(id int) (*identitydomain.User, error) {
+	return adapter.getUserByID(id)
 }
 
-func (adapter *identityUserStoreAdapter) FindByUsername(username string) (*identitydomain.User, error) {
-	user, err := adapter.repo.FindByUsername(username)
-	if err != nil {
-		return nil, err
-	}
-	return identityModelUserToDomain(user), nil
+func (adapter *identityUserStoreAdapter) GetAuthUserByID(id int) (*identitydomain.User, error) {
+	return adapter.getUserByID(id)
+}
+
+func (adapter *identityUserStoreAdapter) FindAuthUserByUsername(username string) (*identitydomain.User, error) {
+	return adapter.findUserByUsername(username)
 }
 
 func (adapter *identityUserStoreAdapter) ExistsByUsername(username string) (bool, error) {
@@ -57,4 +53,20 @@ func (adapter *identityUserStoreAdapter) Create(user *identitydomain.User) error
 
 func (adapter *identityUserStoreAdapter) Update(user *identitydomain.User) error {
 	return adapter.repo.Update(identityDomainUserToModel(user))
+}
+
+func (adapter *identityUserStoreAdapter) getUserByID(id int) (*identitydomain.User, error) {
+	user, err := adapter.repo.GetByID(id)
+	if err != nil {
+		return nil, err
+	}
+	return identityModelUserToDomain(user), nil
+}
+
+func (adapter *identityUserStoreAdapter) findUserByUsername(username string) (*identitydomain.User, error) {
+	user, err := adapter.repo.FindByUsername(username)
+	if err != nil {
+		return nil, err
+	}
+	return identityModelUserToDomain(user), nil
 }

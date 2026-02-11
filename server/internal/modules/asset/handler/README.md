@@ -1,8 +1,8 @@
 # asset/handler
 
-asset 模块 handler 层统一按“资源子目录”组织：
+The asset module handler layer is organized by resource subdirectories:
 
-- `health.go`：健康检查（模块级）
+- `health.go`: health check (module-level)
 - `website/`
 - `endpoint/`
 - `subdomain/`
@@ -10,14 +10,14 @@ asset 模块 handler 层统一按“资源子目录”组织：
 - `host_port/`
 - `screenshot/`
 
-各资源子目录遵循固定职责拆分：
+Each resource subdirectory follows a fixed responsibility split:
 
-- `handler.go`：Handler 结构体与构造函数
-- `read.go`：读接口
-- `write.go`：写接口（不含 `bulk-upsert`）
-- `export.go`：导出接口（仅有导出能力的资源）
+- `handler.go`: handler struct and constructor
+- `read.go`: read APIs
+- `write.go`: write APIs (excluding `bulk-upsert`)
+- `export.go`: export APIs (only for resources that support export)
 
-## 约定
+## Conventions
 
-- `bulk-upsert` 统一由 `snapshot` 模块 handler 承接，不在 `asset/handler/*/write.go` 内实现。
-- `asset` 资源 handler 仅保留查询、导出、创建、删除等资产侧接口。
+- `bulk-upsert` is handled by snapshot handlers, not by `asset/handler/*/write.go`.
+- Asset handlers should keep only asset-facing APIs such as query, export, create, and delete.

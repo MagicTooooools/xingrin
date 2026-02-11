@@ -6,18 +6,12 @@ import {
   IconDotsVertical,
   IconSettings,
   IconTrash,
-  IconAlertTriangle,
   IconActivity,
-  IconMapPin,
   IconClock,
 } from "@/components/icons"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import {
-  Card,
-  CardContent,
-  CardHeader,
-} from "@/components/ui/card"
+import { Card } from "@/components/ui/card"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,23 +20,25 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Separator } from "@/components/ui/separator"
-import { useFormatDate, useFormatNumber } from "@/lib/i18n-format"
+import { useFormatNumber, useFormatRelativeTime } from "@/lib/i18n-format"
 import { cn } from "@/lib/utils"
 import type { Agent } from "@/types/agent.types"
 
-function getHealthStyle(state: string) {
-  const normalized = state.toLowerCase()
-  if (normalized === "ok") {
-    return "bg-[var(--success)]/10 text-[var(--success)] border-[var(--success)]/20"
-  }
-  if (normalized === "warning" || normalized === "warn") {
-    return "bg-[var(--warning)]/10 text-[var(--warning)] border-[var(--warning)]/20"
-  }
-  if (normalized === "error" || normalized === "critical") {
-    return "bg-[var(--error)]/10 text-[var(--error)] border-[var(--error)]/20"
-  }
-  return "bg-muted text-muted-foreground border-border"
+function StatusDot({ status }: { status: string }) {
+  const color = status === "online"
+    ? "bg-[var(--success)]"
+    : status === "offline"
+      ? "bg-[var(--error)]"
+      : "bg-[var(--warning)]"
+
+  return (
+    <span className="flex h-2 w-2 relative">
+      {status === "online" && (
+        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+      )}
+      <span className={cn("relative inline-flex rounded-full h-2 w-2", color)} />
+    </span>
+  )
 }
 
 function formatUptime(seconds?: number | null) {
@@ -56,56 +52,58 @@ function formatUptime(seconds?: number | null) {
   return `${minutes}m`
 }
 
-interface MetricProgressProps {
+interface MetricSegmentedProgressProps {
   label: string
   value: number
   threshold?: number
 }
 
-function MetricProgress({ label, value, threshold }: MetricProgressProps) {
+function MetricSegmentedProgress({ label, value, threshold }: MetricSegmentedProgressProps) {
   const percentage = Math.min(100, Math.max(0, value))
+  const segmentCount = 25
 
-  const status = useMemo(() => {
-    if (!threshold) return "normal"
-    if (percentage >= threshold) return "critical"
-    if (percentage >= threshold * 0.8) return "warning"
-    return "normal"
-  }, [percentage, threshold])
+  const isCritical = threshold !== undefined && percentage >= threshold
+  const activeColorClass = isCritical ? "bg-[var(--error)]" : "bg-[var(--success)]"
 
-  const progressColor = useMemo(() => {
-    if (status === "critical") return "bg-[var(--error)]"
-    if (status === "warning") return "bg-[var(--warning)]"
-    return "bg-[var(--success)]"
-  }, [status])
+  const activeCount = Math.ceil((percentage / 100) * segmentCount)
+  const thresholdValue = threshold === undefined ? undefined : Math.min(100, Math.max(0, threshold))
+  const thresholdIndex = thresholdValue === undefined
+    ? undefined
+    : Math.floor((thresholdValue / 100) * segmentCount)
 
   return (
-    <div className="space-y-1.5">
-      <div className="flex items-center justify-between text-xs">
-        <span className="text-muted-foreground">{label}</span>
-        <div className="flex items-center gap-1">
-          <span className={cn(
-            "font-medium tabular-nums",
-            status === "critical" && "text-[var(--error)]",
-            status === "warning" && "text-[var(--warning)]"
-          )}>
+    <div className="space-y-1">
+      <div className="flex items-center justify-between text-[10px]">
+        <span>{label}</span>
+        <div className="flex items-center gap-1.5">
+          <span className={cn("tabular-nums", isCritical && "text-[var(--error)]")}>
             {percentage.toFixed(0)}%
           </span>
-          {threshold && (
-            <span className="text-muted-foreground text-[10px]">/ {threshold}%</span>
-          )}
-          {status !== "normal" && (
-            <IconAlertTriangle className={cn(
-              "h-3 w-3",
-              status === "critical" ? "text-[var(--error)]" : "text-[var(--warning)]"
-            )} />
+          {thresholdValue !== undefined && (
+            <span className="text-muted-foreground/70">/ {thresholdValue}%</span>
           )}
         </div>
       </div>
-      <div className="relative h-2 w-full bg-muted rounded-full overflow-hidden">
-        <div
-          className={cn("h-full transition-all duration-300", progressColor)}
-          style={{ width: `${percentage}%` }}
-        />
+
+      <div className="flex gap-[2px] h-1.5 w-full">
+        {Array.from({ length: segmentCount }).map((_, index) => {
+          const isActive = index < activeCount
+          const isThresholdMarker = thresholdIndex !== undefined && index === thresholdIndex
+
+          return (
+            <div
+              key={index}
+              className={cn(
+                "flex-1 rounded-[1px]",
+                isActive
+                  ? activeColorClass
+                  : isThresholdMarker
+                    ? "bg-foreground/30"
+                    : "bg-muted"
+              )}
+            />
+          )
+        })}
       </div>
     </div>
   )
@@ -123,31 +121,11 @@ export function AgentCardCompact({
   onDelete,
 }: AgentCardCompactProps) {
   const t = useTranslations("settings.workers")
-  const { formatDateTime } = useFormatDate()
+  const formatRelativeTime = useFormatRelativeTime()
   const formatNumber = useFormatNumber()
-
-
-  const healthState = (agent.health?.state || "unknown").toLowerCase()
-  const healthLabel = useMemo(() => {
-    if (healthState === "ok") return t("health.ok")
-    if (healthState === "warning" || healthState === "warn") return t("health.warning")
-    if (healthState === "error" || healthState === "critical") return t("health.error")
-    return t("health.unknown")
-  }, [healthState, t])
 
   const heartbeat = agent.heartbeat
 
-  // 检查是否有指标超过阈值
-  const hasWarnings = useMemo(() => {
-    if (!heartbeat) return false
-    return (
-      heartbeat.cpu >= agent.cpuThreshold ||
-      heartbeat.mem >= agent.memThreshold ||
-      heartbeat.disk >= agent.diskThreshold
-    )
-  }, [heartbeat, agent])
-
-  // 计算最后心跳时间差（秒）
   const lastHeartbeatSeconds = useMemo(() => {
     if (!agent.lastHeartbeat) return null
     const now = Date.now()
@@ -155,138 +133,118 @@ export function AgentCardCompact({
     return Math.floor((now - lastHeartbeat) / 1000)
   }, [agent.lastHeartbeat])
 
-  // 判断心跳是否过期（超过30秒）
   const isHeartbeatStale = lastHeartbeatSeconds !== null && lastHeartbeatSeconds > 30
+  const lastSeenText = formatRelativeTime(agent.lastHeartbeat)
 
   return (
-    <Card className="transition-all duration-200 hover:shadow-md gap-0">
-      <CardHeader className="pb-2">
-        <div className="flex items-start justify-between gap-2 w-full min-w-0">
-          <div className="flex items-center gap-2 min-w-0 flex-1">
-            <div className={cn(
-              "h-2 w-2 mr-2 shrink-0 rounded-[1px]",
-              agent.status === "online" ? "bg-[var(--success)] shadow-[0_0_4px_var(--success)]" : 
-              agent.status === "offline" ? "bg-[var(--error)]" : "bg-muted-foreground"
-            )} />
-            <span className="font-medium truncate">{agent.name}</span>
-          </div>
-          <div className="flex items-center gap-2 shrink-0">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-7 w-7">
-                  <IconDotsVertical className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuLabel>{t("actions.title")}</DropdownMenuLabel>
-                <DropdownMenuItem onClick={() => onConfig(agent)}>
-                  <IconSettings className="h-4 w-4" />
-                  {t("actions.config")}
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem variant="destructive" onClick={() => onDelete(agent)}>
-                  <IconTrash className="h-4 w-4" />
-                  {t("actions.delete")}
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </div>
-      </CardHeader>
+    <Card className="group flex flex-col rounded-lg border border-border bg-card text-card-foreground shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden gap-0 py-0">
+      <div className="flex items-center justify-between p-3 border-b border-border/50 bg-muted/20">
+        <div className="flex items-center gap-3 min-w-0">
+          <StatusDot status={agent.status} />
 
-      <CardContent className="space-y-2.5 pt-0">
-        {/* 基本信息区 */}
-        <div className="space-y-2 text-xs">
-          <div className="flex items-center gap-2 text-muted-foreground min-w-0">
-            <IconMapPin className="h-3.5 w-3.5 shrink-0" />
-            <span className="truncate">{agent.hostname || t("unknownHost")}</span>
-          </div>
-          <div className="flex items-center gap-2 text-muted-foreground min-w-0">
-            <IconMapPin className="h-3.5 w-3.5 shrink-0 opacity-60" />
-            <span className="truncate">{agent.ipAddress || t("unknownIp")}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <IconClock className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-            <span className="text-muted-foreground">{t("metrics.lastHeartbeat")}:</span>
-            <span className={cn("font-medium", isHeartbeatStale && "text-[var(--error)]")}>
-              {formatDateTime(agent.lastHeartbeat)}
-            </span>
-            {agent.status === "online" && !isHeartbeatStale && (
-              <IconActivity className="h-3.5 w-3.5 text-[var(--success)] animate-pulse" />
-            )}
-          </div>
-          <div className="flex items-center gap-2 flex-wrap min-w-0">
-            {agent.version && (
-              <Badge
-                variant="secondary"
-                className="text-[10px] max-w-[12rem] truncate"
-                title={agent.version}
-              >
-                {agent.version}
-              </Badge>
-            )}
-            <Badge variant="outline" className={cn("text-[10px]", getHealthStyle(healthState))}>
-              {healthLabel}
-            </Badge>
-            {hasWarnings && (
-              <Badge variant="outline" className="bg-[var(--warning)]/10 text-[var(--warning)] border-[var(--warning)]/20 text-[10px]">
-                <IconAlertTriangle className="h-3 w-3 mr-1" />
-                {t("card.warning")}
-              </Badge>
-            )}
-          </div>
-        </div>
-
-        <Separator />
-
-        {/* 系统资源区 */}
-        {heartbeat ? (
-          <div className="space-y-3">
-            <div className="space-y-2.5">
-              <MetricProgress
-                label={t("metrics.cpu")}
-                value={heartbeat.cpu}
-                threshold={agent.cpuThreshold}
-              />
-              <MetricProgress
-                label={t("metrics.mem")}
-                value={heartbeat.mem}
-                threshold={agent.memThreshold}
-              />
-              <MetricProgress
-                label={t("metrics.disk")}
-                value={heartbeat.disk}
-                threshold={agent.diskThreshold}
-              />
+          <div className="min-w-0">
+            <div className="font-bold text-sm leading-none truncate" title={agent.name}>
+              {agent.name}
+            </div>
+            <div className="text-[10px] text-muted-foreground font-mono mt-1 opacity-80 truncate" title={agent.ipAddress || t("unknownIp")}>
+              {agent.ipAddress || t("unknownIp")}
             </div>
           </div>
+        </div>
+
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-foreground shrink-0">
+              <IconDotsVertical className="w-4 h-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuLabel>{t("actions.title")}</DropdownMenuLabel>
+            <DropdownMenuItem onClick={() => onConfig(agent)}>
+              <IconSettings className="w-4 h-4" />
+              {t("actions.config")}
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem variant="destructive" onClick={() => onDelete(agent)}>
+              <IconTrash className="w-4 h-4" />
+              {t("actions.delete")}
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+
+      <div className="p-4 space-y-4 flex-1">
+        <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-[11px]">
+          <div className="space-y-0.5 min-w-0">
+            <span className="text-[9px] uppercase text-muted-foreground font-bold tracking-wider">Host</span>
+            <div className="font-mono text-xs truncate" title={agent.hostname || t("unknownHost")}>
+              {agent.hostname || t("unknownHost")}
+            </div>
+          </div>
+
+          <div className="space-y-0.5 text-right min-w-0">
+            <span className="text-[9px] uppercase text-muted-foreground font-bold tracking-wider">Version</span>
+            <div className="font-mono text-xs truncate" title={agent.version || "-"}>
+              {agent.version || "-"}
+            </div>
+          </div>
+        </div>
+
+        {heartbeat ? (
+          <div className="space-y-3 pt-2">
+            <MetricSegmentedProgress
+              label={t("metrics.cpu")}
+              value={heartbeat.cpu}
+              threshold={agent.cpuThreshold}
+            />
+            <MetricSegmentedProgress
+              label={t("metrics.mem")}
+              value={heartbeat.mem}
+              threshold={agent.memThreshold}
+            />
+            <MetricSegmentedProgress
+              label={t("metrics.disk")}
+              value={heartbeat.disk}
+              threshold={agent.diskThreshold}
+            />
+          </div>
         ) : (
-          <div className="text-xs text-muted-foreground text-center py-4 border border-dashed rounded bg-muted/20">
+          <div className="text-xs text-muted-foreground text-center py-6 border border-dashed border-border rounded bg-muted/20">
             {t("card.waitingForHeartbeat")}
           </div>
         )}
+      </div>
 
-        {heartbeat && (
-          <>
-            <Separator />
+      <div className="p-3 border-t border-border/50 bg-muted/5 flex items-center justify-between text-[10px] gap-2">
+        <div className="flex items-center gap-3 text-muted-foreground min-w-0">
+          <div className="flex items-center gap-1.5 min-w-0" title={t("metrics.lastHeartbeat")}>
+            <IconActivity className="w-3 h-3 shrink-0" />
+            <span className={cn(
+              "truncate",
+              agent.status === "offline"
+                ? "text-[var(--error)]"
+                : isHeartbeatStale
+                  ? "text-[var(--warning)]"
+                  : undefined
+            )}>
+              {lastSeenText}
+            </span>
+          </div>
+          <div className="flex items-center gap-1.5 shrink-0" title={t("list.uptime")}>
+            <IconClock className="w-3 h-3" />
+            <span>{heartbeat ? formatUptime(heartbeat.uptime) : "-"}</span>
+          </div>
+        </div>
 
-            {/* 任务和运行时间区 */}
-            <div className="grid grid-cols-2 gap-3 text-xs">
-              <div>
-                <div className="text-muted-foreground mb-1">{t("metrics.tasks")}</div>
-                <div className="font-medium text-base">
-                  {formatNumber.formatInteger(heartbeat.tasks)}
-                  <span className="text-sm text-muted-foreground">/{agent.maxTasks}</span>
-                </div>
-              </div>
-              <div>
-                <div className="text-muted-foreground mb-1">{t("list.uptime")}</div>
-                <div className="font-medium text-base">{formatUptime(heartbeat.uptime)}</div>
-              </div>
-            </div>
-          </>
-        )}
-      </CardContent>
+        <div className="flex items-center gap-1.5 shrink-0">
+          <span className="text-[9px] uppercase font-bold text-muted-foreground">{t("metrics.tasks")}</span>
+          <Badge variant="secondary" className="h-5 text-[10px] font-mono px-1.5 bg-muted border-border text-foreground">
+            {heartbeat ? formatNumber.formatInteger(heartbeat.tasks) : "-"}
+            <span className="opacity-40 mx-0.5">/</span>
+            {agent.maxTasks}
+          </Badge>
+        </div>
+      </div>
     </Card>
   )
 }

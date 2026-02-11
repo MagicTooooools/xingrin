@@ -31,7 +31,7 @@ if [[ ${#HANDLER_FILES[@]} -eq 0 ]]; then
   exit 0
 fi
 
-# 规则：handler 层顶层导出函数仅允许 New*Handler（构造函数）
+# Rule: handler top-level exported functions must be constructor-only (New*Handler)
 violating_functions="$(
   rg -n --no-heading '^func[[:space:]]+[A-Z][A-Za-z0-9_]*\(' "${HANDLER_FILES[@]}" \
     | rg -v '^[^:]+:[0-9]+:func[[:space:]]+New[A-Za-z0-9_]*Handler\(' || true
@@ -40,7 +40,7 @@ if [[ -n "$violating_functions" ]]; then
   append_violation "禁止 handler 暴露除 New*Handler 之外的顶层导出函数" "$violating_functions"
 fi
 
-# 规则：agent handler 文件名必须以 _handler.go 或 _mapper.go 结尾
+# Rule: agent handler filenames must end with _handler.go or _mapper.go
 agent_handler_files="$(printf '%s\n' "${HANDLER_FILES[@]}" | rg '/internal/modules/agent/handler/' || true)"
 if [[ -n "$agent_handler_files" ]]; then
   invalid_handler_files="$(

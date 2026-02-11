@@ -10,6 +10,6 @@ func RegisterWorkerScanRoutes(api *gin.RouterGroup, workerToken string, workerSc
 	workerAPI := api.Group("/worker")
 	workerAPI.Use(middleware.WorkerAuthMiddleware(workerToken))
 	{
-		workerAPI.GET("/scans/:id/target-name", workerScanHandler.GetTargetName)
+		workerAPI.GET("/scans/:id/target", workerScanHandler.GetTargetName)
 	}
 }

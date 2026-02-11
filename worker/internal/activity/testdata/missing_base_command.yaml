@@ -11,5 +11,5 @@ tools:
     metadata:
       display_name: "Subfinder"
       stage: "recon"
-    # base_command 缺失
+    # base_command missing
     cli_params: []

@@ -194,6 +194,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       items: [
         { title: "组件总览", url: "/tools/component-gallery/" },
         { title: "组件 Demo 索引", url: "/tools/component-demos/" },
+        { title: "Agent Node Designs", url: "/prototypes/agent-node-designs/" },
         { title: "Button Demo", url: "/tools/button-demo/" },
         { title: "Badge Demo", url: "/tools/badge-demo/" },
         { title: "Badge Variants", url: "/prototypes/badge-variants/" },
@@ -234,6 +235,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         { title: "Scan Engine Designs", url: "/scan/engine/demo/" },
         { title: "Scan Dialogs", url: "/prototypes/scan-dialogs/" },
         { title: "Scan Actions Demo", url: "/prototypes/scan-history-actions/" },
+        { title: "Workers Page Layout", url: "/prototypes/workers-page/" },
         { title: "Arknights UI Demo", url: "/prototypes/arknights-ui/" },
       ],
     },

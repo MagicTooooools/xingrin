@@ -15,5 +15,5 @@ func NewWorkerProviderSettingsStoreAdapter(settingsRepo *catalogrepo.SubfinderPr
 }
 
 func NewWorkerApplicationService(scanGuard catalogapp.WorkerScanGuard, settingsStore catalogapp.WorkerProviderSettingsStore) *catalogapp.WorkerService {
-	return newWorkerApplicationService(scanGuard, settingsStore)
+	return catalogapp.NewWorkerService(scanGuard, settingsStore)
 }

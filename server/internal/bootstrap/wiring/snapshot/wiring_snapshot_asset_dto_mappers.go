@@ -2,26 +2,8 @@ package snapshotwiring
 
 import (
 	assetdto "github.com/yyhuni/lunafox/server/internal/modules/asset/dto"
-	scanrepo "github.com/yyhuni/lunafox/server/internal/modules/scan/repository"
-	securitydto "github.com/yyhuni/lunafox/server/internal/modules/security/dto"
 	snapshotapp "github.com/yyhuni/lunafox/server/internal/modules/snapshot/application"
-	snapshotdomain "github.com/yyhuni/lunafox/server/internal/modules/snapshot/domain"
-	"github.com/yyhuni/lunafox/server/internal/pkg/timeutil"
 )
-
-func snapshotScanModelToDomain(item *scanrepo.ScanRecord) *snapshotdomain.ScanRef {
-	if item == nil {
-		return nil
-	}
-	return &snapshotdomain.ScanRef{ID: item.ID, TargetID: item.TargetID}
-}
-
-func snapshotScanTargetModelToDomain(item *scanrepo.ScanTargetRecord) *snapshotdomain.ScanTargetRef {
-	if item == nil {
-		return nil
-	}
-	return &snapshotdomain.ScanTargetRef{ID: item.ID, Name: item.Name, Type: item.Type, CreatedAt: timeutil.ToUTC(item.CreatedAt)}
-}
 
 func snapshotWebsiteAssetUpsertItemsToDTO(items []snapshotapp.WebsiteAssetUpsertItem) []assetdto.WebsiteUpsertItem {
 	results := make([]assetdto.WebsiteUpsertItem, 0, len(items))
@@ -101,21 +83,4 @@ func snapshotScreenshotAssetRequestToDTO(req *snapshotapp.ScreenshotAssetUpsertR
 		items = append(items, assetdto.ScreenshotItem{URL: item.URL, StatusCode: item.StatusCode, Image: item.Image})
 	}
 	return &assetdto.BulkUpsertScreenshotRequest{Screenshots: items}
-}
-
-func snapshotVulnerabilityAssetCreateItemsToDTO(items []snapshotapp.VulnerabilityAssetCreateItem) []securitydto.VulnerabilityCreateItem {
-	results := make([]securitydto.VulnerabilityCreateItem, 0, len(items))
-	for index := range items {
-		item := items[index]
-		results = append(results, securitydto.VulnerabilityCreateItem{
-			URL:         item.URL,
-			VulnType:    item.VulnType,
-			Severity:    item.Severity,
-			Source:      item.Source,
-			CVSSScore:   item.CVSSScore,
-			Description: item.Description,
-			RawOutput:   item.RawOutput,
-		})
-	}
-	return results
 }
