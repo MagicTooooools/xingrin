@@ -3,13 +3,10 @@ package application
 import (
 	"context"
 	"database/sql"
-	"errors"
 
 	assetdomain "github.com/yyhuni/lunafox/server/internal/modules/asset/domain"
 	"github.com/yyhuni/lunafox/server/internal/pkg/dberrors"
 )
-
-var ErrDirectoryTargetNotFound = errors.New("target not found")
 
 type DirectoryQueryService struct {
 	store        DirectoryQueryStore
@@ -25,7 +22,7 @@ func (service *DirectoryQueryService) ListByTarget(ctx context.Context, targetID
 
 	if _, err := service.targetLookup.GetActiveByID(targetID); err != nil {
 		if dberrors.IsRecordNotFound(err) {
-			return nil, 0, ErrDirectoryTargetNotFound
+			return nil, 0, ErrTargetNotFound
 		}
 		return nil, 0, err
 	}
@@ -38,7 +35,7 @@ func (service *DirectoryQueryService) StreamByTarget(ctx context.Context, target
 
 	if _, err := service.targetLookup.GetActiveByID(targetID); err != nil {
 		if dberrors.IsRecordNotFound(err) {
-			return nil, ErrDirectoryTargetNotFound
+			return nil, ErrTargetNotFound
 		}
 		return nil, err
 	}
@@ -51,7 +48,7 @@ func (service *DirectoryQueryService) CountByTarget(ctx context.Context, targetI
 
 	if _, err := service.targetLookup.GetActiveByID(targetID); err != nil {
 		if dberrors.IsRecordNotFound(err) {
-			return 0, ErrDirectoryTargetNotFound
+			return 0, ErrTargetNotFound
 		}
 		return 0, err
 	}

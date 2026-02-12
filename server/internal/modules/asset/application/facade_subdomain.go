@@ -29,7 +29,7 @@ func NewSubdomainFacade(store SubdomainStore, targetLookup SubdomainTargetLookup
 func (service *SubdomainFacade) ListByTarget(targetID, page, pageSize int, filter string) ([]Subdomain, int64, error) {
 	items, total, err := service.queryService.ListByTarget(context.Background(), targetID, page, pageSize, filter)
 	if err != nil {
-		if errors.Is(err, ErrSubdomainTargetNotFound) || dberrors.IsRecordNotFound(err) {
+		if errors.Is(err, ErrTargetNotFound) || dberrors.IsRecordNotFound(err) {
 			return nil, 0, ErrTargetNotFound
 		}
 		return nil, 0, err
@@ -40,7 +40,7 @@ func (service *SubdomainFacade) ListByTarget(targetID, page, pageSize int, filte
 func (service *SubdomainFacade) BulkCreate(targetID int, names []string) (int, error) {
 	count, err := service.cmdService.BulkCreate(context.Background(), targetID, names)
 	if err != nil {
-		if errors.Is(err, ErrSubdomainTargetNotFound) || dberrors.IsRecordNotFound(err) {
+		if errors.Is(err, ErrTargetNotFound) || dberrors.IsRecordNotFound(err) {
 			return 0, ErrTargetNotFound
 		}
 		if errors.Is(err, ErrSubdomainInvalidTargetType) {
@@ -58,7 +58,7 @@ func (service *SubdomainFacade) BulkDelete(ids []int) (int64, error) {
 func (service *SubdomainFacade) StreamByTarget(targetID int) (*sql.Rows, error) {
 	rows, err := service.queryService.StreamByTarget(context.Background(), targetID)
 	if err != nil {
-		if errors.Is(err, ErrSubdomainTargetNotFound) || dberrors.IsRecordNotFound(err) {
+		if errors.Is(err, ErrTargetNotFound) || dberrors.IsRecordNotFound(err) {
 			return nil, ErrTargetNotFound
 		}
 		return nil, err
@@ -69,7 +69,7 @@ func (service *SubdomainFacade) StreamByTarget(targetID int) (*sql.Rows, error) 
 func (service *SubdomainFacade) CountByTarget(targetID int) (int64, error) {
 	count, err := service.queryService.CountByTarget(context.Background(), targetID)
 	if err != nil {
-		if errors.Is(err, ErrSubdomainTargetNotFound) || dberrors.IsRecordNotFound(err) {
+		if errors.Is(err, ErrTargetNotFound) || dberrors.IsRecordNotFound(err) {
 			return 0, ErrTargetNotFound
 		}
 		return 0, err

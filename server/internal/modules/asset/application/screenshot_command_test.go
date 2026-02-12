@@ -62,7 +62,7 @@ func TestScreenshotCommandServiceTargetNotFound(t *testing.T) {
 	service := NewScreenshotCommandService(&screenshotCommandStoreStub{}, &screenshotTargetLookupStub{err: gorm.ErrRecordNotFound})
 
 	_, err := service.BulkUpsert(context.Background(), 9, &BulkUpsertScreenshotRequest{Screenshots: []ScreenshotItem{{URL: "https://a.com"}}})
-	if !errors.Is(err, ErrScreenshotTargetNotFound) {
-		t.Fatalf("expected ErrScreenshotTargetNotFound, got %v", err)
+	if !errors.Is(err, ErrTargetNotFound) {
+		t.Fatalf("expected ErrTargetNotFound, got %v", err)
 	}
 }

@@ -40,7 +40,7 @@ func (service *WebsiteCommandService) BulkCreate(ctx context.Context, targetID i
 	target, err := service.targetLookup.GetActiveByID(targetID)
 	if err != nil {
 		if dberrors.IsRecordNotFound(err) {
-			return 0, ErrWebsiteTargetNotFound
+			return 0, ErrTargetNotFound
 		}
 		return 0, err
 	}
@@ -90,7 +90,7 @@ func (service *WebsiteCommandService) BulkUpsert(ctx context.Context, targetID i
 	target, err := service.targetLookup.GetActiveByID(targetID)
 	if err != nil {
 		if dberrors.IsRecordNotFound(err) {
-			return 0, ErrWebsiteTargetNotFound
+			return 0, ErrTargetNotFound
 		}
 		return 0, err
 	}
@@ -136,7 +136,7 @@ func (service *WebsiteCommandService) ResolveTarget(ctx context.Context, targetI
 	target, err := service.targetLookup.GetActiveByID(targetID)
 	if err != nil {
 		if dberrors.IsRecordNotFound(err) {
-			return nil, ErrWebsiteTargetNotFound
+			return nil, ErrTargetNotFound
 		}
 		return nil, err
 	}

@@ -87,8 +87,8 @@ func TestScreenshotQueryServiceErrors(t *testing.T) {
 	service := NewScreenshotQueryService(&screenshotQueryStoreStub{itemByID: map[int]*assetdomain.Screenshot{}}, &screenshotTargetLookupStub{err: gorm.ErrRecordNotFound})
 
 	_, _, err := service.ListByTargetID(context.Background(), 1, 1, 20, "")
-	if !errors.Is(err, ErrScreenshotTargetNotFound) {
-		t.Fatalf("expected ErrScreenshotTargetNotFound, got %v", err)
+	if !errors.Is(err, ErrTargetNotFound) {
+		t.Fatalf("expected ErrTargetNotFound, got %v", err)
 	}
 
 	_, err = service.GetByID(context.Background(), 99)

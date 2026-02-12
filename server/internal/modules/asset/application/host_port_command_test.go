@@ -75,7 +75,7 @@ func TestHostPortCommandServiceTargetNotFound(t *testing.T) {
 	service := NewHostPortCommandService(&hostPortCommandStoreStub{}, &hostPortCommandTargetLookupStub{err: gorm.ErrRecordNotFound})
 
 	_, err := service.BulkUpsert(context.Background(), 9, []HostPortItem{{Host: "a.example.com", IP: "1.1.1.1", Port: 80}})
-	if !errors.Is(err, ErrHostPortTargetNotFound) {
-		t.Fatalf("expected ErrHostPortTargetNotFound, got %v", err)
+	if !errors.Is(err, ErrTargetNotFound) {
+		t.Fatalf("expected ErrTargetNotFound, got %v", err)
 	}
 }

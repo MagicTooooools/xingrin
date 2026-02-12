@@ -31,7 +31,7 @@ func (service *WebsiteFacade) ListByTarget(targetID, page, pageSize int, filter 
 func (service *WebsiteFacade) BulkCreate(targetID int, urls []string) (int, error) {
 	count, err := service.cmdService.BulkCreate(context.Background(), targetID, urls)
 	if err != nil {
-		if errors.Is(err, ErrWebsiteTargetNotFound) {
+		if errors.Is(err, ErrTargetNotFound) {
 			return 0, ErrTargetNotFound
 		}
 		return 0, err
@@ -57,7 +57,7 @@ func (service *WebsiteFacade) BulkDelete(ids []int) (int64, error) {
 func (service *WebsiteFacade) StreamByTarget(targetID int) (*sql.Rows, error) {
 	rows, err := service.queryService.StreamByTarget(context.Background(), targetID)
 	if err != nil {
-		if errors.Is(err, ErrWebsiteTargetNotFound) || dberrors.IsRecordNotFound(err) {
+		if errors.Is(err, ErrTargetNotFound) || dberrors.IsRecordNotFound(err) {
 			return nil, ErrTargetNotFound
 		}
 		return nil, err
@@ -68,7 +68,7 @@ func (service *WebsiteFacade) StreamByTarget(targetID int) (*sql.Rows, error) {
 func (service *WebsiteFacade) CountByTarget(targetID int) (int64, error) {
 	count, err := service.queryService.CountByTarget(context.Background(), targetID)
 	if err != nil {
-		if errors.Is(err, ErrWebsiteTargetNotFound) || dberrors.IsRecordNotFound(err) {
+		if errors.Is(err, ErrTargetNotFound) || dberrors.IsRecordNotFound(err) {
 			return 0, ErrTargetNotFound
 		}
 		return 0, err
@@ -87,7 +87,7 @@ func (service *WebsiteFacade) ScanRow(rows *sql.Rows) (*Website, error) {
 func (service *WebsiteFacade) BulkUpsert(targetID int, items []WebsiteUpsertItem) (int64, error) {
 	count, err := service.cmdService.BulkUpsert(context.Background(), targetID, items)
 	if err != nil {
-		if errors.Is(err, ErrWebsiteTargetNotFound) {
+		if errors.Is(err, ErrTargetNotFound) {
 			return 0, ErrTargetNotFound
 		}
 		return 0, err

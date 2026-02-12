@@ -3,13 +3,10 @@ package application
 import (
 	"context"
 	"database/sql"
-	"errors"
 
 	assetdomain "github.com/yyhuni/lunafox/server/internal/modules/asset/domain"
 	"github.com/yyhuni/lunafox/server/internal/pkg/dberrors"
 )
-
-var ErrWebsiteTargetNotFound = errors.New("target not found")
 
 type WebsiteQueryService struct {
 	store        WebsiteQueryStore
@@ -30,7 +27,7 @@ func (service *WebsiteQueryService) StreamByTarget(ctx context.Context, targetID
 
 	if _, err := service.targetLookup.GetActiveByID(targetID); err != nil {
 		if dberrors.IsRecordNotFound(err) {
-			return nil, ErrWebsiteTargetNotFound
+			return nil, ErrTargetNotFound
 		}
 		return nil, err
 	}
@@ -43,7 +40,7 @@ func (service *WebsiteQueryService) CountByTarget(ctx context.Context, targetID 
 
 	if _, err := service.targetLookup.GetActiveByID(targetID); err != nil {
 		if dberrors.IsRecordNotFound(err) {
-			return 0, ErrWebsiteTargetNotFound
+			return 0, ErrTargetNotFound
 		}
 		return 0, err
 	}

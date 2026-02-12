@@ -158,7 +158,7 @@ func TestHostPortQueryServiceTargetNotFound(t *testing.T) {
 	service := NewHostPortQueryService(&hostPortQueryStoreStub{}, &hostPortTargetLookupStub{err: gorm.ErrRecordNotFound})
 
 	_, _, err := service.ListByTarget(context.Background(), 1, 1, 20, "")
-	if !errors.Is(err, ErrHostPortTargetNotFound) {
-		t.Fatalf("expected ErrHostPortTargetNotFound, got %v", err)
+	if !errors.Is(err, ErrTargetNotFound) {
+		t.Fatalf("expected ErrTargetNotFound, got %v", err)
 	}
 }

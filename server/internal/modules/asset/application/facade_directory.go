@@ -25,7 +25,7 @@ func NewDirectoryFacade(store DirectoryStore, targetLookup DirectoryTargetLookup
 func (service *DirectoryFacade) ListByTarget(targetID, page, pageSize int, filter string) ([]Directory, int64, error) {
 	items, total, err := service.queryService.ListByTarget(context.Background(), targetID, page, pageSize, filter)
 	if err != nil {
-		if errors.Is(err, ErrDirectoryTargetNotFound) || dberrors.IsRecordNotFound(err) {
+		if errors.Is(err, ErrTargetNotFound) || dberrors.IsRecordNotFound(err) {
 			return nil, 0, ErrTargetNotFound
 		}
 		return nil, 0, err
@@ -36,7 +36,7 @@ func (service *DirectoryFacade) ListByTarget(targetID, page, pageSize int, filte
 func (service *DirectoryFacade) BulkCreate(targetID int, urls []string) (int, error) {
 	count, err := service.cmdService.BulkCreate(context.Background(), targetID, urls)
 	if err != nil {
-		if errors.Is(err, ErrDirectoryTargetNotFound) || dberrors.IsRecordNotFound(err) {
+		if errors.Is(err, ErrTargetNotFound) || dberrors.IsRecordNotFound(err) {
 			return 0, ErrTargetNotFound
 		}
 		return 0, err
@@ -51,7 +51,7 @@ func (service *DirectoryFacade) BulkDelete(ids []int) (int64, error) {
 func (service *DirectoryFacade) StreamByTarget(targetID int) (*sql.Rows, error) {
 	rows, err := service.queryService.StreamByTarget(context.Background(), targetID)
 	if err != nil {
-		if errors.Is(err, ErrDirectoryTargetNotFound) || dberrors.IsRecordNotFound(err) {
+		if errors.Is(err, ErrTargetNotFound) || dberrors.IsRecordNotFound(err) {
 			return nil, ErrTargetNotFound
 		}
 		return nil, err
@@ -62,7 +62,7 @@ func (service *DirectoryFacade) StreamByTarget(targetID int) (*sql.Rows, error) 
 func (service *DirectoryFacade) CountByTarget(targetID int) (int64, error) {
 	count, err := service.queryService.CountByTarget(context.Background(), targetID)
 	if err != nil {
-		if errors.Is(err, ErrDirectoryTargetNotFound) || dberrors.IsRecordNotFound(err) {
+		if errors.Is(err, ErrTargetNotFound) || dberrors.IsRecordNotFound(err) {
 			return 0, ErrTargetNotFound
 		}
 		return 0, err
@@ -81,7 +81,7 @@ func (service *DirectoryFacade) ScanRow(rows *sql.Rows) (*Directory, error) {
 func (service *DirectoryFacade) BulkUpsert(targetID int, items []DirectoryUpsertItem) (int64, error) {
 	affected, err := service.cmdService.BulkUpsert(context.Background(), targetID, items)
 	if err != nil {
-		if errors.Is(err, ErrDirectoryTargetNotFound) || dberrors.IsRecordNotFound(err) {
+		if errors.Is(err, ErrTargetNotFound) || dberrors.IsRecordNotFound(err) {
 			return 0, ErrTargetNotFound
 		}
 		return 0, err

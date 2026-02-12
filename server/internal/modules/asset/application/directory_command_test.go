@@ -88,8 +88,8 @@ func TestDirectoryCommandServiceErrorsAndBulkDelete(t *testing.T) {
 
 	lookup.err = gorm.ErrRecordNotFound
 	_, err := service.BulkCreate(context.Background(), 9, []string{"https://a.com"})
-	if !errors.Is(err, ErrDirectoryTargetNotFound) {
-		t.Fatalf("expected ErrDirectoryTargetNotFound, got %v", err)
+	if !errors.Is(err, ErrTargetNotFound) {
+		t.Fatalf("expected ErrTargetNotFound, got %v", err)
 	}
 
 	lookup.err = nil

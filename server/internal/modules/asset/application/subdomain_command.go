@@ -25,7 +25,7 @@ func (service *SubdomainCommandService) BulkCreate(ctx context.Context, targetID
 	target, err := service.targetLookup.GetActiveByID(targetID)
 	if err != nil {
 		if dberrors.IsRecordNotFound(err) {
-			return 0, ErrSubdomainTargetNotFound
+			return 0, ErrTargetNotFound
 		}
 		return 0, err
 	}

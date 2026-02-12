@@ -101,7 +101,7 @@ func TestWebsiteQueryServiceTargetNotFound(t *testing.T) {
 	service := NewWebsiteQueryService(store, lookup)
 
 	_, err := service.StreamByTarget(context.Background(), 1)
-	if !errors.Is(err, ErrWebsiteTargetNotFound) {
-		t.Fatalf("expected ErrWebsiteTargetNotFound, got %v", err)
+	if !errors.Is(err, ErrTargetNotFound) {
+		t.Fatalf("expected ErrTargetNotFound, got %v", err)
 	}
 }

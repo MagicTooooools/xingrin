@@ -9,8 +9,7 @@ import (
 )
 
 var (
-	ErrScreenshotTargetNotFound = errors.New("target not found")
-	ErrScreenshotNotFound       = errors.New("screenshot not found")
+	ErrScreenshotNotFound = errors.New("screenshot not found")
 )
 
 type ScreenshotQueryService struct {
@@ -27,7 +26,7 @@ func (service *ScreenshotQueryService) ListByTargetID(ctx context.Context, targe
 
 	if _, err := service.targetLookup.GetActiveByID(targetID); err != nil {
 		if dberrors.IsRecordNotFound(err) {
-			return nil, 0, ErrScreenshotTargetNotFound
+			return nil, 0, ErrTargetNotFound
 		}
 		return nil, 0, err
 	}

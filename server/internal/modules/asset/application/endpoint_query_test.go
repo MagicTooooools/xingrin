@@ -127,7 +127,7 @@ func TestEndpointQueryServiceTargetNotFound(t *testing.T) {
 	service := NewEndpointQueryService(store, lookup)
 
 	_, _, err := service.ListByTarget(context.Background(), 1, 1, 20, "")
-	if !errors.Is(err, ErrEndpointTargetNotFound) {
-		t.Fatalf("expected ErrEndpointTargetNotFound, got %v", err)
+	if !errors.Is(err, ErrTargetNotFound) {
+		t.Fatalf("expected ErrTargetNotFound, got %v", err)
 	}
 }

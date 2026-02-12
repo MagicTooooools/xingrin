@@ -23,7 +23,7 @@ func NewEndpointFacade(store EndpointStore, targetLookup EndpointTargetLookup) *
 func (service *EndpointFacade) ListByTarget(targetID, page, pageSize int, filter string) ([]Endpoint, int64, error) {
 	items, total, err := service.queryService.ListByTarget(context.Background(), targetID, page, pageSize, filter)
 	if err != nil {
-		if errors.Is(err, ErrEndpointTargetNotFound) || dberrors.IsRecordNotFound(err) {
+		if errors.Is(err, ErrTargetNotFound) || dberrors.IsRecordNotFound(err) {
 			return nil, 0, ErrTargetNotFound
 		}
 		return nil, 0, err
@@ -45,7 +45,7 @@ func (service *EndpointFacade) GetByID(id int) (*Endpoint, error) {
 func (service *EndpointFacade) BulkCreate(targetID int, urls []string) (int, error) {
 	count, err := service.cmdService.BulkCreate(context.Background(), targetID, urls)
 	if err != nil {
-		if errors.Is(err, ErrEndpointTargetNotFound) || dberrors.IsRecordNotFound(err) {
+		if errors.Is(err, ErrTargetNotFound) || dberrors.IsRecordNotFound(err) {
 			return 0, ErrTargetNotFound
 		}
 		return 0, err
@@ -71,7 +71,7 @@ func (service *EndpointFacade) BulkDelete(ids []int) (int64, error) {
 func (service *EndpointFacade) StreamByTarget(targetID int) (*sql.Rows, error) {
 	rows, err := service.queryService.StreamByTarget(context.Background(), targetID)
 	if err != nil {
-		if errors.Is(err, ErrEndpointTargetNotFound) || dberrors.IsRecordNotFound(err) {
+		if errors.Is(err, ErrTargetNotFound) || dberrors.IsRecordNotFound(err) {
 			return nil, ErrTargetNotFound
 		}
 		return nil, err
@@ -82,7 +82,7 @@ func (service *EndpointFacade) StreamByTarget(targetID int) (*sql.Rows, error) {
 func (service *EndpointFacade) CountByTarget(targetID int) (int64, error) {
 	count, err := service.queryService.CountByTarget(context.Background(), targetID)
 	if err != nil {
-		if errors.Is(err, ErrEndpointTargetNotFound) || dberrors.IsRecordNotFound(err) {
+		if errors.Is(err, ErrTargetNotFound) || dberrors.IsRecordNotFound(err) {
 			return 0, ErrTargetNotFound
 		}
 		return 0, err
@@ -101,7 +101,7 @@ func (service *EndpointFacade) ScanRow(rows *sql.Rows) (*Endpoint, error) {
 func (service *EndpointFacade) BulkUpsert(targetID int, items []EndpointUpsertItem) (int64, error) {
 	affected, err := service.cmdService.BulkUpsert(context.Background(), targetID, items)
 	if err != nil {
-		if errors.Is(err, ErrEndpointTargetNotFound) || dberrors.IsRecordNotFound(err) {
+		if errors.Is(err, ErrTargetNotFound) || dberrors.IsRecordNotFound(err) {
 			return 0, ErrTargetNotFound
 		}
 		return 0, err

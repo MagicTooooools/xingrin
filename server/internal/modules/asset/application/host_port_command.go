@@ -27,7 +27,7 @@ func (service *HostPortCommandService) BulkUpsert(ctx context.Context, targetID 
 
 	if _, err := service.targetLookup.GetActiveByID(targetID); err != nil {
 		if dberrors.IsRecordNotFound(err) {
-			return 0, ErrHostPortTargetNotFound
+			return 0, ErrTargetNotFound
 		}
 		return 0, err
 	}

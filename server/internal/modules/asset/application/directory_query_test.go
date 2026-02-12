@@ -110,7 +110,7 @@ func TestDirectoryQueryServiceTargetNotFound(t *testing.T) {
 	service := NewDirectoryQueryService(&directoryQueryStoreStub{}, &directoryQueryTargetLookupStub{err: gorm.ErrRecordNotFound})
 
 	_, _, err := service.ListByTarget(context.Background(), 1, 1, 20, "")
-	if !errors.Is(err, ErrDirectoryTargetNotFound) {
-		t.Fatalf("expected ErrDirectoryTargetNotFound, got %v", err)
+	if !errors.Is(err, ErrTargetNotFound) {
+		t.Fatalf("expected ErrTargetNotFound, got %v", err)
 	}
 }

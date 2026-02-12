@@ -122,8 +122,8 @@ func TestEndpointCommandServiceDeleteAndErrors(t *testing.T) {
 
 	lookup.err = gorm.ErrRecordNotFound
 	_, err := service.BulkCreate(context.Background(), 9, []string{"https://a.com"})
-	if !errors.Is(err, ErrEndpointTargetNotFound) {
-		t.Fatalf("expected ErrEndpointTargetNotFound, got %v", err)
+	if !errors.Is(err, ErrTargetNotFound) {
+		t.Fatalf("expected ErrTargetNotFound, got %v", err)
 	}
 
 	store.endpointByID = map[int]*assetdomain.Endpoint{}

@@ -3,15 +3,12 @@ package application
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"time"
 
 	assetdomain "github.com/yyhuni/lunafox/server/internal/modules/asset/domain"
 	"github.com/yyhuni/lunafox/server/internal/pkg/dberrors"
 	"github.com/yyhuni/lunafox/server/internal/pkg/timeutil"
 )
-
-var ErrHostPortTargetNotFound = errors.New("target not found")
 
 type HostPortResponse struct {
 	IP        string
@@ -34,7 +31,7 @@ func (service *HostPortQueryService) ListByTarget(ctx context.Context, targetID,
 
 	if _, err := service.targetLookup.GetActiveByID(targetID); err != nil {
 		if dberrors.IsRecordNotFound(err) {
-			return nil, 0, ErrHostPortTargetNotFound
+			return nil, 0, ErrTargetNotFound
 		}
 		return nil, 0, err
 	}
@@ -67,7 +64,7 @@ func (service *HostPortQueryService) StreamByTarget(ctx context.Context, targetI
 
 	if _, err := service.targetLookup.GetActiveByID(targetID); err != nil {
 		if dberrors.IsRecordNotFound(err) {
-			return nil, ErrHostPortTargetNotFound
+			return nil, ErrTargetNotFound
 		}
 		return nil, err
 	}
@@ -80,7 +77,7 @@ func (service *HostPortQueryService) StreamByTargetAndIPs(ctx context.Context, t
 
 	if _, err := service.targetLookup.GetActiveByID(targetID); err != nil {
 		if dberrors.IsRecordNotFound(err) {
-			return nil, ErrHostPortTargetNotFound
+			return nil, ErrTargetNotFound
 		}
 		return nil, err
 	}
@@ -93,7 +90,7 @@ func (service *HostPortQueryService) CountByTarget(ctx context.Context, targetID
 
 	if _, err := service.targetLookup.GetActiveByID(targetID); err != nil {
 		if dberrors.IsRecordNotFound(err) {
-			return 0, ErrHostPortTargetNotFound
+			return 0, ErrTargetNotFound
 		}
 		return 0, err
 	}

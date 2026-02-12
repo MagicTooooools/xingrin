@@ -42,7 +42,7 @@ func (service *ScreenshotCommandService) BulkUpsert(ctx context.Context, targetI
 	target, err := service.targetLookup.GetActiveByID(targetID)
 	if err != nil {
 		if dberrors.IsRecordNotFound(err) {
-			return 0, ErrScreenshotTargetNotFound
+			return 0, ErrTargetNotFound
 		}
 		return 0, err
 	}

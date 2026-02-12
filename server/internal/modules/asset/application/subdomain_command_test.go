@@ -83,7 +83,7 @@ func TestSubdomainCommandServiceErrors(t *testing.T) {
 
 	lookup.err = gorm.ErrRecordNotFound
 	_, err = service.BulkCreate(context.Background(), 9, []string{"api.example.com"})
-	if !errors.Is(err, ErrSubdomainTargetNotFound) {
-		t.Fatalf("expected ErrSubdomainTargetNotFound, got %v", err)
+	if !errors.Is(err, ErrTargetNotFound) {
+		t.Fatalf("expected ErrTargetNotFound, got %v", err)
 	}
 }

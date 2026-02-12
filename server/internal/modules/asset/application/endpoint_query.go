@@ -3,13 +3,10 @@ package application
 import (
 	"context"
 	"database/sql"
-	"errors"
 
 	assetdomain "github.com/yyhuni/lunafox/server/internal/modules/asset/domain"
 	"github.com/yyhuni/lunafox/server/internal/pkg/dberrors"
 )
-
-var ErrEndpointTargetNotFound = errors.New("target not found")
 
 type EndpointQueryService struct {
 	store        EndpointQueryStore
@@ -25,7 +22,7 @@ func (service *EndpointQueryService) ListByTarget(ctx context.Context, targetID,
 
 	if _, err := service.targetLookup.GetActiveByID(targetID); err != nil {
 		if dberrors.IsRecordNotFound(err) {
-			return nil, 0, ErrEndpointTargetNotFound
+			return nil, 0, ErrTargetNotFound
 		}
 		return nil, 0, err
 	}
@@ -43,7 +40,7 @@ func (service *EndpointQueryService) StreamByTarget(ctx context.Context, targetI
 
 	if _, err := service.targetLookup.GetActiveByID(targetID); err != nil {
 		if dberrors.IsRecordNotFound(err) {
-			return nil, ErrEndpointTargetNotFound
+			return nil, ErrTargetNotFound
 		}
 		return nil, err
 	}
@@ -56,7 +53,7 @@ func (service *EndpointQueryService) CountByTarget(ctx context.Context, targetID
 
 	if _, err := service.targetLookup.GetActiveByID(targetID); err != nil {
 		if dberrors.IsRecordNotFound(err) {
-			return 0, ErrEndpointTargetNotFound
+			return 0, ErrTargetNotFound
 		}
 		return 0, err
 	}

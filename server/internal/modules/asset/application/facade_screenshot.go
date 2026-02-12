@@ -22,7 +22,7 @@ func NewScreenshotFacade(store ScreenshotStore, targetLookup ScreenshotTargetLoo
 func (service *ScreenshotFacade) ListByTargetID(targetID, page, pageSize int, filter string) ([]Screenshot, int64, error) {
 	items, total, err := service.queryService.ListByTargetID(context.Background(), targetID, page, pageSize, filter)
 	if err != nil {
-		if errors.Is(err, ErrScreenshotTargetNotFound) || dberrors.IsRecordNotFound(err) {
+		if errors.Is(err, ErrTargetNotFound) || dberrors.IsRecordNotFound(err) {
 			return nil, 0, ErrTargetNotFound
 		}
 		return nil, 0, err
@@ -48,7 +48,7 @@ func (service *ScreenshotFacade) BulkDelete(ids []int) (int64, error) {
 func (service *ScreenshotFacade) BulkUpsert(targetID int, req *BulkUpsertScreenshotRequest) (int64, error) {
 	count, err := service.cmdService.BulkUpsert(context.Background(), targetID, req)
 	if err != nil {
-		if errors.Is(err, ErrScreenshotTargetNotFound) || dberrors.IsRecordNotFound(err) {
+		if errors.Is(err, ErrTargetNotFound) || dberrors.IsRecordNotFound(err) {
 			return 0, ErrTargetNotFound
 		}
 		return 0, err
