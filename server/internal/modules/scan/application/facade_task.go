@@ -22,11 +22,6 @@ func NewScanTaskFacade(taskStore TaskStore, runtimeStore TaskRuntimeScanStore) *
 	return &ScanTaskFacade{runtimeService: NewTaskRuntimeService(taskStore, runtimeStore)}
 }
 
-type TaskService interface {
-	PullTask(ctx context.Context, agentID int) (*TaskAssignment, error)
-	UpdateStatus(ctx context.Context, agentID, taskID int, status, errorMessage string) error
-}
-
 func (service *ScanTaskFacade) PullTask(ctx context.Context, agentID int) (*TaskAssignment, error) {
 	assignment, err := service.runtimeService.PullTask(ctx, agentID)
 	if err != nil {

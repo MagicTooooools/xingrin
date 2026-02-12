@@ -1,5 +1,15 @@
 package application
 
+import (
+	scandomain "github.com/yyhuni/lunafox/server/internal/modules/scan/domain"
+)
+
+type QueryTargetRef = scandomain.QueryTargetRef
+
+type QueryScan = scandomain.QueryScan
+
+type QueryStatistics = scandomain.QueryStatistics
+
 type ScanTargetName struct {
 	Name string
 	Type string

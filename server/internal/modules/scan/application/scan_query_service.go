@@ -2,23 +2,7 @@ package application
 
 import (
 	"context"
-
-	scandomain "github.com/yyhuni/lunafox/server/internal/modules/scan/domain"
 )
-
-type ScanListFilter struct {
-	Page     int
-	PageSize int
-	TargetID int
-	Status   string
-	Search   string
-}
-
-type QueryTargetRef = scandomain.QueryTargetRef
-
-type QueryScan = scandomain.QueryScan
-
-type QueryStatistics = scandomain.QueryStatistics
 
 type ScanQueryService struct{ store ScanQueryStore }
 

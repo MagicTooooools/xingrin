@@ -5,6 +5,11 @@ const (
 	maxScanLogLimit     = 1000
 )
 
+type ScanLogCreateItem struct {
+	Level   string
+	Content string
+}
+
 type ScanLogListQuery struct {
 	AfterID int64
 	Limit   int

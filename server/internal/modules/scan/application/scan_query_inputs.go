@@ -5,6 +5,14 @@ const (
 	defaultScanPageSize = 20
 )
 
+type ScanListFilter struct {
+	Page     int
+	PageSize int
+	TargetID int
+	Status   string
+	Search   string
+}
+
 type ScanListQuery struct {
 	Page     int
 	PageSize int
