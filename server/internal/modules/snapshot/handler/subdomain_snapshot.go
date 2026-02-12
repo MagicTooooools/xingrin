@@ -37,7 +37,7 @@ func (h *SubdomainSnapshotHandler) BulkUpsert(c *gin.Context) {
 		return
 	}
 
-	snapshotCount, assetCount, err := h.svc.SaveAndSync(scanID, req.TargetID, req.Subdomains)
+	snapshotCount, assetCount, err := h.svc.SaveAndSync(scanID, req.TargetID, toSubdomainSnapshotItemsInput(req.Subdomains))
 	if err != nil {
 		if errors.Is(err, service.ErrScanNotFoundForSnapshot) {
 			dto.NotFound(c, "Scan not found")
@@ -75,7 +75,7 @@ func (h *SubdomainSnapshotHandler) List(c *gin.Context) {
 		return
 	}
 
-	snapshots, total, err := h.svc.ListByScan(scanID, &query)
+	snapshots, total, err := h.svc.ListByScan(scanID, toSnapshotListQueryInput(query.GetPage(), query.GetPageSize(), query.Filter))
 	if err != nil {
 		if errors.Is(err, service.ErrScanNotFoundForSnapshot) {
 			dto.NotFound(c, "Scan not found")
@@ -87,7 +87,7 @@ func (h *SubdomainSnapshotHandler) List(c *gin.Context) {
 
 	var resp []dto.SubdomainSnapshotResponse
 	for _, s := range snapshots {
-		resp = append(resp, toSubdomainSnapshotResponse(&s))
+		resp = append(resp, toSubdomainSnapshotOutput(&s))
 	}
 
 	dto.Paginated(c, resp, total, query.GetPage(), query.GetPageSize())
@@ -140,8 +140,8 @@ func (h *SubdomainSnapshotHandler) Export(c *gin.Context) {
 	}
 }
 
-// toSubdomainSnapshotResponse converts model to response DTO
-func toSubdomainSnapshotResponse(s *service.SubdomainSnapshot) dto.SubdomainSnapshotResponse {
+// toSubdomainSnapshotOutput converts model to output DTO
+func toSubdomainSnapshotOutput(s *service.SubdomainSnapshot) dto.SubdomainSnapshotResponse {
 	return dto.SubdomainSnapshotResponse{
 		ID:        s.ID,
 		ScanID:    s.ScanID,

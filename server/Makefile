@@ -1,4 +1,4 @@
-.PHONY: build run test check-ddd check-architecture check-layer-dependencies check-domain-purity check-no-legacy-layer check-dto-selftest check-repo-selftest check-layer-selftest check-wiring-selftest check-guards-selftest check-common-httpdto check-naming-conventions check-wiring-conventions sync-common-httpdto lint clean deps fmt generate check-router-boundaries check-router-selftest check-handler-boundaries check-handler-selftest
+.PHONY: build run test check-ddd check-architecture check-layer-dependencies check-domain-purity check-no-legacy-layer check-dto-selftest check-repo-selftest check-layer-selftest check-wiring-selftest check-guards-selftest check-common-httpdto check-naming-conventions check-mapper-naming check-wiring-conventions sync-common-httpdto lint clean deps fmt generate check-router-boundaries check-router-selftest check-handler-boundaries check-handler-selftest
 
 # Build the server binary
 build:
@@ -17,6 +17,7 @@ check-architecture:
 	bash ./scripts/check-dto-boundaries.sh
 	bash ./scripts/check-repository-boundaries.sh
 	bash ./scripts/check-naming-conventions.sh
+	bash ./scripts/check-mapper-naming.sh
 	bash ./scripts/check-router-boundaries.sh
 	bash ./scripts/check-handler-boundaries.sh
 	bash ./scripts/check-wiring-conventions.sh
@@ -24,6 +25,9 @@ check-architecture:
 
 check-naming-conventions:
 	bash ./scripts/check-naming-conventions.sh
+
+check-mapper-naming:
+	bash ./scripts/check-mapper-naming.sh
 
 check-wiring-conventions:
 	bash ./scripts/check-wiring-conventions.sh

@@ -4,6 +4,7 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 bash "$ROOT_DIR/server/scripts/check-naming-conventions.sh"
+bash "$ROOT_DIR/server/scripts/check-mapper-naming.sh"
 bash "$ROOT_DIR/server/scripts/check-router-boundaries.sh"
 bash "$ROOT_DIR/server/scripts/check-handler-boundaries.sh"
 bash "$ROOT_DIR/server/scripts/check-wiring-conventions.sh"

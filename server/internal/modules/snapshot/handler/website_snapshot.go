@@ -38,7 +38,7 @@ func (h *WebsiteSnapshotHandler) BulkUpsert(c *gin.Context) {
 		return
 	}
 
-	snapshotCount, assetCount, err := h.svc.SaveAndSync(scanID, req.TargetID, req.Websites)
+	snapshotCount, assetCount, err := h.svc.SaveAndSync(scanID, req.TargetID, toWebsiteSnapshotItemsInput(req.Websites))
 	if err != nil {
 		if errors.Is(err, service.ErrScanNotFoundForSnapshot) {
 			dto.NotFound(c, "Scan not found")
@@ -72,7 +72,7 @@ func (h *WebsiteSnapshotHandler) List(c *gin.Context) {
 		return
 	}
 
-	snapshots, total, err := h.svc.ListByScan(scanID, &query)
+	snapshots, total, err := h.svc.ListByScan(scanID, toSnapshotListQueryInput(query.GetPage(), query.GetPageSize(), query.Filter))
 	if err != nil {
 		if errors.Is(err, service.ErrScanNotFoundForSnapshot) {
 			dto.NotFound(c, "Scan not found")
@@ -85,7 +85,7 @@ func (h *WebsiteSnapshotHandler) List(c *gin.Context) {
 	// Convert to response
 	var resp []dto.WebsiteSnapshotResponse
 	for _, s := range snapshots {
-		resp = append(resp, toWebsiteSnapshotResponse(&s))
+		resp = append(resp, toWebsiteSnapshotOutput(&s))
 	}
 
 	dto.Paginated(c, resp, total, query.GetPage(), query.GetPageSize())
@@ -173,8 +173,8 @@ func (h *WebsiteSnapshotHandler) Export(c *gin.Context) {
 	}
 }
 
-// toWebsiteSnapshotResponse converts model to response DTO
-func toWebsiteSnapshotResponse(s *service.WebsiteSnapshot) dto.WebsiteSnapshotResponse {
+// toWebsiteSnapshotOutput converts model to output DTO
+func toWebsiteSnapshotOutput(s *service.WebsiteSnapshot) dto.WebsiteSnapshotResponse {
 	tech := s.Tech
 	if tech == nil {
 		tech = []string{}

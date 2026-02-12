@@ -3,7 +3,7 @@ package application
 import (
 	"context"
 
-	scandto "github.com/yyhuni/lunafox/server/internal/modules/scan/dto"
+	scanapp "github.com/yyhuni/lunafox/server/internal/modules/scan/application"
 )
 
 // AgentTaskService orchestrates task pull/status updates for agent runtime endpoints.
@@ -15,7 +15,7 @@ func NewAgentTaskService(runtime ScanTaskRuntimePort) *AgentTaskService {
 	return &AgentTaskService{runtime: runtime}
 }
 
-func (service *AgentTaskService) PullTask(ctx context.Context, agentID int) (*scandto.TaskAssignment, error) {
+func (service *AgentTaskService) PullTask(ctx context.Context, agentID int) (*scanapp.TaskAssignment, error) {
 	return service.runtime.PullTask(ctx, agentID)
 }
 
