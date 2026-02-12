@@ -3,10 +3,12 @@
 import * as React from "react"
 import type { ColumnDef } from "@tanstack/react-table"
 import { useTranslations } from "next-intl"
-import { UnifiedDataTable } from "@/components/ui/data-table/unified-data-table"
+import { SmartFilterDataTable } from "@/components/ui/data-table/smart-filter-data-table"
+import { buildDownloadOptions } from "@/components/ui/data-table/data-table-helpers"
 import type { FilterField } from "@/components/common/smart-filter-input"
-import type { DownloadOption, PaginationState } from "@/types/data-table.types"
+import type { PaginationState } from "@/types/data-table.types"
 import type { PaginationInfo } from "@/types/common.types"
+import { buildPaginationInfo } from "@/hooks/_shared/pagination"
 
 // Endpoint page filter field configuration
 const ENDPOINT_FILTER_FIELDS: FilterField[] = [
@@ -75,13 +77,6 @@ export function EndpointsDataTable<TData extends { id: number | string }, TValue
 
   const pagination = externalPagination || internalPagination
 
-  // Handle smart filter search
-  const handleSmartSearch = (rawQuery: string) => {
-    if (onFilterChange) {
-      onFilterChange(rawQuery)
-    }
-  }
-
   // Handle pagination change
   const handlePaginationChange = (newPagination: PaginationState) => {
     if (onPaginationChange) {
@@ -92,61 +87,44 @@ export function EndpointsDataTable<TData extends { id: number | string }, TValue
   }
 
   // Build paginationInfo
-  const paginationInfo: PaginationInfo | undefined = externalPagination && totalCount ? {
-    total: totalCount,
-    totalPages: totalPages || Math.ceil(totalCount / pagination.pageSize),
-    page: pagination.pageIndex + 1,
-    pageSize: pagination.pageSize,
-  } : undefined
+  const paginationInfo: PaginationInfo | undefined =
+    externalPagination && totalCount !== undefined
+      ? buildPaginationInfo({
+        total: totalCount ?? 0,
+        page: pagination.pageIndex + 1,
+        pageSize: pagination.pageSize,
+        totalPages,
+        minTotalPages: 1,
+      })
+      : undefined
 
-  // Download options
-  const downloadOptions: DownloadOption[] = []
-  if (onDownloadAll) {
-    downloadOptions.push({
-      key: "all",
-      label: tDownload("all"),
-      onClick: onDownloadAll,
-    })
-  }
-  if (onDownloadSelected) {
-    downloadOptions.push({
-      key: "selected",
-      label: tDownload("selected"),
-      onClick: onDownloadSelected,
-      disabled: (count) => count === 0,
-    })
-  }
+  const downloadOptions = buildDownloadOptions(tDownload, {
+    onDownloadAll,
+    onDownloadSelected,
+  })
 
   return (
-    <UnifiedDataTable
+    <SmartFilterDataTable
       data={data}
       columns={columns as ColumnDef<TData>[]}
       getRowId={(row) => String(row.id)}
-      // Pagination
+      filterFields={ENDPOINT_FILTER_FIELDS}
+      filterExamples={ENDPOINT_FILTER_EXAMPLES}
+      filterValue={filterValue}
+      onFilterChange={onFilterChange}
+      isSearching={isSearching}
       pagination={pagination}
       setPagination={onPaginationChange ? undefined : setInternalPagination}
       paginationInfo={paginationInfo}
       onPaginationChange={handlePaginationChange}
-      // Smart filter
-      searchMode="smart"
-      searchValue={filterValue}
-      onSearch={handleSmartSearch}
-      isSearching={isSearching}
-      filterFields={ENDPOINT_FILTER_FIELDS}
-      filterExamples={ENDPOINT_FILTER_EXAMPLES}
-      // Selection
       onSelectionChange={onSelectionChange}
-      // Bulk operations
       onBulkDelete={onBulkDelete}
       bulkDeleteLabel={tActions("delete")}
       onAddNew={onAddNew}
       addButtonLabel={addButtonText}
-      // Bulk add button
       onBulkAdd={onBulkAdd}
       bulkAddLabel={tActions("add")}
-      // Download
-      downloadOptions={downloadOptions.length > 0 ? downloadOptions : undefined}
-      // Empty state
+      downloadOptions={downloadOptions}
       emptyMessage={t("noData")}
     />
   )

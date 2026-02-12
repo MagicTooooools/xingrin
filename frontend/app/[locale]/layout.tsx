@@ -5,10 +5,10 @@ import { getMessages, setRequestLocale, getTranslations } from 'next-intl/server
 import { notFound } from 'next/navigation'
 import { locales, localeHtmlLang, type Locale } from '@/i18n/config'
 import { DEFAULT_COLOR_THEME_ID } from "@/lib/color-themes"
+import localFont from 'next/font/local'
 
 // Import global style files
 import "../globals.css"
-// Font faces are declared in globals.css
 // Import color themes
 import "@/styles/themes/bauhaus.css"
 import { Suspense } from "react"
@@ -16,6 +16,7 @@ import { QueryProvider } from "@/components/providers/query-provider"
 import { ThemeProvider } from "@/components/providers/theme-provider"
 import { UiI18nProvider } from "@/components/providers/ui-i18n-provider"
 import { ColorThemeInit } from "@/components/color-theme-init"
+import { ErrorBoundary } from "@/components/error-boundary"
 
 // Import common layout components
 import { RoutePrefetch } from "@/components/route-prefetch"
@@ -53,13 +54,30 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   }
 }
 
-// Use HarmonyOS Sans SC + system font fallback, fully loaded locally
-const fontConfig = {
-  className: "font-sans",
-  style: {
-    fontFamily: "'HarmonyOS Sans SC', system-ui, -apple-system, PingFang SC, Hiragino Sans GB, Microsoft YaHei, sans-serif"
-  }
-}
+// Optimize font loading with next/font/local
+const harmonyOS = localFont({
+  src: [
+    {
+      path: '../../public/fonts/harmonyos-sans/woff2/HarmonyOS_Sans_SC_Regular.woff2',
+      weight: '400',
+      style: 'normal',
+    },
+    {
+      path: '../../public/fonts/harmonyos-sans/woff2/HarmonyOS_Sans_SC_Medium.woff2',
+      weight: '500',
+      style: 'normal',
+    },
+    {
+      path: '../../public/fonts/harmonyos-sans/woff2/HarmonyOS_Sans_SC_Bold.woff2',
+      weight: '700',
+      style: 'normal',
+    },
+  ],
+  variable: '--font-harmony',
+  display: 'swap',
+  preload: true,
+  fallback: ['system-ui', '-apple-system', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'sans-serif'],
+})
 
 // Generate static parameters, support all languages
 export function generateStaticParams() {
@@ -100,7 +118,7 @@ export default async function LocaleLayout({
       data-theme={themeId}
       suppressHydrationWarning
     >
-      <body className={fontConfig.className} style={fontConfig.style}>
+      <body className={harmonyOS.className}>
         <ColorThemeInit />
         {/* Route loading progress bar */}
         <Suspense fallback={null}>
@@ -112,15 +130,18 @@ export default async function LocaleLayout({
           <NextIntlClientProvider messages={messages}>
             {/* QueryProvider provides React Query functionality */}
             <QueryProvider>
-              {/* UiI18nProvider provides UI component translations */}
-              <UiI18nProvider>
-                {/* Route prefetch */}
-                <RoutePrefetch />
-                {/* AuthLayout handles authentication and sidebar display */}
-                <AuthLayout>
-                  {children}
-                </AuthLayout>
-              </UiI18nProvider>
+              {/* ErrorBoundary catches component errors and prevents app crashes */}
+              <ErrorBoundary>
+                {/* UiI18nProvider provides UI component translations */}
+                <UiI18nProvider>
+                  {/* Route prefetch */}
+                  <RoutePrefetch />
+                  {/* AuthLayout handles authentication and sidebar display */}
+                  <AuthLayout>
+                    {children}
+                  </AuthLayout>
+                </UiI18nProvider>
+              </ErrorBoundary>
             </QueryProvider>
           </NextIntlClientProvider>
         </ThemeProvider>

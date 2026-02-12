@@ -1,20 +1,17 @@
 "use client"
 
-import React from "react"
 import { useTranslations } from "next-intl"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
 } from "@/components/ui/dialog"
-import { useChangePassword } from "@/hooks/use-auth"
-import { getErrorMessage } from "@/lib/api-client"
+import { useChangePasswordDialogState } from "@/components/auth/change-password-dialog-state"
+import {
+  ChangePasswordDialogHeader,
+  ChangePasswordFormFields,
+  ChangePasswordError,
+  ChangePasswordDialogFooter,
+} from "@/components/auth/change-password-dialog-sections"
 
 interface ChangePasswordDialogProps {
   open: boolean
@@ -23,96 +20,43 @@ interface ChangePasswordDialogProps {
 
 export function ChangePasswordDialog({ open, onOpenChange }: ChangePasswordDialogProps) {
   const t = useTranslations("auth.changePassword")
-  
-  const [oldPassword, setOldPassword] = React.useState("")
-  const [newPassword, setNewPassword] = React.useState("")
-  const [confirmPassword, setConfirmPassword] = React.useState("")
-  const [error, setError] = React.useState("")
-  
-  const { mutate: changePassword, isPending } = useChangePassword()
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    setError("")
-    
-    if (newPassword !== confirmPassword) {
-      setError(t("passwordMismatch"))
-      return
-    }
-    
-    if (newPassword.length < 6) {
-      setError(t("passwordTooShort", { min: 6 }))
-      return
-    }
-    
-    changePassword(
-      { oldPassword, newPassword },
-      {
-        onSuccess: () => {
-          onOpenChange(false)
-          setOldPassword("")
-          setNewPassword("")
-          setConfirmPassword("")
-        },
-        onError: (err: unknown) => {
-          setError(getErrorMessage(err))
-        },
-      }
-    )
-  }
+  const {
+    oldPassword,
+    newPassword,
+    confirmPassword,
+    error,
+    isPending,
+    setOldPassword,
+    setNewPassword,
+    setConfirmPassword,
+    handleSubmit,
+    handleOpenChange,
+  } = useChangePasswordDialogState({
+    onOpenChange,
+    t,
+  })
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-[400px]">
-        <DialogHeader>
-          <DialogTitle>{t("title")}</DialogTitle>
-          <DialogDescription>{t("desc")}</DialogDescription>
-        </DialogHeader>
+        <ChangePasswordDialogHeader t={t} />
         <form onSubmit={handleSubmit}>
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="oldPassword">{t("currentPassword")}</Label>
-              <Input
-                id="oldPassword"
-                type="password"
-                value={oldPassword}
-                onChange={(e) => setOldPassword(e.target.value)}
-                required
-                autoFocus
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="newPassword">{t("newPassword")}</Label>
-              <Input
-                id="newPassword"
-                type="password"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                required
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="confirmPassword">{t("confirmPassword")}</Label>
-              <Input
-                id="confirmPassword"
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-              />
-            </div>
-            {error && (
-              <p className="text-sm text-destructive">{error}</p>
-            )}
-          </div>
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              {t("cancel")}
-            </Button>
-            <Button type="submit" disabled={isPending}>
-              {isPending ? t("saving") : t("save")}
-            </Button>
-          </DialogFooter>
+          <ChangePasswordFormFields
+            t={t}
+            oldPassword={oldPassword}
+            newPassword={newPassword}
+            confirmPassword={confirmPassword}
+            onOldPasswordChange={setOldPassword}
+            onNewPasswordChange={setNewPassword}
+            onConfirmPasswordChange={setConfirmPassword}
+          />
+          <ChangePasswordError error={error} />
+          <ChangePasswordDialogFooter
+            t={t}
+            isPending={isPending}
+            onCancel={() => handleOpenChange(false)}
+          />
         </form>
       </DialogContent>
     </Dialog>

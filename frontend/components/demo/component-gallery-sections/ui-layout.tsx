@@ -169,9 +169,8 @@ export function UiLayoutSection() {
           <UnifiedDataTable
             data={sampleTableData}
             columns={sampleTableColumns}
-            hideToolbar
-            hidePagination
-            enableRowSelection={false}
+            ui={{ hideToolbar: true, hidePagination: true }}
+            behavior={{ enableRowSelection: false }}
           />
         </DemoCard>
 

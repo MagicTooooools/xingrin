@@ -1,5 +1,13 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import { useQuery } from "@tanstack/react-query"
+import { useResourceMutation } from "@/hooks/_shared/create-resource-mutation"
+import { createResourceKeys } from "@/hooks/_shared/query-keys"
+import { getAssetDeletedCount } from "@/hooks/_shared/asset-mutation-helpers"
 import { CommandService } from "@/services/command.service"
+import {
+  getMockCommandById,
+  getMockCommandDeleteCount,
+  getMockCommands,
+} from "@/mock/data/commands"
 import type {
   GetCommandsRequest,
   CreateCommandRequest,
@@ -7,249 +15,25 @@ import type {
   GetCommandsResponse,
   Command,
 } from "@/types/command.types"
-import { useToastMessages } from '@/lib/toast-helpers'
-import { getErrorCode, getErrorResponseData } from '@/lib/response-parser'
 
-// Mock data
-const MOCK_COMMANDS: Command[] = [
-  {
-    id: 1,
-    createdAt: "2024-01-15T10:30:00Z",
-    updatedAt: "2024-01-15T10:30:00Z",
-    toolId: 1,
-    tool: {
-      id: 1,
-      name: "subfinder",
-      type: "opensource",
-      createdAt: "2024-01-01T00:00:00Z",
-      updatedAt: "2024-01-01T00:00:00Z",
-      repoUrl: "https://github.com/projectdiscovery/subfinder",
-      version: "v2.6.5",
-      description: "Fast passive subdomain enumeration tool",
-      categoryNames: ["subdomain", "recon"],
-      directory: "",
-      installCommand: "go install -v github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest",
-      updateCommand: "go install -v github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest",
-      versionCommand: "subfinder -version",
-    },
-    name: "subdomain_scan",
-    displayName: "Subdomain Scan",
-    description: "Subdomain scanning using subfinder",
-    commandTemplate: "subfinder -d {{domain}} -o {{output}}",
-  },
-  {
-    id: 2,
-    createdAt: "2024-01-16T11:20:00Z",
-    updatedAt: "2024-01-16T11:20:00Z",
-    toolId: 2,
-    tool: {
-      id: 2,
-      name: "nmap",
-      type: "opensource",
-      createdAt: "2024-01-01T00:00:00Z",
-      updatedAt: "2024-01-01T00:00:00Z",
-      repoUrl: "https://github.com/nmap/nmap",
-      version: "7.94",
-      description: "Network exploration tool and security / port scanner",
-      categoryNames: ["port", "network"],
-      directory: "",
-      installCommand: "brew install nmap",
-      updateCommand: "brew upgrade nmap",
-      versionCommand: "nmap --version",
-    },
-    name: "port_scan",
-    displayName: "Port Scan",
-    description: "Port scanning using nmap",
-    commandTemplate: "nmap -sV -p- {{target}} -oX {{output}}",
-  },
-  {
-    id: 3,
-    createdAt: "2024-01-17T09:15:00Z",
-    updatedAt: "2024-01-17T09:15:00Z",
-    toolId: 1,
-    tool: {
-      id: 1,
-      name: "subfinder",
-      type: "opensource",
-      createdAt: "2024-01-01T00:00:00Z",
-      updatedAt: "2024-01-01T00:00:00Z",
-      repoUrl: "https://github.com/projectdiscovery/subfinder",
-      version: "v2.6.5",
-      description: "Fast passive subdomain enumeration tool",
-      categoryNames: ["subdomain", "recon"],
-      directory: "",
-      installCommand: "go install -v github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest",
-      updateCommand: "go install -v github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest",
-      versionCommand: "subfinder -version",
-    },
-    name: "fast_subdomain_scan",
-    displayName: "Fast Subdomain Scan",
-    description: "Fast scanning of common subdomains using subfinder",
-    commandTemplate: "subfinder -d {{domain}} -silent -o {{output}}",
-  },
-  {
-    id: 4,
-    createdAt: "2024-01-18T14:45:00Z",
-    updatedAt: "2024-01-18T14:45:00Z",
-    toolId: 3,
-    tool: {
-      id: 3,
-      name: "nuclei",
-      type: "opensource",
-      createdAt: "2024-01-01T00:00:00Z",
-      updatedAt: "2024-01-01T00:00:00Z",
-      repoUrl: "https://github.com/projectdiscovery/nuclei",
-      version: "v3.1.4",
-      description: "Fast and customisable vulnerability scanner",
-      categoryNames: ["vulnerability", "scanner"],
-      directory: "",
-      installCommand: "go install -v github.com/projectdiscovery/nuclei/v3/cmd/nuclei@latest",
-      updateCommand: "go install -v github.com/projectdiscovery/nuclei/v3/cmd/nuclei@latest",
-      versionCommand: "nuclei -version",
-    },
-    name: "vulnerability_scan",
-    displayName: "Vulnerability Scan",
-    description: "Vulnerability scanning using nuclei",
-    commandTemplate: "nuclei -u {{target}} -severity critical,high,medium -o {{output}}",
-  },
-  {
-    id: 5,
-    createdAt: "2024-01-19T16:00:00Z",
-    updatedAt: "2024-01-19T16:00:00Z",
-    toolId: 4,
-    tool: {
-      id: 4,
-      name: "katana",
-      type: "opensource",
-      createdAt: "2024-01-01T00:00:00Z",
-      updatedAt: "2024-01-01T00:00:00Z",
-      repoUrl: "https://github.com/projectdiscovery/katana",
-      version: "v1.0.4",
-      description: "Next-generation crawling and spidering framework",
-      categoryNames: ["crawler", "recon"],
-      directory: "",
-      installCommand: "go install github.com/projectdiscovery/katana/cmd/katana@latest",
-      updateCommand: "go install github.com/projectdiscovery/katana/cmd/katana@latest",
-      versionCommand: "katana -version",
-    },
-    name: "web_crawl",
-    displayName: "Web Crawling",
-    description: "Web link crawling using katana",
-    commandTemplate: "katana -u {{target}} -d 3 -o {{output}}",
-  },
-  {
-    id: 6,
-    createdAt: "2024-01-20T10:30:00Z",
-    updatedAt: "2024-01-20T10:30:00Z",
-    toolId: 2,
-    tool: {
-      id: 2,
-      name: "nmap",
-      type: "opensource",
-      createdAt: "2024-01-01T00:00:00Z",
-      updatedAt: "2024-01-01T00:00:00Z",
-      repoUrl: "https://github.com/nmap/nmap",
-      version: "7.94",
-      description: "Network exploration tool and security / port scanner",
-      categoryNames: ["port", "network"],
-      directory: "",
-      installCommand: "brew install nmap",
-      updateCommand: "brew upgrade nmap",
-      versionCommand: "nmap --version",
-    },
-    name: "service_detect",
-    displayName: "Service Detection",
-    description: "Service version detection using nmap",
-    commandTemplate: "nmap -sV {{target}} -oX {{output}}",
-  },
-  {
-    id: 7,
-    createdAt: "2024-01-21T13:20:00Z",
-    updatedAt: "2024-01-21T13:20:00Z",
-    toolId: 5,
-    tool: {
-      id: 5,
-      name: "dirsearch",
-      type: "opensource",
-      createdAt: "2024-01-01T00:00:00Z",
-      updatedAt: "2024-01-01T00:00:00Z",
-      repoUrl: "https://github.com/maurosoria/dirsearch",
-      version: "v0.4.3",
-      description: "Web path scanner",
-      categoryNames: ["directory", "recon"],
-      directory: "",
-      installCommand: "pip3 install dirsearch",
-      updateCommand: "pip3 install --upgrade dirsearch",
-      versionCommand: "dirsearch --version",
-    },
-    name: "dir_scan",
-    displayName: "Directory Scan",
-    description: "Directory scanning using dirsearch",
-    commandTemplate: "dirsearch -u {{target}} -e php,html,js -o {{output}}",
-  },
-  {
-    id: 8,
-    createdAt: "2024-01-22T15:10:00Z",
-    updatedAt: "2024-01-22T15:10:00Z",
-    toolId: 3,
-    tool: {
-      id: 3,
-      name: "nuclei",
-      type: "opensource",
-      createdAt: "2024-01-01T00:00:00Z",
-      updatedAt: "2024-01-01T00:00:00Z",
-      repoUrl: "https://github.com/projectdiscovery/nuclei",
-      version: "v3.1.4",
-      description: "Fast and customisable vulnerability scanner",
-      categoryNames: ["vulnerability", "scanner"],
-      directory: "",
-      installCommand: "go install -v github.com/projectdiscovery/nuclei/v3/cmd/nuclei@latest",
-      updateCommand: "go install -v github.com/projectdiscovery/nuclei/v3/cmd/nuclei@latest",
-      versionCommand: "nuclei -version",
-    },
-    name: "full_vulnerability_scan",
-    displayName: "Full Vulnerability Scan",
-    description: "Comprehensive vulnerability scanning using nuclei",
-    commandTemplate: "nuclei -u {{target}} -t nuclei-templates/ -o {{output}}",
-  },
-]
+
+// Query Keys
+export const commandKeys = createResourceKeys("commands", {
+  list: (params: GetCommandsRequest = {}) => params,
+  detail: (id: number) => id,
+})
 
 /**
  * Get command list (using mock data)
  */
 export function useCommands(params: GetCommandsRequest = {}) {
   return useQuery({
-    queryKey: ["commands", params],
+    queryKey: commandKeys.list(params),
     queryFn: async (): Promise<GetCommandsResponse> => {
       // Simulate network delay
       await new Promise(resolve => setTimeout(resolve, 500))
-      
-      const page = params.page || 1
-      const pageSize = params.pageSize || 10
-      
-      // If there's toolId filter
-      let filteredCommands = MOCK_COMMANDS
-      if (params.toolId) {
-        filteredCommands = MOCK_COMMANDS.filter(cmd => cmd.toolId === params.toolId)
-      }
-      
-      const totalCount = filteredCommands.length
-      const totalPages = Math.ceil(totalCount / pageSize)
-      const startIndex = (page - 1) * pageSize
-      const endIndex = startIndex + pageSize
-      const commands = filteredCommands.slice(startIndex, endIndex)
-      
-      return {
-        commands,
-        page,
-        pageSize,
-        total: totalCount,
-        totalPages,
-        // Compatible fields (backward compatibility)
-        page_size: pageSize,
-        total_count: totalCount,
-        total_pages: totalPages,
-      }
+
+      return getMockCommands(params)
     },
   })
 }
@@ -259,11 +43,11 @@ export function useCommands(params: GetCommandsRequest = {}) {
  */
 export function useCommand(id: number) {
   return useQuery({
-    queryKey: ["command", id],
+    queryKey: commandKeys.detail(id),
     queryFn: async (): Promise<Command | undefined> => {
       // Simulate network delay
       await new Promise(resolve => setTimeout(resolve, 300))
-      return MOCK_COMMANDS.find(cmd => cmd.id === id)
+      return getMockCommandById(id)
     },
     enabled: !!id,
   })
@@ -273,18 +57,13 @@ export function useCommand(id: number) {
  * Create command
  */
 export function useCreateCommand() {
-  const queryClient = useQueryClient()
-  const toastMessages = useToastMessages()
-
-  return useMutation({
+  return useResourceMutation({
     mutationFn: (data: CreateCommandRequest) => CommandService.createCommand(data),
-    onSuccess: () => {
-      toastMessages.success('toast.command.create.success')
-      queryClient.invalidateQueries({ queryKey: ["commands"] })
+    invalidate: [{ queryKey: commandKeys.all }],
+    onSuccess: ({ toast }) => {
+      toast.success('toast.command.create.success')
     },
-    onError: (error: unknown) => {
-      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.command.create.error')
-    },
+    errorFallbackKey: 'toast.command.create.error',
   })
 }
 
@@ -292,20 +71,17 @@ export function useCreateCommand() {
  * Update command
  */
 export function useUpdateCommand() {
-  const queryClient = useQueryClient()
-  const toastMessages = useToastMessages()
-
-  return useMutation({
+  return useResourceMutation({
     mutationFn: ({ id, data }: { id: number; data: UpdateCommandRequest }) =>
       CommandService.updateCommand(id, data),
-    onSuccess: () => {
-      toastMessages.success('toast.command.update.success')
-      queryClient.invalidateQueries({ queryKey: ["commands"] })
-      queryClient.invalidateQueries({ queryKey: ["command"] })
+    invalidate: [
+      { queryKey: commandKeys.all },
+      { queryKey: commandKeys.details() },
+    ],
+    onSuccess: ({ toast }) => {
+      toast.success('toast.command.update.success')
     },
-    onError: (error: unknown) => {
-      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.command.update.error')
-    },
+    errorFallbackKey: 'toast.command.update.error',
   })
 }
 
@@ -313,18 +89,13 @@ export function useUpdateCommand() {
  * Delete command
  */
 export function useDeleteCommand() {
-  const queryClient = useQueryClient()
-  const toastMessages = useToastMessages()
-
-  return useMutation({
+  return useResourceMutation({
     mutationFn: (id: number) => CommandService.deleteCommand(id),
-    onSuccess: () => {
-      toastMessages.success('toast.command.delete.success')
-      queryClient.invalidateQueries({ queryKey: ["commands"] })
+    invalidate: [{ queryKey: commandKeys.all }],
+    onSuccess: ({ toast }) => {
+      toast.success('toast.command.delete.success')
     },
-    onError: (error: unknown) => {
-      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.command.delete.error')
-    },
+    errorFallbackKey: 'toast.command.delete.error',
   })
 }
 
@@ -332,30 +103,25 @@ export function useDeleteCommand() {
  * Batch delete commands (using mock data)
  */
 export function useBatchDeleteCommands() {
-  const queryClient = useQueryClient()
-  const toastMessages = useToastMessages()
-
-  return useMutation({
+  return useResourceMutation({
     mutationFn: async (ids: number[]) => {
       // Simulate network delay
       await new Promise(resolve => setTimeout(resolve, 800))
-      
+
       // Filter out deleted commands from mock data
-      const deletedCount = ids.filter(id => 
-        MOCK_COMMANDS.some(cmd => cmd.id === id)
-      ).length
-      
+      const deletedCount = getMockCommandDeleteCount(ids)
+
       // Simulate deletion (won't actually delete mock data)
       return {
         deletedCount: deletedCount
       }
     },
-    onSuccess: (response) => {
-      toastMessages.success('toast.command.delete.bulkSuccess', { count: response.deletedCount || 0 })
-      queryClient.invalidateQueries({ queryKey: ["commands"] })
+    invalidate: [{ queryKey: commandKeys.all }],
+    onSuccess: ({ data: response, toast }) => {
+      toast.success('toast.command.delete.bulkSuccess', {
+        count: getAssetDeletedCount(response),
+      })
     },
-    onError: (error: unknown) => {
-      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.command.delete.error')
-    },
+    errorFallbackKey: 'toast.command.delete.error',
   })
 }

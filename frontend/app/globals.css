@@ -4,38 +4,7 @@
 @import "@xterm/xterm/css/xterm.css";
 @import "../styles/themes/index.css";
 
-@font-face {
-  font-family: "HarmonyOS Sans SC";
-  src:
-    local("HarmonyOS Sans SC"),
-    local("HarmonyOS_Sans_SC"),
-    url("/fonts/harmonyos-sans/woff2/HarmonyOS_Sans_SC_Regular.woff2") format("woff2");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "HarmonyOS Sans SC";
-  src:
-    local("HarmonyOS Sans SC"),
-    local("HarmonyOS_Sans_SC"),
-    url("/fonts/harmonyos-sans/woff2/HarmonyOS_Sans_SC_Medium.woff2") format("woff2");
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "HarmonyOS Sans SC";
-  src:
-    local("HarmonyOS Sans SC"),
-    local("HarmonyOS_Sans_SC"),
-    url("/fonts/harmonyos-sans/woff2/HarmonyOS_Sans_SC_Bold.woff2") format("woff2");
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
+/* Font loading is now handled by next/font/local in layout.tsx */
 
 @custom-variant dark (&:is(.dark *));
 

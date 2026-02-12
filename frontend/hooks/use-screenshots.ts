@@ -1,5 +1,17 @@
 import { useQuery, keepPreviousData } from '@tanstack/react-query'
+import { createResourceKeys } from "@/hooks/_shared/query-keys"
 import { ScreenshotService } from '@/services/screenshot.service'
+
+// Query Keys
+const screenshotKeyBase = createResourceKeys("screenshots")
+
+export const screenshotKeys = {
+  ...screenshotKeyBase,
+  target: (targetId: number, params: { page: number; pageSize: number; filter?: string }) =>
+    [...screenshotKeyBase.all, 'target', targetId, params] as const,
+  scan: (scanId: number, params: { page: number; pageSize: number; filter?: string }) =>
+    [...screenshotKeyBase.all, 'scan', scanId, params] as const,
+}
 
 // 获取目标的截图列表
 export function useTargetScreenshots(
@@ -8,7 +20,7 @@ export function useTargetScreenshots(
   options?: { enabled?: boolean }
 ) {
   return useQuery({
-    queryKey: ['target-screenshots', targetId, params],
+    queryKey: screenshotKeys.target(targetId, params),
     queryFn: () => ScreenshotService.getByTarget(targetId, params),
     enabled: options?.enabled ?? true,
     placeholderData: keepPreviousData,
@@ -22,7 +34,7 @@ export function useScanScreenshots(
   options?: { enabled?: boolean }
 ) {
   return useQuery({
-    queryKey: ['scan-screenshots', scanId, params],
+    queryKey: screenshotKeys.scan(scanId, params),
     queryFn: () => ScreenshotService.getByScan(scanId, params),
     enabled: options?.enabled ?? true,
     placeholderData: keepPreviousData,

@@ -1,7 +1,7 @@
 "use client"
 
 import { useMemo } from "react"
-import { Pie, PieChart, Cell, Label } from "recharts"
+import { PieChart, Pie, Cell, Label } from "recharts"
 import { useAssetStatistics } from "@/hooks/use-dashboard"
 import {
   Card,

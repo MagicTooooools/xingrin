@@ -3,11 +3,13 @@
 import * as React from "react"
 import { toast, type ToasterProps } from "sonner"
 
+import { NudgeToastCard, type NudgeToastCardProps } from "@/components/nudges/nudge-toast-card"
 import {
-  NudgeToastCard,
-  type NudgeToastAction,
-  type NudgeToastCardProps,
-} from "@/components/nudges/nudge-toast-card"
+  isLocalStorageAvailable,
+  isNudgeSuppressed,
+  suppressNudge,
+  withNudgeDismiss,
+} from "@/lib/nudge-toast-helpers"
 
 export type NudgeToastVariant = Omit<NudgeToastCardProps, "onDismiss">
 
@@ -56,57 +58,7 @@ export interface UseNudgeToastOptions {
   variants: NudgeToastVariant[]
 }
 
-function isSuppressed(storageKey: string, cooldownMs?: number): boolean {
-  try {
-    const raw = localStorage.getItem(storageKey)
-    if (!raw) return false
-
-    // Forever suppression
-    if (!cooldownMs) return true
-
-    // Cooldown suppression
-    const nextAllowedAt = Number(raw)
-    if (!Number.isFinite(nextAllowedAt)) return true
-
-    if (nextAllowedAt > Date.now()) return true
-
-    // Expired cooldown - allow again
-    localStorage.removeItem(storageKey)
-    return false
-  } catch {
-    // If storage is blocked, be conservative: treat as suppressed
-    return true
-  }
-}
-
-function suppress(storageKey: string, cooldownMs?: number) {
-  try {
-    if (!cooldownMs) {
-      localStorage.setItem(storageKey, "true")
-      return
-    }
-
-    localStorage.setItem(storageKey, String(Date.now() + cooldownMs))
-  } catch {
-    // ignore
-  }
-}
-
-function withDismiss(
-  action: NudgeToastAction | undefined,
-  onDismiss: () => void
-): NudgeToastAction | undefined {
-  if (!action) return undefined
-
-  const original = action.onClick
-  return {
-    ...action,
-    onClick: () => {
-      original?.()
-      onDismiss()
-    },
-  }
-}
+const withDismiss = withNudgeDismiss
 
 export function useNudgeToast({
   storageKey,
@@ -128,17 +80,47 @@ export function useNudgeToast({
     }
   }, [])
 
-  const trigger = React.useCallback(() => {
+  const showVariant = React.useCallback((variant: NudgeToastVariant) => {
+    toast.custom(
+      (t) => {
+        const onDismiss = () => {
+          toast.dismiss(t)
+          if (storageKey) suppressNudge(storageKey, cooldownMs)
+        }
+
+        const primaryAction = withDismiss(variant.primaryAction, onDismiss) ?? {
+          label: "OK",
+          onClick: onDismiss,
+        }
+
+        return (
+          <NudgeToastCard
+            {...variant}
+            onDismiss={onDismiss}
+            primaryAction={primaryAction}
+            secondaryAction={withDismiss(variant.secondaryAction, onDismiss)}
+          />
+        )
+      },
+      {
+        duration,
+        position,
+      }
+    )
+  }, [cooldownMs, duration, position, storageKey])
+
+  const triggerInternal = React.useCallback((variantOverride?: NudgeToastVariant) => {
     if (typeof window === "undefined") return
-    if (!variants || variants.length === 0) return
+    if (!variantOverride && (!variants || variants.length === 0)) return
 
     // Probability control
     if (Math.random() > probability) return
 
     // Storage suppression
-    if (storageKey && isSuppressed(storageKey, cooldownMs)) return
+    if (storageKey && isNudgeSuppressed(storageKey, cooldownMs)) return
 
-    const variant = variants[Math.floor(Math.random() * variants.length)]
+    const variant = variantOverride ?? variants[Math.floor(Math.random() * variants.length)]
+    if (!variant) return
 
     // Deduplicate pending triggers
     if (timerRef.current !== null) {
@@ -147,32 +129,27 @@ export function useNudgeToast({
     }
 
     timerRef.current = window.setTimeout(() => {
-      toast.custom(
-        (t) => {
-          const onDismiss = () => {
-            toast.dismiss(t)
-            if (storageKey) suppress(storageKey, cooldownMs)
-          }
-
-          return (
-            <NudgeToastCard
-              {...variant}
-              onDismiss={onDismiss}
-              primaryAction={withDismiss(variant.primaryAction, onDismiss)!}
-              secondaryAction={withDismiss(variant.secondaryAction, onDismiss)}
-            />
-          )
-        },
-        {
-          duration,
-          position,
-        }
-      )
+      showVariant(variant)
     }, delay)
-  }, [cooldownMs, delay, duration, position, probability, storageKey, variants])
+  }, [cooldownMs, delay, probability, showVariant, storageKey, variants])
+
+  const trigger = React.useCallback(() => {
+    triggerInternal()
+  }, [triggerInternal])
+
+  const triggerWithVariant = React.useCallback((variant: NudgeToastVariant) => {
+    triggerInternal(variant)
+  }, [triggerInternal])
+
+  const isSuppressedNow = React.useCallback(() => {
+    if (!isLocalStorageAvailable()) return true
+    if (!storageKey) return false
+
+    return isNudgeSuppressed(storageKey, cooldownMs)
+  }, [cooldownMs, storageKey])
 
   const reset = React.useCallback(() => {
-    if (typeof window === "undefined") return
+    if (!isLocalStorageAvailable()) return
     if (!storageKey) return
 
     try {
@@ -182,5 +159,5 @@ export function useNudgeToast({
     }
   }, [storageKey])
 
-  return { trigger, reset }
+  return { trigger, triggerWithVariant, isSuppressedNow, reset }
 }

@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useCallback, useMemo, useState, useEffect } from "react"
+import React, { useCallback, useMemo, useState } from "react"
 import { AlertTriangle } from "@/components/icons"
 import { useTranslations, useLocale } from "next-intl"
 import { WebSitesDataTable } from "./websites-data-table"
@@ -9,10 +9,14 @@ import { DataTableSkeleton } from "@/components/ui/data-table-skeleton"
 import { Button } from "@/components/ui/button"
 import { useTargetWebSites, useScanWebSites } from "@/hooks/use-websites"
 import { useTarget } from "@/hooks/use-targets"
+import { useSearchState } from "@/hooks/_shared/use-search-state"
+import { buildPaginationInfo, normalizePagination } from "@/hooks/_shared/pagination"
 import { WebsiteService } from "@/services/website.service"
 import { BulkAddUrlsDialog } from "@/components/common/bulk-add-urls-dialog"
 import { ConfirmDialog } from "@/components/ui/confirm-dialog"
 import { getDateLocale } from "@/lib/date-utils"
+import { escapeCSV, formatArrayForCSV, formatDateForCSV } from "@/lib/csv-utils"
+import { downloadBlob } from "@/lib/download-utils"
 import type { TargetType } from "@/lib/url-validator"
 import type { WebSite } from "@/types/website.types"
 import { toast } from "sonner"
@@ -34,7 +38,6 @@ export function WebSitesView({
   const [isDeleting, setIsDeleting] = useState(false)
 
   const [filterQuery, setFilterQuery] = useState("")
-  const [isSearching, setIsSearching] = useState(false)
 
   // Internationalization
   const tColumns = useTranslations("columns")
@@ -69,12 +72,6 @@ export function WebSitesView({
   // Get target info (for URL matching validation)
   const { data: target } = useTarget(targetId || 0, { enabled: !!targetId })
 
-  const handleFilterChange = (value: string) => {
-    setIsSearching(true)
-    setFilterQuery(value)
-    setPagination((prev) => ({ ...prev, pageIndex: 0 }))
-  }
-
   const targetQuery = useTargetWebSites(
     targetId || 0,
     {
@@ -97,13 +94,11 @@ export function WebSitesView({
 
   const activeQuery = targetId ? targetQuery : scanQuery
   const { data, isLoading, isFetching, error, refetch } = activeQuery
-
-  // Reset search state when request completes
-  useEffect(() => {
-    if (!isFetching && isSearching) {
-      setIsSearching(false)
-    }
-  }, [isFetching, isSearching])
+  const { isSearching, handleSearchChange: handleFilterChange } = useSearchState({
+    isFetching,
+    setSearchValue: setFilterQuery,
+    onResetPage: () => setPagination((prev) => ({ ...prev, pageIndex: 0 })),
+  })
 
   const formatDate = useCallback((dateString: string) => {
     return new Date(dateString).toLocaleString(getDateLocale(locale), {
@@ -132,46 +127,15 @@ export function WebSitesView({
   }, [data])
 
   const paginationInfo = data
-    ? {
-      total: data.total,
-      page: data.page,
-      pageSize: data.pageSize,
-      totalPages: data.totalPages,
-    }
+    ? buildPaginationInfo({
+      ...normalizePagination(data, pagination.pageIndex + 1, pagination.pageSize),
+      minTotalPages: 1,
+    })
     : undefined
 
   const handleSelectionChange = useCallback((selectedRows: WebSite[]) => {
     setSelectedWebSites(selectedRows)
   }, [])
-
-  // Format date as YYYY-MM-DD HH:MM:SS (consistent with backend)
-  const formatDateForCSV = (dateString: string): string => {
-    if (!dateString) return ''
-    const date = new Date(dateString)
-    const year = date.getFullYear()
-    const month = String(date.getMonth() + 1).padStart(2, '0')
-    const day = String(date.getDate()).padStart(2, '0')
-    const hours = String(date.getHours()).padStart(2, '0')
-    const minutes = String(date.getMinutes()).padStart(2, '0')
-    const seconds = String(date.getSeconds()).padStart(2, '0')
-    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
-  }
-
-  // CSV escape
-  const escapeCSV = (value: string | number | boolean | null | undefined): string => {
-    if (value === null || value === undefined) return ''
-    const str = String(value)
-    if (str.includes(',') || str.includes('"') || str.includes('\n')) {
-      return `"${str.replace(/"/g, '""')}"`
-    }
-    return str
-  }
-
-  // Format array as comma-separated string
-  const formatArrayForCSV = (arr: string[] | undefined): string => {
-    if (!arr || arr.length === 0) return ''
-    return arr.join(',')
-  }
 
   // Generate CSV content
   const generateCSV = (items: WebSite[]): string => {
@@ -221,15 +185,8 @@ export function WebSitesView({
 
       if (!blob) return
 
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement("a")
       const prefix = scanId ? `scan-${scanId}` : targetId ? `target-${targetId}` : "websites"
-      a.href = url
-      a.download = `${prefix}-websites-${Date.now()}.csv`
-      document.body.appendChild(a)
-      a.click()
-      a.remove()
-      URL.revokeObjectURL(url)
+      downloadBlob(blob, `${prefix}-websites-${Date.now()}.csv`)
     } catch {
       toast.error(tToast("downloadFailed"))
     }
@@ -242,15 +199,8 @@ export function WebSitesView({
     }
     const csvContent = generateCSV(selectedWebSites)
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8" })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement("a")
     const prefix = scanId ? `scan-${scanId}` : targetId ? `target-${targetId}` : "websites"
-    a.href = url
-    a.download = `${prefix}-websites-selected-${Date.now()}.csv`
-    document.body.appendChild(a)
-    a.click()
-    a.remove()
-    URL.revokeObjectURL(url)
+    downloadBlob(blob, `${prefix}-websites-selected-${Date.now()}.csv`)
   }
 
   // Handle bulk delete

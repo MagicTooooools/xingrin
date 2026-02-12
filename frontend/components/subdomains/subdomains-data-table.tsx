@@ -3,11 +3,11 @@
 import * as React from "react"
 import type { ColumnDef } from "@tanstack/react-table"
 import { useTranslations } from "next-intl"
-import { UnifiedDataTable } from "@/components/ui/data-table/unified-data-table"
+import { SmartFilterDataTable } from "@/components/ui/data-table/smart-filter-data-table"
+import { buildDownloadOptions } from "@/components/ui/data-table/data-table-helpers"
 import type { FilterField } from "@/components/common/smart-filter-input"
 import type { Subdomain } from "@/types/subdomain.types"
 import type { PaginationInfo } from "@/types/common.types"
-import type { DownloadOption } from "@/types/data-table.types"
 
 // Subdomain page filter field configuration
 const SUBDOMAIN_FILTER_FIELDS: FilterField[] = [
@@ -61,6 +61,7 @@ export function SubdomainsDataTable({
   isSearching = false,
   addButtonText = "Add",
   onDownloadAll,
+  onDownloadInteresting,
   onDownloadImportant,
   onDownloadSelected,
   pagination: externalPagination,
@@ -71,70 +72,37 @@ export function SubdomainsDataTable({
   const t = useTranslations("common.status")
   const tActions = useTranslations("common.actions")
   const tDownload = useTranslations("common.download")
-  
-  // Handle smart filter search
-  const handleSmartSearch = (rawQuery: string) => {
-    if (onFilterChange) {
-      onFilterChange(rawQuery)
-    }
-  }
 
   // Download options
-  const downloadOptions: DownloadOption[] = []
-  if (onDownloadAll) {
-    downloadOptions.push({
-      key: "all",
-      label: tDownload("all"),
-      onClick: onDownloadAll,
-    })
-  }
-  if (onDownloadSelected) {
-    downloadOptions.push({
-      key: "selected",
-      label: tDownload("selected"),
-      onClick: onDownloadSelected,
-      disabled: (count) => count === 0,
-    })
-  }
-  if (onDownloadImportant) {
-    downloadOptions.push({
-      key: "important",
-      label: tDownload("important"),
-      onClick: onDownloadImportant,
-    })
-  }
+  const downloadOptions = buildDownloadOptions(tDownload, {
+    onDownloadAll,
+    onDownloadSelected,
+    onDownloadImportant,
+    onDownloadInteresting,
+  })
 
   return (
-    <UnifiedDataTable
+    <SmartFilterDataTable
       data={data}
       columns={columns}
       getRowId={(row) => String(row.id)}
-      // Pagination
+      filterFields={SUBDOMAIN_FILTER_FIELDS}
+      filterExamples={SUBDOMAIN_FILTER_EXAMPLES}
+      filterValue={filterValue}
+      onFilterChange={onFilterChange}
+      isSearching={isSearching}
       pagination={externalPagination}
       setPagination={setExternalPagination}
       paginationInfo={paginationInfo}
       onPaginationChange={onPaginationChange}
-      // Smart filter
-      searchMode="smart"
-      searchValue={filterValue}
-      onSearch={handleSmartSearch}
-      isSearching={isSearching}
-      filterFields={SUBDOMAIN_FILTER_FIELDS}
-      filterExamples={SUBDOMAIN_FILTER_EXAMPLES}
-      // Selection
       onSelectionChange={onSelectionChange}
-      // Bulk operations
       onBulkDelete={onBulkDelete}
       bulkDeleteLabel={tActions("delete")}
-      // Add button
       onAddNew={onAddNew}
       addButtonLabel={addButtonText}
-      // Bulk add button
       onBulkAdd={onBulkAdd}
       bulkAddLabel={tActions("add")}
-      // Download
-      downloadOptions={downloadOptions.length > 0 ? downloadOptions : undefined}
-      // Empty state
+      downloadOptions={downloadOptions}
       emptyMessage={t("noData")}
     />
   )

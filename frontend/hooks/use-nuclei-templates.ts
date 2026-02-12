@@ -1,8 +1,7 @@
 "use client"
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { useToastMessages } from '@/lib/toast-helpers'
-import { getErrorCode, getErrorResponseData } from '@/lib/response-parser'
+import { useQuery } from "@tanstack/react-query"
+import { useResourceMutation } from '@/hooks/_shared/create-resource-mutation'
 import { getNucleiTemplateTree, getNucleiTemplateContent, refreshNucleiTemplates, saveNucleiTemplate, uploadNucleiTemplate } from "@/services/nuclei.service"
 import type { NucleiTemplateTreeNode, NucleiTemplateContent, UploadNucleiTemplatePayload, SaveNucleiTemplatePayload } from "@/types/nuclei.types"
 
@@ -22,64 +21,51 @@ export function useNucleiTemplateContent(path: string | null) {
 }
 
 export function useRefreshNucleiTemplates() {
-  const queryClient = useQueryClient()
-  const toastMessages = useToastMessages()
-
-  return useMutation({
+  return useResourceMutation({
     mutationFn: () => refreshNucleiTemplates(),
-    onMutate: () => {
-      toastMessages.loading('toast.nucleiTemplate.refresh.loading', {}, 'refresh-nuclei-templates')
+    loadingToast: {
+      key: 'toast.nucleiTemplate.refresh.loading',
+      params: {},
+      id: 'refresh-nuclei-templates',
     },
-    onSuccess: () => {
-      toastMessages.dismiss('refresh-nuclei-templates')
-      toastMessages.success('toast.nucleiTemplate.refresh.success')
-      queryClient.invalidateQueries({ queryKey: ["nuclei", "templates", "tree"] })
+    invalidate: [{ queryKey: ["nuclei", "templates", "tree"] }],
+    onSuccess: ({ toast }) => {
+      toast.success('toast.nucleiTemplate.refresh.success')
     },
-    onError: (error: unknown) => {
-      toastMessages.dismiss('refresh-nuclei-templates')
-      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.nucleiTemplate.refresh.error')
-    },
+    errorFallbackKey: 'toast.nucleiTemplate.refresh.error',
   })
 }
 
 export function useUploadNucleiTemplate() {
-  const queryClient = useQueryClient()
-  const toastMessages = useToastMessages()
-
-  return useMutation<void, Error, UploadNucleiTemplatePayload>({
+  return useResourceMutation<void, UploadNucleiTemplatePayload>({
     mutationFn: (payload) => uploadNucleiTemplate(payload),
-    onMutate: () => {
-      toastMessages.loading('common.status.uploading', {}, 'upload-nuclei-template')
+    loadingToast: {
+      key: 'common.status.uploading',
+      params: {},
+      id: 'upload-nuclei-template',
     },
-    onSuccess: () => {
-      toastMessages.dismiss('upload-nuclei-template')
-      toastMessages.success('toast.nucleiTemplate.upload.success')
-      queryClient.invalidateQueries({ queryKey: ["nuclei", "templates", "tree"] })
+    invalidate: [{ queryKey: ["nuclei", "templates", "tree"] }],
+    onSuccess: ({ toast }) => {
+      toast.success('toast.nucleiTemplate.upload.success')
     },
-    onError: (error: unknown) => {
-      toastMessages.dismiss('upload-nuclei-template')
-      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.nucleiTemplate.upload.error')
-    },
+    errorFallbackKey: 'toast.nucleiTemplate.upload.error',
   })
 }
 
 export function useSaveNucleiTemplate() {
-  const queryClient = useQueryClient()
-  const toastMessages = useToastMessages()
-
-  return useMutation<void, Error, SaveNucleiTemplatePayload>({
+  return useResourceMutation<void, SaveNucleiTemplatePayload>({
     mutationFn: (payload) => saveNucleiTemplate(payload),
-    onMutate: () => {
-      toastMessages.loading('common.actions.saving', {}, 'save-nuclei-template')
+    loadingToast: {
+      key: 'common.actions.saving',
+      params: {},
+      id: 'save-nuclei-template',
     },
-    onSuccess: (_data, variables) => {
-      toastMessages.dismiss('save-nuclei-template')
-      toastMessages.success('toast.nucleiTemplate.save.success')
-      queryClient.invalidateQueries({ queryKey: ["nuclei", "templates", "content", variables.path] })
+    invalidate: [
+      ({ variables }) => ({ queryKey: ["nuclei", "templates", "content", variables.path] }),
+    ],
+    onSuccess: ({ toast }) => {
+      toast.success('toast.nucleiTemplate.save.success')
     },
-    onError: (error: unknown) => {
-      toastMessages.dismiss('save-nuclei-template')
-      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.nucleiTemplate.save.error')
-    },
+    errorFallbackKey: 'toast.nucleiTemplate.save.error',
   })
 }

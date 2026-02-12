@@ -8,6 +8,7 @@ import { useTranslations } from "next-intl"
 import { toast } from "sonner"
 import type { FilterField } from "@/components/common/smart-filter-input"
 import { useAssetSearch } from "@/hooks/use-search"
+import { buildPaginationInfo } from "@/hooks/_shared/pagination"
 import { VulnerabilityService } from "@/services/vulnerability.service"
 import { SearchService } from "@/services/search.service"
 import type { SearchParams, SearchState, Vulnerability as SearchVuln, AssetType } from "@/types/search.types"
@@ -184,6 +185,14 @@ export function SearchPage() {
     { ...searchParams, page, pageSize },
     { enabled: searchState === "results" || searchState === "searching" }
   )
+
+  const paginationInfo = buildPaginationInfo({
+    total: data?.total ?? 0,
+    page,
+    pageSize,
+    totalPages: data?.totalPages || undefined,
+    minTotalPages: data?.total ? 1 : 0,
+  })
 
   const handleSearch = useCallback((_filters: unknown, rawQuery: string) => {
     if (!rawQuery.trim()) return
@@ -472,8 +481,8 @@ export function SearchPage() {
                   <SearchPagination
                     page={page}
                     pageSize={pageSize}
-                    total={data.total}
-                    totalPages={data.totalPages}
+                    total={paginationInfo.total}
+                    totalPages={paginationInfo.totalPages}
                     onPageChange={handlePageChange}
                     onPageSizeChange={handlePageSizeChange}
                   />

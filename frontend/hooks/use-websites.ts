@@ -1,106 +1,29 @@
-import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query'
-import { useToastMessages } from '@/lib/toast-helpers'
-import { getErrorCode, getErrorResponseData } from '@/lib/response-parser'
+import { useQuery, keepPreviousData } from '@tanstack/react-query'
+import { useResourceMutation } from '@/hooks/_shared/create-resource-mutation'
+import { createResourceKeys } from "@/hooks/_shared/query-keys"
+import {
+  getAssetDeletedCount,
+  resolveAssetBulkCreateToast,
+} from '@/hooks/_shared/asset-mutation-helpers'
 import { WebsiteService } from '@/services/website.service'
-import { USE_MOCK, mockDelay, getMockWebsites, getMockScanById } from '@/mock'
-import { api } from '@/lib/api-client'
-import type { WebSiteListResponse } from '@/types/website.types'
 
-// API 服务函数
-const websiteService = {
-  // 获取目标的网站列表
-  getTargetWebSites: async (
-    targetId: number,
-    params: { page: number; pageSize: number; filter?: string }
-  ): Promise<WebSiteListResponse> => {
-    if (USE_MOCK) {
-      await mockDelay()
-      return getMockWebsites({
-        page: params.page,
-        pageSize: params.pageSize,
-        search: params.filter,
-        targetId,
-      })
-    }
-    const response = await api.get<WebSiteListResponse>(
-      `/targets/${targetId}/websites/`,
-      { params }
-    )
-    return response.data
-  },
+// Query Keys
+const websiteKeyBase = createResourceKeys("websites")
 
-  // 获取扫描的网站列表
-  getScanWebSites: async (
-    scanId: number,
-    params: { page: number; pageSize: number; filter?: string }
-  ): Promise<WebSiteListResponse> => {
-    if (USE_MOCK) {
-      await mockDelay()
-      const scan = getMockScanById(scanId)
-      if (!scan?.targetId) {
-        return {
-          results: [],
-          total: 0,
-          page: params.page,
-          pageSize: params.pageSize,
-          totalPages: 0,
-        }
-      }
-      return getMockWebsites({
-        page: params.page,
-        pageSize: params.pageSize,
-        search: params.filter,
-        targetId: scan.targetId,
-      })
-    }
-    const response = await api.get<WebSiteListResponse>(
-      `/scans/${scanId}/websites/`,
-      { params }
-    )
-    return response.data
-  },
+export const websiteKeys = {
+  ...websiteKeyBase,
+  target: (targetId: number, params: { page: number; pageSize: number; filter?: string }) =>
+    [...websiteKeyBase.all, 'target', targetId, params] as const,
+  scan: (scanId: number, params: { page: number; pageSize: number; filter?: string }) =>
+    [...websiteKeyBase.all, 'scan', scanId, params] as const,
+}
 
-  // 批量删除网站（支持单个或多个）
-  bulkDeleteWebSites: async (ids: number[]): Promise<{
-    message: string
-    deletedCount: number
-    requestedIds: number[]
-    cascadeDeleted: Record<string, number>
-  }> => {
-    const response = await api.post<{
-      message: string
-      deletedCount: number
-      requestedIds: number[]
-      cascadeDeleted: Record<string, number>
-    }>('/websites/bulk-delete/', { ids })
-    return response.data
-  },
-
-  // 删除单个网站（使用单独的 DELETE API）
-  deleteWebSite: async (websiteId: number): Promise<{
-    message: string
-    websiteId: number
-    websiteUrl: string
-    deletedCount: number
-    deletedWebSites: string[]
-    detail: {
-      phase1: string
-      phase2: string
-    }
-  }> => {
-    const response = await api.delete<{
-      message: string
-      websiteId: number
-      websiteUrl: string
-      deletedCount: number
-      deletedWebSites: string[]
-      detail: {
-        phase1: string
-        phase2: string
-      }
-    }>(`/websites/${websiteId}/`)
-    return response.data
-  },
+function websiteCascadeInvalidates() {
+  return [
+    { queryKey: websiteKeys.all },
+    { queryKey: ['targets'] as const },
+    { queryKey: ['scans'] as const },
+  ]
 }
 
 // 获取目标的网站列表
@@ -110,8 +33,8 @@ export function useTargetWebSites(
   options?: { enabled?: boolean }
 ) {
   return useQuery({
-    queryKey: ['target-websites', targetId, params],
-    queryFn: () => websiteService.getTargetWebSites(targetId, params),
+    queryKey: websiteKeys.target(targetId, params),
+    queryFn: () => WebsiteService.getTargetWebSites(targetId, params),
     enabled: options?.enabled ?? true,
     placeholderData: keepPreviousData,
   })
@@ -124,8 +47,8 @@ export function useScanWebSites(
   options?: { enabled?: boolean }
 ) {
   return useQuery({
-    queryKey: ['scan-websites', scanId, params],
-    queryFn: () => websiteService.getScanWebSites(scanId, params),
+    queryKey: websiteKeys.scan(scanId, params),
+    queryFn: () => WebsiteService.getScanWebSites(scanId, params),
     enabled: options?.enabled ?? true,
     placeholderData: keepPreviousData,
   })
@@ -133,96 +56,73 @@ export function useScanWebSites(
 
 // 删除单个网站（使用单独的 DELETE API）
 export function useDeleteWebSite() {
-  const queryClient = useQueryClient()
-  const toastMessages = useToastMessages()
-
-  return useMutation({
-    mutationFn: websiteService.deleteWebSite,
-    onMutate: (id) => {
-      toastMessages.loading('common.status.deleting', {}, `delete-website-${id}`)
+  return useResourceMutation({
+    mutationFn: WebsiteService.deleteWebSite,
+    loadingToast: {
+      key: 'common.status.deleting',
+      params: {},
+      id: (id) => `delete-website-${id}`,
     },
-    onSuccess: (response, id) => {
-      toastMessages.dismiss(`delete-website-${id}`)
-      toastMessages.success('toast.asset.website.delete.success')
-      
-      queryClient.invalidateQueries({ queryKey: ['target-websites'] })
-      queryClient.invalidateQueries({ queryKey: ['scan-websites'] })
-      queryClient.invalidateQueries({ queryKey: ['targets'] })
-      queryClient.invalidateQueries({ queryKey: ['scans'] })
+    invalidate: websiteCascadeInvalidates(),
+    onSuccess: ({ toast }) => {
+      toast.success('toast.asset.website.delete.success')
     },
-    onError: (error: unknown, id) => {
-      toastMessages.dismiss(`delete-website-${id}`)
-      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.asset.website.delete.error')
-    },
+    errorFallbackKey: 'toast.asset.website.delete.error',
   })
 }
 
 // 批量删除网站（使用统一的批量删除接口）
 export function useBulkDeleteWebSites() {
-  const queryClient = useQueryClient()
-  const toastMessages = useToastMessages()
-
-  return useMutation({
-    mutationFn: websiteService.bulkDeleteWebSites,
-    onMutate: () => {
-      toastMessages.loading('common.status.batchDeleting', {}, 'bulk-delete-websites')
+  return useResourceMutation({
+    mutationFn: WebsiteService.bulkDeleteWebSites,
+    loadingToast: {
+      key: 'common.status.batchDeleting',
+      params: {},
+      id: 'bulk-delete-websites',
     },
-    onSuccess: (response) => {
-      toastMessages.dismiss('bulk-delete-websites')
-      toastMessages.success('toast.asset.website.delete.bulkSuccess', { count: response.deletedCount })
-      
-      queryClient.invalidateQueries({ queryKey: ['target-websites'] })
-      queryClient.invalidateQueries({ queryKey: ['scan-websites'] })
-      queryClient.invalidateQueries({ queryKey: ['targets'] })
-      queryClient.invalidateQueries({ queryKey: ['scans'] })
+    invalidate: websiteCascadeInvalidates(),
+    onSuccess: ({ data, toast }) => {
+      toast.success('toast.asset.website.delete.bulkSuccess', {
+        count: getAssetDeletedCount(data),
+      })
     },
-    onError: (error: unknown) => {
-      toastMessages.dismiss('bulk-delete-websites')
-      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.asset.website.delete.error')
-    },
+    errorFallbackKey: 'toast.asset.website.delete.error',
   })
 }
 
 
 // 批量创建网站（绑定到目标）
 export function useBulkCreateWebsites() {
-  const queryClient = useQueryClient()
-  const toastMessages = useToastMessages()
-
-  return useMutation({
+  return useResourceMutation({
     mutationFn: (data: { targetId: number; urls: string[] }) =>
       WebsiteService.bulkCreateWebsites(data.targetId, data.urls),
-    onMutate: async () => {
-      toastMessages.loading('common.status.batchCreating', {}, 'bulk-create-websites')
+    loadingToast: {
+      key: 'common.status.batchCreating',
+      params: {},
+      id: 'bulk-create-websites',
     },
-    onSuccess: (response, { targetId }) => {
-      toastMessages.dismiss('bulk-create-websites')
-      const { createdCount } = response
-      
-      if (createdCount > 0) {
-        toastMessages.success('toast.asset.website.create.success', { count: createdCount })
+    invalidate: [
+      {
+        queryKey: websiteKeys.all,
+        exact: false,
+        refetchType: 'active',
+      },
+      ({ variables }) => ({
+        queryKey: ['targets', variables.targetId],
+        refetchType: 'active',
+      }),
+    ],
+    onSuccess: ({ data, toast }) => {
+      const toastPayload = resolveAssetBulkCreateToast(data.createdCount, {
+        success: 'toast.asset.website.create.success',
+        partial: 'toast.asset.website.create.partialSuccess',
+      })
+      if (toastPayload.variant === 'success') {
+        toast.success(toastPayload.key, toastPayload.params)
       } else {
-        toastMessages.warning('toast.asset.website.create.partialSuccess', { success: 0, skipped: 0 })
+        toast.warning(toastPayload.key, toastPayload.params)
       }
-      
-      queryClient.invalidateQueries({
-        queryKey: ['target-websites', targetId],
-        exact: false,
-        refetchType: 'active',
-      })
-      queryClient.invalidateQueries({
-        queryKey: ['scan-websites'],
-        exact: false,
-        refetchType: 'active',
-      })
-      queryClient.invalidateQueries({
-        queryKey: ['targets', targetId],
-        refetchType: 'active',
-      })
     },
-    onError: (error: unknown) => {
-      toastMessages.dismiss('bulk-create-websites')
-      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.asset.website.create.error')
-    },
+    errorFallbackKey: 'toast.asset.website.create.error',
   })
 }

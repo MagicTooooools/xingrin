@@ -1,20 +1,24 @@
-import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query'
-import { useToastMessages } from '@/lib/toast-helpers'
+import { useQuery, keepPreviousData } from '@tanstack/react-query'
+import { useResourceMutation } from '@/hooks/_shared/create-resource-mutation'
+import { createResourceKeys } from "@/hooks/_shared/query-keys"
+import { getAssetDeletedCount } from '@/hooks/_shared/asset-mutation-helpers'
+import {
+  applyOrganizationOptimisticDelete,
+  getOrganizationDeleteToastId,
+  invalidateOrganizationTargets,
+  ORGANIZATION_BATCH_DELETE_TOAST_ID,
+  rollbackOrganizationQueries,
+} from '@/hooks/_shared/organization-mutation-helpers'
 import { getErrorCode, getErrorResponseData } from '@/lib/response-parser'
 import { OrganizationService } from '@/services/organization.service'
-import type { Organization, CreateOrganizationRequest, UpdateOrganizationRequest } from '@/types/organization.types'
+import type { CreateOrganizationRequest, UpdateOrganizationRequest } from '@/types/organization.types'
 
 type OrganizationListParams = { page?: number; pageSize?: number; filter?: string }
-type OrganizationListCache = { organizations?: Organization[] } & Record<string, unknown>
-
 // Query Keys - Unified query key management
-export const organizationKeys = {
-  all: ['organizations'] as const,
-  lists: () => [...organizationKeys.all, 'list'] as const,
-  list: (params?: OrganizationListParams) => [...organizationKeys.lists(), params] as const,
-  details: () => [...organizationKeys.all, 'detail'] as const,
-  detail: (id: number) => [...organizationKeys.details(), id] as const,
-}
+export const organizationKeys = createResourceKeys("organizations", {
+  list: (params?: OrganizationListParams) => params,
+  detail: (id: number) => id,
+})
 
 /**
  * Hook for getting organization list
@@ -38,11 +42,11 @@ export function useOrganizations(
   }
 ) {
   return useQuery({
-    queryKey: ['organizations', {
+    queryKey: organizationKeys.list({
       page: params.page || 1,
       pageSize: params.pageSize || 10,
       filter: params.filter || undefined,
-    }],
+    }),
     queryFn: () => OrganizationService.getOrganizations(params || {}),
     select: (response) => {
       // Handle DRF pagination response format
@@ -111,24 +115,19 @@ export function useOrganizationTargets(
  * - Automatic success/failure notifications
  */
 export function useCreateOrganization() {
-  const queryClient = useQueryClient()
-  const toastMessages = useToastMessages()
-
-  return useMutation({
+  return useResourceMutation({
     mutationFn: (data: CreateOrganizationRequest) => 
       OrganizationService.createOrganization(data),
-    onMutate: () => {
-      toastMessages.loading('common.status.creating', {}, 'create-organization')
+    loadingToast: {
+      key: 'common.status.creating',
+      params: {},
+      id: 'create-organization',
     },
-    onSuccess: () => {
-      toastMessages.dismiss('create-organization')
-      queryClient.invalidateQueries({ queryKey: ['organizations'] })
-      toastMessages.success('toast.organization.create.success')
+    invalidate: [{ queryKey: organizationKeys.all }],
+    onSuccess: ({ toast }) => {
+      toast.success('toast.organization.create.success')
     },
-    onError: (error: unknown) => {
-      toastMessages.dismiss('create-organization')
-      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.organization.create.error')
-    },
+    errorFallbackKey: 'toast.organization.create.error',
   })
 }
 
@@ -136,24 +135,19 @@ export function useCreateOrganization() {
  * Update organization Mutation Hook
  */
 export function useUpdateOrganization() {
-  const queryClient = useQueryClient()
-  const toastMessages = useToastMessages()
-
-  return useMutation({
+  return useResourceMutation({
     mutationFn: ({ id, data }: { id: number; data: UpdateOrganizationRequest }) =>
       OrganizationService.updateOrganization({ id, ...data }),
-    onMutate: ({ id }) => {
-      toastMessages.loading('common.status.updating', {}, `update-${id}`)
+    loadingToast: {
+      key: 'common.status.updating',
+      params: {},
+      id: ({ id }) => `update-${id}`,
     },
-    onSuccess: ({ id }) => {
-      toastMessages.dismiss(`update-${id}`)
-      queryClient.invalidateQueries({ queryKey: ['organizations'] })
-      toastMessages.success('toast.organization.update.success')
+    invalidate: [{ queryKey: organizationKeys.all }],
+    onSuccess: ({ toast }) => {
+      toast.success('toast.organization.update.success')
     },
-    onError: (error: unknown, { id }) => {
-      toastMessages.dismiss(`update-${id}`)
-      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.organization.update.error')
-    },
+    errorFallbackKey: 'toast.organization.update.error',
   })
 }
 
@@ -161,51 +155,35 @@ export function useUpdateOrganization() {
  * 删除组织的 Mutation Hook（乐观更新）
  */
 export function useDeleteOrganization() {
-  const queryClient = useQueryClient()
-  const toastMessages = useToastMessages()
-
-  return useMutation({
+  return useResourceMutation({
     mutationFn: (id: number) => OrganizationService.deleteOrganization(id),
-    onMutate: async (deletedId) => {
-      toastMessages.loading('common.status.deleting', {}, `delete-${deletedId}`)
-      
-      await queryClient.cancelQueries({ queryKey: ['organizations'] })
-      const previousData = queryClient.getQueriesData({ queryKey: ['organizations'] })
+    onMutate: async (deletedId, { queryClient, toast }) => {
+      const toastId = getOrganizationDeleteToastId(deletedId)
+      toast.loading('common.status.deleting', {}, toastId)
 
-      queryClient.setQueriesData(
-        { queryKey: ['organizations'] },
-        (old: OrganizationListCache | undefined) => {
-          if (old?.organizations) {
-            return {
-              ...old,
-              organizations: old.organizations.filter((org: Organization) => org.id !== deletedId)
-            }
-          }
-          return old
-        }
-      )
+      await queryClient.cancelQueries({ queryKey: organizationKeys.all })
+      const previousData = applyOrganizationOptimisticDelete(queryClient, [deletedId])
 
       return { previousData, deletedId }
     },
-    onSuccess: (response, deletedId) => {
-      toastMessages.dismiss(`delete-${deletedId}`)
-      const { organizationName } = response
-      toastMessages.success('toast.organization.delete.success', { name: organizationName })
-    },
-    onError: (error: unknown, deletedId, context) => {
-      toastMessages.dismiss(`delete-${deletedId}`)
-      
-      if (context?.previousData) {
-        context.previousData.forEach(([queryKey, data]) => {
-          queryClient.setQueryData(queryKey, data)
-        })
+    onSuccess: ({ data: response, context, toast }) => {
+      if (context?.deletedId) {
+        toast.dismiss(getOrganizationDeleteToastId(context.deletedId))
       }
-      
-      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.organization.delete.error')
+      const { organizationName } = response
+      toast.success('toast.organization.delete.success', { name: organizationName })
     },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['organizations'] })
-      queryClient.invalidateQueries({ queryKey: ['targets'] })
+    onError: ({ error, context, toast, queryClient }) => {
+      if (context?.deletedId) {
+        toast.dismiss(`delete-${context.deletedId}`)
+      }
+
+      rollbackOrganizationQueries(queryClient, context?.previousData)
+
+      toast.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.organization.delete.error')
+    },
+    onSettled: async ({ queryClient }) => {
+      await invalidateOrganizationTargets(queryClient)
     },
   })
 }
@@ -214,54 +192,32 @@ export function useDeleteOrganization() {
  * 批量删除组织的 Mutation Hook（乐观更新）
  */
 export function useBatchDeleteOrganizations() {
-  const queryClient = useQueryClient()
-  const toastMessages = useToastMessages()
-
-  return useMutation({
+  return useResourceMutation({
     mutationFn: (ids: number[]) => 
       OrganizationService.batchDeleteOrganizations(ids),
-    onMutate: async (deletedIds) => {
-      toastMessages.loading('common.status.batchDeleting', {}, 'batch-delete')
-      
-      await queryClient.cancelQueries({ queryKey: ['organizations'] })
-      const previousData = queryClient.getQueriesData({ queryKey: ['organizations'] })
+    onMutate: async (deletedIds, { queryClient, toast }) => {
+      toast.loading('common.status.batchDeleting', {}, ORGANIZATION_BATCH_DELETE_TOAST_ID)
 
-      queryClient.setQueriesData(
-        { queryKey: ['organizations'] },
-        (old: OrganizationListCache | undefined) => {
-          if (old?.organizations) {
-            return {
-              ...old,
-              organizations: old.organizations.filter(
-                (org: Organization) => !deletedIds.includes(org.id)
-              )
-            }
-          }
-          return old
-        }
-      )
+      await queryClient.cancelQueries({ queryKey: organizationKeys.all })
+      const previousData = applyOrganizationOptimisticDelete(queryClient, deletedIds)
 
       return { previousData, deletedIds }
     },
-    onSuccess: (response) => {
-      toastMessages.dismiss('batch-delete')
-      const { deletedCount } = response
-      toastMessages.success('toast.organization.delete.bulkSuccess', { count: deletedCount })
+    onSuccess: ({ data: response, toast }) => {
+      toast.dismiss(ORGANIZATION_BATCH_DELETE_TOAST_ID)
+      toast.success('toast.organization.delete.bulkSuccess', {
+        count: getAssetDeletedCount(response),
+      })
     },
-    onError: (error: unknown, deletedIds, context) => {
-      toastMessages.dismiss('batch-delete')
-      
-      if (context?.previousData) {
-        context.previousData.forEach(([queryKey, data]) => {
-          queryClient.setQueryData(queryKey, data)
-        })
-      }
-      
-      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.organization.delete.error')
+    onError: ({ error, context, toast, queryClient }) => {
+      toast.dismiss(ORGANIZATION_BATCH_DELETE_TOAST_ID)
+
+      rollbackOrganizationQueries(queryClient, context?.previousData)
+
+      toast.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.organization.delete.error')
     },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['organizations'] })
-      queryClient.invalidateQueries({ queryKey: ['targets'] })
+    onSettled: async ({ queryClient }) => {
+      await invalidateOrganizationTargets(queryClient)
     },
   })
 }
@@ -272,25 +228,21 @@ export function useBatchDeleteOrganizations() {
  * 解除组织与目标关联的 Mutation Hook（批量）
  */
 export function useUnlinkTargetsFromOrganization() {
-  const queryClient = useQueryClient()
-  const toastMessages = useToastMessages()
-
-  return useMutation({
+  return useResourceMutation({
     mutationFn: (data: { organizationId: number; targetIds: number[] }) => 
       OrganizationService.unlinkTargetsFromOrganization(data),
-    onMutate: ({ organizationId }) => {
-      toastMessages.loading('common.status.unlinking', {}, `unlink-${organizationId}`)
+    loadingToast: {
+      key: 'common.status.unlinking',
+      params: {},
+      id: ({ organizationId }) => `unlink-${organizationId}`,
     },
-    onSuccess: (response, { organizationId, targetIds }) => {
-      toastMessages.dismiss(`unlink-${organizationId}`)
-      toastMessages.success('toast.target.unlink.bulkSuccess', { count: targetIds.length })
-      
-      queryClient.invalidateQueries({ queryKey: ['targets'] })
-      queryClient.invalidateQueries({ queryKey: ['organizations'] })
+    invalidate: [
+      { queryKey: ['targets'] },
+      { queryKey: organizationKeys.all },
+    ],
+    onSuccess: ({ variables: { targetIds }, toast }) => {
+      toast.success('toast.target.unlink.bulkSuccess', { count: targetIds.length })
     },
-    onError: (error: unknown, { organizationId }) => {
-      toastMessages.dismiss(`unlink-${organizationId}`)
-      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.target.unlink.error')
-    },
+    errorFallbackKey: 'toast.target.unlink.error',
   })
 }

@@ -20,6 +20,8 @@ import {
 } from "@/components/ui/alert-dialog"
 import { useTargetBlacklist, useUpdateTargetBlacklist, useTarget } from "@/hooks/use-targets"
 import { useScheduledScans, useToggleScheduledScan, useDeleteScheduledScan } from "@/hooks/use-scheduled-scans"
+import { useSearchState } from "@/hooks/_shared/use-search-state"
+import { buildPaginationInfo } from "@/hooks/_shared/pagination"
 import { createScheduledScanColumns } from "@/components/scan/scheduled/scheduled-scan-columns"
 import { DataTableSkeleton } from "@/components/ui/data-table-skeleton"
 import type { ScheduledScan } from "@/types/scheduled-scan.types"
@@ -80,7 +82,6 @@ export function TargetSettings({ targetId }: TargetSettingsProps) {
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(10)
   const [searchQuery, setSearchQuery] = useState("")
-  const [isSearching, setIsSearching] = useState(false)
 
   // Fetch target data for preset name
   const { data: target } = useTarget(targetId)
@@ -101,12 +102,22 @@ export function TargetSettings({ targetId }: TargetSettingsProps) {
     pageSize,
     search: searchQuery || undefined
   })
+  const { isSearching, handleSearchChange } = useSearchState({
+    isFetching,
+    setSearchValue: setSearchQuery,
+    onResetPage: () => setPage(1),
+  })
   const { mutate: toggleScheduledScan } = useToggleScheduledScan()
   const { mutate: deleteScheduledScan } = useDeleteScheduledScan()
 
   const scheduledScans = scheduledScansData?.results || []
-  const total = scheduledScansData?.total || 0
-  const totalPages = scheduledScansData?.totalPages || 1
+  const scheduledPaginationInfo = buildPaginationInfo({
+    total: scheduledScansData?.total ?? 0,
+    page,
+    pageSize,
+    totalPages: scheduledScansData?.totalPages,
+    minTotalPages: 1,
+  })
 
   // Build translation object for columns
   const translations = React.useMemo(() => ({
@@ -148,13 +159,6 @@ export function TargetSettings({ targetId }: TargetSettingsProps) {
       setHasChanges(false)
     }
   }, [data])
-
-  // Reset search state when request completes
-  useEffect(() => {
-    if (!isFetching && isSearching) {
-      setIsSearching(false)
-    }
-  }, [isFetching, isSearching])
 
   // Handle text change
   const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -216,13 +220,6 @@ export function TargetSettings({ targetId }: TargetSettingsProps) {
   const handleToggleStatus = React.useCallback((scan: ScheduledScan, enabled: boolean) => {
     toggleScheduledScan({ id: scan.id, isEnabled: enabled })
   }, [toggleScheduledScan])
-
-  // Search handler
-  const handleSearchChange = (value: string) => {
-    setIsSearching(true)
-    setSearchQuery(value)
-    setPage(1)
-  }
 
   // Page change handler
   const handlePageChange = React.useCallback((newPage: number) => {
@@ -342,8 +339,8 @@ export function TargetSettings({ targetId }: TargetSettingsProps) {
               addButtonText={tScan("scheduled.createTitle")}
               page={page}
               pageSize={pageSize}
-              total={total}
-              totalPages={totalPages}
+              total={scheduledPaginationInfo.total}
+              totalPages={scheduledPaginationInfo.totalPages}
               onPageChange={handlePageChange}
               onPageSizeChange={handlePageSizeChange}
             />

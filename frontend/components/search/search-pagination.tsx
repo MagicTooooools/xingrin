@@ -56,16 +56,18 @@ export function SearchPagination({
     onPageChange(Math.max(1, page - 1))
   }, [onPageChange, page])
 
+  const safeTotalPages = Math.max(1, totalPages)
+
   const handleNextPage = React.useCallback(() => {
-    onPageChange(Math.min(totalPages, page + 1))
-  }, [onPageChange, page, totalPages])
+    onPageChange(Math.min(safeTotalPages, page + 1))
+  }, [onPageChange, page, safeTotalPages])
 
   const handleLastPage = React.useCallback(() => {
-    onPageChange(totalPages)
-  }, [onPageChange, totalPages])
+    onPageChange(safeTotalPages)
+  }, [onPageChange, safeTotalPages])
 
   const canPreviousPage = page > 1
-  const canNextPage = page < totalPages
+  const canNextPage = page < safeTotalPages
 
   return (
     <div className="flex items-center justify-between">
@@ -100,7 +102,7 @@ export function SearchPagination({
 
         {/* 页码信息 */}
         <div className="flex items-center justify-center text-sm font-medium whitespace-nowrap">
-          {t('page', { current: page, total: totalPages || 1 })}
+          {t('page', { current: page, total: safeTotalPages })}
         </div>
 
         {/* 分页按钮 */}

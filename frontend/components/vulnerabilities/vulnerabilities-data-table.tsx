@@ -5,6 +5,7 @@ import type { ColumnDef } from "@tanstack/react-table"
 import { useTranslations } from "next-intl"
 import { CheckCircle, Circle, X, Filter } from "@/components/icons"
 import { UnifiedDataTable } from "@/components/ui/data-table/unified-data-table"
+import { buildDownloadOptions } from "@/components/ui/data-table/data-table-helpers"
 import { SmartFilterInput, PREDEFINED_FIELDS, type FilterField, type ParsedFilter } from "@/components/common/smart-filter-input"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
@@ -18,7 +19,6 @@ import {
 } from "@/components/ui/select"
 import type { Vulnerability, VulnerabilitySeverity } from "@/types/vulnerability.types"
 import type { PaginationInfo } from "@/types/common.types"
-import type { DownloadOption } from "@/types/data-table.types"
 
 // Review filter type
 export type ReviewFilter = "all" | "pending" | "reviewed"
@@ -109,23 +109,10 @@ export function VulnerabilitiesDataTable({
     onFilterChange?.(rawQuery)
   }
 
-  // Download options
-  const downloadOptions: DownloadOption[] = []
-  if (onDownloadAll) {
-    downloadOptions.push({
-      key: "all",
-      label: tDownload("all"),
-      onClick: onDownloadAll,
-    })
-  }
-  if (onDownloadSelected) {
-    downloadOptions.push({
-      key: "selected",
-      label: tDownload("selected"),
-      onClick: onDownloadSelected,
-      disabled: (count) => count === 0,
-    })
-  }
+  const downloadOptions = buildDownloadOptions(tDownload, {
+    onDownloadAll,
+    onDownloadSelected,
+  })
 
   // Severity options for Select
   const severityOptions: { value: SeverityFilter; label: string }[] = [
@@ -251,26 +238,25 @@ export function VulnerabilitiesDataTable({
         data={data}
         columns={columns}
         getRowId={(row) => String(row.id)}
-        // Pagination
-        pagination={pagination}
-        setPagination={setPagination}
-        paginationInfo={paginationInfo}
-        onPaginationChange={onPaginationChange}
-        // Toolbar
-        toolbarLeft={leftToolbarContent}
-        // Selection
-        onSelectionChange={onSelectionChange}
-        // Bulk operations
-        onBulkDelete={onBulkDelete}
-        bulkDeleteLabel={tActions("delete")}
-        showAddButton={false}
-        // Download
-        downloadOptions={downloadOptions.length > 0 ? downloadOptions : undefined}
-        // Toolbar
-        hideToolbar={hideToolbar}
-        toolbarRight={rightToolbarContent}
-        // Empty state
-        emptyMessage={t("noData")}
+        state={{
+          pagination,
+          setPagination,
+          paginationInfo,
+          onPaginationChange,
+          onSelectionChange,
+        }}
+        actions={{
+          onBulkDelete,
+          bulkDeleteLabel: tActions("delete"),
+          showAddButton: false,
+          downloadOptions: downloadOptions.length > 0 ? downloadOptions : undefined,
+        }}
+        ui={{
+          toolbarLeft: leftToolbarContent,
+          hideToolbar,
+          toolbarRight: rightToolbarContent,
+          emptyMessage: t("noData"),
+        }}
       />
       {floatingActionBar}
     </>

@@ -248,9 +248,13 @@ export function SearchResultsTable({ results }: SearchResultsTableProps) {
       columns={columns}
       data={results}
       getRowId={(row) => String(row.id)}
-      hideToolbar
-      hidePagination
-      enableRowSelection={false}
+      ui={{
+        hideToolbar: true,
+        hidePagination: true,
+      }}
+      behavior={{
+        enableRowSelection: false,
+      }}
     />
   )
 }

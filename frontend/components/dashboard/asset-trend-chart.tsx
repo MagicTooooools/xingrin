@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useMemo, useEffect } from "react"
-import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
 import { useStatisticsHistory } from "@/hooks/use-dashboard"
 import type { StatisticsHistoryItem } from "@/types/dashboard.types"
 import { useTranslations } from "next-intl"

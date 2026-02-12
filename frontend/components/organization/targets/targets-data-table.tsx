@@ -1,12 +1,11 @@
 "use client"
 
 import * as React from "react"
-import { IconSearch, IconLoader2 } from "@/components/icons"
 import { Filter } from "@/components/icons"
 import { useTranslations } from "next-intl"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { UnifiedDataTable } from "@/components/ui/data-table/unified-data-table"
+import { SimpleSearchToolbar } from "@/components/ui/data-table/simple-search-toolbar"
+import { useSimpleSearchState } from "@/components/ui/data-table/use-simple-search"
 import {
   Select,
   SelectContent,
@@ -66,81 +65,59 @@ export function TargetsDataTable({
   const tTooltips = useTranslations("tooltips")
   const tCommon = useTranslations("common")
   
-  // 本地搜索输入状态
-  const [localSearchValue, setLocalSearchValue] = React.useState(searchValue || "")
-
-  React.useEffect(() => {
-    setLocalSearchValue(searchValue || "")
-  }, [searchValue])
-
-  const handleSearchSubmit = () => {
-    if (onSearch) {
-      onSearch(localSearchValue)
-    }
-  }
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
-      handleSearchSubmit()
-    }
-  }
+  const {
+    value: localSearchValue,
+    setValue: setLocalSearchValue,
+    submit: handleSearchSubmit,
+  } = useSimpleSearchState({ searchValue, onSearch })
 
   return (
     <UnifiedDataTable
       data={data}
       columns={columns}
       getRowId={(row) => String(row.id)}
-      // 分页
-      pagination={externalPagination}
-      setPagination={setExternalPagination}
-      paginationInfo={paginationInfo}
-      onPaginationChange={onPaginationChange}
-      // 选择
-      onSelectionChange={onSelectionChange}
-      // 批量操作
-      showBulkDelete={!!onBulkDelete}
-      onBulkDelete={onBulkDelete}
-      bulkDeleteLabel={tTooltips("unlinkTarget")}
-      // 添加按钮（在解除关联按钮之后）
-      showAddButton={!!onAddNew}
-      onAddNew={onAddNew}
-      onAddHover={onAddHover}
-      addButtonLabel={addButtonText || tTarget("addTarget")}
-      // 空状态
-      emptyMessage={t("noData")}
-      // 自定义工具栏
-      toolbarLeft={
-        <div className="flex items-center space-x-2">
-          <Input
-            placeholder={searchPlaceholder || tTarget("title")}
+      state={{
+        pagination: externalPagination,
+        setPagination: setExternalPagination,
+        paginationInfo,
+        onPaginationChange,
+        onSelectionChange,
+      }}
+      actions={{
+        showBulkDelete: !!onBulkDelete,
+        onBulkDelete,
+        bulkDeleteLabel: tTooltips("unlinkTarget"),
+        showAddButton: !!onAddNew,
+        onAddNew,
+        onAddHover,
+        addButtonLabel: addButtonText || tTarget("addTarget"),
+      }}
+      ui={{
+        emptyMessage: t("noData"),
+        toolbarLeft: (
+          <SimpleSearchToolbar
             value={localSearchValue}
-            onChange={(e) => setLocalSearchValue(e.target.value)}
-            onKeyDown={handleKeyDown}
-            className="h-8 max-w-sm"
+            onChange={setLocalSearchValue}
+            onSubmit={handleSearchSubmit}
+            loading={isSearching}
+            placeholder={searchPlaceholder || tTarget("title")}
+            after={onTypeFilterChange ? (
+              <Select value={typeFilter || "all"} onValueChange={(value) => onTypeFilterChange(value === "all" ? "" : value)}>
+                <SelectTrigger size="sm" className="w-auto">
+                  <Filter className="h-4 w-4" />
+                  <SelectValue placeholder={tCommon("actions.filter")} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">{tCommon("actions.all")}</SelectItem>
+                  <SelectItem value="domain">{tTarget("types.domain")}</SelectItem>
+                  <SelectItem value="ip">{tTarget("types.ip")}</SelectItem>
+                  <SelectItem value="cidr">{tTarget("types.cidr")}</SelectItem>
+                </SelectContent>
+              </Select>
+            ) : null}
           />
-          <Button variant="outline" size="sm" onClick={handleSearchSubmit} disabled={isSearching}>
-            {isSearching ? (
-              <IconLoader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <IconSearch className="h-4 w-4" />
-            )}
-          </Button>
-          {onTypeFilterChange && (
-            <Select value={typeFilter || "all"} onValueChange={(value) => onTypeFilterChange(value === "all" ? "" : value)}>
-              <SelectTrigger size="sm" className="w-auto">
-                <Filter className="h-4 w-4" />
-                <SelectValue placeholder={tCommon("actions.filter")} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">{tCommon("actions.all")}</SelectItem>
-                <SelectItem value="domain">{tTarget("types.domain")}</SelectItem>
-                <SelectItem value="ip">{tTarget("types.ip")}</SelectItem>
-                <SelectItem value="cidr">{tTarget("types.cidr")}</SelectItem>
-              </SelectContent>
-            </Select>
-          )}
-        </div>
-      }
+        ),
+      }}
     />
   )
 }

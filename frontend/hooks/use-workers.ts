@@ -2,19 +2,42 @@
  * Worker 节点管理 Hooks
  */
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
+import {
+  useResourceMutation,
+  type UseResourceMutationOptions,
+} from '@/hooks/_shared/create-resource-mutation'
+import { createResourceKeys } from "@/hooks/_shared/query-keys"
 import { workerService } from '@/services/worker.service'
 import type { CreateWorkerRequest, UpdateWorkerRequest } from '@/types/worker.types'
-import { useToastMessages } from '@/lib/toast-helpers'
-import { getErrorCode, getErrorResponseData } from '@/lib/response-parser'
 
 // Query Keys
-export const workerKeys = {
-  all: ['workers'] as const,
-  lists: () => [...workerKeys.all, 'list'] as const,
-  list: (page: number, pageSize: number) => [...workerKeys.lists(), { page, pageSize }] as const,
-  details: () => [...workerKeys.all, 'detail'] as const,
-  detail: (id: number) => [...workerKeys.details(), id] as const,
+export const workerKeys = createResourceKeys("workers", {
+  list: (page: number, pageSize: number) => ({ page, pageSize }),
+  detail: (id: number) => id,
+})
+
+type WorkerMutationConfig<TData, TVariables> = {
+  mutationFn: UseResourceMutationOptions<TData, TVariables>['mutationFn']
+  invalidate?: UseResourceMutationOptions<TData, TVariables>['invalidate']
+  successKey: string
+  errorFallbackKey: string
+}
+
+function useWorkerMutation<TData, TVariables>({
+  mutationFn,
+  invalidate,
+  successKey,
+  errorFallbackKey,
+}: WorkerMutationConfig<TData, TVariables>) {
+  return useResourceMutation<TData, TVariables>({
+    mutationFn,
+    invalidate,
+    onSuccess: ({ toast }) => {
+      toast.success(successKey)
+    },
+    errorFallbackKey,
+  })
 }
 
 /**
@@ -42,18 +65,11 @@ export function useWorker(id: number) {
  * 创建 Worker
  */
 export function useCreateWorker() {
-  const queryClient = useQueryClient()
-  const toastMessages = useToastMessages()
-
-  return useMutation({
+  return useWorkerMutation({
     mutationFn: (data: CreateWorkerRequest) => workerService.createWorker(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: workerKeys.lists() })
-      toastMessages.success('toast.worker.create.success')
-    },
-    onError: (error: unknown) => {
-      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.worker.create.error')
-    },
+    invalidate: [{ queryKey: workerKeys.lists() }],
+    successKey: 'toast.worker.create.success',
+    errorFallbackKey: 'toast.worker.create.error',
   })
 }
 
@@ -61,20 +77,15 @@ export function useCreateWorker() {
  * 更新 Worker
  */
 export function useUpdateWorker() {
-  const queryClient = useQueryClient()
-  const toastMessages = useToastMessages()
-
-  return useMutation({
+  return useWorkerMutation({
     mutationFn: ({ id, data }: { id: number; data: UpdateWorkerRequest }) =>
       workerService.updateWorker(id, data),
-    onSuccess: (_: unknown, { id }: { id: number; data: UpdateWorkerRequest }) => {
-      queryClient.invalidateQueries({ queryKey: workerKeys.lists() })
-      queryClient.invalidateQueries({ queryKey: workerKeys.detail(id) })
-      toastMessages.success('toast.worker.update.success')
-    },
-    onError: (error: unknown) => {
-      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.worker.update.error')
-    },
+    invalidate: [
+      { queryKey: workerKeys.lists() },
+      ({ variables }) => ({ queryKey: workerKeys.detail(variables.id) }),
+    ],
+    successKey: 'toast.worker.update.success',
+    errorFallbackKey: 'toast.worker.update.error',
   })
 }
 
@@ -82,21 +93,16 @@ export function useUpdateWorker() {
  * 删除 Worker
  */
 export function useDeleteWorker() {
-  const queryClient = useQueryClient()
-  const toastMessages = useToastMessages()
-
-  return useMutation({
+  return useWorkerMutation({
     mutationFn: (id: number) => workerService.deleteWorker(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ 
+    invalidate: [
+      {
         queryKey: workerKeys.lists(),
         refetchType: 'active',
-      })
-      toastMessages.success('toast.worker.delete.success')
-    },
-    onError: (error: unknown) => {
-      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.worker.delete.error')
-    },
+      },
+    ],
+    successKey: 'toast.worker.delete.success',
+    errorFallbackKey: 'toast.worker.delete.error',
   })
 }
 
@@ -104,19 +110,14 @@ export function useDeleteWorker() {
  * 部署 Worker
  */
 export function useDeployWorker() {
-  const queryClient = useQueryClient()
-  const toastMessages = useToastMessages()
-
-  return useMutation({
+  return useWorkerMutation({
     mutationFn: (id: number) => workerService.deployWorker(id),
-    onSuccess: (_: unknown, id: number) => {
-      queryClient.invalidateQueries({ queryKey: workerKeys.detail(id) })
-      queryClient.invalidateQueries({ queryKey: workerKeys.lists() })
-      toastMessages.success('toast.worker.deploy.success')
-    },
-    onError: (error: unknown) => {
-      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.worker.deploy.error')
-    },
+    invalidate: [
+      ({ variables }) => ({ queryKey: workerKeys.detail(variables) }),
+      { queryKey: workerKeys.lists() },
+    ],
+    successKey: 'toast.worker.deploy.success',
+    errorFallbackKey: 'toast.worker.deploy.error',
   })
 }
 
@@ -124,19 +125,14 @@ export function useDeployWorker() {
  * 重启 Worker
  */
 export function useRestartWorker() {
-  const queryClient = useQueryClient()
-  const toastMessages = useToastMessages()
-
-  return useMutation({
+  return useWorkerMutation({
     mutationFn: (id: number) => workerService.restartWorker(id),
-    onSuccess: (_: unknown, id: number) => {
-      queryClient.invalidateQueries({ queryKey: workerKeys.detail(id) })
-      queryClient.invalidateQueries({ queryKey: workerKeys.lists() })
-      toastMessages.success('toast.worker.restart.success')
-    },
-    onError: (error: unknown) => {
-      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.worker.restart.error')
-    },
+    invalidate: [
+      ({ variables }) => ({ queryKey: workerKeys.detail(variables) }),
+      { queryKey: workerKeys.lists() },
+    ],
+    successKey: 'toast.worker.restart.success',
+    errorFallbackKey: 'toast.worker.restart.error',
   })
 }
 
@@ -144,18 +140,13 @@ export function useRestartWorker() {
  * 停止 Worker
  */
 export function useStopWorker() {
-  const queryClient = useQueryClient()
-  const toastMessages = useToastMessages()
-
-  return useMutation({
+  return useWorkerMutation({
     mutationFn: (id: number) => workerService.stopWorker(id),
-    onSuccess: (_: unknown, id: number) => {
-      queryClient.invalidateQueries({ queryKey: workerKeys.detail(id) })
-      queryClient.invalidateQueries({ queryKey: workerKeys.lists() })
-      toastMessages.success('toast.worker.stop.success')
-    },
-    onError: (error: unknown) => {
-      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.worker.stop.error')
-    },
+    invalidate: [
+      ({ variables }) => ({ queryKey: workerKeys.detail(variables) }),
+      { queryKey: workerKeys.lists() },
+    ],
+    successKey: 'toast.worker.stop.success',
+    errorFallbackKey: 'toast.worker.stop.error',
   })
 }

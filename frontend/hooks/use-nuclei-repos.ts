@@ -2,11 +2,18 @@
  * Nuclei 模板仓库相关 Hooks
  */
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { useToastMessages } from '@/lib/toast-helpers'
-import { getErrorCode, getErrorResponseData } from '@/lib/response-parser'
+import { useQuery } from "@tanstack/react-query"
+import { useResourceMutation } from '@/hooks/_shared/create-resource-mutation'
 import { nucleiRepoApi } from "../services/nuclei-repo.service"
 import type { NucleiTemplateTreeNode, NucleiTemplateContent } from "@/types/nuclei.types"
+
+export const nucleiRepoKeys = {
+  repos: ["nuclei-repos"] as const,
+  repo: (repoId: number | null) => ["nuclei-repos", repoId] as const,
+  tree: (repoId: number | null) => ["nuclei-repo-tree", repoId] as const,
+  content: (repoId: number | null, path: string | null) =>
+    ["nuclei-repo-content", repoId, path] as const,
+}
 
 // ==================== 仓库 CRUD ====================
 
@@ -24,7 +31,7 @@ export interface NucleiRepo {
 /** 获取仓库列表 */
 export function useNucleiRepos() {
   return useQuery<NucleiRepo[]>({
-    queryKey: ["nuclei-repos"],
+    queryKey: nucleiRepoKeys.repos,
     queryFn: nucleiRepoApi.listRepos,
   })
 }
@@ -32,7 +39,7 @@ export function useNucleiRepos() {
 /** 获取单个仓库详情 */
 export function useNucleiRepo(repoId: number | null) {
   return useQuery<NucleiRepo>({
-    queryKey: ["nuclei-repos", repoId],
+    queryKey: nucleiRepoKeys.repo(repoId),
     queryFn: () => nucleiRepoApi.getRepo(repoId!),
     enabled: !!repoId,
   })
@@ -40,56 +47,43 @@ export function useNucleiRepo(repoId: number | null) {
 
 /** 创建仓库 */
 export function useCreateNucleiRepo() {
-  const queryClient = useQueryClient()
-  const toastMessages = useToastMessages()
-
-  return useMutation({
+  return useResourceMutation({
     mutationFn: nucleiRepoApi.createRepo,
-    onSuccess: () => {
-      toastMessages.success('toast.nucleiRepo.create.success')
-      queryClient.invalidateQueries({ queryKey: ["nuclei-repos"] })
+    invalidate: [{ queryKey: nucleiRepoKeys.repos }],
+    onSuccess: ({ toast }) => {
+      toast.success('toast.nucleiRepo.create.success')
     },
-    onError: (error: unknown) => {
-      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.nucleiRepo.create.error')
-    },
+    errorFallbackKey: 'toast.nucleiRepo.create.error',
   })
 }
 
 /** 更新仓库 */
 export function useUpdateNucleiRepo() {
-  const queryClient = useQueryClient()
-  const toastMessages = useToastMessages()
-
-  return useMutation({
+  return useResourceMutation({
     mutationFn: (data: {
       id: number
       repoUrl?: string
     }) => nucleiRepoApi.updateRepo(data.id, { repoUrl: data.repoUrl }),
-    onSuccess: (_data, variables) => {
-      toastMessages.success('toast.nucleiRepo.update.success')
-      queryClient.invalidateQueries({ queryKey: ["nuclei-repos"] })
-      queryClient.invalidateQueries({ queryKey: ["nuclei-repos", variables.id] })
+    invalidate: [
+      { queryKey: nucleiRepoKeys.repos },
+      ({ variables }) => ({ queryKey: nucleiRepoKeys.repo(variables.id) }),
+    ],
+    onSuccess: ({ toast }) => {
+      toast.success('toast.nucleiRepo.update.success')
     },
-    onError: (error: unknown) => {
-      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.nucleiRepo.update.error')
-    },
+    errorFallbackKey: 'toast.nucleiRepo.update.error',
   })
 }
 
 /** 删除仓库 */
 export function useDeleteNucleiRepo() {
-  const queryClient = useQueryClient()
-  const toastMessages = useToastMessages()
-
-  return useMutation({
+  return useResourceMutation({
     mutationFn: nucleiRepoApi.deleteRepo,
-    onSuccess: () => {
-      toastMessages.success('toast.nucleiRepo.delete.success')
-      queryClient.invalidateQueries({ queryKey: ["nuclei-repos"] })
+    invalidate: [{ queryKey: nucleiRepoKeys.repos }],
+    onSuccess: ({ toast }) => {
+      toast.success('toast.nucleiRepo.delete.success')
     },
-    onError: (error: unknown) => {
-      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.nucleiRepo.delete.error')
-    },
+    errorFallbackKey: 'toast.nucleiRepo.delete.error',
   })
 }
 
@@ -97,20 +91,17 @@ export function useDeleteNucleiRepo() {
 
 /** 刷新仓库（Git clone/pull） */
 export function useRefreshNucleiRepo() {
-  const queryClient = useQueryClient()
-  const toastMessages = useToastMessages()
-
-  return useMutation({
+  return useResourceMutation({
     mutationFn: nucleiRepoApi.refreshRepo,
-    onSuccess: (_data, repoId) => {
-      toastMessages.success('toast.nucleiRepo.sync.success')
-      queryClient.invalidateQueries({ queryKey: ["nuclei-repos"] })
-      queryClient.invalidateQueries({ queryKey: ["nuclei-repos", repoId] })
-      queryClient.invalidateQueries({ queryKey: ["nuclei-repo-tree", repoId] })
+    invalidate: [
+      { queryKey: nucleiRepoKeys.repos },
+      ({ variables }) => ({ queryKey: nucleiRepoKeys.repo(variables) }),
+      ({ variables }) => ({ queryKey: nucleiRepoKeys.tree(variables) }),
+    ],
+    onSuccess: ({ toast }) => {
+      toast.success('toast.nucleiRepo.sync.success')
     },
-    onError: (error: unknown) => {
-      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.nucleiRepo.sync.error')
-    },
+    errorFallbackKey: 'toast.nucleiRepo.sync.error',
   })
 }
 
@@ -119,7 +110,7 @@ export function useRefreshNucleiRepo() {
 /** 获取仓库模板目录树 */
 export function useNucleiRepoTree(repoId: number | null) {
   return useQuery({
-    queryKey: ["nuclei-repo-tree", repoId],
+    queryKey: nucleiRepoKeys.tree(repoId),
     queryFn: async () => {
       const res = await nucleiRepoApi.getTemplateTree(repoId!)
       return (res.roots ?? []) as NucleiTemplateTreeNode[]
@@ -131,7 +122,7 @@ export function useNucleiRepoTree(repoId: number | null) {
 /** 获取模板文件内容 */
 export function useNucleiRepoContent(repoId: number | null, path: string | null) {
   return useQuery<NucleiTemplateContent>({
-    queryKey: ["nuclei-repo-content", repoId, path],
+    queryKey: nucleiRepoKeys.content(repoId, path),
     queryFn: () => nucleiRepoApi.getTemplateContent(repoId!, path!),
     enabled: !!repoId && !!path,
   })

@@ -9,6 +9,8 @@ import {
   useBulkDeleteFingersFingerprints,
   useDeleteAllFingersFingerprints,
 } from "@/hooks/use-fingerprints"
+import { useSearchState } from "@/hooks/_shared/use-search-state"
+import { useStablePaginationInfo } from "@/hooks/_shared/use-stable-pagination-info"
 import { FingerprintService } from "@/services/fingerprint.service"
 import { FingersFingerprintDataTable } from "./fingers-fingerprint-data-table"
 import { createFingersFingerprintColumns } from "./fingers-fingerprint-columns"
@@ -16,6 +18,8 @@ import { FingersFingerprintDialog } from "./fingers-fingerprint-dialog"
 import { ImportFingerprintDialog } from "./import-fingerprint-dialog"
 import { DataTableSkeleton } from "@/components/ui/data-table-skeleton"
 import { getDateLocale } from "@/lib/date-utils"
+import { downloadBlob } from "@/lib/download-utils"
+import { getErrorMessage } from "@/lib/error-utils"
 import type { FingersFingerprint } from "@/types/fingerprint.types"
 
 export function FingersFingerprintView() {
@@ -25,7 +29,6 @@ export function FingersFingerprintView() {
   const [selectedFingerprints, setSelectedFingerprints] = useState<FingersFingerprint[]>([])
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 })
   const [filterQuery, setFilterQuery] = useState("")
-  const [isSearching, setIsSearching] = useState(false)
   const [addDialogOpen, setAddDialogOpen] = useState(false)
   const [importDialogOpen, setImportDialogOpen] = useState(false)
 
@@ -40,18 +43,11 @@ export function FingersFingerprintView() {
   const bulkDeleteMutation = useBulkDeleteFingersFingerprints()
   const deleteAllMutation = useDeleteAllFingersFingerprints()
 
-  // Search state
-  React.useEffect(() => {
-    if (!isFetching && isSearching) {
-      setIsSearching(false)
-    }
-  }, [isFetching, isSearching])
-
-  const handleFilterChange = (value: string) => {
-    setIsSearching(true)
-    setFilterQuery(value)
-    setPagination((prev) => ({ ...prev, pageIndex: 0 }))
-  }
+  const { isSearching, handleSearchChange: handleFilterChange } = useSearchState({
+    isFetching,
+    setSearchValue: setFilterQuery,
+    onResetPage: () => setPagination((prev) => ({ ...prev, pageIndex: 0 })),
+  })
 
   // Format date
   const formatDate = React.useCallback((dateString: string): string => {
@@ -65,21 +61,11 @@ export function FingersFingerprintView() {
     })
   }, [locale])
 
-  const getErrorMessage = (error: unknown): string =>
-    error instanceof Error ? error.message : ""
-
   // Export
   const handleExport = async () => {
     try {
       const blob = await FingerprintService.exportFingersFingerprints()
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement("a")
-      a.href = url
-      a.download = `fingers-fingerprints-${Date.now()}.json`
-      document.body.appendChild(a)
-      a.click()
-      a.remove()
-      URL.revokeObjectURL(url)
+      downloadBlob(blob, `fingers-fingerprints-${Date.now()}.json`)
       toast.success(tFingerprints("toast.exportSuccess"))
     } catch (error) {
       toast.error(getErrorMessage(error) || tFingerprints("toast.exportFailed"))
@@ -123,17 +109,7 @@ export function FingersFingerprintView() {
   }, [data])
 
   // Stabilize paginationInfo reference
-  const total = data?.total ?? 0
-  const page = data?.page ?? 1
-  const serverPageSize = data?.pageSize ?? 10
-  const totalPages = data?.totalPages ?? 1
-  
-  const paginationInfo = useMemo(() => ({
-    total,
-    page,
-    pageSize: serverPageSize,
-    totalPages,
-  }), [total, page, serverPageSize, totalPages])
+  const paginationInfo = useStablePaginationInfo(data, { fallbackTotalPages: 1 })
 
   // Error state
   if (error) {

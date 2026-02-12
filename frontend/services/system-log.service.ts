@@ -5,7 +5,7 @@ const BASE_URL = "/system/logs"
 
 export const systemLogService = {
   /**
-   * 获取日志文件列表
+   * Get log file list
    */
   async getLogFiles(): Promise<LogFilesResponse> {
     const response = await apiClient.get<LogFilesResponse>(`${BASE_URL}/files/`)
@@ -13,7 +13,7 @@ export const systemLogService = {
   },
 
   /**
-   * 获取日志内容
+   * Get log content
    */
   async getSystemLogs(params?: { file?: string; lines?: number }): Promise<SystemLogResponse> {
     const searchParams = new URLSearchParams()

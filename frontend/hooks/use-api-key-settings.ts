@@ -1,29 +1,27 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
+import { useResourceMutation } from '@/hooks/_shared/create-resource-mutation'
 import { ApiKeySettingsService } from '@/services/api-key-settings.service'
 import type { ApiKeySettings } from '@/types/api-key-settings.types'
-import { useToastMessages } from '@/lib/toast-helpers'
-import { getErrorCode, getErrorResponseData } from '@/lib/response-parser'
+
+export const apiKeySettingsKeys = {
+  settings: ['api-key-settings'] as const,
+}
 
 export function useApiKeySettings() {
   return useQuery({
-    queryKey: ['api-key-settings'],
+    queryKey: apiKeySettingsKeys.settings,
     queryFn: () => ApiKeySettingsService.getSettings(),
   })
 }
 
 export function useUpdateApiKeySettings() {
-  const qc = useQueryClient()
-  const toastMessages = useToastMessages()
-  
-  return useMutation({
+  return useResourceMutation({
     mutationFn: (data: Partial<ApiKeySettings>) =>
       ApiKeySettingsService.updateSettings(data),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['api-key-settings'] })
-      toastMessages.success('toast.apiKeys.settings.success')
+    invalidate: [{ queryKey: apiKeySettingsKeys.settings }],
+    onSuccess: ({ toast }) => {
+      toast.success('toast.apiKeys.settings.success')
     },
-    onError: (error: unknown) => {
-      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.apiKeys.settings.error')
-    },
+    errorFallbackKey: 'toast.apiKeys.settings.error',
   })
 }

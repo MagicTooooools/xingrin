@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query'
+import { useQuery, keepPreviousData } from '@tanstack/react-query'
 import {
   getScheduledScans,
   getScheduledScan,
@@ -7,8 +7,10 @@ import {
   deleteScheduledScan,
   toggleScheduledScan,
 } from '@/services/scheduled-scan.service'
-import { useToastMessages } from '@/lib/toast-helpers'
-import { parseResponse, getErrorCode, getErrorResponseData } from '@/lib/response-parser'
+import { useResourceMutation } from '@/hooks/_shared/create-resource-mutation'
+import { createResourceKeys } from "@/hooks/_shared/query-keys"
+import { handleScheduledScanMutationSuccess } from '@/hooks/_shared/scheduled-scan-mutation-helpers'
+import { getErrorCode, getErrorResponseData } from '@/lib/response-parser'
 import type {
   CreateScheduledScanRequest,
   UpdateScheduledScanRequest,
@@ -16,18 +18,30 @@ import type {
   ScheduledScan,
 } from '@/types/scheduled-scan.types'
 
+// Query Keys
+export const scheduledScanKeys = createResourceKeys("scheduled-scans", {
+  list: (params: {
+    page?: number
+    pageSize?: number
+    search?: string
+    targetId?: number
+    organizationId?: number
+  }) => params,
+  detail: (id: number) => id,
+})
+
 /**
  * 获取定时扫描列表
  */
-export function useScheduledScans(params: { 
+export function useScheduledScans(params: {
   page?: number
   pageSize?: number
   search?: string
   targetId?: number
-  organizationId?: number 
+  organizationId?: number
 } = { page: 1, pageSize: 10 }) {
   return useQuery({
-    queryKey: ['scheduled-scans', params],
+    queryKey: scheduledScanKeys.list(params),
     queryFn: () => getScheduledScans(params),
     placeholderData: keepPreviousData,
   })
@@ -38,7 +52,7 @@ export function useScheduledScans(params: {
  */
 export function useScheduledScan(id: number) {
   return useQuery({
-    queryKey: ['scheduled-scan', id],
+    queryKey: scheduledScanKeys.detail(id),
     queryFn: () => getScheduledScan(id),
     enabled: !!id,
   })
@@ -48,25 +62,19 @@ export function useScheduledScan(id: number) {
  * 创建定时扫描
  */
 export function useCreateScheduledScan() {
-  const queryClient = useQueryClient()
-  const toastMessages = useToastMessages()
-
-  return useMutation({
+  return useResourceMutation({
     mutationFn: (data: CreateScheduledScanRequest) => createScheduledScan(data),
-    onSuccess: (response) => {
-      parseResponse<unknown>(response)
-      // 使用 i18n 消息显示成功提示
-      toastMessages.success('toast.scheduledScan.create.success')
-      queryClient.invalidateQueries({ queryKey: ['scheduled-scans'] })
+    invalidate: [{ queryKey: scheduledScanKeys.all }],
+    onSuccess: ({ data: response, toast }) => {
+      handleScheduledScanMutationSuccess({
+        response,
+        onSuccess: () => {
+          // 使用 i18n 消息显示成功提示
+          toast.success('toast.scheduledScan.create.success')
+        },
+      })
     },
-    onError: (error: unknown) => {
-      const errorCode = getErrorCode(getErrorResponseData(error))
-      if (errorCode) {
-        toastMessages.errorFromCode(errorCode)
-      } else {
-        toastMessages.error('toast.scheduledScan.create.error')
-      }
-    },
+    errorFallbackKey: 'toast.scheduledScan.create.error',
   })
 }
 
@@ -74,27 +82,23 @@ export function useCreateScheduledScan() {
  * 更新定时扫描
  */
 export function useUpdateScheduledScan() {
-  const queryClient = useQueryClient()
-  const toastMessages = useToastMessages()
-
-  return useMutation({
+  return useResourceMutation({
     mutationFn: ({ id, data }: { id: number; data: UpdateScheduledScanRequest }) =>
       updateScheduledScan(id, data),
-    onSuccess: (response) => {
-      parseResponse<unknown>(response)
-      // 使用 i18n 消息显示成功提示
-      toastMessages.success('toast.scheduledScan.update.success')
-      queryClient.invalidateQueries({ queryKey: ['scheduled-scans'] })
-      queryClient.invalidateQueries({ queryKey: ['scheduled-scan'] })
+    invalidate: [
+      { queryKey: scheduledScanKeys.all },
+      { queryKey: scheduledScanKeys.details() },
+    ],
+    onSuccess: ({ data: response, toast }) => {
+      handleScheduledScanMutationSuccess({
+        response,
+        onSuccess: () => {
+          // 使用 i18n 消息显示成功提示
+          toast.success('toast.scheduledScan.update.success')
+        },
+      })
     },
-    onError: (error: unknown) => {
-      const errorCode = getErrorCode(getErrorResponseData(error))
-      if (errorCode) {
-        toastMessages.errorFromCode(errorCode)
-      } else {
-        toastMessages.error('toast.scheduledScan.update.error')
-      }
-    },
+    errorFallbackKey: 'toast.scheduledScan.update.error',
   })
 }
 
@@ -102,25 +106,19 @@ export function useUpdateScheduledScan() {
  * 删除定时扫描
  */
 export function useDeleteScheduledScan() {
-  const queryClient = useQueryClient()
-  const toastMessages = useToastMessages()
-
-  return useMutation({
+  return useResourceMutation({
     mutationFn: (id: number) => deleteScheduledScan(id),
-    onSuccess: (response) => {
-      parseResponse<unknown>(response)
-      // 使用 i18n 消息显示成功提示
-      toastMessages.success('toast.scheduledScan.delete.success')
-      queryClient.invalidateQueries({ queryKey: ['scheduled-scans'] })
+    invalidate: [{ queryKey: scheduledScanKeys.all }],
+    onSuccess: ({ data: response, toast }) => {
+      handleScheduledScanMutationSuccess({
+        response,
+        onSuccess: () => {
+          // 使用 i18n 消息显示成功提示
+          toast.success('toast.scheduledScan.delete.success')
+        },
+      })
     },
-    onError: (error: unknown) => {
-      const errorCode = getErrorCode(getErrorResponseData(error))
-      if (errorCode) {
-        toastMessages.errorFromCode(errorCode)
-      } else {
-        toastMessages.error('toast.scheduledScan.delete.error')
-      }
-    },
+    errorFallbackKey: 'toast.scheduledScan.delete.error',
   })
 }
 
@@ -129,22 +127,20 @@ export function useDeleteScheduledScan() {
  * 使用乐观更新，避免重新获取数据导致列表重新排序
  */
 export function useToggleScheduledScan() {
-  const queryClient = useQueryClient()
-  const toastMessages = useToastMessages()
-
-  return useMutation({
+  return useResourceMutation({
     mutationFn: ({ id, isEnabled }: { id: number; isEnabled: boolean }) =>
       toggleScheduledScan(id, isEnabled),
-    onMutate: async ({ id, isEnabled }) => {
+    onMutate: async ({ id, isEnabled }, context) => {
+      const { queryClient } = context
       // 取消正在进行的查询
-      await queryClient.cancelQueries({ queryKey: ['scheduled-scans'] })
+      await queryClient.cancelQueries({ queryKey: scheduledScanKeys.all })
 
       // 获取当前缓存的所有 scheduled-scans 查询
-      const previousQueries = queryClient.getQueriesData({ queryKey: ['scheduled-scans'] })
+      const previousQueries = queryClient.getQueriesData({ queryKey: scheduledScanKeys.all })
 
       // 乐观更新所有匹配的查询缓存
       queryClient.setQueriesData(
-        { queryKey: ['scheduled-scans'] },
+        { queryKey: scheduledScanKeys.all },
         (old: GetScheduledScansResponse | undefined) => {
           if (!old?.results) return old
           return {
@@ -159,17 +155,21 @@ export function useToggleScheduledScan() {
       // 返回上下文用于回滚
       return { previousQueries }
     },
-    onSuccess: (response, { isEnabled }) => {
-      parseResponse<unknown>(response)
-      // 使用 i18n 消息显示成功提示
-      if (isEnabled) {
-        toastMessages.success('toast.scheduledScan.toggle.enabled')
-      } else {
-        toastMessages.success('toast.scheduledScan.toggle.disabled')
-      }
+    onSuccess: ({ data: response, variables: { isEnabled }, toast }) => {
+      handleScheduledScanMutationSuccess({
+        response,
+        onSuccess: () => {
+          // 使用 i18n 消息显示成功提示
+          if (isEnabled) {
+            toast.success('toast.scheduledScan.toggle.enabled')
+          } else {
+            toast.success('toast.scheduledScan.toggle.disabled')
+          }
+        },
+      })
       // 不调用 invalidateQueries，保持当前排序
     },
-    onError: (error: unknown, _variables, context) => {
+    onError: ({ error, context, toast, queryClient }) => {
       // 回滚到之前的状态
       if (context?.previousQueries) {
         context.previousQueries.forEach(([queryKey, data]) => {
@@ -178,9 +178,9 @@ export function useToggleScheduledScan() {
       }
       const errorCode = getErrorCode(getErrorResponseData(error))
       if (errorCode) {
-        toastMessages.errorFromCode(errorCode)
+        toast.errorFromCode(errorCode)
       } else {
-        toastMessages.error('toast.scheduledScan.toggle.error')
+        toast.error('toast.scheduledScan.toggle.error')
       }
     },
   })

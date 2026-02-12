@@ -1,29 +1,27 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
+import { useResourceMutation } from '@/hooks/_shared/create-resource-mutation'
 import { NotificationSettingsService } from '@/services/notification-settings.service'
 import type { UpdateNotificationSettingsRequest } from '@/types/notification-settings.types'
-import { useToastMessages } from '@/lib/toast-helpers'
-import { getErrorCode, getErrorResponseData } from '@/lib/response-parser'
+
+export const notificationSettingsKeys = {
+  settings: ['notification-settings'] as const,
+}
 
 export function useNotificationSettings() {
   return useQuery({
-    queryKey: ['notification-settings'],
+    queryKey: notificationSettingsKeys.settings,
     queryFn: () => NotificationSettingsService.getSettings(),
   })
 }
 
 export function useUpdateNotificationSettings() {
-  const qc = useQueryClient()
-  const toastMessages = useToastMessages()
-  
-  return useMutation({
+  return useResourceMutation({
     mutationFn: (data: UpdateNotificationSettingsRequest) =>
       NotificationSettingsService.updateSettings(data),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['notification-settings'] })
-      toastMessages.success('toast.notification.settings.success')
+    invalidate: [{ queryKey: notificationSettingsKeys.settings }],
+    onSuccess: ({ toast }) => {
+      toast.success('toast.notification.settings.success')
     },
-    onError: (error: unknown) => {
-      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.notification.settings.error')
-    },
+    errorFallbackKey: 'toast.notification.settings.error',
   })
 }

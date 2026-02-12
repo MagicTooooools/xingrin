@@ -3,12 +3,12 @@
 import * as React from "react"
 import type { ColumnDef } from "@tanstack/react-table"
 import { useTranslations } from "next-intl"
-import { IconSearch, IconLoader2 } from "@/components/icons"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { UnifiedDataTable } from "@/components/ui/data-table/unified-data-table"
+import { SimpleSearchToolbar } from "@/components/ui/data-table/simple-search-toolbar"
+import { useSimpleSearchState } from "@/components/ui/data-table/use-simple-search"
 import type { ScheduledScan } from "@/types/scheduled-scan.types"
 import type { PaginationInfo } from "@/types/common.types"
+import { buildPaginationInfo } from "@/hooks/_shared/pagination"
 
 interface ScheduledScanDataTableProps {
   data: ScheduledScan[]
@@ -51,33 +51,21 @@ export function ScheduledScanDataTable({
   const t = useTranslations("common.status")
   const tScan = useTranslations("scan.scheduled")
   
-  // Search local state
-  const [localSearchValue, setLocalSearchValue] = React.useState(searchValue || "")
-
-  React.useEffect(() => {
-    setLocalSearchValue(searchValue || "")
-  }, [searchValue])
-
-  const handleSearchSubmit = () => {
-    if (onSearch) {
-      onSearch(localSearchValue)
-    }
-  }
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
-      handleSearchSubmit()
-    }
-  }
+  const {
+    value: localSearchValue,
+    setValue: setLocalSearchValue,
+    submit: handleSearchSubmit,
+  } = useSimpleSearchState({ searchValue, onSearch })
 
   // Convert to pagination format required by UnifiedDataTable
   const pagination = { pageIndex: page - 1, pageSize }
-  const paginationInfo: PaginationInfo = {
+  const paginationInfo: PaginationInfo = buildPaginationInfo({
     total,
-    totalPages,
     page,
     pageSize,
-  }
+    totalPages,
+    minTotalPages: 1,
+  })
 
   const handlePaginationChange = (newPagination: { pageIndex: number; pageSize: number }) => {
     if (newPagination.pageSize !== pageSize && onPageSizeChange) {
@@ -93,37 +81,29 @@ export function ScheduledScanDataTable({
       data={data}
       columns={columns}
       getRowId={(row) => String(row.id)}
-      // Pagination
-      pagination={pagination}
-      paginationInfo={paginationInfo}
-      onPaginationChange={handlePaginationChange}
-      // Selection
-      enableRowSelection={false}
-      // Bulk operations
-      showBulkDelete={false}
-      onAddNew={onAddNew}
-      addButtonLabel={addButtonText || tScan("createTitle")}
-      // Empty state
-      emptyMessage={t("noData")}
-      // Custom search box
-      toolbarLeft={
-        <div className="flex items-center space-x-2">
-          <Input
-            placeholder={searchPlaceholder || tScan("searchPlaceholder")}
+      state={{
+        pagination,
+        paginationInfo,
+        onPaginationChange: handlePaginationChange,
+      }}
+      behavior={{ enableRowSelection: false }}
+      actions={{
+        showBulkDelete: false,
+        onAddNew,
+        addButtonLabel: addButtonText || tScan("createTitle"),
+      }}
+      ui={{
+        emptyMessage: t("noData"),
+        toolbarLeft: (
+          <SimpleSearchToolbar
             value={localSearchValue}
-            onChange={(e) => setLocalSearchValue(e.target.value)}
-            onKeyDown={handleKeyDown}
-            className="h-8 max-w-sm"
+            onChange={setLocalSearchValue}
+            onSubmit={handleSearchSubmit}
+            loading={isSearching}
+            placeholder={searchPlaceholder || tScan("searchPlaceholder")}
           />
-          <Button variant="outline" size="sm" onClick={handleSearchSubmit} disabled={isSearching}>
-            {isSearching ? (
-              <IconLoader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <IconSearch className="h-4 w-4" />
-            )}
-          </Button>
-        </div>
-      }
+        ),
+      }}
     />
   )
 }

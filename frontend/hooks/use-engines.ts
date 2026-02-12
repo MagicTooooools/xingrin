@@ -1,6 +1,5 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { useToastMessages } from '@/lib/toast-helpers'
-import { getErrorCode, getErrorResponseData } from '@/lib/response-parser'
+import { useQuery } from '@tanstack/react-query'
+import { useResourceMutation } from '@/hooks/_shared/create-resource-mutation'
 import {
   getPresetEngines,
   getPresetEngine,
@@ -57,18 +56,13 @@ export function useEngine(id: number) {
  * Create engine
  */
 export function useCreateEngine() {
-  const queryClient = useQueryClient()
-  const toastMessages = useToastMessages()
-
-  return useMutation({
+  return useResourceMutation({
     mutationFn: createEngine,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['engines'] })
-      toastMessages.success('toast.engine.create.success')
+    invalidate: [{ queryKey: ['engines'] }],
+    onSuccess: ({ toast }) => {
+      toast.success('toast.engine.create.success')
     },
-    onError: (error: unknown) => {
-      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.engine.create.error')
-    },
+    errorFallbackKey: 'toast.engine.create.error',
   })
 }
 
@@ -76,20 +70,17 @@ export function useCreateEngine() {
  * Update engine
  */
 export function useUpdateEngine() {
-  const queryClient = useQueryClient()
-  const toastMessages = useToastMessages()
-
-  return useMutation({
+  return useResourceMutation({
     mutationFn: ({ id, data }: { id: number; data: Parameters<typeof updateEngine>[1] }) =>
       updateEngine(id, data),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['engines'] })
-      queryClient.invalidateQueries({ queryKey: ['engines', variables.id] })
-      toastMessages.success('toast.engine.update.success')
+    invalidate: [
+      { queryKey: ['engines'] },
+      ({ variables }) => ({ queryKey: ['engines', variables.id] }),
+    ],
+    onSuccess: ({ toast }) => {
+      toast.success('toast.engine.update.success')
     },
-    onError: (error: unknown) => {
-      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.engine.update.error')
-    },
+    errorFallbackKey: 'toast.engine.update.error',
   })
 }
 
@@ -97,17 +88,12 @@ export function useUpdateEngine() {
  * Delete engine
  */
 export function useDeleteEngine() {
-  const queryClient = useQueryClient()
-  const toastMessages = useToastMessages()
-
-  return useMutation({
+  return useResourceMutation({
     mutationFn: deleteEngine,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['engines'] })
-      toastMessages.success('toast.engine.delete.success')
+    invalidate: [{ queryKey: ['engines'] }],
+    onSuccess: ({ toast }) => {
+      toast.success('toast.engine.delete.success')
     },
-    onError: (error: unknown) => {
-      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.engine.delete.error')
-    },
+    errorFallbackKey: 'toast.engine.delete.error',
   })
 }

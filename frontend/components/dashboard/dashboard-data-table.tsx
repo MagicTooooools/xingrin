@@ -7,17 +7,18 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { UnifiedDataTable } from "@/components/ui/data-table/unified-data-table"
 import { useAllVulnerabilities } from "@/hooks/use-vulnerabilities"
 import { useScans } from "@/hooks/use-scans"
+import { useResourceMutation } from "@/hooks/_shared/create-resource-mutation"
 import { VulnerabilityDetailDialog } from "@/components/vulnerabilities/vulnerability-detail-dialog"
 import { createVulnerabilityColumns } from "@/components/vulnerabilities/vulnerabilities-columns"
 import { createScanHistoryColumns } from "@/components/scan/history/scan-history-columns"
 import { ScanProgressDialog, buildScanProgressData, type ScanProgressData } from "@/components/scan/scan-progress-dialog"
 import { getScan } from "@/services/scan.service"
 import { useRouter } from "next/navigation"
-import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 import { deleteScan, stopScan } from "@/services/scan.service"
 import { useTranslations, useLocale } from "next-intl"
 import { getDateLocale } from "@/lib/date-utils"
+import { buildPaginationInfo, normalizePagination } from "@/hooks/_shared/pagination"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -34,7 +35,6 @@ import type { PaginationInfo } from "@/types/common.types"
 
 export function DashboardDataTable() {
   const router = useRouter()
-  const queryClient = useQueryClient()
   const t = useTranslations()
   const locale = useLocale()
   const [activeTab, setActiveTab] = React.useState("scans")
@@ -72,19 +72,17 @@ export function DashboardDataTable() {
   })
 
   // 删除扫描的 mutation
-  const deleteMutation = useMutation({
+  const deleteMutation = useResourceMutation({
     mutationFn: deleteScan,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['scans'] })
-    },
+    invalidate: [{ queryKey: ['scans'] }],
+    skipDefaultErrorHandler: true,
   })
 
   // 停止扫描的 mutation
-  const stopMutation = useMutation({
+  const stopMutation = useResourceMutation({
     mutationFn: stopScan,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['scans'] })
-    },
+    invalidate: [{ queryKey: ['scans'] }],
+    skipDefaultErrorHandler: true,
   })
 
   const vulnerabilities = vulnQuery.data?.vulnerabilities ?? []
@@ -245,21 +243,36 @@ export function DashboardDataTable() {
     [formatDate, router, handleViewProgress, handleDelete, handleStop, t]
   )
 
-  // 漏洞分页信息
-  const vulnPaginationInfo: PaginationInfo = {
-    total: vulnQuery.data?.pagination?.total ?? 0,
-    page: vulnPagination.pageIndex + 1,
-    pageSize: vulnPagination.pageSize,
-    totalPages: vulnQuery.data?.pagination?.totalPages ?? 1,
-  }
+  const vulnPaginationInfo: PaginationInfo = buildPaginationInfo({
+    ...normalizePagination(
+      vulnQuery.data?.pagination,
+      vulnPagination.pageIndex + 1,
+      vulnPagination.pageSize
+    ),
+    minTotalPages: 1,
+  })
 
-  // 扫描分页信息
-  const scanPaginationInfo: PaginationInfo = {
-    total: scanQuery.data?.total ?? 0,
-    page: scanPagination.pageIndex + 1,
-    pageSize: scanPagination.pageSize,
-    totalPages: scanQuery.data?.totalPages ?? 1,
-  }
+  const scanPaginationInfo: PaginationInfo = buildPaginationInfo({
+    ...normalizePagination(
+      scanQuery.data,
+      scanPagination.pageIndex + 1,
+      scanPagination.pageSize
+    ),
+    minTotalPages: 1,
+  })
+
+  const tabsToolbar = (
+    <TabsList>
+      <TabsTrigger value="scans" className="gap-1.5">
+        <IconRadar className="h-4 w-4" />
+        {t('navigation.scanHistory')}
+      </TabsTrigger>
+      <TabsTrigger value="vulnerabilities" className="gap-1.5">
+        <IconBug className="h-4 w-4" />
+        {t('navigation.vulnerabilities')}
+      </TabsTrigger>
+    </TabsList>
+  )
 
   return (
     <>
@@ -330,25 +343,22 @@ export function DashboardDataTable() {
               data={vulnerabilities}
               columns={vulnColumns}
               getRowId={(row) => String(row.id)}
-              enableRowSelection={false}
-              pagination={vulnPagination}
-              onPaginationChange={setVulnPagination}
-              paginationInfo={vulnPaginationInfo}
-              emptyMessage={t('common.status.noData')}
-              toolbarLeft={
-                <TabsList>
-                  <TabsTrigger value="scans" className="gap-1.5">
-                    <IconRadar className="h-4 w-4" />
-                    {t('navigation.scanHistory')}
-                  </TabsTrigger>
-                  <TabsTrigger value="vulnerabilities" className="gap-1.5">
-                    <IconBug className="h-4 w-4" />
-                    {t('navigation.vulnerabilities')}
-                  </TabsTrigger>
-                </TabsList>
-              }
-              showAddButton={false}
-              showBulkDelete={false}
+              state={{
+                pagination: vulnPagination,
+                onPaginationChange: setVulnPagination,
+                paginationInfo: vulnPaginationInfo,
+              }}
+              behavior={{
+                enableRowSelection: false,
+              }}
+              actions={{
+                showAddButton: false,
+                showBulkDelete: false,
+              }}
+              ui={{
+                emptyMessage: t('common.status.noData'),
+                toolbarLeft: tabsToolbar,
+              }}
             />
           )}
         </TabsContent>
@@ -364,26 +374,23 @@ export function DashboardDataTable() {
               data={scans}
               columns={scanColumns}
               getRowId={(row) => String(row.id)}
-              enableRowSelection={false}
-              enableAutoColumnSizing
-              pagination={scanPagination}
-              onPaginationChange={setScanPagination}
-              paginationInfo={scanPaginationInfo}
-              emptyMessage={t('common.status.noData')}
-              toolbarLeft={
-                <TabsList>
-                  <TabsTrigger value="scans" className="gap-1.5">
-                    <IconRadar className="h-4 w-4" />
-                    {t('navigation.scanHistory')}
-                  </TabsTrigger>
-                  <TabsTrigger value="vulnerabilities" className="gap-1.5">
-                    <IconBug className="h-4 w-4" />
-                    {t('navigation.vulnerabilities')}
-                  </TabsTrigger>
-                </TabsList>
-              }
-              showAddButton={false}
-              showBulkDelete={false}
+              state={{
+                pagination: scanPagination,
+                onPaginationChange: setScanPagination,
+                paginationInfo: scanPaginationInfo,
+              }}
+              behavior={{
+                enableRowSelection: false,
+                enableAutoColumnSizing: true,
+              }}
+              actions={{
+                showAddButton: false,
+                showBulkDelete: false,
+              }}
+              ui={{
+                emptyMessage: t('common.status.noData'),
+                toolbarLeft: tabsToolbar,
+              }}
             />
           )}
         </TabsContent>

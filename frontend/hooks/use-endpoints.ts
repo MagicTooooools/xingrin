@@ -1,8 +1,13 @@
 "use client"
 
-import { useMutation, useQuery, useQueryClient, keepPreviousData } from "@tanstack/react-query"
-import { useToastMessages } from '@/lib/toast-helpers'
-import { getErrorCode, getErrorResponseData } from '@/lib/response-parser'
+import { useQuery, keepPreviousData } from "@tanstack/react-query"
+import { useResourceMutation } from '@/hooks/_shared/create-resource-mutation'
+import { createResourceKeys } from "@/hooks/_shared/query-keys"
+import { normalizePagination } from "@/hooks/_shared/pagination"
+import {
+  getAssetDeletedCount,
+  resolveAssetBulkCreateToast,
+} from "@/hooks/_shared/asset-mutation-helpers"
 import { EndpointService } from "@/services/endpoint.service"
 import type { 
   Endpoint, 
@@ -23,19 +28,23 @@ type EndpointPageResponse = {
 }
 
 // Query Keys
+const endpointKeyBase = createResourceKeys("endpoints", {
+  list: (params: GetEndpointsRequest) => params,
+  detail: (id: number) => id,
+})
+
 export const endpointKeys = {
-  all: ['endpoints'] as const,
-  lists: () => [...endpointKeys.all, 'list'] as const,
-  list: (params: GetEndpointsRequest) => 
-    [...endpointKeys.lists(), params] as const,
-  details: () => [...endpointKeys.all, 'detail'] as const,
-  detail: (id: number) => [...endpointKeys.details(), id] as const,
-  byTarget: (targetId: number, params: GetEndpointsRequest) => 
-    [...endpointKeys.all, 'target', targetId, params] as const,
-  bySubdomain: (subdomainId: number, params: GetEndpointsRequest) => 
-    [...endpointKeys.all, 'subdomain', subdomainId, params] as const,
+  ...endpointKeyBase,
+  byTarget: (targetId: number, params: GetEndpointsRequest) =>
+    [...endpointKeyBase.all, 'target', targetId, params] as const,
+  bySubdomain: (subdomainId: number, params: GetEndpointsRequest) =>
+    [...endpointKeyBase.all, 'subdomain', subdomainId, params] as const,
   byScan: (scanId: number, params: GetEndpointsRequest) =>
-    [...endpointKeys.all, 'scan', scanId, params] as const,
+    [...endpointKeyBase.all, 'scan', scanId, params] as const,
+}
+
+function endpointAllInvalidates() {
+  return [{ queryKey: endpointKeys.all }]
 }
 
 // 获取单个 Endpoint 详情
@@ -105,12 +114,7 @@ export function useScanEndpoints(scanId: number, params?: Omit<GetEndpointsReque
       // 后端使用通用分页格式：results/total/page/pageSize/totalPages
       return {
         endpoints: response.results || [],
-        pagination: {
-          total: response.total || 0,
-          page: response.page || 1,
-          pageSize: response.pageSize || response.page_size || defaultParams.pageSize || 10,
-          totalPages: response.totalPages || response.total_pages || 0,
-        },
+        pagination: normalizePagination(response, defaultParams.page, defaultParams.pageSize),
       }
     },
     placeholderData: keepPreviousData,
@@ -119,119 +123,101 @@ export function useScanEndpoints(scanId: number, params?: Omit<GetEndpointsReque
 
 // 创建 Endpoint（完全自动化）
 export function useCreateEndpoint() {
-  const queryClient = useQueryClient()
-  const toastMessages = useToastMessages()
-
-  return useMutation({
+  return useResourceMutation({
     mutationFn: (data: {
       endpoints: Array<CreateEndpointRequest>
     }) => EndpointService.createEndpoints(data),
-    onMutate: async () => {
-      toastMessages.loading('common.status.creating', {}, 'create-endpoint')
+    loadingToast: {
+      key: 'common.status.creating',
+      params: {},
+      id: 'create-endpoint',
     },
-    onSuccess: (response) => {
-      toastMessages.dismiss('create-endpoint')
-      
-      const { createdCount, existedCount } = response
-      
+    invalidate: endpointAllInvalidates(),
+    onSuccess: ({ data, toast }) => {
+      const { createdCount, existedCount } = data
+
       if (existedCount > 0) {
-        toastMessages.warning('toast.asset.endpoint.create.partialSuccess', { 
-          success: createdCount, 
-          skipped: existedCount 
+        toast.warning('toast.asset.endpoint.create.partialSuccess', {
+          success: createdCount,
+          skipped: existedCount
         })
       } else {
-        toastMessages.success('toast.asset.endpoint.create.success', { count: createdCount })
+        toast.success('toast.asset.endpoint.create.success', { count: createdCount })
       }
-      
-      queryClient.invalidateQueries({ queryKey: ['endpoints'] })
     },
-    onError: (error: unknown) => {
-      toastMessages.dismiss('create-endpoint')
-      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.asset.endpoint.create.error')
-    },
+    errorFallbackKey: 'toast.asset.endpoint.create.error',
   })
 }
 
 // 删除单个 Endpoint
 export function useDeleteEndpoint() {
-  const queryClient = useQueryClient()
-  const toastMessages = useToastMessages()
-
-  return useMutation({
+  return useResourceMutation({
     mutationFn: (id: number) => EndpointService.deleteEndpoint(id),
-    onMutate: (id) => {
-      toastMessages.loading('common.status.deleting', {}, `delete-endpoint-${id}`)
+    loadingToast: {
+      key: 'common.status.deleting',
+      params: {},
+      id: (id) => `delete-endpoint-${id}`,
     },
-    onSuccess: (response, id) => {
-      toastMessages.dismiss(`delete-endpoint-${id}`)
-      toastMessages.success('toast.asset.endpoint.delete.success')
-      queryClient.invalidateQueries({ queryKey: ['endpoints'] })
+    invalidate: endpointAllInvalidates(),
+    onSuccess: ({ toast }) => {
+      toast.success('toast.asset.endpoint.delete.success')
     },
-    onError: (error: unknown, id) => {
-      toastMessages.dismiss(`delete-endpoint-${id}`)
-      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.asset.endpoint.delete.error')
-    },
+    errorFallbackKey: 'toast.asset.endpoint.delete.error',
   })
 }
 
 // 批量删除 Endpoint
 export function useBatchDeleteEndpoints() {
-  const queryClient = useQueryClient()
-  const toastMessages = useToastMessages()
-
-  return useMutation({
+  return useResourceMutation({
     mutationFn: (data: BatchDeleteEndpointsRequest) => EndpointService.batchDeleteEndpoints(data),
-    onMutate: () => {
-      toastMessages.loading('common.status.batchDeleting', {}, 'batch-delete-endpoints')
+    loadingToast: {
+      key: 'common.status.batchDeleting',
+      params: {},
+      id: 'batch-delete-endpoints',
     },
-    onSuccess: (response) => {
-      toastMessages.dismiss('batch-delete-endpoints')
-      const { deletedCount } = response
-      toastMessages.success('toast.asset.endpoint.delete.bulkSuccess', { count: deletedCount })
-      queryClient.invalidateQueries({ queryKey: ['endpoints'] })
+    invalidate: endpointAllInvalidates(),
+    onSuccess: ({ data, toast }) => {
+      toast.success('toast.asset.endpoint.delete.bulkSuccess', {
+        count: getAssetDeletedCount(data),
+      })
     },
-    onError: (error: unknown) => {
-      toastMessages.dismiss('batch-delete-endpoints')
-      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.asset.endpoint.delete.error')
-    },
+    errorFallbackKey: 'toast.asset.endpoint.delete.error',
   })
 }
 
 // 批量创建端点（绑定到目标）
 export function useBulkCreateEndpoints() {
-  const queryClient = useQueryClient()
-  const toastMessages = useToastMessages()
-
-  return useMutation({
+  return useResourceMutation({
     mutationFn: (data: { targetId: number; urls: string[] }) =>
       EndpointService.bulkCreateEndpoints(data.targetId, data.urls),
-    onMutate: async () => {
-      toastMessages.loading('common.status.batchCreating', {}, 'bulk-create-endpoints')
+    loadingToast: {
+      key: 'common.status.batchCreating',
+      params: {},
+      id: 'bulk-create-endpoints',
     },
-    onSuccess: (response, { targetId }) => {
-      toastMessages.dismiss('bulk-create-endpoints')
-      const { createdCount } = response
-      
-      if (createdCount > 0) {
-        toastMessages.success('toast.asset.endpoint.create.success', { count: createdCount })
+    invalidate: [
+      ({ variables }) => ({
+        queryKey: endpointKeys.byTarget(variables.targetId, {}),
+        exact: false,
+        refetchType: 'active',
+      }),
+      {
+        queryKey: endpointKeys.all,
+        exact: false,
+        refetchType: 'active',
+      },
+    ],
+    onSuccess: ({ data, toast }) => {
+      const toastPayload = resolveAssetBulkCreateToast(data.createdCount, {
+        success: 'toast.asset.endpoint.create.success',
+        partial: 'toast.asset.endpoint.create.partialSuccess',
+      })
+      if (toastPayload.variant === 'success') {
+        toast.success(toastPayload.key, toastPayload.params)
       } else {
-        toastMessages.warning('toast.asset.endpoint.create.partialSuccess', { success: 0, skipped: 0 })
+        toast.warning(toastPayload.key, toastPayload.params)
       }
-      
-      queryClient.invalidateQueries({
-        queryKey: endpointKeys.byTarget(targetId, {}),
-        exact: false,
-        refetchType: 'active',
-      })
-      queryClient.invalidateQueries({
-        queryKey: ['endpoints'],
-        exact: false,
-        refetchType: 'active',
-      })
     },
-    onError: (error: unknown) => {
-      toastMessages.dismiss('bulk-create-endpoints')
-      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.asset.endpoint.create.error')
-    },
+    errorFallbackKey: 'toast.asset.endpoint.create.error',
   })
 }

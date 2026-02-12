@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/dialog"
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden"
 import { useTargetScreenshots, useScanScreenshots } from "@/hooks/use-screenshots"
+import { buildPaginationInfo } from "@/hooks/_shared/pagination"
 import { ScreenshotService } from "@/services/screenshot.service"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
@@ -71,7 +72,16 @@ export function ScreenshotsGallery({ targetId, scanId }: ScreenshotsGalleryProps
   const { data, isLoading, error, refetch } = activeQuery
 
   const screenshots: Screenshot[] = useMemo(() => data?.results || [], [data])
-  const totalPages = data?.totalPages || 0
+  const total = data?.total ?? screenshots.length ?? 0
+  const paginationInfo = buildPaginationInfo({
+    total,
+    page: pagination.pageIndex + 1,
+    pageSize: pagination.pageSize,
+    totalPages: data?.totalPages || undefined,
+    minTotalPages: total > 0 ? 1 : 0,
+  })
+  const maxPageIndex = Math.max(0, paginationInfo.totalPages - 1)
+  const displayTotalPages = Math.max(1, paginationInfo.totalPages)
 
   // Selection handlers
   const toggleSelect = useCallback((id: number) => {
@@ -314,7 +324,7 @@ export function ScreenshotsGallery({ targetId, scanId }: ScreenshotsGalleryProps
       )}
 
       {/* Pagination */}
-      {(totalPages > 1 || (data?.total ?? 0) > 12) && (
+      {(paginationInfo.totalPages > 1 || paginationInfo.total > pagination.pageSize) && (
         <div className="flex justify-center items-center gap-4">
           <div className="flex items-center gap-2">
             <Button
@@ -326,13 +336,13 @@ export function ScreenshotsGallery({ targetId, scanId }: ScreenshotsGalleryProps
               <ChevronLeft className="h-4 w-4" />
             </Button>
             <span className="text-sm text-muted-foreground">
-              {pagination.pageIndex + 1} / {totalPages || 1}
+              {pagination.pageIndex + 1} / {displayTotalPages}
             </span>
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setPagination(prev => ({ ...prev, pageIndex: Math.min(totalPages - 1, prev.pageIndex + 1) }))}
-              disabled={pagination.pageIndex >= totalPages - 1}
+              onClick={() => setPagination(prev => ({ ...prev, pageIndex: Math.min(maxPageIndex, prev.pageIndex + 1) }))}
+              disabled={pagination.pageIndex >= maxPageIndex}
             >
               <ChevronRight className="h-4 w-4" />
             </Button>

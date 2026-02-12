@@ -1,13 +1,17 @@
 /**
  * Authentication-related hooks
  */
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { useLocale } from 'next-intl'
 import { useRouter } from 'next/navigation'
+import { useResourceMutation } from '@/hooks/_shared/create-resource-mutation'
 import { login, logout, getMe, changePassword } from '@/services/auth.service'
-import { useToastMessages } from '@/lib/toast-helpers'
-import { getErrorCode, getErrorResponseData } from '@/lib/response-parser'
 import type { LoginRequest, ChangePasswordRequest } from '@/types/auth.types'
+
+export const authKeys = {
+  all: ['auth'] as const,
+  me: ['auth', 'me'] as const,
+}
 
 /**
  * Get current user information
@@ -16,7 +20,7 @@ export function useAuth() {
   const skipAuth = process.env.NEXT_PUBLIC_SKIP_AUTH === 'true'
   
   return useQuery({
-    queryKey: ['auth', 'me'],
+    queryKey: authKeys.me,
     queryFn: skipAuth 
       ? () => Promise.resolve({ authenticated: true } as Awaited<ReturnType<typeof getMe>>)
       : getMe,
@@ -29,22 +33,13 @@ export function useAuth() {
  * User login
  */
 export function useLogin() {
-  const toastMessages = useToastMessages()
-
-  return useMutation({
+  return useResourceMutation({
     mutationFn: (data: LoginRequest) => login(data),
-    onSuccess: () => {
+    onSuccess: ({ toast }) => {
       // Navigation and data prefetch are handled by the login page.
-      toastMessages.success('toast.auth.login.success')
+      toast.success('toast.auth.login.success')
     },
-    onError: (error: unknown) => {
-      const errorCode = getErrorCode(getErrorResponseData(error))
-      if (errorCode) {
-        toastMessages.errorFromCode(errorCode)
-      } else {
-        toastMessages.error('auth.loginFailed')
-      }
-    },
+    errorFallbackKey: 'auth.loginFailed',
   })
 }
 
@@ -52,26 +47,17 @@ export function useLogin() {
  * User logout
  */
 export function useLogout() {
-  const queryClient = useQueryClient()
   const router = useRouter()
-  const toastMessages = useToastMessages()
   const locale = useLocale()
 
-  return useMutation({
+  return useResourceMutation<Awaited<ReturnType<typeof logout>>, void>({
     mutationFn: logout,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['auth', 'me'] })
-      toastMessages.success('toast.auth.logout.success')
+    invalidate: [{ queryKey: authKeys.me }],
+    onSuccess: ({ toast }) => {
+      toast.success('toast.auth.logout.success')
       router.push(`/${locale}/login/`)
     },
-    onError: (error: unknown) => {
-      const errorCode = getErrorCode(getErrorResponseData(error))
-      if (errorCode) {
-        toastMessages.errorFromCode(errorCode)
-      } else {
-        toastMessages.error('errors.unknown')
-      }
-    },
+    errorFallbackKey: 'errors.unknown',
   })
 }
 
@@ -79,20 +65,11 @@ export function useLogout() {
  * Change password
  */
 export function useChangePassword() {
-  const toastMessages = useToastMessages()
-
-  return useMutation({
+  return useResourceMutation({
     mutationFn: (data: ChangePasswordRequest) => changePassword(data),
-    onSuccess: () => {
-      toastMessages.success('toast.auth.changePassword.success')
+    onSuccess: ({ toast }) => {
+      toast.success('toast.auth.changePassword.success')
     },
-    onError: (error: unknown) => {
-      const errorCode = getErrorCode(getErrorResponseData(error))
-      if (errorCode) {
-        toastMessages.errorFromCode(errorCode)
-      } else {
-        toastMessages.error('toast.auth.changePassword.error')
-      }
-    },
+    errorFallbackKey: 'toast.auth.changePassword.error',
   })
 }

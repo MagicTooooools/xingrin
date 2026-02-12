@@ -1,8 +1,8 @@
 "use client"
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { useToastMessages } from '@/lib/toast-helpers'
-import { getErrorCode, getErrorResponseData } from '@/lib/response-parser'
+import { useQuery } from "@tanstack/react-query"
+import { useResourceMutation } from "@/hooks/_shared/create-resource-mutation"
+import { createResourceKeys } from "@/hooks/_shared/query-keys"
 import {
   getWordlists,
   uploadWordlist,
@@ -12,65 +12,65 @@ import {
 } from "@/services/wordlist.service"
 import type { GetWordlistsResponse, Wordlist } from "@/types/wordlist.types"
 
+// Query Keys
+const wordlistKeyBase = createResourceKeys("wordlists", {
+  list: (params: { page: number; pageSize: number }) => params,
+})
+
+export const wordlistKeys = {
+  ...wordlistKeyBase,
+  content: (id: number | null) => [...wordlistKeyBase.all, 'content', id] as const,
+}
+
 // Get wordlist list
 export function useWordlists(params?: { page?: number; pageSize?: number }) {
   const page = params?.page ?? 1
   const pageSize = params?.pageSize ?? 10
 
   return useQuery<GetWordlistsResponse>({
-    queryKey: ["wordlists", { page, pageSize }],
+    queryKey: wordlistKeys.list({ page, pageSize }),
     queryFn: () => getWordlists(page, pageSize),
   })
 }
 
 // Upload wordlist
 export function useUploadWordlist() {
-  const queryClient = useQueryClient()
-  const toastMessages = useToastMessages()
-
-  return useMutation<unknown, Error, { name: string; description?: string; file: File }>({
+  return useResourceMutation<Wordlist, { name: string; description?: string; file: File }>({
     mutationFn: (payload) => uploadWordlist(payload),
-    onMutate: () => {
-      toastMessages.loading('common.status.uploading', {}, 'upload-wordlist')
+    loadingToast: {
+      key: 'common.status.uploading',
+      params: {},
+      id: 'upload-wordlist',
     },
-    onSuccess: () => {
-      toastMessages.dismiss('upload-wordlist')
-      toastMessages.success('toast.wordlist.upload.success')
-      queryClient.invalidateQueries({ queryKey: ["wordlists"] })
+    invalidate: [{ queryKey: wordlistKeys.all }],
+    onSuccess: ({ toast }) => {
+      toast.success('toast.wordlist.upload.success')
     },
-    onError: (error: unknown) => {
-      toastMessages.dismiss('upload-wordlist')
-      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.wordlist.upload.error')
-    },
+    errorFallbackKey: 'toast.wordlist.upload.error',
   })
 }
 
 // Delete wordlist
 export function useDeleteWordlist() {
-  const queryClient = useQueryClient()
-  const toastMessages = useToastMessages()
-
-  return useMutation<void, Error, number>({
+  return useResourceMutation<void, number>({
     mutationFn: (id: number) => deleteWordlist(id),
-    onMutate: (id) => {
-      toastMessages.loading('common.status.deleting', {}, `delete-wordlist-${id}`)
+    loadingToast: {
+      key: 'common.status.deleting',
+      params: {},
+      id: (id) => `delete-wordlist-${id}`,
     },
-    onSuccess: (_data, id) => {
-      toastMessages.dismiss(`delete-wordlist-${id}`)
-      toastMessages.success('toast.wordlist.delete.success')
-      queryClient.invalidateQueries({ queryKey: ["wordlists"] })
+    invalidate: [{ queryKey: wordlistKeys.all }],
+    onSuccess: ({ toast }) => {
+      toast.success('toast.wordlist.delete.success')
     },
-    onError: (error: unknown, id) => {
-      toastMessages.dismiss(`delete-wordlist-${id}`)
-      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.wordlist.delete.error')
-    },
+    errorFallbackKey: 'toast.wordlist.delete.error',
   })
 }
 
 // Get wordlist content
 export function useWordlistContent(id: number | null) {
   return useQuery<string>({
-    queryKey: ["wordlist-content", id],
+    queryKey: wordlistKeys.content(id),
     queryFn: () => getWordlistContent(id!),
     enabled: id !== null,
   })
@@ -78,23 +78,20 @@ export function useWordlistContent(id: number | null) {
 
 // Update wordlist content
 export function useUpdateWordlistContent() {
-  const queryClient = useQueryClient()
-  const toastMessages = useToastMessages()
-
-  return useMutation<Wordlist, Error, { id: number; content: string }>({
+  return useResourceMutation<Wordlist, { id: number; content: string }>({
     mutationFn: ({ id, content }) => updateWordlistContent(id, content),
-    onMutate: () => {
-      toastMessages.loading('common.actions.saving', {}, 'update-wordlist-content')
+    loadingToast: {
+      key: 'common.actions.saving',
+      params: {},
+      id: 'update-wordlist-content',
     },
-    onSuccess: (data) => {
-      toastMessages.dismiss('update-wordlist-content')
-      toastMessages.success('toast.wordlist.update.success')
-      queryClient.invalidateQueries({ queryKey: ["wordlists"] })
-      queryClient.invalidateQueries({ queryKey: ["wordlist-content", data.id] })
+    invalidate: [
+      { queryKey: wordlistKeys.all },
+      ({ data }) => ({ queryKey: wordlistKeys.content(data.id) }),
+    ],
+    onSuccess: ({ toast }) => {
+      toast.success('toast.wordlist.update.success')
     },
-    onError: (error: unknown) => {
-      toastMessages.dismiss('update-wordlist-content')
-      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.wordlist.update.error')
-    },
+    errorFallbackKey: 'toast.wordlist.update.error',
   })
 }

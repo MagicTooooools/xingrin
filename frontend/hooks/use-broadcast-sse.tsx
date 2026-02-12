@@ -55,6 +55,8 @@ const BROADCAST_TOAST_ID = "lunafox-broadcast"
 export function useBroadcastSSE() {
   const eventSourceRef = useRef<EventSource | null>(null)
   const reconnectTimerRef = useRef<number | null>(null)
+  const reconnectAttemptsRef = useRef(0)
+  const MAX_RECONNECT_DELAY = 60000 // 最大 60 秒
 
   const showBroadcastToast = useCallback((data: BroadcastMessage) => {
     // 检查是否被抑制
@@ -117,7 +119,8 @@ export function useBroadcastSSE() {
       eventSourceRef.current = es
 
       es.onopen = () => {
-        // 连接成功
+        // 连接成功，重置重试计数器
+        reconnectAttemptsRef.current = 0
       }
 
       es.onmessage = (event) => {
@@ -138,10 +141,16 @@ export function useBroadcastSSE() {
         es.close()
         eventSourceRef.current = null
 
-        // 5秒后重连，无上限
+        // 指数退避: 5s, 10s, 20s, 40s, 60s (max)
+        const delay = Math.min(
+          5000 * Math.pow(2, reconnectAttemptsRef.current),
+          MAX_RECONNECT_DELAY
+        )
+        reconnectAttemptsRef.current++
+
         reconnectTimerRef.current = window.setTimeout(() => {
           connect()
-        }, 5000)
+        }, delay)
       }
     } catch {
       // 连接失败，忽略

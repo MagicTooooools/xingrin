@@ -10,6 +10,9 @@ import { Button } from "@/components/ui/button"
 import { useTargetIPAddresses, useScanIPAddresses } from "@/hooks/use-ip-addresses"
 import { ConfirmDialog } from "@/components/ui/confirm-dialog"
 import { getDateLocale } from "@/lib/date-utils"
+import { escapeCSV, formatDateForCSV } from "@/lib/csv-utils"
+import { downloadBlob } from "@/lib/download-utils"
+import { buildPaginationInfo, normalizePagination } from "@/hooks/_shared/pagination"
 import type { IPAddress } from "@/types/ip-address.types"
 import { IPAddressService } from "@/services/ip-address.service"
 import { toast } from "sonner"
@@ -110,12 +113,10 @@ export function IPAddressesView({
   }, [data])
 
   const paginationInfo = data
-    ? {
-      total: data.total,
-      page: data.page,
-      pageSize: data.pageSize,
-      totalPages: data.totalPages,
-    }
+    ? buildPaginationInfo({
+      ...normalizePagination(data, pagination.pageIndex + 1, pagination.pageSize),
+      minTotalPages: 1,
+    })
     : undefined
   const handleSelectionChange = useCallback((selectedRows: IPAddress[]) => {
     setSelectedIPAddresses(selectedRows)
@@ -141,45 +142,18 @@ export function IPAddressesView({
 
       if (!blob) return
 
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement("a")
       const prefix = scanId ? `scan-${scanId}` : targetId ? `target-${targetId}` : "ip-addresses"
-      a.href = url
-      a.download = `${prefix}-ip-addresses-${Date.now()}.csv`
-      document.body.appendChild(a)
-      a.click()
-      a.remove()
-      URL.revokeObjectURL(url)
+      downloadBlob(blob, `${prefix}-ip-addresses-${Date.now()}.csv`)
     } catch {
       toast.error(tToast("downloadFailed"))
     }
-  }
-
-  // Format date as YYYY-MM-DD HH:MM:SS (consistent with backend)
-  const formatDateForCSV = (dateString: string): string => {
-    if (!dateString) return ''
-    const date = new Date(dateString)
-    const year = date.getFullYear()
-    const month = String(date.getMonth() + 1).padStart(2, '0')
-    const day = String(date.getDate()).padStart(2, '0')
-    const hours = String(date.getHours()).padStart(2, '0')
-    const minutes = String(date.getMinutes()).padStart(2, '0')
-    const seconds = String(date.getSeconds()).padStart(2, '0')
-    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
   }
 
   // Generate CSV content (original format: one row per host+port combination)
   const generateCSV = (items: IPAddress[]): string => {
     const BOM = '\ufeff'
     const headers = ['ip', 'host', 'port', 'created_at']
-    
-    const escapeCSV = (value: string): string => {
-      if (value.includes(',') || value.includes('"') || value.includes('\n')) {
-        return `"${value.replace(/"/g, '""')}"`
-      }
-      return value
-    }
-    
+
     // Expand aggregated data to original format: one row per (ip, host, port) combination
     const rows: string[] = []
     for (const item of items) {
@@ -222,15 +196,8 @@ export function IPAddressesView({
 
       if (!blob) return
 
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement("a")
       const prefix = scanId ? `scan-${scanId}` : targetId ? `target-${targetId}` : "ip-addresses"
-      a.href = url
-      a.download = `${prefix}-ip-addresses-selected-${Date.now()}.csv`
-      document.body.appendChild(a)
-      a.click()
-      a.remove()
-      URL.revokeObjectURL(url)
+      downloadBlob(blob, `${prefix}-ip-addresses-selected-${Date.now()}.csv`)
     } catch {
       toast.error(tToast("downloadFailed"))
     }

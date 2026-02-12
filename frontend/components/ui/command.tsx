@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { type DialogProps } from "@radix-ui/react-dialog"
-import { MagnifyingGlassIcon } from "@/components/icons"
+import { IconSearch } from "@/components/icons"
 import { Command as CommandPrimitive } from "cmdk"
 import { useTranslations } from "next-intl"
 
@@ -48,7 +48,7 @@ const CommandInput = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof CommandPrimitive.Input>
 >(({ className, ...props }, ref) => (
   <div className="flex items-center border-b px-3" cmdk-input-wrapper="">
-    <MagnifyingGlassIcon className="shrink-0 opacity-50" />
+    <IconSearch className="shrink-0 opacity-50" />
     <CommandPrimitive.Input
       ref={ref}
       className={cn(

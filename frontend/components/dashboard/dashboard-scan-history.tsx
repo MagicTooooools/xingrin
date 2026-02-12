@@ -6,6 +6,7 @@ import { useTranslations, useLocale } from "next-intl"
 import { ScanHistoryDataTable } from "@/components/scan/history/scan-history-data-table"
 import { createScanHistoryColumns } from "@/components/scan/history/scan-history-columns"
 import { useScans } from "@/hooks/use-scans"
+import { buildPaginationInfo, normalizePagination } from "@/hooks/_shared/pagination"
 import { DataTableSkeleton } from "@/components/ui/data-table-skeleton"
 import { getDateLocale } from "@/lib/date-utils"
 import type { ScanRecord } from "@/types/scan.types"
@@ -91,7 +92,10 @@ export function DashboardScanHistory() {
   }
 
   const paginationInfo = data
-    ? { total: data.total, page: data.page, pageSize: data.pageSize, totalPages: data.totalPages }
+    ? buildPaginationInfo({
+      ...normalizePagination(data, pagination.pageIndex + 1, pagination.pageSize),
+      minTotalPages: 1,
+    })
     : undefined
 
   return (

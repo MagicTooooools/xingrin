@@ -83,20 +83,20 @@ interface CreateColumnsProps {
 /**
  * Target name cell component
  */
-function TargetNameCell({ 
-  name, 
-  targetId, 
+const TargetNameCell = React.memo(function TargetNameCell({
+  name,
+  targetId,
   navigate,
   t,
-}: { 
+}: {
   name: string
   targetId: number
   navigate: (path: string) => void
   t: AllTargetsTranslations
 }) {
   const [copied, setCopied] = React.useState(false)
-  
-  const handleCopy = async (e: React.MouseEvent) => {
+
+  const handleCopy = React.useCallback(async (e: React.MouseEvent) => {
     e.stopPropagation()
     const success = await copyToClipboard(name)
     if (success) {
@@ -104,14 +104,18 @@ function TargetNameCell({
       toast.success(t.tooltips.copied)
       setTimeout(() => setCopied(false), 2000)
     }
-  }
-  
+  }, [name, t.tooltips.copied])
+
+  const handleNavigate = React.useCallback(() => {
+    navigate(`/target/${targetId}/details`)
+  }, [navigate, targetId])
+
   return (
     <div className="group flex items-start gap-1 flex-1 min-w-0">
       <Tooltip>
         <TooltipTrigger asChild>
           <span
-            onClick={() => navigate(`/target/${targetId}/details`)}
+            onClick={handleNavigate}
             className="text-sm font-medium hover:text-primary hover:underline underline-offset-2 transition-colors cursor-pointer text-left break-all leading-relaxed whitespace-normal"
           >
             {name}
@@ -144,12 +148,12 @@ function TargetNameCell({
       </TooltipProvider>
     </div>
   )
-}
+})
 
 /**
  * Target row actions component
  */
-function TargetRowActions({
+const TargetRowActions = React.memo(function TargetRowActions({
   onView,
   onInitiateScan,
   onScheduleScan,
@@ -226,7 +230,7 @@ function TargetRowActions({
       </DropdownMenu>
     </div>
   )
-}
+})
 
 /**
  * Create all targets table column definitions

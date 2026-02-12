@@ -1,12 +1,11 @@
 "use client"
 
 import * as React from "react"
-import { IconSearch, IconLoader2 } from "@/components/icons"
 import { Filter } from "@/components/icons"
 import { useTranslations } from "next-intl"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { UnifiedDataTable } from "@/components/ui/data-table/unified-data-table"
+import { SimpleSearchToolbar } from "@/components/ui/data-table/simple-search-toolbar"
+import { useSimpleSearchState } from "@/components/ui/data-table/use-simple-search"
 import {
   Select,
   SelectContent,
@@ -17,6 +16,7 @@ import {
 import type { ColumnDef } from "@tanstack/react-table"
 import type { Target } from "@/types/target.types"
 import type { PaginationInfo } from "@/types/common.types"
+import { buildPaginationInfo } from "@/hooks/_shared/pagination"
 
 interface TargetsDataTableProps {
   data: Target[]
@@ -82,24 +82,11 @@ export function TargetsDataTable({
     pageSize: 10,
   })
 
-  // Local search input state
-  const [localSearchValue, setLocalSearchValue] = React.useState(searchValue ?? "")
-  
-  React.useEffect(() => {
-    setLocalSearchValue(searchValue ?? "")
-  }, [searchValue])
-
-  const handleSearchSubmit = () => {
-    if (onSearch) {
-      onSearch(localSearchValue)
-    }
-  }
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      handleSearchSubmit()
-    }
-  }
+  const {
+    value: localSearchValue,
+    setValue: setLocalSearchValue,
+    submit: handleSearchSubmit,
+  } = useSimpleSearchState({ searchValue, onSearch })
 
   const pagination = externalPagination || internalPagination
 
@@ -113,73 +100,66 @@ export function TargetsDataTable({
   }
 
   // Build paginationInfo
-  const paginationInfo: PaginationInfo | undefined = manualPagination && totalCount ? {
-    total: totalCount,
-    totalPages: Math.ceil(totalCount / pagination.pageSize),
-    page: pagination.pageIndex + 1,
-    pageSize: pagination.pageSize,
-  } : undefined
+  const paginationInfo: PaginationInfo | undefined =
+    manualPagination && totalCount !== undefined
+      ? buildPaginationInfo({
+        total: totalCount ?? 0,
+        page: pagination.pageIndex + 1,
+        pageSize: pagination.pageSize,
+        minTotalPages: 1,
+      })
+      : undefined
 
   return (
     <UnifiedDataTable
       data={data}
       columns={columns}
       getRowId={(row) => String(row.id)}
-      // Pagination
-      pagination={pagination}
-      setPagination={onPaginationChange ? undefined : setInternalPagination}
-      paginationInfo={paginationInfo}
-      onPaginationChange={handlePaginationChange}
-      // Selection
-      onSelectionChange={onSelectionChange}
-      // Bulk operations
-      onBulkDelete={onBulkDelete}
-      bulkDeleteLabel={tActions("delete")}
-      // Add button
-      onAddNew={onAddNew}
-      onAddHover={onAddHover}
-      addButtonLabel={addButtonText || tTarget("addTarget")}
-      showAddButton={!!onAddNew}
-      // Empty state
-      emptyMessage={t("noData")}
-      // Custom toolbar
-      toolbarLeft={
-        <div className="flex items-center space-x-2">
-          <Input
-            placeholder={searchPlaceholder || tTarget("title")}
+      state={{
+        pagination,
+        setPagination: onPaginationChange ? undefined : setInternalPagination,
+        paginationInfo,
+        onPaginationChange: handlePaginationChange,
+        onSelectionChange,
+      }}
+      actions={{
+        onBulkDelete,
+        bulkDeleteLabel: tActions("delete"),
+        onAddNew,
+        onAddHover,
+        addButtonLabel: addButtonText || tTarget("addTarget"),
+        showAddButton: !!onAddNew,
+      }}
+      ui={{
+        emptyMessage: t("noData"),
+        toolbarLeft: (
+          <SimpleSearchToolbar
             value={localSearchValue}
-            onChange={(e) => setLocalSearchValue(e.target.value)}
-            onKeyDown={handleKeyDown}
-            className="h-8 max-w-sm"
+            onChange={setLocalSearchValue}
+            onSubmit={handleSearchSubmit}
+            loading={isSearching}
+            placeholder={searchPlaceholder || tTarget("title")}
+            after={onTypeFilterChange ? (
+              <Select value={typeFilter || "all"} onValueChange={(value) => onTypeFilterChange(value === "all" ? "" : value)}>
+                <SelectTrigger size="sm" className="w-auto">
+                  <Filter className="h-4 w-4" />
+                  <SelectValue placeholder={tActions("filter")} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">{tActions("all")}</SelectItem>
+                  <SelectItem value="domain">{tTarget("types.domain")}</SelectItem>
+                  <SelectItem value="ip">{tTarget("types.ip")}</SelectItem>
+                  <SelectItem value="cidr">{tTarget("types.cidr")}</SelectItem>
+                </SelectContent>
+              </Select>
+            ) : null}
           />
-          <Button variant="outline" size="sm" onClick={handleSearchSubmit} disabled={isSearching}>
-            {isSearching ? (
-              <IconLoader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <IconSearch className="h-4 w-4" />
-            )}
-          </Button>
-          {onTypeFilterChange && (
-            <Select value={typeFilter || "all"} onValueChange={(value) => onTypeFilterChange(value === "all" ? "" : value)}>
-              <SelectTrigger size="sm" className="w-auto">
-                <Filter className="h-4 w-4" />
-                <SelectValue placeholder={tActions("filter")} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">{tActions("all")}</SelectItem>
-                <SelectItem value="domain">{tTarget("types.domain")}</SelectItem>
-                <SelectItem value="ip">{tTarget("types.ip")}</SelectItem>
-                <SelectItem value="cidr">{tTarget("types.cidr")}</SelectItem>
-              </SelectContent>
-            </Select>
-          )}
-        </div>
-      }
-      // Styling
-      className={className}
-      tableClassName={tableClassName}
-      hideToolbar={hideToolbar}
-      hidePagination={hidePagination}
+        ),
+        className,
+        tableClassName,
+        hideToolbar,
+        hidePagination,
+      }}
     />
   )
 }

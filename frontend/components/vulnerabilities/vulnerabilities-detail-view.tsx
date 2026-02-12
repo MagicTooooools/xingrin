@@ -7,6 +7,7 @@ import { createVulnerabilityColumns } from "./vulnerabilities-columns"
 import { VulnerabilityDetailDialog } from "./vulnerability-detail-dialog"
 import { DataTableSkeleton } from "@/components/ui/data-table-skeleton"
 import { getDateLocale } from "@/lib/date-utils"
+import { buildPaginationInfo, normalizePagination } from "@/hooks/_shared/pagination"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -160,12 +161,16 @@ export function VulnerabilitiesDetailView({
   const isQueryLoading = activeQuery.isLoading
 
   const vulnerabilities = activeQuery.data?.vulnerabilities ?? []
-  const paginationInfo = activeQuery.data?.pagination ?? {
-    total: vulnerabilities.length,
-    page: pagination.pageIndex + 1,
-    pageSize: pagination.pageSize,
-    totalPages: 1,
-  }
+  const paginationInfo = buildPaginationInfo({
+    ...(activeQuery.data?.pagination
+      ? normalizePagination(activeQuery.data.pagination, pagination.pageIndex + 1, pagination.pageSize)
+      : {
+          total: vulnerabilities.length,
+          page: pagination.pageIndex + 1,
+          pageSize: pagination.pageSize,
+        }),
+    minTotalPages: 1,
+  })
 
   // Get pending count from stats API (only for global and target pages, not scan)
   const globalStatsQuery = useVulnerabilityStats({ enabled: !scanId && !targetId })
@@ -293,12 +298,7 @@ export function VulnerabilitiesDetailView({
         onFilterChange={handleFilterChange}
         pagination={pagination}
         setPagination={setPagination}
-        paginationInfo={{
-          total: paginationInfo.total,
-          page: paginationInfo.page,
-          pageSize: paginationInfo.pageSize,
-          totalPages: paginationInfo.totalPages,
-        }}
+        paginationInfo={paginationInfo}
         onPaginationChange={handlePaginationChange}
         onSelectionChange={setSelectedVulnerabilities}
         hideToolbar={hideToolbar}

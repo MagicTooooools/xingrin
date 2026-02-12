@@ -1,9 +1,20 @@
 import { useQuery } from '@tanstack/react-query'
 import { getDashboardStats, getAssetStatistics, getStatisticsHistory } from '@/services/dashboard.service'
 
+// Query Keys
+export const dashboardKeys = {
+  all: ['dashboard'] as const,
+  stats: () => [...dashboardKeys.all, 'stats'] as const,
+  asset: {
+    all: () => ['asset'] as const,
+    statistics: () => [...dashboardKeys.asset.all(), 'statistics'] as const,
+    history: (days: number) => [...dashboardKeys.asset.statistics(), 'history', days] as const,
+  },
+}
+
 export function useDashboardStats() {
   return useQuery({
-    queryKey: ['dashboard', 'stats'],
+    queryKey: dashboardKeys.stats(),
     queryFn: () => getDashboardStats(),
   })
 }
@@ -13,7 +24,7 @@ export function useDashboardStats() {
  */
 export function useAssetStatistics() {
   return useQuery({
-    queryKey: ['asset', 'statistics'],
+    queryKey: dashboardKeys.asset.statistics(),
     queryFn: getAssetStatistics,
   })
 }
@@ -23,7 +34,7 @@ export function useAssetStatistics() {
  */
 export function useStatisticsHistory(days: number = 7) {
   return useQuery({
-    queryKey: ['asset', 'statistics', 'history', days],
+    queryKey: dashboardKeys.asset.history(days),
     queryFn: () => getStatisticsHistory(days),
   })
 }

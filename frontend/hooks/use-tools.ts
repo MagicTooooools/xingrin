@@ -1,16 +1,41 @@
 "use client"
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { useToastMessages } from '@/lib/toast-helpers'
-import { getErrorCode, getErrorResponseData } from '@/lib/response-parser'
+import { useQuery } from "@tanstack/react-query"
+import {
+  useResourceMutation,
+  type UseResourceMutationOptions,
+} from '@/hooks/_shared/create-resource-mutation'
+import { createResourceKeys } from "@/hooks/_shared/query-keys"
 import { ToolService } from "@/services/tool.service"
 import type { GetToolsParams, CreateToolRequest, UpdateToolRequest } from "@/types/tool.types"
 
 // Query Keys
-export const toolKeys = {
-  all: ['tools'] as const,
-  lists: () => [...toolKeys.all, 'list'] as const,
-  list: (params: GetToolsParams) => [...toolKeys.lists(), params] as const,
+export const toolKeys = createResourceKeys("tools", {
+  list: (params: GetToolsParams) => params,
+})
+
+type ToolMutationConfig<TData, TVariables> = {
+  mutationFn: UseResourceMutationOptions<TData, TVariables>['mutationFn']
+  loadingToast: UseResourceMutationOptions<TData, TVariables>['loadingToast']
+  successKey: string
+  errorFallbackKey: string
+}
+
+function useToolMutation<TData, TVariables>({
+  mutationFn,
+  loadingToast,
+  successKey,
+  errorFallbackKey,
+}: ToolMutationConfig<TData, TVariables>) {
+  return useResourceMutation<TData, TVariables>({
+    mutationFn,
+    loadingToast,
+    invalidate: [{ queryKey: toolKeys.all, refetchType: 'active' }],
+    onSuccess: ({ toast }) => {
+      toast.success(successKey)
+    },
+    errorFallbackKey,
+  })
 }
 
 // 获取工具列表
@@ -35,76 +60,43 @@ export function useTools(params: GetToolsParams = {}) {
 
 // 创建工具
 export function useCreateTool() {
-  const queryClient = useQueryClient()
-  const toastMessages = useToastMessages()
-
-  return useMutation({
+  return useToolMutation({
     mutationFn: (data: CreateToolRequest) => ToolService.createTool(data),
-    onMutate: async () => {
-      toastMessages.loading('common.status.creating', {}, 'create-tool')
+    loadingToast: {
+      key: 'common.status.creating',
+      params: {},
+      id: 'create-tool',
     },
-    onSuccess: () => {
-      toastMessages.dismiss('create-tool')
-      toastMessages.success('toast.tool.create.success')
-      queryClient.invalidateQueries({ 
-        queryKey: toolKeys.all,
-        refetchType: 'active' 
-      })
-    },
-    onError: (error: unknown) => {
-      toastMessages.dismiss('create-tool')
-      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.tool.create.error')
-    },
+    successKey: 'toast.tool.create.success',
+    errorFallbackKey: 'toast.tool.create.error',
   })
 }
 
 // 更新工具
 export function useUpdateTool() {
-  const queryClient = useQueryClient()
-  const toastMessages = useToastMessages()
-
-  return useMutation({
+  return useToolMutation({
     mutationFn: ({ id, data }: { id: number; data: UpdateToolRequest }) => 
       ToolService.updateTool(id, data),
-    onMutate: async () => {
-      toastMessages.loading('common.status.updating', {}, 'update-tool')
+    loadingToast: {
+      key: 'common.status.updating',
+      params: {},
+      id: 'update-tool',
     },
-    onSuccess: () => {
-      toastMessages.dismiss('update-tool')
-      toastMessages.success('toast.tool.update.success')
-      queryClient.invalidateQueries({ 
-        queryKey: toolKeys.all,
-        refetchType: 'active' 
-      })
-    },
-    onError: (error: unknown) => {
-      toastMessages.dismiss('update-tool')
-      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.tool.update.error')
-    },
+    successKey: 'toast.tool.update.success',
+    errorFallbackKey: 'toast.tool.update.error',
   })
 }
 
 // 删除工具
 export function useDeleteTool() {
-  const queryClient = useQueryClient()
-  const toastMessages = useToastMessages()
-
-  return useMutation({
+  return useToolMutation({
     mutationFn: (id: number) => ToolService.deleteTool(id),
-    onMutate: async () => {
-      toastMessages.loading('common.status.deleting', {}, 'delete-tool')
+    loadingToast: {
+      key: 'common.status.deleting',
+      params: {},
+      id: 'delete-tool',
     },
-    onSuccess: () => {
-      toastMessages.dismiss('delete-tool')
-      toastMessages.success('toast.tool.delete.success')
-      queryClient.invalidateQueries({ 
-        queryKey: toolKeys.all,
-        refetchType: 'active' 
-      })
-    },
-    onError: (error: unknown) => {
-      toastMessages.dismiss('delete-tool')
-      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.tool.delete.error')
-    },
+    successKey: 'toast.tool.delete.success',
+    errorFallbackKey: 'toast.tool.delete.error',
   })
 }

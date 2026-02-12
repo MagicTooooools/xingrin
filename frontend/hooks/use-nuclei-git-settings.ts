@@ -1,30 +1,28 @@
 "use client"
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { useToastMessages } from '@/lib/toast-helpers'
-import { getErrorCode, getErrorResponseData } from '@/lib/response-parser'
+import { useQuery } from "@tanstack/react-query"
+import { useResourceMutation } from '@/hooks/_shared/create-resource-mutation'
 import { NucleiGitService } from "@/services/nuclei-git.service"
 import type { UpdateNucleiGitSettingsRequest } from "@/types/nuclei-git.types"
 
+export const nucleiGitKeys = {
+  settings: ["nuclei", "git", "settings"] as const,
+}
+
 export function useNucleiGitSettings() {
   return useQuery({
-    queryKey: ["nuclei", "git", "settings"],
+    queryKey: nucleiGitKeys.settings,
     queryFn: () => NucleiGitService.getSettings(),
   })
 }
 
 export function useUpdateNucleiGitSettings() {
-  const qc = useQueryClient()
-  const toastMessages = useToastMessages()
-
-  return useMutation({
+  return useResourceMutation({
     mutationFn: (data: UpdateNucleiGitSettingsRequest) => NucleiGitService.updateSettings(data),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["nuclei", "git", "settings"] })
-      toastMessages.success('toast.nucleiGit.settings.success')
+    invalidate: [{ queryKey: nucleiGitKeys.settings }],
+    onSuccess: ({ toast }) => {
+      toast.success('toast.nucleiGit.settings.success')
     },
-    onError: (error: unknown) => {
-      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.nucleiGit.settings.error')
-    },
+    errorFallbackKey: 'toast.nucleiGit.settings.error',
   })
 }

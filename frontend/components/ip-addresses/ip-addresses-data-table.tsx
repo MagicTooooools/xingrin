@@ -3,11 +3,11 @@
 import * as React from "react"
 import type { ColumnDef } from "@tanstack/react-table"
 import { useTranslations } from "next-intl"
-import { UnifiedDataTable } from "@/components/ui/data-table/unified-data-table"
+import { SmartFilterDataTable } from "@/components/ui/data-table/smart-filter-data-table"
+import { buildDownloadOptions } from "@/components/ui/data-table/data-table-helpers"
 import { PREDEFINED_FIELDS, type FilterField } from "@/components/common/smart-filter-input"
 import type { IPAddress } from "@/types/ip-address.types"
 import type { PaginationInfo } from "@/types/common.types"
-import type { DownloadOption } from "@/types/data-table.types"
 
 // IP address page filter field configuration
 const IP_ADDRESS_FILTER_FIELDS: FilterField[] = [
@@ -55,55 +55,31 @@ export function IPAddressesDataTable({
   const t = useTranslations("common.status")
   const tDownload = useTranslations("common.download")
   const tActions = useTranslations("common.actions")
-  
-  // Smart search handler
-  const handleSmartSearch = (rawQuery: string) => {
-    onFilterChange?.(rawQuery)
-  }
 
   // Download options
-  const downloadOptions: DownloadOption[] = []
-  if (onDownloadAll) {
-    downloadOptions.push({
-      key: "all",
-      label: tDownload("all"),
-      onClick: onDownloadAll,
-    })
-  }
-  if (onDownloadSelected) {
-    downloadOptions.push({
-      key: "selected",
-      label: tDownload("selected"),
-      onClick: onDownloadSelected,
-      disabled: (count) => count === 0,
-    })
-  }
+  const downloadOptions = buildDownloadOptions(tDownload, {
+    onDownloadAll,
+    onDownloadSelected,
+  })
 
   return (
-    <UnifiedDataTable
+    <SmartFilterDataTable
       data={data}
       columns={columns}
       getRowId={(row) => row.ip}
-      // Pagination
+      filterFields={IP_ADDRESS_FILTER_FIELDS}
+      filterExamples={IP_ADDRESS_FILTER_EXAMPLES}
+      filterValue={filterValue}
+      onFilterChange={onFilterChange}
       pagination={pagination}
       setPagination={setPagination}
       paginationInfo={paginationInfo}
       onPaginationChange={onPaginationChange}
-      // Smart filter
-      searchMode="smart"
-      searchValue={filterValue}
-      onSearch={handleSmartSearch}
-      filterFields={IP_ADDRESS_FILTER_FIELDS}
-      filterExamples={IP_ADDRESS_FILTER_EXAMPLES}
-      // Selection
       onSelectionChange={onSelectionChange}
-      // Bulk operations
       onBulkDelete={onBulkDelete}
       bulkDeleteLabel={tActions("delete")}
       showAddButton={false}
-      // Download
-      downloadOptions={downloadOptions.length > 0 ? downloadOptions : undefined}
-      // Empty state
+      downloadOptions={downloadOptions}
       emptyMessage={t("noData")}
     />
   )

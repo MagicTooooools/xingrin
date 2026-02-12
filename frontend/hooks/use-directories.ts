@@ -1,140 +1,29 @@
-import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query'
-import { useToastMessages } from '@/lib/toast-helpers'
-import { getErrorCode, getErrorResponseData } from '@/lib/response-parser'
+import { useQuery, keepPreviousData } from '@tanstack/react-query'
+import { useResourceMutation } from '@/hooks/_shared/create-resource-mutation'
+import { createResourceKeys } from "@/hooks/_shared/query-keys"
+import {
+  getAssetDeletedCount,
+  resolveAssetBulkCreateToast,
+} from '@/hooks/_shared/asset-mutation-helpers'
 import { DirectoryService } from '@/services/directory.service'
-import { api } from '@/lib/api-client'
-import { USE_MOCK, mockDelay, mockDirectories, getMockTargetById, getMockScanById } from '@/mock'
-import type { DirectoryListResponse } from '@/types/directory.types'
 
-const buildMockDirectoriesResponse = (params: {
-  page: number
-  pageSize: number
-  filter?: string
-  targetId?: number
-  scanId?: number
-}): DirectoryListResponse => {
-  const page = params.page
-  const pageSize = params.pageSize
-  const filter = params.filter?.toLowerCase() || ""
-  const target = params.targetId ? getMockTargetById(params.targetId) : undefined
-  const scan = params.scanId ? getMockScanById(params.scanId) : undefined
-  const domain = (target?.name || scan?.target?.name || "").toLowerCase()
+// Query Keys
+const directoryKeyBase = createResourceKeys("directories")
 
-  let filtered = mockDirectories
-
-  if (domain) {
-    filtered = filtered.filter((d) =>
-      d.url.toLowerCase().includes(domain) ||
-      d.websiteUrl.toLowerCase().includes(domain)
-    )
-  }
-
-  if (filter) {
-    filtered = filtered.filter((d) =>
-      d.url.toLowerCase().includes(filter) ||
-      d.contentType.toLowerCase().includes(filter)
-    )
-  }
-
-  const total = filtered.length
-  const totalPages = Math.ceil(total / pageSize)
-  const start = (page - 1) * pageSize
-  const results = filtered.slice(start, start + pageSize)
-
-  return {
-    results,
-    total,
-    page,
-    pageSize,
-    totalPages,
-  }
+export const directoryKeys = {
+  ...directoryKeyBase,
+  target: (targetId: number, params: { page: number; pageSize: number; filter?: string }) =>
+    [...directoryKeyBase.all, 'target', targetId, params] as const,
+  scan: (scanId: number, params: { page: number; pageSize: number; filter?: string }) =>
+    [...directoryKeyBase.all, 'scan', scanId, params] as const,
 }
 
-// API 服务函数
-const directoryService = {
-  // 获取目标的目录列表
-  getTargetDirectories: async (
-    targetId: number,
-    params: { page: number; pageSize: number; filter?: string }
-  ): Promise<DirectoryListResponse> => {
-    if (USE_MOCK) {
-      await mockDelay()
-      return buildMockDirectoriesResponse({
-        page: params.page,
-        pageSize: params.pageSize,
-        filter: params.filter,
-        targetId,
-      })
-    }
-    const response = await api.get<DirectoryListResponse>(
-      `/targets/${targetId}/directories/`,
-      { params }
-    )
-    return response.data
-  },
-
-  // 获取扫描的目录列表
-  getScanDirectories: async (
-    scanId: number,
-    params: { page: number; pageSize: number; filter?: string }
-  ): Promise<DirectoryListResponse> => {
-    if (USE_MOCK) {
-      await mockDelay()
-      return buildMockDirectoriesResponse({
-        page: params.page,
-        pageSize: params.pageSize,
-        filter: params.filter,
-        scanId,
-      })
-    }
-    const response = await api.get<DirectoryListResponse>(
-      `/scans/${scanId}/directories/`,
-      { params }
-    )
-    return response.data
-  },
-
-  // 批量删除目录（支持单个或多个）
-  bulkDeleteDirectories: async (ids: number[]): Promise<{
-    message: string
-    deletedCount: number
-    requestedIds: number[]
-    cascadeDeleted: Record<string, number>
-  }> => {
-    const response = await api.post<{
-      message: string
-      deletedCount: number
-      requestedIds: number[]
-      cascadeDeleted: Record<string, number>
-    }>('/directories/bulk-delete/', { ids })
-    return response.data
-  },
-
-  // 删除单个目录（使用单独的 DELETE API）
-  deleteDirectory: async (directoryId: number): Promise<{
-    message: string
-    directoryId: number
-    directoryUrl: string
-    deletedCount: number
-    deletedDirectories: string[]
-    detail: {
-      phase1: string
-      phase2: string
-    }
-  }> => {
-    const response = await api.delete<{
-      message: string
-      directoryId: number
-      directoryUrl: string
-      deletedCount: number
-      deletedDirectories: string[]
-      detail: {
-        phase1: string
-        phase2: string
-      }
-    }>(`/directories/${directoryId}/`)
-    return response.data
-  },
+function directoryCascadeInvalidates() {
+  return [
+    { queryKey: directoryKeys.all },
+    { queryKey: ['targets'] as const },
+    { queryKey: ['scans'] as const },
+  ]
 }
 
 // 获取目标的目录列表
@@ -144,8 +33,8 @@ export function useTargetDirectories(
   options?: { enabled?: boolean }
 ) {
   return useQuery({
-    queryKey: ['target-directories', targetId, params],
-    queryFn: () => directoryService.getTargetDirectories(targetId, params),
+    queryKey: directoryKeys.target(targetId, params),
+    queryFn: () => DirectoryService.getTargetDirectories(targetId, params),
     enabled: options?.enabled ?? true,
     placeholderData: keepPreviousData,
   })
@@ -158,8 +47,8 @@ export function useScanDirectories(
   options?: { enabled?: boolean }
 ) {
   return useQuery({
-    queryKey: ['scan-directories', scanId, params],
-    queryFn: () => directoryService.getScanDirectories(scanId, params),
+    queryKey: directoryKeys.scan(scanId, params),
+    queryFn: () => DirectoryService.getScanDirectories(scanId, params),
     enabled: options?.enabled ?? true,
     placeholderData: keepPreviousData,
   })
@@ -167,92 +56,69 @@ export function useScanDirectories(
 
 // 删除单个目录（使用单独的 DELETE API）
 export function useDeleteDirectory() {
-  const queryClient = useQueryClient()
-  const toastMessages = useToastMessages()
-
-  return useMutation({
-    mutationFn: directoryService.deleteDirectory,
-    onMutate: (id) => {
-      toastMessages.loading('common.status.deleting', {}, `delete-directory-${id}`)
+  return useResourceMutation({
+    mutationFn: DirectoryService.deleteDirectory,
+    loadingToast: {
+      key: 'common.status.deleting',
+      params: {},
+      id: (id) => `delete-directory-${id}`,
     },
-    onSuccess: (response, id) => {
-      toastMessages.dismiss(`delete-directory-${id}`)
-      toastMessages.success('toast.asset.directory.delete.success')
-      
-      queryClient.invalidateQueries({ queryKey: ['target-directories'] })
-      queryClient.invalidateQueries({ queryKey: ['scan-directories'] })
-      queryClient.invalidateQueries({ queryKey: ['targets'] })
-      queryClient.invalidateQueries({ queryKey: ['scans'] })
+    invalidate: directoryCascadeInvalidates(),
+    onSuccess: ({ toast }) => {
+      toast.success('toast.asset.directory.delete.success')
     },
-    onError: (error: unknown, id) => {
-      toastMessages.dismiss(`delete-directory-${id}`)
-      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.asset.directory.delete.error')
-    },
+    errorFallbackKey: 'toast.asset.directory.delete.error',
   })
 }
 
 // 批量删除目录（使用统一的批量删除接口）
 export function useBulkDeleteDirectories() {
-  const queryClient = useQueryClient()
-  const toastMessages = useToastMessages()
-
-  return useMutation({
-    mutationFn: directoryService.bulkDeleteDirectories,
-    onMutate: () => {
-      toastMessages.loading('common.status.batchDeleting', {}, 'bulk-delete-directories')
+  return useResourceMutation({
+    mutationFn: DirectoryService.bulkDeleteDirectories,
+    loadingToast: {
+      key: 'common.status.batchDeleting',
+      params: {},
+      id: 'bulk-delete-directories',
     },
-    onSuccess: (response) => {
-      toastMessages.dismiss('bulk-delete-directories')
-      toastMessages.success('toast.asset.directory.delete.bulkSuccess', { count: response.deletedCount })
-      
-      queryClient.invalidateQueries({ queryKey: ['target-directories'] })
-      queryClient.invalidateQueries({ queryKey: ['scan-directories'] })
-      queryClient.invalidateQueries({ queryKey: ['targets'] })
-      queryClient.invalidateQueries({ queryKey: ['scans'] })
+    invalidate: directoryCascadeInvalidates(),
+    onSuccess: ({ data, toast }) => {
+      toast.success('toast.asset.directory.delete.bulkSuccess', {
+        count: getAssetDeletedCount(data),
+      })
     },
-    onError: (error: unknown) => {
-      toastMessages.dismiss('bulk-delete-directories')
-      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.asset.directory.delete.error')
-    },
+    errorFallbackKey: 'toast.asset.directory.delete.error',
   })
 }
 
 
 // 批量创建目录（绑定到目标）
 export function useBulkCreateDirectories() {
-  const queryClient = useQueryClient()
-  const toastMessages = useToastMessages()
-
-  return useMutation({
+  return useResourceMutation({
     mutationFn: (data: { targetId: number; urls: string[] }) =>
       DirectoryService.bulkCreateDirectories(data.targetId, data.urls),
-    onMutate: async () => {
-      toastMessages.loading('common.status.batchCreating', {}, 'bulk-create-directories')
+    loadingToast: {
+      key: 'common.status.batchCreating',
+      params: {},
+      id: 'bulk-create-directories',
     },
-    onSuccess: (response, { targetId }) => {
-      toastMessages.dismiss('bulk-create-directories')
-      const { createdCount } = response
-      
-      if (createdCount > 0) {
-        toastMessages.success('toast.asset.directory.create.success', { count: createdCount })
+    invalidate: [
+      {
+        queryKey: directoryKeys.all,
+        exact: false,
+        refetchType: 'active',
+      },
+    ],
+    onSuccess: ({ data, toast }) => {
+      const toastPayload = resolveAssetBulkCreateToast(data.createdCount, {
+        success: 'toast.asset.directory.create.success',
+        partial: 'toast.asset.directory.create.partialSuccess',
+      })
+      if (toastPayload.variant === 'success') {
+        toast.success(toastPayload.key, toastPayload.params)
       } else {
-        toastMessages.warning('toast.asset.directory.create.partialSuccess', { success: 0, skipped: 0 })
+        toast.warning(toastPayload.key, toastPayload.params)
       }
-      
-      queryClient.invalidateQueries({
-        queryKey: ['target-directories', targetId],
-        exact: false,
-        refetchType: 'active',
-      })
-      queryClient.invalidateQueries({
-        queryKey: ['scan-directories'],
-        exact: false,
-        refetchType: 'active',
-      })
     },
-    onError: (error: unknown) => {
-      toastMessages.dismiss('bulk-create-directories')
-      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.asset.directory.create.error')
-    },
+    errorFallbackKey: 'toast.asset.directory.create.error',
   })
 }

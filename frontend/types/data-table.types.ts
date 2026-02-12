@@ -33,6 +33,11 @@ export interface PaginationInfo {
 }
 
 /**
+ * Search mode type
+ */
+export type SearchMode = 'simple' | 'smart'
+
+/**
  * Filter field definition
  * Note: description is required, consistent with SmartFilterInput component
  */
@@ -64,84 +69,119 @@ export interface DeleteConfirmationConfig {
 }
 
 /**
+ * Grouped state config for UnifiedDataTable
+ */
+export interface UnifiedDataTableStateConfig<TData> {
+  // Pagination
+  pagination?: PaginationState
+  setPagination?: React.Dispatch<React.SetStateAction<PaginationState>>
+  paginationInfo?: PaginationInfo
+  onPaginationChange?: (pagination: PaginationState) => void
+
+  // Search state
+  searchValue?: string
+  isSearching?: boolean
+
+  // Selection
+  rowSelection?: Record<string, boolean>
+  onRowSelectionChange?: (selection: Record<string, boolean>) => void
+
+  // Column control
+  columnVisibility?: VisibilityState
+  onColumnVisibilityChange?: (visibility: VisibilityState) => void
+
+  // Sorting
+  sorting?: SortingState
+  onSortingChange?: (sorting: SortingState) => void
+  defaultSorting?: SortingState
+
+  // Selection callback
+  onSelectionChange?: (selectedRows: TData[]) => void
+}
+
+/**
+ * Grouped UI config for UnifiedDataTable
+ */
+export interface UnifiedDataTableUIConfig {
+  // Pagination UI
+  hidePagination?: boolean
+  pageSizeOptions?: number[]
+
+  // Toolbar UI
+  hideToolbar?: boolean
+  toolbarLeft?: ReactNode
+  toolbarRight?: ReactNode
+
+  // Search/filter UI
+  searchPlaceholder?: string
+  filterFields?: FilterField[]
+  filterExamples?: string[]
+
+  // Empty state UI
+  emptyMessage?: string
+  emptyComponent?: ReactNode
+
+  // Styling
+  className?: string
+  tableClassName?: string
+}
+
+/**
+ * Grouped behavior config for UnifiedDataTable
+ */
+export interface UnifiedDataTableBehaviorConfig {
+  // Search/filter behavior
+  searchMode?: SearchMode
+  onSearch?: (value: string) => void
+
+  // Selection behavior
+  enableRowSelection?: boolean
+
+  // Auto column sizing behavior
+  enableAutoColumnSizing?: boolean
+}
+
+/**
+ * Grouped action config for UnifiedDataTable
+ */
+export interface UnifiedDataTableActionConfig {
+  // Bulk operations
+  onBulkDelete?: () => void
+  bulkDeleteLabel?: string
+  showBulkDelete?: boolean
+
+  // Add operation
+  onAddNew?: () => void
+  onAddHover?: () => void
+  addButtonLabel?: string
+  showAddButton?: boolean
+
+  // Bulk add operation
+  onBulkAdd?: () => void
+  bulkAddLabel?: string
+  showBulkAdd?: boolean
+
+  // Download operations
+  downloadOptions?: DownloadOption[]
+
+  // Confirmation dialog
+  deleteConfirmation?: DeleteConfirmationConfig
+}
+
+/**
  * Unified data table component props
  */
 export interface UnifiedDataTableProps<TData> {
   // Core data
   data: TData[]
   columns: ColumnDef<TData, unknown>[]
-  getRowId?: (row: TData) => string
-  
-  // Pagination
-  pagination?: PaginationState
-  setPagination?: React.Dispatch<React.SetStateAction<PaginationState>>
-  paginationInfo?: PaginationInfo
-  onPaginationChange?: (pagination: PaginationState) => void
-  hidePagination?: boolean
-  pageSizeOptions?: number[]
-  
-  // Toolbar
-  hideToolbar?: boolean
-  toolbarLeft?: ReactNode
-  toolbarRight?: ReactNode
-  
-  // Search/Filter
-  searchMode?: 'simple' | 'smart'
-  searchPlaceholder?: string
-  searchValue?: string
-  onSearch?: (value: string) => void
-  isSearching?: boolean
-  filterFields?: FilterField[]
-  filterExamples?: string[]
-  
-  // Selection
-  enableRowSelection?: boolean
-  rowSelection?: Record<string, boolean>
-  onRowSelectionChange?: (selection: Record<string, boolean>) => void
-  onSelectionChange?: (selectedRows: TData[]) => void
-  
-  // Bulk operations
-  onBulkDelete?: () => void
-  bulkDeleteLabel?: string
-  showBulkDelete?: boolean
-  
-  // Add operation
-  onAddNew?: () => void
-  onAddHover?: () => void
-  addButtonLabel?: string
-  showAddButton?: boolean
-  
-  // Bulk add operation
-  onBulkAdd?: () => void
-  bulkAddLabel?: string
-  showBulkAdd?: boolean
-  
-  // Download operations
-  downloadOptions?: DownloadOption[]
-  
-  // Column control
-  columnVisibility?: VisibilityState
-  onColumnVisibilityChange?: (visibility: VisibilityState) => void
-  
-  // Sorting
-  sorting?: SortingState
-  onSortingChange?: (sorting: SortingState) => void
-  defaultSorting?: SortingState
-  
-  // Empty state
-  emptyMessage?: string
-  emptyComponent?: ReactNode
-  
-  // Confirmation dialog
-  deleteConfirmation?: DeleteConfirmationConfig
-  
-  // Styling
-  className?: string
-  tableClassName?: string
-  
-  // Auto column sizing
-  /** Enable automatic column width calculation based on content */
-  enableAutoColumnSizing?: boolean
+  getRowId?: (row: TData, index: number) => string
+
+  // Grouped config (single source of truth)
+  state?: UnifiedDataTableStateConfig<TData>
+  ui?: UnifiedDataTableUIConfig
+  behavior?: UnifiedDataTableBehaviorConfig
+  actions?: UnifiedDataTableActionConfig
 }
 
 /**
@@ -149,7 +189,7 @@ export interface UnifiedDataTableProps<TData> {
  */
 export interface DataTableToolbarProps {
   // Search
-  searchMode?: 'simple' | 'smart'
+  searchMode?: SearchMode
   searchPlaceholder?: string
   searchValue?: string
   onSearch?: (value: string) => void

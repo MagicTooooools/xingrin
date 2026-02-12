@@ -1,21 +1,32 @@
 "use client"
 
-import { useMutation, useQuery, useQueryClient, keepPreviousData } from "@tanstack/react-query"
-import { useToastMessages } from '@/lib/toast-helpers'
-import { getErrorCode, getErrorResponseData } from '@/lib/response-parser'
+import { useQuery, keepPreviousData } from "@tanstack/react-query"
+import { useResourceMutation } from '@/hooks/_shared/create-resource-mutation'
+import { createResourceKeys } from "@/hooks/_shared/query-keys"
+import { normalizePagination } from "@/hooks/_shared/pagination"
+import {
+  getSubdomainBatchDeleteCount,
+  getSubdomainBatchDeleteFromOrgCount,
+  resolveSubdomainCreateToast,
+} from "@/hooks/_shared/subdomain-mutation-helpers"
 import { SubdomainService } from "@/services/subdomain.service"
 import { OrganizationService } from "@/services/organization.service"
 import type { GetAllSubdomainsParams } from "@/types/subdomain.types"
 import type { PaginationParams } from "@/types/common.types"
 
 // Query Keys
-export const subdomainKeys = {
-  all: ['subdomains'] as const,
-  lists: () => [...subdomainKeys.all, 'list'] as const,
-  list: (params: PaginationParams & { organizationId?: string }) => 
-    [...subdomainKeys.lists(), params] as const,
-  details: () => [...subdomainKeys.all, 'detail'] as const,
-  detail: (id: number) => [...subdomainKeys.details(), id] as const,
+export const subdomainKeys = createResourceKeys("subdomains", {
+  list: (params: PaginationParams & { organizationId?: string }) => params,
+  detail: (id: number) => id,
+})
+
+function subdomainCascadeInvalidates() {
+  return [
+    { queryKey: subdomainKeys.all },
+    { queryKey: ['targets'] },
+    { queryKey: ['scans'] },
+    { queryKey: ['organizations'] },
+  ]
 }
 
 // 获取单个子域名详情
@@ -45,173 +56,137 @@ export function useOrganizationSubdomains(
     enabled: options?.enabled !== undefined ? options.enabled : true,
     select: (response) => ({
       domains: response.domains || [],
-      pagination: {
-        total: response.total || 0,
-        page: response.page || 1,
-        pageSize: response.pageSize || 10,
-        totalPages: response.totalPages || 0,
-      }
+      pagination: normalizePagination(response, params?.page ?? 1, params?.pageSize ?? 10),
     }),
   })
 }
 
 // 创建子域名（绑定到资产）
 export function useCreateSubdomain() {
-  const queryClient = useQueryClient()
-  const toastMessages = useToastMessages()
-
-  return useMutation({
+  return useResourceMutation({
     mutationFn: (data: { domains: Array<{ name: string }>; assetId: number }) =>
       SubdomainService.createSubdomains(data),
-    onMutate: async () => {
-      toastMessages.loading('common.status.creating', {}, 'create-subdomain')
+    loadingToast: {
+      key: 'common.status.creating',
+      params: {},
+      id: 'create-subdomain',
     },
-    onSuccess: (response) => {
-      toastMessages.dismiss('create-subdomain')
-      const { createdCount, existedCount, skippedCount = 0 } = response
-      if (skippedCount > 0 || existedCount > 0) {
-        toastMessages.warning('toast.asset.subdomain.create.partialSuccess', { 
-          success: createdCount, 
-          skipped: (existedCount || 0) + (skippedCount || 0) 
-        })
+    invalidate: [
+      { queryKey: subdomainKeys.all },
+      { queryKey: ['assets'] },
+    ],
+    onSuccess: ({ data, toast }) => {
+      const toastPayload = resolveSubdomainCreateToast(data)
+      if (toastPayload.variant === "warning") {
+        toast.warning(toastPayload.key, toastPayload.params)
       } else {
-        toastMessages.success('toast.asset.subdomain.create.success', { count: createdCount })
+        toast.success(toastPayload.key, toastPayload.params)
       }
-      queryClient.invalidateQueries({ queryKey: ['subdomains'] })
-      queryClient.invalidateQueries({ queryKey: ['assets'] })
     },
-    onError: (error: unknown) => {
-      toastMessages.dismiss('create-subdomain')
-      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.asset.subdomain.create.error')
-    },
+    errorFallbackKey: 'toast.asset.subdomain.create.error',
   })
 }
 
 // 从组织中移除子域名
 export function useDeleteSubdomainFromOrganization() {
-  const queryClient = useQueryClient()
-  const toastMessages = useToastMessages()
-
-  return useMutation({
+  return useResourceMutation({
     mutationFn: (data: { organizationId: number; targetId: number }) =>
       OrganizationService.unlinkTargetsFromOrganization({
         organizationId: data.organizationId,
         targetIds: [data.targetId],
       }),
-    onMutate: ({ organizationId, targetId }) => {
-      toastMessages.loading('common.status.removing', {}, `delete-${organizationId}-${targetId}`)
+    loadingToast: {
+      key: 'common.status.removing',
+      params: {},
+      id: ({ organizationId, targetId }) => `delete-${organizationId}-${targetId}`,
     },
-    onSuccess: (_response, { organizationId, targetId }) => {
-      toastMessages.dismiss(`delete-${organizationId}-${targetId}`)
-      toastMessages.success('toast.asset.subdomain.delete.success')
-      queryClient.invalidateQueries({ queryKey: ['subdomains'] })
-      queryClient.invalidateQueries({ queryKey: ['organizations'] })
+    invalidate: [
+      { queryKey: subdomainKeys.all },
+      { queryKey: ['organizations'] },
+    ],
+    onSuccess: ({ toast }) => {
+      toast.success('toast.asset.subdomain.delete.success')
     },
-    onError: (error: unknown, { organizationId, targetId }) => {
-      toastMessages.dismiss(`delete-${organizationId}-${targetId}`)
-      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.asset.subdomain.delete.error')
-    },
+    errorFallbackKey: 'toast.asset.subdomain.delete.error',
   })
 }
 
 // 批量从组织中移除子域名
 export function useBatchDeleteSubdomainsFromOrganization() {
-  const queryClient = useQueryClient()
-  const toastMessages = useToastMessages()
-
-  return useMutation({
+  return useResourceMutation({
     mutationFn: (data: { organizationId: number; domainIds: number[] }) => 
       SubdomainService.batchDeleteSubdomainsFromOrganization(data),
-    onMutate: ({ organizationId }) => {
-      toastMessages.loading('common.status.batchRemoving', {}, `batch-delete-${organizationId}`)
+    loadingToast: {
+      key: 'common.status.batchRemoving',
+      params: {},
+      id: ({ organizationId }) => `batch-delete-${organizationId}`,
     },
-    onSuccess: (response, { organizationId }) => {
-      toastMessages.dismiss(`batch-delete-${organizationId}`)
-      const successCount = response.successCount || 0
-      toastMessages.success('toast.asset.subdomain.delete.bulkSuccess', { count: successCount })
-      queryClient.invalidateQueries({ queryKey: ['subdomains'] })
-      queryClient.invalidateQueries({ queryKey: ['organizations'] })
+    invalidate: [
+      { queryKey: subdomainKeys.all },
+      { queryKey: ['organizations'] },
+    ],
+    onSuccess: ({ data, toast }) => {
+      const successCount = getSubdomainBatchDeleteFromOrgCount(data)
+      toast.success('toast.asset.subdomain.delete.bulkSuccess', { count: successCount })
     },
-    onError: (error: unknown, { organizationId }) => {
-      toastMessages.dismiss(`batch-delete-${organizationId}`)
-      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.asset.subdomain.delete.error')
-    },
+    errorFallbackKey: 'toast.asset.subdomain.delete.error',
   })
 }
 
 // 删除单个子域名（使用单独的 DELETE API）
 export function useDeleteSubdomain() {
-  const queryClient = useQueryClient()
-  const toastMessages = useToastMessages()
-
-  return useMutation({
+  return useResourceMutation({
     mutationFn: (id: number) => SubdomainService.deleteSubdomain(id),
-    onMutate: (id) => {
-      toastMessages.loading('common.status.deleting', {}, `delete-subdomain-${id}`)
+    loadingToast: {
+      key: 'common.status.deleting',
+      params: {},
+      id: (id) => `delete-subdomain-${id}`,
     },
-    onSuccess: (response, id) => {
-      toastMessages.dismiss(`delete-subdomain-${id}`)
-      toastMessages.success('toast.asset.subdomain.delete.success')
-      
-      queryClient.invalidateQueries({ queryKey: ['subdomains'] })
-      queryClient.invalidateQueries({ queryKey: ['targets'] })
-      queryClient.invalidateQueries({ queryKey: ['scans'] })
-      queryClient.invalidateQueries({ queryKey: ['organizations'] })
+    invalidate: subdomainCascadeInvalidates(),
+    onSuccess: ({ toast }) => {
+      toast.success('toast.asset.subdomain.delete.success')
     },
-    onError: (error: unknown, id) => {
-      toastMessages.dismiss(`delete-subdomain-${id}`)
-      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.asset.subdomain.delete.error')
-    },
+    errorFallbackKey: 'toast.asset.subdomain.delete.error',
   })
 }
 
 // 批量删除子域名（使用统一的批量删除接口）
 export function useBatchDeleteSubdomains() {
-  const queryClient = useQueryClient()
-  const toastMessages = useToastMessages()
-
-  return useMutation({
+  return useResourceMutation({
     mutationFn: (ids: number[]) => SubdomainService.batchDeleteSubdomains(ids),
-    onMutate: () => {
-      toastMessages.loading('common.status.batchDeleting', {}, 'batch-delete-subdomains')
+    loadingToast: {
+      key: 'common.status.batchDeleting',
+      params: {},
+      id: 'batch-delete-subdomains',
     },
-    onSuccess: (response) => {
-      toastMessages.dismiss('batch-delete-subdomains')
-      toastMessages.success('toast.asset.subdomain.delete.bulkSuccess', { count: response.deletedCount })
-      
-      queryClient.invalidateQueries({ queryKey: ['subdomains'] })
-      queryClient.invalidateQueries({ queryKey: ['targets'] })
-      queryClient.invalidateQueries({ queryKey: ['scans'] })
-      queryClient.invalidateQueries({ queryKey: ['organizations'] })
+    invalidate: subdomainCascadeInvalidates(),
+    onSuccess: ({ data, toast }) => {
+      toast.success('toast.asset.subdomain.delete.bulkSuccess', {
+        count: getSubdomainBatchDeleteCount(data),
+      })
     },
-    onError: (error: unknown) => {
-      toastMessages.dismiss('batch-delete-subdomains')
-      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.asset.subdomain.delete.error')
-    },
+    errorFallbackKey: 'toast.asset.subdomain.delete.error',
   })
 }
 
 // 更新子域名
 export function useUpdateSubdomain() {
-  const queryClient = useQueryClient()
-  const toastMessages = useToastMessages()
-
-  return useMutation({
+  return useResourceMutation({
     mutationFn: ({ id, data }: { id: number; data: { name?: string; description?: string } }) =>
       SubdomainService.updateSubdomain({ id, ...data }),
-    onMutate: ({ id }) => {
-      toastMessages.loading('common.status.updating', {}, `update-subdomain-${id}`)
+    loadingToast: {
+      key: 'common.status.updating',
+      params: {},
+      id: ({ id }) => `update-subdomain-${id}`,
     },
-    onSuccess: (_response, { id }) => {
-      toastMessages.dismiss(`update-subdomain-${id}`)
-      toastMessages.success('common.status.updateSuccess')
-      queryClient.invalidateQueries({ queryKey: ['subdomains'] })
-      queryClient.invalidateQueries({ queryKey: ['organizations'] })
+    invalidate: [
+      { queryKey: subdomainKeys.all },
+      { queryKey: ['organizations'] },
+    ],
+    onSuccess: ({ toast }) => {
+      toast.success('common.status.updateSuccess')
     },
-    onError: (error: unknown, { id }) => {
-      toastMessages.dismiss(`update-subdomain-${id}`)
-      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'common.status.updateFailed')
-    },
+    errorFallbackKey: 'common.status.updateFailed',
   })
 }
 
@@ -225,12 +200,7 @@ export function useAllSubdomains(
     queryFn: () => SubdomainService.getAllSubdomains(params),
     select: (response) => ({
       domains: response.domains || [],
-      pagination: {
-        total: response.total || 0,
-        page: response.page || 1,
-        pageSize: response.pageSize || 10,
-        totalPages: response.totalPages || 0,
-      }
+      pagination: normalizePagination(response, params.page ?? 1, params.pageSize ?? 10),
     }),
     enabled: options?.enabled !== undefined ? options.enabled : true,
   })
@@ -266,48 +236,44 @@ export function useScanSubdomains(
 
 // 批量创建子域名（绑定到目标）
 export function useBulkCreateSubdomains() {
-  const queryClient = useQueryClient()
-  const toastMessages = useToastMessages()
-
-  return useMutation({
+  return useResourceMutation({
     mutationFn: (data: { targetId: number; subdomains: string[] }) =>
       SubdomainService.bulkCreateSubdomains(data.targetId, data.subdomains),
-    onMutate: async () => {
-      toastMessages.loading('common.status.batchCreating', {}, 'bulk-create-subdomains')
+    loadingToast: {
+      key: 'common.status.batchCreating',
+      params: {},
+      id: 'bulk-create-subdomains',
     },
-    onSuccess: (response, { targetId }) => {
-      toastMessages.dismiss('bulk-create-subdomains')
-      const { createdCount, skippedCount = 0, invalidCount = 0, mismatchedCount = 0 } = response
+    invalidate: [
+      ({ variables }) => ({
+        queryKey: ['targets', variables.targetId, 'subdomains'],
+        exact: false,
+        refetchType: 'active',
+      }),
+      {
+        queryKey: subdomainKeys.all,
+        exact: false,
+        refetchType: 'active',
+      },
+    ],
+    onSuccess: ({ data, toast }) => {
+      const { createdCount, skippedCount = 0, invalidCount = 0, mismatchedCount = 0 } = data
       const totalSkipped = skippedCount + invalidCount + mismatchedCount
-      
+
       if (totalSkipped > 0) {
-        toastMessages.warning('toast.asset.subdomain.create.partialSuccess', { 
-          success: createdCount, 
-          skipped: totalSkipped 
+        toast.warning('toast.asset.subdomain.create.partialSuccess', {
+          success: createdCount,
+          skipped: totalSkipped
         })
       } else if (createdCount > 0) {
-        toastMessages.success('toast.asset.subdomain.create.success', { count: createdCount })
+        toast.success('toast.asset.subdomain.create.success', { count: createdCount })
       } else {
-        toastMessages.warning('toast.asset.subdomain.create.partialSuccess', { 
-          success: 0, 
-          skipped: 0 
+        toast.warning('toast.asset.subdomain.create.partialSuccess', {
+          success: 0,
+          skipped: 0
         })
       }
-      
-      queryClient.invalidateQueries({
-        queryKey: ['targets', targetId, 'subdomains'],
-        exact: false,
-        refetchType: 'active',
-      })
-      queryClient.invalidateQueries({
-        queryKey: ['subdomains'],
-        exact: false,
-        refetchType: 'active',
-      })
     },
-    onError: (error: unknown) => {
-      toastMessages.dismiss('bulk-create-subdomains')
-      toastMessages.errorFromCode(getErrorCode(getErrorResponseData(error)), 'toast.asset.subdomain.create.error')
-    },
+    errorFallbackKey: 'toast.asset.subdomain.create.error',
   })
 }

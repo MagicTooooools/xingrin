@@ -3,8 +3,8 @@
 import * as React from "react"
 import type { ColumnDef } from "@tanstack/react-table"
 import { useTranslations } from "next-intl"
-import { Input } from "@/components/ui/input"
 import { UnifiedDataTable } from "@/components/ui/data-table/unified-data-table"
+import { SimpleSearchToolbar } from "@/components/ui/data-table/simple-search-toolbar"
 import type { ScanEngine } from "@/types/engine.types"
 
 // Component props type definitions
@@ -48,20 +48,23 @@ export function EngineDataTable({
       data={filteredData}
       columns={columns}
       getRowId={(row) => String(row.id)}
-      enableRowSelection={false}
-      onAddNew={onAddNew}
-      addButtonLabel={addButtonText || tEngine("createEngine")}
-      showBulkDelete={false}
-      emptyMessage={t("noData")}
-      toolbarLeft={
-        <Input
-          placeholder={searchPlaceholder || tEngine("searchPlaceholder")}
-          value={searchValue}
-          onChange={(e) => setSearchValue(e.target.value)}
-          className="max-w-sm h-8"
-        />
-      }
+      behavior={{ enableRowSelection: false }}
+      actions={{
+        onAddNew,
+        addButtonLabel: addButtonText || tEngine("createEngine"),
+        showBulkDelete: false,
+      }}
+      ui={{
+        emptyMessage: t("noData"),
+        toolbarLeft: (
+          <SimpleSearchToolbar
+            value={searchValue}
+            onChange={setSearchValue}
+            placeholder={searchPlaceholder || tEngine("searchPlaceholder")}
+            showButton={false}
+          />
+        ),
+      }}
     />
   )
 }
-

@@ -3,8 +3,8 @@
 import * as React from "react"
 import type { ColumnDef } from "@tanstack/react-table"
 import { useTranslations } from "next-intl"
-import { Input } from "@/components/ui/input"
 import { UnifiedDataTable } from "@/components/ui/data-table/unified-data-table"
+import { SimpleSearchToolbar } from "@/components/ui/data-table/simple-search-toolbar"
 interface CommandsDataTableProps<TData extends { id: number; displayName?: string }> {
   columns: ColumnDef<TData, unknown>[]
   data: TData[]
@@ -47,20 +47,26 @@ export function CommandsDataTable<TData extends { id: number; displayName?: stri
       data={filteredData}
       columns={columns}
       getRowId={(row) => String(row.id)}
-      onSelectionChange={setSelectedRows}
-      onBulkDelete={onBulkDelete ? handleBulkDelete : undefined}
-      onAddNew={onAdd}
-      addButtonLabel={tCommon("actions.add")}
-      bulkDeleteLabel={tCommon("actions.delete")}
-      emptyMessage={tCommon("status.noData")}
-      toolbarLeft={
-        <Input
-          placeholder={t("searchPlaceholder")}
-          value={searchValue}
-          onChange={(e) => setSearchValue(e.target.value)}
-          className="max-w-sm h-8"
-        />
-      }
+      state={{
+        onSelectionChange: setSelectedRows,
+      }}
+      actions={{
+        onBulkDelete: onBulkDelete ? handleBulkDelete : undefined,
+        onAddNew: onAdd,
+        addButtonLabel: tCommon("actions.add"),
+        bulkDeleteLabel: tCommon("actions.delete"),
+      }}
+      ui={{
+        emptyMessage: tCommon("status.noData"),
+        toolbarLeft: (
+          <SimpleSearchToolbar
+            value={searchValue}
+            onChange={setSearchValue}
+            placeholder={t("searchPlaceholder")}
+            showButton={false}
+          />
+        ),
+      }}
     />
   )
 }

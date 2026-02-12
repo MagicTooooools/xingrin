@@ -6,13 +6,14 @@ import { useTranslations, useLocale } from "next-intl"
 import { ScheduledScanDataTable } from "@/components/scan/scheduled/scheduled-scan-data-table"
 import { createScheduledScanColumns } from "@/components/scan/scheduled/scheduled-scan-columns"
 import { useScheduledScans } from "@/hooks/use-scheduled-scans"
+import { useSearchState } from "@/hooks/_shared/use-search-state"
+import { buildPaginationInfo } from "@/hooks/_shared/pagination"
 import { DataTableSkeleton } from "@/components/ui/data-table-skeleton"
 import { getDateLocale } from "@/lib/date-utils"
 
 export function DashboardScheduledScans() {
   const [pagination, setPagination] = React.useState({ page: 1, pageSize: 10 })
   const [searchQuery, setSearchQuery] = React.useState("")
-  const [isSearching, setIsSearching] = React.useState(false)
   const router = useRouter()
   const locale = useLocale()
 
@@ -54,23 +55,16 @@ export function DashboardScheduledScans() {
     },
   }), [tColumns, tCommon, tScan])
 
-  const handleSearchChange = (value: string) => {
-    setIsSearching(true)
-    setSearchQuery(value)
-    setPagination((prev) => ({ ...prev, page: 1 }))
-  }
-
   const { data, isLoading, isFetching } = useScheduledScans({
     page: pagination.page,
     pageSize: pagination.pageSize,
     search: searchQuery || undefined,
   })
-
-  React.useEffect(() => {
-    if (!isFetching && isSearching) {
-      setIsSearching(false)
-    }
-  }, [isFetching, isSearching])
+  const { isSearching, handleSearchChange } = useSearchState({
+    isFetching,
+    setSearchValue: setSearchQuery,
+    onResetPage: () => setPagination((prev) => ({ ...prev, page: 1 })),
+  })
 
   const formatDate = React.useCallback(
     (dateString: string) => new Date(dateString).toLocaleString(getDateLocale(locale), { hour12: false }),
@@ -104,6 +98,13 @@ export function DashboardScheduledScans() {
   }
 
   const list = data?.results ?? []
+  const paginationInfo = buildPaginationInfo({
+    total: data?.total ?? 0,
+    page: pagination.page,
+    pageSize: pagination.pageSize,
+    totalPages: data?.totalPages,
+    minTotalPages: 1,
+  })
 
   return (
     <ScheduledScanDataTable
@@ -115,8 +116,8 @@ export function DashboardScheduledScans() {
       isSearching={isSearching}
       page={pagination.page}
       pageSize={pagination.pageSize}
-      total={data?.total || 0}
-      totalPages={data?.totalPages || 1}
+      total={paginationInfo.total}
+      totalPages={paginationInfo.totalPages}
       onPageChange={(page) => setPagination((prev) => ({ ...prev, page }))}
       onPageSizeChange={(pageSize) => setPagination({ page: 1, pageSize })}
     />

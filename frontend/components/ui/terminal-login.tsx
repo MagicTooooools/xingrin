@@ -1,134 +1,15 @@
 "use client"
 
 import * as React from "react"
-import dynamic from "next/dynamic"
 import { cn } from "@/lib/utils"
-
 import type { ShuffleRef } from "@/components/shuffle"
-
-// Dynamic import to avoid SSR issues with GSAP
-const Shuffle = dynamic(() => import("@/components/shuffle"), { ssr: false })
-
-type BootLine = {
-  text: string
-  className?: string
-}
-
-// Boot log animation timing (similar to LoginBootScreen)
-const AUTH_STEP_DELAYS_MS = [400, 400, 400, 400]
-
-function AuthBootLog({
-  authenticatingLabel,
-  processingLabel,
-  done = false,
-  className,
-}: {
-  authenticatingLabel: string
-  processingLabel: string
-  done?: boolean
-  className?: string
-}) {
-  const [visible, setVisible] = React.useState(0)
-
-  const authLines = React.useMemo<BootLine[]>(
-    () => [
-      { text: `> ${authenticatingLabel}`, className: "text-foreground/90" },
-      { text: "> initializing secure channel...", className: "text-muted-foreground" },
-      { text: "> validating credentials...", className: "text-muted-foreground" },
-      { text: "> checking session...", className: "text-foreground/90" },
-    ],
-    [authenticatingLabel]
-  )
-
-  React.useEffect(() => {
-    setVisible(0)
-
-    const timers: Array<ReturnType<typeof setTimeout>> = []
-    let acc = 0
-
-    for (let i = 0; i < authLines.length; i++) {
-      acc += AUTH_STEP_DELAYS_MS[i] ?? 220
-      timers.push(
-        setTimeout(() => {
-          setVisible((prev) => Math.max(prev, i + 1))
-        }, acc)
-      )
-    }
-
-    return () => {
-      timers.forEach(clearTimeout)
-    }
-  }, [authLines])
-
-  // When the login flow completes, force the log to finish and jump progress to 100%.
-  React.useEffect(() => {
-    if (!done) return
-    setVisible(authLines.length)
-  }, [authLines.length, done])
-
-  const rawProgress = Math.round((Math.min(visible, authLines.length) / authLines.length) * 100)
-  const progress = done ? 100 : Math.min(rawProgress, 99)
-
-  return (
-    <div className={className}>
-      <div className="space-y-1">
-        {authLines.slice(0, visible).map((line, idx) => (
-          <div 
-            key={idx} 
-            className={cn("animate-typing", line.className)}
-          >
-            {line.text}
-          </div>
-        ))}
-
-        {/* Cursor */}
-        <div className="text-foreground/80">
-          <span className="inline-block h-4 w-2 align-middle bg-foreground/80 animate-pulse" />
-        </div>
-      </div>
-
-      {/* Progress bar */}
-      <div className="mt-6">
-        <div className="h-1.5 w-full rounded bg-foreground/10 overflow-hidden">
-          <div
-            className="h-full bg-gradient-to-r from-primary/40 to-primary transition-all duration-300"
-            style={{
-              width: `${progress}%`,
-              boxShadow:
-                "0 0 10px hsl(var(--primary) / 0.35), 0 0 18px hsl(var(--primary) / 0.2)",
-            }}
-          />
-        </div>
-        <div className="mt-2 text-xs text-muted-foreground">{processingLabel}</div>
-      </div>
-    </div>
-  )
-}
-
-type LoginStep = "username" | "password" | "authenticating" | "success" | "error"
-
-interface TerminalLoginTranslations {
-  title: string
-  subtitle: string
-  usernamePrompt: string
-  passwordPrompt: string
-  authenticating: string
-  processing: string
-  accessGranted: string
-  welcomeMessage: string
-  authFailed: string
-  invalidCredentials: string
-  shortcuts: string
-  submit: string
-  cancel: string
-  clear: string
-  startEnd: string
-}
-
-interface TerminalLine {
-  text: string
-  type: "prompt" | "input" | "info" | "success" | "error" | "warning"
-}
+import type { LoginStep, TerminalLine, TerminalLoginTranslations } from "@/components/ui/terminal-login-types"
+import {
+  TerminalDesktopPanel,
+  TerminalLoginBanner,
+  TerminalLoginHeader,
+  TerminalMobilePanel,
+} from "@/components/ui/terminal-login-sections"
 
 interface TerminalLoginProps {
   onLogin: (username: string, password: string) => Promise<void>
@@ -342,6 +223,21 @@ export function TerminalLogin({
     )
   }
 
+  const handleMobileSubmit = async () => {
+    if (!username.trim() || !password.trim()) return
+    setStep("authenticating")
+    try {
+      await onLogin(username, password)
+    } catch {
+      setStep("error")
+      setTimeout(() => {
+        setUsername("")
+        setPassword("")
+        setStep("username")
+      }, 2000)
+    }
+  }
+
   return (
     <div
       ref={containerRef}
@@ -351,168 +247,46 @@ export function TerminalLogin({
         className
       )}
     >
-      {/* Terminal header */}
-      <div className="border-border flex items-center gap-x-2 border-b px-4 py-3">
-        <div className="flex flex-row gap-x-2">
-          <div className="h-3 w-3 rounded-full bg-[var(--error)]"></div>
-          <div className="h-3 w-3 rounded-full bg-[var(--warning)]"></div>
-          <div className="h-3 w-3 rounded-full bg-[var(--success)]"></div>
-        </div>
-        <span className="ml-2 text-xs text-muted-foreground font-mono">{t.title}</span>
-      </div>
+      <TerminalLoginHeader title={t.title} />
 
       {/* Terminal content */}
       <div className="p-4 font-mono text-sm min-h-[280px]">
-        {/* Shuffle Title Banner */}
-        <div className="mb-6 text-center">
-          <Shuffle
-            ref={shuffleRef}
-            text="LUNAFOX"
-            className="!text-4xl sm:!text-5xl md:!text-6xl !font-bold text-primary"
-            shuffleDirection="up"
-            duration={0.5}
-            stagger={0.04}
-            shuffleTimes={2}
-            triggerOnHover={true}
-            triggerOnce={false}
-            autoPlay={true}
-          />
-          <div className="mt-3 flex items-center gap-3 text-muted-foreground text-sm">
-            <span className="h-px flex-1 bg-border" />
-            <span className="whitespace-nowrap">{t.subtitle}</span>
-            <span className="h-px flex-1 bg-border" />
-          </div>
-        </div>
+        <TerminalLoginBanner subtitle={t.subtitle} shuffleRef={shuffleRef} />
 
         {/* ========== Mobile Form ========== */}
-        <div className="sm:hidden">
-          {(step === "username" || step === "password" || step === "error") && (
-            <form
-              onSubmit={async (e) => {
-                e.preventDefault()
-                if (!username.trim() || !password.trim()) return
-                setStep("authenticating")
-                try {
-                  await onLogin(username, password)
-                  // Keep showing the authenticating progress bar until navigation happens.
-                } catch {
-                  setStep("error")
-                  setTimeout(() => {
-                    setUsername("")
-                    setPassword("")
-                    setStep("username")
-                  }, 2000)
-                }
-              }}
-              className="space-y-4"
-            >
-              <div>
-                <label className="text-primary text-xs mb-1 block">{t.usernamePrompt}</label>
-                <input
-                  type="text"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  disabled={isInputDisabled}
-                  className="w-full bg-background/60 border border-border rounded px-3 py-2 text-foreground outline-none focus:border-primary font-mono text-sm"
-                  autoComplete="username"
-                />
-              </div>
-              <div>
-                <label className="text-primary text-xs mb-1 block">{t.passwordPrompt}</label>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  disabled={isInputDisabled}
-                  className="w-full bg-background/60 border border-border rounded px-3 py-2 text-foreground outline-none focus:border-primary font-mono text-sm"
-                  autoComplete="current-password"
-                />
-              </div>
-              {step === "error" && (
-                <p className="text-destructive text-sm">{t.invalidCredentials}</p>
-              )}
-              <button
-                type="submit"
-                disabled={isInputDisabled}
-                className="w-full py-2 px-4 bg-primary hover:bg-primary/90 disabled:opacity-50 text-primary-foreground font-mono text-sm rounded transition-colors"
-              >
-                {t.submit}
-              </button>
-            </form>
-          )}
-          {step === "authenticating" && (
-            <div className="py-4">
-              <AuthBootLog authenticatingLabel={t.authenticating} processingLabel={t.processing} done={authDone} />
-            </div>
-          )}
-          {step === "success" && (
-            <div className="text-primary text-center py-4">
-              {t.accessGranted}
-            </div>
-          )}
-        </div>
+        <TerminalMobilePanel
+          step={step}
+          username={username}
+          password={password}
+          isInputDisabled={isInputDisabled}
+          authDone={authDone}
+          onUsernameChange={setUsername}
+          onPasswordChange={setPassword}
+          onSubmit={handleMobileSubmit}
+          t={t}
+        />
 
         {/* ========== Desktop Terminal ========== */}
-        <div className="hidden sm:block">
-          {/* Previous lines */}
-          {lines.map((line, index) => (
-            <span
-              key={index}
-              className={cn(
-                "whitespace-pre-wrap",
-                line.type === "prompt" && "text-primary",
-                line.type === "input" && "text-foreground",
-                line.type === "info" && "text-muted-foreground",
-                line.type === "success" && "text-primary",
-                line.type === "error" && "text-destructive",
-                line.type === "warning" && "text-amber-500"
-              )}
-            >
-              {line.text}
-              {(line.type === "prompt" || line.text === "") ? "" : "\n"}
-            </span>
-          ))}
-
-          {/* Current input line */}
-          {(step === "username" || step === "password") && (
-            <div className="flex items-center">
-              <span className="text-primary">{getCurrentPrompt()}</span>
-              {renderInputWithCursor()}
-              <input
-                ref={inputRef}
-                type={step === "password" ? "password" : "text"}
-                value={getCurrentValue()}
-                onChange={handleInputChange}
-                onKeyDown={handleKeyDown}
-                onSelect={handleSelect}
-                onFocus={() => setIsFocused(true)}
-                onBlur={() => setIsFocused(false)}
-                disabled={isInputDisabled}
-                className="absolute opacity-0 pointer-events-none"
-                autoComplete={step === "username" ? "username" : "current-password"}
-                autoFocus
-              />
-            </div>
-          )}
-
-          {/* Loading indicator */}
-          {step === "authenticating" && (
-            <div className="mt-2">
-              <AuthBootLog authenticatingLabel={t.authenticating} processingLabel={t.processing} done={authDone} />
-            </div>
-          )}
-
-          {/* Keyboard shortcuts hint */}
-          {(step === "username" || step === "password") && (
-            <div className="mt-6 text-xs text-muted-foreground">
-              <span className="text-muted-foreground">{t.shortcuts}:</span>{" "}
-              <span className="text-primary">Enter</span> {t.submit}{" "}
-              <span className="text-primary">Ctrl+C</span> {t.cancel}{" "}
-              <span className="text-primary">Ctrl+U</span> {t.clear}{" "}
-              <span className="text-primary">Ctrl+A/E</span> {t.startEnd}
-            </div>
-          )}
-        </div>
+        <TerminalDesktopPanel
+          step={step}
+          lines={lines}
+          t={t}
+          prompt={getCurrentPrompt()}
+          renderInput={renderInputWithCursor}
+          inputRef={inputRef}
+          authDone={authDone}
+          inputProps={{
+            value: getCurrentValue(),
+            onChange: handleInputChange,
+            onKeyDown: handleKeyDown,
+            onSelect: handleSelect,
+            onFocus: () => setIsFocused(true),
+            onBlur: () => setIsFocused(false),
+            disabled: isInputDisabled,
+            type: step === "password" ? "password" : "text",
+            autoComplete: step === "username" ? "username" : "current-password",
+          }}
+        />
       </div>
     </div>
   )

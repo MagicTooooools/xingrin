@@ -1,15 +1,18 @@
 "use client"
 
 import { useQuery, keepPreviousData } from "@tanstack/react-query"
+import { createResourceKeys } from "@/hooks/_shared/query-keys"
 import { IPAddressService } from "@/services/ip-address.service"
 import type { GetIPAddressesParams, GetIPAddressesResponse } from "@/types/ip-address.types"
 
+const ipAddressKeyBase = createResourceKeys("ip-addresses")
+
 const ipAddressKeys = {
-  all: ["ip-addresses"] as const,
+  ...ipAddressKeyBase,
   target: (targetId: number, params: GetIPAddressesParams) =>
-    [...ipAddressKeys.all, "target", targetId, params] as const,
+    [...ipAddressKeyBase.all, "target", targetId, params] as const,
   scan: (scanId: number, params: GetIPAddressesParams) =>
-    [...ipAddressKeys.all, "scan", scanId, params] as const,
+    [...ipAddressKeyBase.all, "scan", scanId, params] as const,
 }
 
 function normalizeParams(params?: GetIPAddressesParams): Required<GetIPAddressesParams> {

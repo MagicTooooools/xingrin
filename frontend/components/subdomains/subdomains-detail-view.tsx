@@ -15,6 +15,10 @@ import { SubdomainService } from "@/services/subdomain.service"
 import { BulkAddSubdomainsDialog } from "./bulk-add-subdomains-dialog"
 import { ConfirmDialog } from "@/components/ui/confirm-dialog"
 import { getDateLocale } from "@/lib/date-utils"
+import { escapeCSV, formatDateForCSV } from "@/lib/csv-utils"
+import { downloadBlob } from "@/lib/download-utils"
+import { useSearchState } from "@/hooks/_shared/use-search-state"
+import { buildPaginationInfo, normalizePagination } from "@/hooks/_shared/pagination"
 import type { Subdomain } from "@/types/subdomain.types"
 import { toast } from "sonner"
 
@@ -65,13 +69,6 @@ export function SubdomainsDetailView({
 
   // Filter state (smart filter syntax)
   const [filterQuery, setFilterQuery] = useState("")
-  const [isSearching, setIsSearching] = useState(false)
-
-  const handleFilterChange = (value: string) => {
-    setIsSearching(true)
-    setFilterQuery(value)
-    setPagination((prev) => ({ ...prev, pageIndex: 0 }))
-  }
 
   // Fetch subdomain data based on targetId or scanId (with pagination and filter params)
   const targetSubdomainsQuery = useTargetSubdomains(
@@ -96,13 +93,17 @@ export function SubdomainsDetailView({
   // Select the active query result
   const activeQuery = targetId ? targetSubdomainsQuery : scanSubdomainsQuery
   const { data: subdomainsData, isLoading, isFetching, error, refetch } = activeQuery
-
-  // Reset search state when request completes
-  React.useEffect(() => {
-    if (!isFetching && isSearching) {
-      setIsSearching(false)
-    }
-  }, [isFetching, isSearching])
+  const { isSearching, handleSearchChange: handleFilterChange } = useSearchState({
+    isFetching,
+    setSearchValue: setFilterQuery,
+    onResetPage: () => setPagination((prev) => ({ ...prev, pageIndex: 0 })),
+  })
+  const paginationInfo = subdomainsData
+    ? buildPaginationInfo({
+      ...normalizePagination(subdomainsData, pagination.pageIndex + 1, pagination.pageSize),
+      minTotalPages: 1,
+    })
+    : undefined
 
   // Get target info (only in targetId mode)
   const { data: targetData } = useTarget(targetId || 0)
@@ -123,29 +124,6 @@ export function SubdomainsDetailView({
   // Handle pagination change
   const handlePaginationChange = (newPagination: { pageIndex: number; pageSize: number }) => {
     setPagination(newPagination)
-  }
-
-  // Format date as YYYY-MM-DD HH:MM:SS (consistent with backend)
-  const formatDateForCSV = (dateString: string): string => {
-    if (!dateString) return ''
-    const date = new Date(dateString)
-    const year = date.getFullYear()
-    const month = String(date.getMonth() + 1).padStart(2, '0')
-    const day = String(date.getDate()).padStart(2, '0')
-    const hours = String(date.getHours()).padStart(2, '0')
-    const minutes = String(date.getMinutes()).padStart(2, '0')
-    const seconds = String(date.getSeconds()).padStart(2, '0')
-    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
-  }
-
-  // CSV escape
-  const escapeCSV = (value: string | number | null | undefined): string => {
-    if (value === null || value === undefined) return ''
-    const str = String(value)
-    if (str.includes(',') || str.includes('"') || str.includes('\n')) {
-      return `"${str.replace(/"/g, '""')}"`
-    }
-    return str
   }
 
   // Generate CSV content
@@ -182,15 +160,8 @@ export function SubdomainsDetailView({
 
       if (!blob) return
 
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement("a")
       const prefix = scanId ? `scan-${scanId}` : targetId ? `target-${targetId}` : "subdomains"
-      a.href = url
-      a.download = `${prefix}-subdomains-${Date.now()}.csv`
-      document.body.appendChild(a)
-      a.click()
-      a.remove()
-      URL.revokeObjectURL(url)
+      downloadBlob(blob, `${prefix}-subdomains-${Date.now()}.csv`)
     } catch (error) {
       void error
     }
@@ -203,14 +174,7 @@ export function SubdomainsDetailView({
     }
     const csvContent = generateCSV(selectedSubdomains)
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8" })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement("a")
-    a.href = url
-    a.download = `subdomains-selected-${scanId ?? targetId ?? "all"}-${Date.now()}.csv`
-    document.body.appendChild(a)
-    a.click()
-    a.remove()
-    URL.revokeObjectURL(url)
+    downloadBlob(blob, `subdomains-selected-${scanId ?? targetId ?? "all"}-${Date.now()}.csv`)
   }
 
   // Handle bulk delete
@@ -299,12 +263,7 @@ export function SubdomainsDetailView({
         onBulkDelete={targetId ? () => setDeleteDialogOpen(true) : undefined}
         pagination={pagination}
         setPagination={setPagination}
-        paginationInfo={{
-          total: subdomainsData?.total || 0,
-          page: subdomainsData?.page || 1,
-          pageSize: subdomainsData?.pageSize || 10,
-          totalPages: subdomainsData?.totalPages || 1,
-        }}
+        paginationInfo={paginationInfo}
         onPaginationChange={handlePaginationChange}
         onBulkAdd={targetId ? () => setBulkAddOpen(true) : undefined}
       />

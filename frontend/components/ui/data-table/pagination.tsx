@@ -52,6 +52,8 @@ export function DataTablePagination<TData>({
   // Calculate total count and total pages
   const total = paginationInfo?.total ?? table.getFilteredRowModel().rows.length
   const totalPages = paginationInfo?.totalPages ?? table.getPageCount()
+  const maxPageIndex = Math.max(0, totalPages - 1)
+  const displayTotalPages = Math.max(1, totalPages)
   const selectedCount = table.getFilteredSelectedRowModel().rows.length
 
   // Use useCallback to wrap handler functions to avoid unnecessary re-renders
@@ -74,19 +76,19 @@ export function DataTablePagination<TData>({
 
   const handleNextPage = React.useCallback(() => {
     if (isServerSide) {
-      table.setPageIndex(Math.min(totalPages - 1, pageIndex + 1))
+      table.setPageIndex(Math.min(maxPageIndex, pageIndex + 1))
     } else {
       table.nextPage()
     }
-  }, [table, isServerSide, pageIndex, totalPages])
+  }, [table, isServerSide, pageIndex, maxPageIndex])
 
   const handleLastPage = React.useCallback(() => {
-    table.setPageIndex(Math.max(0, totalPages - 1))
-  }, [table, totalPages])
+    table.setPageIndex(maxPageIndex)
+  }, [table, maxPageIndex])
 
   // For server-side pagination use our calculated values, for client-side pagination use table methods
   const canPreviousPage = isServerSide ? pageIndex > 0 : table.getCanPreviousPage()
-  const canNextPage = isServerSide ? pageIndex < totalPages - 1 : table.getCanNextPage()
+  const canNextPage = isServerSide ? pageIndex < maxPageIndex : table.getCanNextPage()
 
   return (
     <div className={cn("flex items-center justify-between px-2", className)}>
@@ -121,7 +123,7 @@ export function DataTablePagination<TData>({
 
         {/* Page info */}
         <div className="flex items-center justify-center text-sm font-medium whitespace-nowrap">
-          {t('page', { current: pageIndex + 1, total: totalPages || 1 })}
+          {t('page', { current: pageIndex + 1, total: displayTotalPages })}
         </div>
 
         {/* Pagination buttons */}

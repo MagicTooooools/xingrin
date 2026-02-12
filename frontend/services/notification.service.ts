@@ -13,7 +13,6 @@ import { USE_MOCK, mockDelay, getMockNotifications, getMockUnreadCount } from '@
 export class NotificationService {
   /**
    * Get notification list
-   * 后端返回分页格式: { results, total, page, pageSize, totalPages }
    */
   static async getNotifications(
     params: GetNotificationsRequest = {}
@@ -30,7 +29,6 @@ export class NotificationService {
 
   /**
    * Mark all notifications as read
-   * 后端返回: { updated: number }
    */
   static async markAllAsRead(): Promise<{ updated: number }> {
     if (USE_MOCK) {
@@ -43,7 +41,6 @@ export class NotificationService {
 
   /**
    * Get unread notification count
-   * 后端返回: { count: number }
    */
   static async getUnreadCount(): Promise<{ count: number }> {
     if (USE_MOCK) {

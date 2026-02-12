@@ -5,6 +5,8 @@ import { AlertTriangle } from "@/components/icons"
 import { useTranslations, useLocale } from "next-intl"
 import { useTargetEndpoints, useTarget } from "@/hooks/use-targets"
 import { useDeleteEndpoint, useScanEndpoints } from "@/hooks/use-endpoints"
+import { useSearchState } from "@/hooks/_shared/use-search-state"
+import { buildPaginationInfo } from "@/hooks/_shared/pagination"
 import { EndpointsDataTable } from "./endpoints-data-table"
 import { createEndpointColumns } from "./endpoints-columns"
 import { LoadingSpinner } from "@/components/loading-spinner"
@@ -12,6 +14,8 @@ import { DataTableSkeleton } from "@/components/ui/data-table-skeleton"
 import { BulkAddUrlsDialog } from "@/components/common/bulk-add-urls-dialog"
 import { ConfirmDialog } from "@/components/ui/confirm-dialog"
 import { getDateLocale } from "@/lib/date-utils"
+import { escapeCSV, formatArrayForCSV, formatDateForCSV } from "@/lib/csv-utils"
+import { downloadBlob } from "@/lib/download-utils"
 import type { TargetType } from "@/lib/url-validator"
 import {
   AlertDialog,
@@ -52,7 +56,6 @@ export function EndpointsDetailView({
   })
 
   const [filterQuery, setFilterQuery] = useState("")
-  const [isSearching, setIsSearching] = useState(false)
 
   // Internationalization
   const tColumns = useTranslations("columns")
@@ -88,12 +91,6 @@ export function EndpointsDetailView({
   // Get target info (for URL matching validation)
   const { data: target } = useTarget(targetId || 0, { enabled: !!targetId })
 
-  const handleFilterChange = (value: string) => {
-    setIsSearching(true)
-    setFilterQuery(value)
-    setPagination((prev) => ({ ...prev, pageIndex: 0 }))
-  }
-
   // Delete related hooks
   const deleteEndpoint = useDeleteEndpoint()
 
@@ -121,12 +118,11 @@ export function EndpointsDetailView({
     error,
     refetch,
   } = targetId ? targetEndpointsQuery : scanEndpointsQuery
-
-  React.useEffect(() => {
-    if (!isFetching && isSearching) {
-      setIsSearching(false)
-    }
-  }, [isFetching, isSearching])
+  const { isSearching, handleSearchChange: handleFilterChange } = useSearchState({
+    isFetching,
+    setSearchValue: setFilterQuery,
+    onResetPage: () => setPagination((prev) => ({ ...prev, pageIndex: 0 })),
+  })
 
   // Helper function - format date
   const formatDate = React.useCallback((dateString: string): string => {
@@ -170,35 +166,6 @@ export function EndpointsDetailView({
       }),
     [formatDate, translations]
   )
-
-  // Format date as YYYY-MM-DD HH:MM:SS (consistent with backend)
-  const formatDateForCSV = (dateString: string): string => {
-    if (!dateString) return ''
-    const date = new Date(dateString)
-    const year = date.getFullYear()
-    const month = String(date.getMonth() + 1).padStart(2, '0')
-    const day = String(date.getDate()).padStart(2, '0')
-    const hours = String(date.getHours()).padStart(2, '0')
-    const minutes = String(date.getMinutes()).padStart(2, '0')
-    const seconds = String(date.getSeconds()).padStart(2, '0')
-    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
-  }
-
-  // CSV escape
-  const escapeCSV = (value: string | number | boolean | null | undefined): string => {
-    if (value === null || value === undefined) return ''
-    const str = String(value)
-    if (str.includes(',') || str.includes('"') || str.includes('\n')) {
-      return `"${str.replace(/"/g, '""')}"`
-    }
-    return str
-  }
-
-  // Format array as comma-separated string
-  const formatArrayForCSV = (arr: string[] | undefined): string => {
-    if (!arr || arr.length === 0) return ''
-    return arr.join(',')
-  }
 
   // Generate CSV content
   const generateCSV = (items: Endpoint[]): string => {
@@ -249,15 +216,8 @@ export function EndpointsDetailView({
 
       if (!blob) return
 
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement("a")
       const prefix = scanId ? `scan-${scanId}` : targetId ? `target-${targetId}` : "endpoints"
-      a.href = url
-      a.download = `${prefix}-endpoints-${Date.now()}.csv`
-      document.body.appendChild(a)
-      a.click()
-      a.remove()
-      URL.revokeObjectURL(url)
+      downloadBlob(blob, `${prefix}-endpoints-${Date.now()}.csv`)
     } catch {
       toast.error(tToast("downloadFailed"))
     }
@@ -270,15 +230,8 @@ export function EndpointsDetailView({
     }
     const csvContent = generateCSV(selectedEndpoints)
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8" })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement("a")
     const prefix = scanId ? `scan-${scanId}` : targetId ? `target-${targetId}` : "endpoints"
-    a.href = url
-    a.download = `${prefix}-endpoints-selected-${Date.now()}.csv`
-    document.body.appendChild(a)
-    a.click()
-    a.remove()
-    URL.revokeObjectURL(url)
+    downloadBlob(blob, `${prefix}-endpoints-selected-${Date.now()}.csv`)
   }
 
   // Handle bulk delete
@@ -332,6 +285,14 @@ export function EndpointsDetailView({
     )
   }
 
+  const paginationInfo = buildPaginationInfo({
+    total: data?.pagination?.total ?? data?.endpoints?.length ?? 0,
+    page: data?.pagination?.page ?? pagination.pageIndex + 1,
+    pageSize: data?.pagination?.pageSize ?? pagination.pageSize,
+    totalPages: data?.pagination?.totalPages,
+    minTotalPages: 1,
+  })
+
   return (
     <>
       <EndpointsDataTable
@@ -342,8 +303,8 @@ export function EndpointsDetailView({
         isSearching={isSearching}
         pagination={pagination}
         onPaginationChange={handlePaginationChange}
-        totalCount={data?.pagination?.total || 0}
-        totalPages={data?.pagination?.totalPages || 1}
+        totalCount={paginationInfo.total}
+        totalPages={paginationInfo.totalPages}
         onSelectionChange={handleSelectionChange}
         onDownloadAll={handleDownloadAll}
         onDownloadSelected={handleDownloadSelected}

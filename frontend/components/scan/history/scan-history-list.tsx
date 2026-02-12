@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useMemo } from "react"
+import React, { useMemo } from "react"
 import dynamic from "next/dynamic"
 import { useRouter } from "next/navigation"
 import { useTranslations, useLocale } from "next-intl"
@@ -9,21 +9,11 @@ import { getDateLocale } from "@/lib/date-utils"
 import type { ScanRecord, ScanStatus } from "@/types/scan.types"
 import type { ColumnDef } from "@tanstack/react-table"
 import { DataTableSkeleton } from "@/components/ui/data-table-skeleton"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
-import { toast } from "sonner"
 import { useScans } from "@/hooks/use-scans"
-import { deleteScan, bulkDeleteScans, stopScan, getScan } from "@/services/scan.service"
-import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { buildScanProgressData, type ScanProgressData } from "@/components/scan/scan-progress-dialog"
+import { useSearchState } from "@/hooks/_shared/use-search-state"
+import { buildPaginationInfo, normalizePagination } from "@/hooks/_shared/pagination"
+import { ScanHistoryDialogs } from "@/components/scan/history/scan-history-list-dialogs"
+import { useScanHistoryActions } from "@/components/scan/history/scan-history-list-state"
 
 const ScanHistoryDataTable = dynamic(
   () => import("./scan-history-data-table").then((mod) => mod.ScanHistoryDataTable),
@@ -52,14 +42,6 @@ interface ScanHistoryListProps {
 }
 
 export function ScanHistoryList({ hideToolbar = false, targetId, pageSize: customPageSize, hideTargetColumn = false, pageSizeOptions, hidePagination = false }: ScanHistoryListProps) {
-  const queryClient = useQueryClient()
-  const [selectedScans, setSelectedScans] = useState<ScanRecord[]>([])
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-  const [scanToDelete, setScanToDelete] = useState<ScanRecord | null>(null)
-  const [bulkDeleteDialogOpen, setBulkDeleteDialogOpen] = useState(false)
-  const [stopDialogOpen, setStopDialogOpen] = useState(false)
-  const [scanToStop, setScanToStop] = useState<ScanRecord | null>(null)
-
   // Internationalization
   const tColumns = useTranslations("columns")
   const tCommon = useTranslations("common")
@@ -108,81 +90,68 @@ export function ScanHistoryList({ hideToolbar = false, targetId, pageSize: custo
     },
   }), [tColumns, tCommon, tTooltips, tScan])
   
-  // Progress dialog state
-  const [progressDialogOpen, setProgressDialogOpen] = useState(false)
-  const [progressData, setProgressData] = useState<ScanProgressData | null>(null)
-  
   // Pagination state
-  const [pagination, setPagination] = useState({
+  const [pagination, setPagination] = React.useState({
     pageIndex: 0,
     pageSize: customPageSize || 10,
   })
 
   // Search state
-  const [searchQuery, setSearchQuery] = useState("")
-  const [isSearching, setIsSearching] = useState(false)
+  const [searchQuery, setSearchQuery] = React.useState("")
   
   // Status filter state
-  const [statusFilter, setStatusFilter] = useState<ScanStatus | "all">("all")
+  const [statusFilter, setStatusFilter] = React.useState<ScanStatus | "all">("all")
 
-  const handleSearchChange = (value: string) => {
-    setIsSearching(true)
-    setSearchQuery(value)
-    setPagination((prev) => ({ ...prev, pageIndex: 0 }))
-  }
-  
   const handleStatusFilterChange = (status: ScanStatus | "all") => {
     setStatusFilter(status)
     setPagination((prev) => ({ ...prev, pageIndex: 0 }))
   }
   
   // Get scan list data
-  const { data, isLoading, isFetching, error } = useScans({
+  const { data, isLoading, isFetching, error, refetch } = useScans({
     page: pagination.pageIndex + 1, // API page numbers start from 1
     pageSize: pagination.pageSize,
     search: searchQuery || undefined,
     target: targetId,
     status: statusFilter === "all" ? undefined : statusFilter,
   })
-
-  // Reset search state when request completes
-  React.useEffect(() => {
-    if (!isFetching && isSearching) {
-      setIsSearching(false)
-    }
-  }, [isFetching, isSearching])
+  const { isSearching, handleSearchChange } = useSearchState({
+    isFetching,
+    setSearchValue: setSearchQuery,
+    onResetPage: () => setPagination((prev) => ({ ...prev, pageIndex: 0 })),
+  })
+  const paginationInfo = data
+    ? buildPaginationInfo({
+      ...normalizePagination(data, pagination.pageIndex + 1, pagination.pageSize),
+      minTotalPages: 1,
+    })
+    : undefined
   
   // Scan list data
   const scans = data?.results || []
   
-  // Delete single scan mutation
-  const deleteMutation = useMutation({
-    mutationFn: deleteScan,
-    onSuccess: () => {
-      // Refresh list data
-      queryClient.invalidateQueries({ queryKey: ['scans'] })
-    },
-  })
-  
-  // Bulk delete mutation
-  const bulkDeleteMutation = useMutation({
-    mutationFn: bulkDeleteScans,
-    onSuccess: () => {
-      // Refresh list data
-      queryClient.invalidateQueries({ queryKey: ['scans'] })
-      // Clear selected items
-      setSelectedScans([])
-    },
-  })
-  
-  // Stop scan mutation
-  const stopMutation = useMutation({
-    mutationFn: stopScan,
-    onSuccess: () => {
-      // Refresh list data
-      queryClient.invalidateQueries({ queryKey: ['scans'] })
-    },
-  })
+  const {
+    selectedScans,
+    setSelectedScans,
+    deleteDialogOpen,
+    setDeleteDialogOpen,
+    scanToDelete,
+    bulkDeleteDialogOpen,
+    setBulkDeleteDialogOpen,
+    stopDialogOpen,
+    setStopDialogOpen,
+    scanToStop,
+    progressDialogOpen,
+    setProgressDialogOpen,
+    progressData,
+    handleDeleteScan,
+    confirmDelete,
+    handleBulkDelete,
+    confirmBulkDelete,
+    handleStopScan,
+    confirmStop,
+    handleViewProgress,
+  } = useScanHistoryActions({ tToast })
 
   // Helper function - format date
   const formatDate = React.useCallback((dateString: string): string => {
@@ -202,91 +171,6 @@ export function ScanHistoryList({ hideToolbar = false, targetId, pageSize: custo
   const navigate = React.useCallback((path: string) => {
     router.push(path)
   }, [router])
-
-  // Handle delete scan record
-  const handleDeleteScan = (scan: ScanRecord) => {
-    setScanToDelete(scan)
-    setDeleteDialogOpen(true)
-  }
-
-  // Confirm delete scan record
-  const confirmDelete = async () => {
-    if (!scanToDelete) return
-
-    setDeleteDialogOpen(false)
-    
-    try {
-      await deleteMutation.mutateAsync(scanToDelete.id)
-      toast.success(tToast("deletedScanRecord", { name: scanToDelete.target?.name ?? "" }))
-    } catch {
-      toast.error(tToast("deleteFailed"))
-    } finally {
-      setScanToDelete(null)
-    }
-  }
-
-  // Handle bulk delete
-  const handleBulkDelete = () => {
-    if (selectedScans.length === 0) {
-      return
-    }
-    setBulkDeleteDialogOpen(true)
-  }
-  
-  // Handle stop scan
-  const handleStopScan = (scan: ScanRecord) => {
-    setScanToStop(scan)
-    setStopDialogOpen(true)
-  }
-  
-  // Confirm stop scan
-  const confirmStop = async () => {
-    if (!scanToStop) return
-
-    setStopDialogOpen(false)
-    
-    try {
-      await stopMutation.mutateAsync(scanToStop.id)
-      toast.success(tToast("stoppedScan", { name: scanToStop.target?.name ?? "" }))
-    } catch {
-      toast.error(tToast("stopFailed"))
-    } finally {
-      setScanToStop(null)
-    }
-  }
-  
-  // View scan progress (get latest data for single scan)
-  const handleViewProgress = async (scan: ScanRecord) => {
-    try {
-      // Get latest data for single scan, instead of refreshing entire list
-      const freshScan = await getScan(scan.id)
-      const progressData = buildScanProgressData(freshScan)
-      setProgressData(progressData)
-      setProgressDialogOpen(true)
-    } catch {
-      // If fetch fails, use current data
-      const progressData = buildScanProgressData(scan)
-      setProgressData(progressData)
-      setProgressDialogOpen(true)
-    }
-  }
-
-  // Confirm bulk delete
-  const confirmBulkDelete = async () => {
-    if (selectedScans.length === 0) return
-
-    const deletedIds = selectedScans.map(scan => scan.id)
-    
-    setBulkDeleteDialogOpen(false)
-    
-    try {
-      const result = await bulkDeleteMutation.mutateAsync(deletedIds)
-      toast.success(result.message || tToast("bulkDeleteSuccess", { count: result.deletedCount }))
-    } catch {
-      toast.error(tToast("bulkDeleteFailed"))
-    }
-  }
-
 
   // Handle pagination change
   const handlePaginationChange = (newPagination: { pageIndex: number; pageSize: number }) => {
@@ -314,8 +198,10 @@ export function ScanHistoryList({ hideToolbar = false, targetId, pageSize: custo
     return (
       <div className="flex flex-col items-center justify-center py-12">
         <p className="text-destructive mb-4">{tScan("history.loadFailed")}</p>
-        <button 
-          onClick={() => queryClient.invalidateQueries({ queryKey: ['scans'] })}
+        <button
+          onClick={() => {
+            void refetch()
+          }}
           className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
         >
           {tScan("history.retry")}
@@ -349,12 +235,7 @@ export function ScanHistoryList({ hideToolbar = false, targetId, pageSize: custo
         isSearching={isSearching}
         pagination={pagination}
         setPagination={setPagination}
-        paginationInfo={{
-          total: data?.total || 0,
-          page: data?.page || 1,
-          pageSize: data?.pageSize || 10,
-          totalPages: data?.totalPages || 1,
-        }}
+        paginationInfo={paginationInfo}
         onPaginationChange={handlePaginationChange}
         hideToolbar={hideToolbar}
         pageSizeOptions={pageSizeOptions}
@@ -363,79 +244,22 @@ export function ScanHistoryList({ hideToolbar = false, targetId, pageSize: custo
         onStatusFilterChange={handleStatusFilterChange}
       />
 
-      {/* Delete confirmation dialog */}
-      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{tConfirm("deleteTitle")}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {tConfirm("deleteScanMessage", { name: scanToDelete?.target?.name ?? "" })}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>{tCommon("actions.cancel")}</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={confirmDelete} 
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              {tCommon("actions.delete")}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Bulk delete confirmation dialog */}
-      <AlertDialog open={bulkDeleteDialogOpen} onOpenChange={setBulkDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{tConfirm("bulkDeleteTitle")}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {tConfirm("bulkDeleteScanMessage", { count: selectedScans.length })}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          {/* Scan record list container */}
-          <div className="mt-2 p-2 bg-muted rounded-md max-h-96 overflow-y-auto">
-            <ul className="text-sm space-y-1">
-              {selectedScans.map((scan) => (
-                <li key={scan.id} className="flex items-center justify-between">
-                  <span className="font-medium">{scan.target?.name}</span>
-                  <span className="text-muted-foreground text-xs">{scan.engineNames?.join(", ") || "-"}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-          <AlertDialogFooter>
-            <AlertDialogCancel>{tCommon("actions.cancel")}</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={confirmBulkDelete} 
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              {tConfirm("deleteScanCount", { count: selectedScans.length })}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Stop scan confirmation dialog */}
-      <AlertDialog open={stopDialogOpen} onOpenChange={setStopDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{tConfirm("stopScanTitle")}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {tConfirm("stopScanMessage", { name: scanToStop?.target?.name ?? "" })}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>{tCommon("actions.cancel")}</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={confirmStop} 
-              className="bg-primary text-primary-foreground hover:bg-primary/90"
-            >
-              {tConfirm("stopScanAction")}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <ScanHistoryDialogs
+        tConfirm={tConfirm}
+        tCommon={tCommon}
+        deleteDialogOpen={deleteDialogOpen}
+        setDeleteDialogOpen={setDeleteDialogOpen}
+        scanToDelete={scanToDelete}
+        onConfirmDelete={confirmDelete}
+        bulkDeleteDialogOpen={bulkDeleteDialogOpen}
+        setBulkDeleteDialogOpen={setBulkDeleteDialogOpen}
+        selectedScans={selectedScans}
+        onConfirmBulkDelete={confirmBulkDelete}
+        stopDialogOpen={stopDialogOpen}
+        setStopDialogOpen={setStopDialogOpen}
+        scanToStop={scanToStop}
+        onConfirmStop={confirmStop}
+      />
 
       {/* Scan progress dialog */}
       {progressDialogOpen ? (

@@ -12,6 +12,7 @@ import { useSystemLogs, useLogFiles } from "@/hooks/use-system-logs"
 import { LogToolbar, type LogLevel } from "./log-toolbar"
 import { AnsiLogViewer } from "./ansi-log-viewer"
 import { PageHeader } from "@/components/common/page-header"
+import { downloadBlob } from "@/lib/download-utils"
 
 const DEFAULT_FILE = "lunafox.log"
 const DEFAULT_LINES = 500
@@ -53,14 +54,7 @@ export function SystemLogsView() {
     if (!content) return
     
     const blob = new Blob([content], { type: "text/plain;charset=utf-8" })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement("a")
-    a.href = url
-    a.download = selectedFile
-    document.body.appendChild(a)
-    a.click()
-    a.remove()
-    URL.revokeObjectURL(url)
+    downloadBlob(blob, selectedFile)
   }, [content, selectedFile])
 
   return (
