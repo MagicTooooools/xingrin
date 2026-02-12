@@ -65,5 +65,5 @@ func (h *AgentHandler) UpdateAgentConfig(c *gin.Context) {
 		h.runtimeService.SendConfigUpdate(agent)
 	}
 
-	dto.Success(c, toAgentResponse(agent, nil))
+	dto.Success(c, toAgentOutput(agent, nil))
 }

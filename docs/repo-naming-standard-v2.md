@@ -8,9 +8,15 @@
 
 ### 2.1 application 层
 
-- 允许角色后缀：`query`、`command`、`facade`、`mapper`、`contracts`、`errors`、`aliases`、`adapter`、`codec`、`service`
+- 通用模板：`docs/server-application-naming-template-v1.md`（模块 `application/README.md` 优先引用模板 + 仅补充模块特有规则）
+- 若存在历史聚合文件（如 `aliases.go`、`errors.go`），需在模块 README 中显式标注“历史保留 + 后续迁移方向”
+- 模块 README 的“补充规则”固定使用 5 字段：入口聚合、服务编排、端口拆分、模型命名、历史迁移
+- 允许角色后缀：`query`、`command`、`facade`、`mapper`、`ports`、`contracts`、`errors`、`aliases`、`adapter`、`codec`、`service`
 - 禁止泛名文件：`commands.go`、`ports.go`、`types_alias.go`
+- 端口接口建议使用资源化命名：`*_ports.go`（例如 `scan_ports.go`、`identity_ports.go`）
+- 端口文件优先按职责拆分：`query_ports.go`、`command_ports.go`，必要时补充 `runtime_ports.go`、`codec_ports.go`
 - 禁止资源无前缀泛名：`service.go`（必须资源化，如 `scan_command_service.go`、`agent_service.go`）
+- handler/application 映射函数命名（`to*Input` / `to*Output`）见：`docs/server-mapper-naming-standard-v1.md`
 
 ### 2.2 facade 约束
 
@@ -42,6 +48,7 @@
 ## 4. 守卫脚本
 
 - `server/scripts/check-naming-conventions.sh`
+- `server/scripts/check-mapper-naming.sh`
 - `scripts/check-frontend-naming.mjs`
 - `scripts/check-repo-naming.sh`
 

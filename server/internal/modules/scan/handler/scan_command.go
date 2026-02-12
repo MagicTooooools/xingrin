@@ -127,7 +127,7 @@ func (h *ScanHandler) Create(c *gin.Context) {
 			return
 		}
 
-		scan, err := h.service.CreateNormal(toCreateNormalRequest(&req))
+		scan, err := h.service.CreateNormal(toScanCreateNormalInput(&req))
 		if err != nil {
 			if errors.Is(err, service.ErrTargetNotFound) {
 				dto.NotFound(c, "Target not found")
@@ -143,7 +143,7 @@ func (h *ScanHandler) Create(c *gin.Context) {
 			return
 		}
 
-		dto.Created(c, toScanDetailResponse(scan))
+		dto.Created(c, toScanDetailOutput(scan))
 
 	case "quick":
 		if len(req.Targets) == 0 {

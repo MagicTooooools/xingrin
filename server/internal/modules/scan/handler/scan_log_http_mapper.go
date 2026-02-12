@@ -3,9 +3,10 @@ package handler
 import (
 	scanapp "github.com/yyhuni/lunafox/server/internal/modules/scan/application"
 	"github.com/yyhuni/lunafox/server/internal/modules/scan/dto"
+	"github.com/yyhuni/lunafox/server/internal/pkg/timeutil"
 )
 
-func toScanLogListQuery(query *dto.ScanLogListQuery) *scanapp.ScanLogListQuery {
+func toScanLogQueryInput(query *dto.ScanLogListQuery) *scanapp.ScanLogListQuery {
 	if query == nil {
 		return nil
 	}
@@ -15,7 +16,7 @@ func toScanLogListQuery(query *dto.ScanLogListQuery) *scanapp.ScanLogListQuery {
 	}
 }
 
-func toScanLogBulkCreateRequest(scanID int, req *dto.BulkCreateScanLogsRequest) *scanapp.ScanLogBulkCreateRequest {
+func toScanLogCreateInput(scanID int, req *dto.BulkCreateScanLogsRequest) *scanapp.ScanLogBulkCreateRequest {
 	if req == nil {
 		return &scanapp.ScanLogBulkCreateRequest{ScanID: scanID}
 	}
@@ -31,4 +32,19 @@ func toScanLogBulkCreateRequest(scanID int, req *dto.BulkCreateScanLogsRequest) 
 		ScanID: scanID,
 		Items:  items,
 	}
+}
+
+func toScanLogListOutput(logs []scanapp.ScanLogEntry, hasMore bool) dto.ScanLogListResponse {
+	results := make([]dto.ScanLogResponse, 0, len(logs))
+	for index := range logs {
+		item := logs[index]
+		results = append(results, dto.ScanLogResponse{
+			ID:        item.ID,
+			ScanID:    item.ScanID,
+			Level:     item.Level,
+			Content:   item.Content,
+			CreatedAt: timeutil.ToUTC(item.CreatedAt),
+		})
+	}
+	return dto.ScanLogListResponse{Results: results, HasMore: hasMore}
 }

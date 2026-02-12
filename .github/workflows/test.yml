@@ -12,6 +12,38 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+          cache-dependency-path: frontend/pnpm-lock.yaml
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: pnpm install --frozen-lockfile
+
+      - name: Frontend typecheck
+        working-directory: frontend
+        run: pnpm run typecheck
+
+      - name: Frontend lint core
+        working-directory: frontend
+        run: pnpm run lint:core
+
+      - name: Frontend legacy props guard
+        working-directory: frontend
+        run: pnpm run check:datatable-legacy
+
+      - name: Frontend test
+        working-directory: frontend
+        run: pnpm run test
+
       - name: Set up Go
         uses: actions/setup-go@v5
         with:

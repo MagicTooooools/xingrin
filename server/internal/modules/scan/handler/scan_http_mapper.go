@@ -8,7 +8,7 @@ import (
 	"github.com/yyhuni/lunafox/server/internal/pkg/timeutil"
 )
 
-func toScanListQuery(query *dto.ScanListQuery) *scanapp.ScanListQuery {
+func toScanQueryInput(query *dto.ScanListQuery) *scanapp.ScanListQuery {
 	if query == nil {
 		return nil
 	}
@@ -21,7 +21,7 @@ func toScanListQuery(query *dto.ScanListQuery) *scanapp.ScanListQuery {
 	}
 }
 
-func toCreateNormalRequest(req *dto.CreateScanRequest) *scanapp.CreateNormalRequest {
+func toScanCreateNormalInput(req *dto.CreateScanRequest) *scanapp.CreateNormalRequest {
 	if req == nil {
 		return nil
 	}
@@ -33,7 +33,7 @@ func toCreateNormalRequest(req *dto.CreateScanRequest) *scanapp.CreateNormalRequ
 	}
 }
 
-func toScanResponse(scan *scanapp.QueryScan) dto.ScanResponse {
+func toScanOutput(scan *scanapp.QueryScan) dto.ScanResponse {
 	if scan == nil {
 		return dto.ScanResponse{
 			EngineIDs:   []int64{},
@@ -95,13 +95,13 @@ func toScanResponse(scan *scanapp.QueryScan) dto.ScanResponse {
 	return response
 }
 
-func toScanDetailResponse(scan *scanapp.QueryScan) dto.ScanDetailResponse {
+func toScanDetailOutput(scan *scanapp.QueryScan) dto.ScanDetailResponse {
 	if scan == nil {
-		return dto.ScanDetailResponse{ScanResponse: toScanResponse(nil)}
+		return dto.ScanDetailResponse{ScanResponse: toScanOutput(nil)}
 	}
 
 	response := dto.ScanDetailResponse{
-		ScanResponse:      toScanResponse(scan),
+		ScanResponse:      toScanOutput(scan),
 		YamlConfiguration: scan.YamlConfiguration,
 		ResultsDir:        scan.ResultsDir,
 		WorkerID:          scan.WorkerID,
@@ -117,7 +117,7 @@ func toScanDetailResponse(scan *scanapp.QueryScan) dto.ScanDetailResponse {
 	return response
 }
 
-func toScanStatisticsResponse(stats *scanapp.ScanStatistics) dto.ScanStatisticsResponse {
+func toScanStatisticsOutput(stats *scanapp.ScanStatistics) dto.ScanStatisticsResponse {
 	if stats == nil {
 		return dto.ScanStatisticsResponse{}
 	}
@@ -134,7 +134,7 @@ func toScanStatisticsResponse(stats *scanapp.ScanStatistics) dto.ScanStatisticsR
 	}
 }
 
-func toWorkerTargetNameResponse(target *scanapp.ScanTargetName) dto.WorkerTargetNameResponse {
+func toWorkerTargetNameOutput(target *scanapp.ScanTargetName) dto.WorkerTargetNameResponse {
 	if target == nil {
 		return dto.WorkerTargetNameResponse{}
 	}
