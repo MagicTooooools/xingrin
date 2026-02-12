@@ -16,7 +16,7 @@ func NewWordlistHandler(svc *service.WordlistFacade) *WordlistHandler {
 	return &WordlistHandler{svc: svc}
 }
 
-func toWordlistResponse(wordlist *service.Wordlist) dto.WordlistResponse {
+func toWordlistOutput(wordlist *service.Wordlist) dto.WordlistResponse {
 	return dto.WordlistResponse{
 		ID:          wordlist.ID,
 		Name:        wordlist.Name,

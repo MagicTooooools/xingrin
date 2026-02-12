@@ -2,12 +2,12 @@ package handler
 
 import (
 	"errors"
-	"github.com/yyhuni/lunafox/server/internal/pkg/timeutil"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 	service "github.com/yyhuni/lunafox/server/internal/modules/snapshot/application"
 	"github.com/yyhuni/lunafox/server/internal/modules/snapshot/dto"
+	"github.com/yyhuni/lunafox/server/internal/pkg/timeutil"
 )
 
 // ScreenshotSnapshotHandler handles screenshot snapshot endpoints
@@ -34,7 +34,7 @@ func (h *ScreenshotSnapshotHandler) BulkUpsert(c *gin.Context) {
 		return
 	}
 
-	snapshotCount, assetCount, err := h.svc.SaveAndSync(scanID, req.TargetID, toScreenshotSnapshotItems(req.Screenshots))
+	snapshotCount, assetCount, err := h.svc.SaveAndSync(scanID, req.TargetID, toScreenshotSnapshotItemsInput(req.Screenshots))
 	if err != nil {
 		if errors.Is(err, service.ErrScanNotFoundForSnapshot) {
 			dto.NotFound(c, "Scan not found")
@@ -68,7 +68,7 @@ func (h *ScreenshotSnapshotHandler) List(c *gin.Context) {
 		return
 	}
 
-	snapshots, total, err := h.svc.ListByScan(scanID, toSnapshotListQuery(query.GetPage(), query.GetPageSize(), query.Filter))
+	snapshots, total, err := h.svc.ListByScan(scanID, toSnapshotListQueryInput(query.GetPage(), query.GetPageSize(), query.Filter))
 	if err != nil {
 		if errors.Is(err, service.ErrScanNotFoundForSnapshot) {
 			dto.NotFound(c, "Scan not found")
@@ -81,13 +81,7 @@ func (h *ScreenshotSnapshotHandler) List(c *gin.Context) {
 	// Convert to response (exclude image data)
 	resp := make([]dto.ScreenshotSnapshotResponse, 0, len(snapshots))
 	for _, s := range snapshots {
-		resp = append(resp, dto.ScreenshotSnapshotResponse{
-			ID:         s.ID,
-			ScanID:     s.ScanID,
-			URL:        s.URL,
-			StatusCode: s.StatusCode,
-			CreatedAt:  timeutil.ToUTC(s.CreatedAt),
-		})
+		resp = append(resp, toScreenshotSnapshotOutput(&s))
 	}
 
 	dto.Paginated(c, resp, total, query.GetPage(), query.GetPageSize())
@@ -131,4 +125,14 @@ func (h *ScreenshotSnapshotHandler) GetImage(c *gin.Context) {
 	c.Header("Content-Type", "image/webp")
 	c.Header("Content-Disposition", "inline; filename=\"screenshot_snapshot_"+strconv.Itoa(snapshotID)+".webp\"")
 	c.Data(200, "image/webp", snapshot.Image)
+}
+
+func toScreenshotSnapshotOutput(s *service.ScreenshotSnapshot) dto.ScreenshotSnapshotResponse {
+	return dto.ScreenshotSnapshotResponse{
+		ID:         s.ID,
+		ScanID:     s.ScanID,
+		URL:        s.URL,
+		StatusCode: s.StatusCode,
+		CreatedAt:  timeutil.ToUTC(s.CreatedAt),
+	}
 }

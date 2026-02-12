@@ -36,13 +36,13 @@ func (h *DirectoryHandler) List(c *gin.Context) {
 
 	resp := make([]dto.DirectoryResponse, 0, len(directories))
 	for _, item := range directories {
-		resp = append(resp, toDirectoryResponse(&item))
+		resp = append(resp, toDirectoryOutput(&item))
 	}
 
 	dto.Paginated(c, resp, total, query.GetPage(), query.GetPageSize())
 }
 
-func toDirectoryResponse(directory *service.Directory) dto.DirectoryResponse {
+func toDirectoryOutput(directory *service.Directory) dto.DirectoryResponse {
 	return dto.DirectoryResponse{
 		ID:            directory.ID,
 		TargetID:      directory.TargetID,

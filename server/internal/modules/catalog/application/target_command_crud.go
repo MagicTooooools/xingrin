@@ -20,10 +20,10 @@ type FailedTarget struct {
 
 type TargetCommandService struct {
 	store           TargetCommandStore
-	organizationRef OrganizationStore
+	organizationRef OrganizationTargetBindingStore
 }
 
-func NewTargetCommandService(store TargetCommandStore, organizationRef OrganizationStore) *TargetCommandService {
+func NewTargetCommandService(store TargetCommandStore, organizationRef OrganizationTargetBindingStore) *TargetCommandService {
 	return &TargetCommandService{store: store, organizationRef: organizationRef}
 }
 

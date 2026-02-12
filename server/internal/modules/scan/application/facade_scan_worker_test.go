@@ -16,14 +16,14 @@ func (stub *workerTargetNameStoreStub) FindAll(page, pageSize int, targetID int,
 	return nil, 0, nil
 }
 
-func (stub *workerTargetNameStoreStub) FindByIDWithTarget(id int) (*QueryScan, error) {
+func (stub *workerTargetNameStoreStub) GetQueryByID(id int) (*QueryScan, error) {
 	if stub.err != nil {
 		return nil, stub.err
 	}
 	return stub.scan, nil
 }
 
-func (stub *workerTargetNameStoreStub) GetActiveByID(id int) (*QueryScan, error) {
+func (stub *workerTargetNameStoreStub) GetByIDNotDeleted(id int) (*QueryScan, error) {
 	return nil, nil
 }
 
@@ -49,7 +49,7 @@ func (stub *workerTargetNameStoreStub) UpdateStatus(id int, status string, error
 
 func TestScanFacadeGetTargetName(t *testing.T) {
 	t.Run("scan not found", func(t *testing.T) {
-		facade := NewScanFacade(&workerTargetNameStoreStub{err: gorm.ErrRecordNotFound}, nil, nil, nil, nil)
+		facade := NewScanFacade(&workerTargetNameStoreStub{err: gorm.ErrRecordNotFound}, &workerTargetNameStoreStub{err: gorm.ErrRecordNotFound}, nil, nil, nil, nil)
 		_, err := facade.GetTargetName(1)
 		if !errors.Is(err, ErrScanNotFound) {
 			t.Fatalf("expected ErrScanNotFound, got %v", err)
@@ -57,7 +57,7 @@ func TestScanFacadeGetTargetName(t *testing.T) {
 	})
 
 	t.Run("target not found", func(t *testing.T) {
-		facade := NewScanFacade(&workerTargetNameStoreStub{scan: &QueryScan{ID: 1}}, nil, nil, nil, nil)
+		facade := NewScanFacade(&workerTargetNameStoreStub{scan: &QueryScan{ID: 1}}, &workerTargetNameStoreStub{scan: &QueryScan{ID: 1}}, nil, nil, nil, nil)
 		_, err := facade.GetTargetName(1)
 		if !errors.Is(err, ErrScanTargetNotFound) {
 			t.Fatalf("expected ErrScanTargetNotFound, got %v", err)
@@ -65,7 +65,7 @@ func TestScanFacadeGetTargetName(t *testing.T) {
 	})
 
 	t.Run("success", func(t *testing.T) {
-		facade := NewScanFacade(&workerTargetNameStoreStub{scan: &QueryScan{ID: 1, Target: &QueryTargetRef{Name: "example.com", Type: "domain"}}}, nil, nil, nil, nil)
+		facade := NewScanFacade(&workerTargetNameStoreStub{scan: &QueryScan{ID: 1, Target: &QueryTargetRef{Name: "example.com", Type: "domain"}}}, &workerTargetNameStoreStub{scan: &QueryScan{ID: 1, Target: &QueryTargetRef{Name: "example.com", Type: "domain"}}}, nil, nil, nil, nil)
 		target, err := facade.GetTargetName(1)
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)

@@ -7,7 +7,6 @@ import (
 	"github.com/gin-gonic/gin"
 	service "github.com/yyhuni/lunafox/server/internal/modules/scan/application"
 	"github.com/yyhuni/lunafox/server/internal/modules/scan/dto"
-	"github.com/yyhuni/lunafox/server/internal/pkg/timeutil"
 )
 
 // ScanLogHandler handles scan log HTTP requests
@@ -38,7 +37,7 @@ func (h *ScanLogHandler) List(c *gin.Context) {
 		return
 	}
 
-	logs, hasMore, err := h.svc.ListByScanID(c.Request.Context(), scanID, toScanLogListQuery(&query))
+	logs, hasMore, err := h.svc.ListByScanID(c.Request.Context(), scanID, toScanLogQueryInput(&query))
 	if err != nil {
 		if errors.Is(err, service.ErrScanLogScanNotFound) || errors.Is(err, service.ErrScanNotFound) {
 			dto.NotFound(c, "Scan not found")
@@ -48,16 +47,5 @@ func (h *ScanLogHandler) List(c *gin.Context) {
 		return
 	}
 
-	results := make([]dto.ScanLogResponse, 0, len(logs))
-	for _, item := range logs {
-		results = append(results, dto.ScanLogResponse{
-			ID:        item.ID,
-			ScanID:    item.ScanID,
-			Level:     item.Level,
-			Content:   item.Content,
-			CreatedAt: timeutil.ToUTC(item.CreatedAt),
-		})
-	}
-
-	dto.Success(c, dto.ScanLogListResponse{Results: results, HasMore: hasMore})
+	dto.Success(c, toScanLogListOutput(logs, hasMore))
 }

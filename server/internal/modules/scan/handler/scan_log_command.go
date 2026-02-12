@@ -23,7 +23,7 @@ func (h *ScanLogHandler) BulkCreate(c *gin.Context) {
 		return
 	}
 
-	createdCount, err := h.svc.BulkCreate(c.Request.Context(), toScanLogBulkCreateRequest(scanID, &req))
+	createdCount, err := h.svc.BulkCreate(c.Request.Context(), toScanLogCreateInput(scanID, &req))
 	if err != nil {
 		if errors.Is(err, service.ErrScanLogScanNotFound) || errors.Is(err, service.ErrScanNotFound) {
 			dto.NotFound(c, "Scan not found")

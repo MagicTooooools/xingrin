@@ -36,7 +36,7 @@ func (h *EndpointHandler) List(c *gin.Context) {
 
 	resp := make([]dto.EndpointResponse, 0, len(endpoints))
 	for _, endpoint := range endpoints {
-		resp = append(resp, toEndpointResponse(&endpoint))
+		resp = append(resp, toEndpointOutput(&endpoint))
 	}
 
 	dto.Paginated(c, resp, total, query.GetPage(), query.GetPageSize())
@@ -61,10 +61,10 @@ func (h *EndpointHandler) GetByID(c *gin.Context) {
 		return
 	}
 
-	dto.Success(c, toEndpointResponse(endpoint))
+	dto.Success(c, toEndpointOutput(endpoint))
 }
 
-func toEndpointResponse(endpoint *service.Endpoint) dto.EndpointResponse {
+func toEndpointOutput(endpoint *service.Endpoint) dto.EndpointResponse {
 	tech := []string(endpoint.Tech)
 	if tech == nil {
 		tech = []string{}

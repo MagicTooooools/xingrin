@@ -1,20 +1,11 @@
 # snapshot/application
 
-snapshot 模块 application 命名规范：
+通用规则请遵循：`docs/server-application-naming-template-v1.md`
 
-- `ports.go`：应用层端口接口（query/command store、asset sync、scan lookup、codec 等依赖抽象）。
-- `query_inputs.go`：应用层查询入参模型（分页、过滤、排序）。
-- `facade_*.go`：按业务视角聚合对外能力（web/discovery/port-capture/vulnerability）。
-- `*_snapshot.go`：按资产类型拆分快照 query/command 逻辑。
+snapshot 模块补充规则：
 
-说明：
-
-- 默认实现优先放在 `infrastructure`，并按能力命名（如 `clock.go`、`token_generator.go`、`codec.go`）。
-
-约束：
-
-- 新代码不再使用 `contracts.go`，统一使用 `ports.go`。
-- 新代码不再使用 `defaults.go`。
-- 新代码不在 `application` 层新增 `default_impls.go`。
-- `application` 层不直接依赖 `dto`；DTO 映射放在 `handler`/`wiring` 边界层。
-- 避免使用弱语义泛名文件（如 `types.go`、`common.go`）。
+- **入口聚合**：facade 维度按业务视角划分（`facade_web_snapshot.go`、`facade_discovery_snapshot.go`、`facade_port_capture_snapshot.go`、`facade_vulnerability_snapshot.go`）。
+- **服务编排**：`*_snapshot.go` 按资产类型拆分 query/command 服务实现，不内联端口或跨边界模型定义。
+- **端口拆分**：端口按资源+职责拆分为 `*_query_ports.go`、`*_command_ports.go`、`*_lookup_ports.go`、`*_codec_ports.go`。
+- **模型命名**：跨边界模型和入参分别使用 `*_item_models.go`、`*_query_inputs.go`（如 `snapshot_list_query_inputs.go`、`vulnerability_snapshot_query_inputs.go`），domain 别名使用 `*_aliases.go`。
+- **历史迁移**：无历史聚合文件，保持资源化命名不回退。

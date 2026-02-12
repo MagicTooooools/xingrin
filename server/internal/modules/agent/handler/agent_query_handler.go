@@ -48,7 +48,7 @@ func (h *AgentHandler) ListAgents(c *gin.Context) {
 				}
 			}
 		}
-		results = append(results, toAgentResponse(agent, heartbeat))
+		results = append(results, toAgentOutput(agent, heartbeat))
 	}
 
 	dto.Paginated(c, results, total, page, pageSize)
@@ -89,5 +89,5 @@ func (h *AgentHandler) GetAgent(c *gin.Context) {
 		}
 	}
 
-	dto.Success(c, toAgentResponse(agent, heartbeat))
+	dto.Success(c, toAgentOutput(agent, heartbeat))
 }

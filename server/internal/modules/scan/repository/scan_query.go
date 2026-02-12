@@ -6,8 +6,8 @@ import (
 	"gorm.io/gorm"
 )
 
-// GetActiveByID finds a scan by ID (excluding soft deleted).
-func (r *ScanRepository) GetActiveByID(id int) (*ScanRecord, error) {
+// GetByIDNotDeleted finds a scan by ID (excluding soft deleted).
+func (r *ScanRepository) GetByIDNotDeleted(id int) (*ScanRecord, error) {
 	var scan model.Scan
 	err := r.db.Where("id = ? AND deleted_at IS NULL", id).
 		First(&scan).Error
@@ -17,8 +17,8 @@ func (r *ScanRepository) GetActiveByID(id int) (*ScanRecord, error) {
 	return scanModelToRecord(&scan), nil
 }
 
-// FindByIDWithTarget finds a scan by ID with target preloaded.
-func (r *ScanRepository) FindByIDWithTarget(id int) (*ScanRecord, error) {
+// GetQueryByID finds a query scan by ID with target preloaded.
+func (r *ScanRepository) GetQueryByID(id int) (*ScanRecord, error) {
 	var scan model.Scan
 	err := r.db.Where("id = ? AND deleted_at IS NULL", id).
 		Preload("Target").
@@ -27,6 +27,30 @@ func (r *ScanRepository) FindByIDWithTarget(id int) (*ScanRecord, error) {
 		return nil, err
 	}
 	return scanModelToRecord(&scan), nil
+}
+
+// GetTaskRuntimeByID finds a runtime scan by ID with target preloaded.
+func (r *ScanRepository) GetTaskRuntimeByID(id int) (*TaskRuntimeScanRecord, error) {
+	var scan model.Scan
+	err := r.db.Where("id = ? AND deleted_at IS NULL", id).
+		Preload("Target").
+		First(&scan).Error
+	if err != nil {
+		return nil, err
+	}
+	return scanModelToTaskRuntimeRecord(&scan), nil
+}
+
+// FindScanLogScanRefByID finds the minimal scan projection required by scan-log flows.
+func (r *ScanRepository) FindScanLogScanRefByID(id int) (*ScanLogScanRefRecord, error) {
+	var scan model.Scan
+	err := r.db.Where("id = ? AND deleted_at IS NULL", id).
+		Select("id", "status").
+		First(&scan).Error
+	if err != nil {
+		return nil, err
+	}
+	return scanModelToScanLogScanRefRecord(&scan), nil
 }
 
 // FindByIDs finds scans by IDs (excluding soft deleted).
@@ -129,8 +153,8 @@ func (r *ScanRepository) GetStatistics() (*ScanStatistics, error) {
 	return stats, nil
 }
 
-// GetTargetByScanID returns the target associated with a scan.
-func (r *ScanRepository) GetTargetByScanID(scanID int) (*ScanTargetRecord, error) {
+// GetTargetRefByScanID returns the target associated with a scan.
+func (r *ScanRepository) GetTargetRefByScanID(scanID int) (*ScanTargetRecord, error) {
 	var scan model.Scan
 	err := r.db.Where("id = ? AND deleted_at IS NULL", scanID).
 		Preload("Target").

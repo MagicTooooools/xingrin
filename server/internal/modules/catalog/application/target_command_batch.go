@@ -53,7 +53,7 @@ func (service *TargetCommandService) BatchCreateTargets(ctx context.Context, nam
 			}
 		}
 
-		exists, err := service.organizationRef.Exists(*organizationID)
+		exists, err := service.organizationRef.ExistsByID(*organizationID)
 		if err != nil {
 			return &BatchCreateResult{
 				CreatedCount:  0,

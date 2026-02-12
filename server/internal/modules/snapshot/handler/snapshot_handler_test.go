@@ -318,7 +318,7 @@ func TestVulnerabilitySnapshotListByScan(t *testing.T) {
 
 				var resp []dto.VulnerabilitySnapshotResponse
 				for _, s := range snapshots {
-					resp = append(resp, toVulnerabilitySnapshotResponse(&s))
+					resp = append(resp, toVulnerabilitySnapshotOutput(&s))
 				}
 
 				dto.Paginated(c, resp, total, query.GetPage(), query.GetPageSize())
@@ -418,7 +418,7 @@ func TestVulnerabilitySnapshotListAll(t *testing.T) {
 
 				var resp []dto.VulnerabilitySnapshotResponse
 				for _, s := range snapshots {
-					resp = append(resp, toVulnerabilitySnapshotResponse(&s))
+					resp = append(resp, toVulnerabilitySnapshotOutput(&s))
 				}
 
 				dto.Paginated(c, resp, total, query.GetPage(), query.GetPageSize())
@@ -535,7 +535,7 @@ func TestVulnerabilitySnapshotGetByID(t *testing.T) {
 					return
 				}
 
-				dto.OK(c, toVulnerabilitySnapshotResponse(snapshot))
+				dto.OK(c, toVulnerabilitySnapshotOutput(snapshot))
 			})
 
 			req := httptest.NewRequest(http.MethodGet, "/api/vulnerability-snapshots/"+tt.id+"/", nil)
@@ -1213,7 +1213,7 @@ func TestIntegrationCompleteFlow(t *testing.T) {
 
 			var resp []dto.VulnerabilitySnapshotResponse
 			for _, s := range snapshots {
-				resp = append(resp, toVulnerabilitySnapshotResponse(&s))
+				resp = append(resp, toVulnerabilitySnapshotOutput(&s))
 			}
 
 			dto.Paginated(c, resp, total, query.GetPage(), query.GetPageSize())
@@ -1248,7 +1248,7 @@ func TestIntegrationCompleteFlow(t *testing.T) {
 		router := gin.New()
 		router.GET("/api/vulnerability-snapshots/:id/", func(c *gin.Context) {
 			snapshot, _ := mockSvc.GetByID(1)
-			dto.OK(c, toVulnerabilitySnapshotResponse(snapshot))
+			dto.OK(c, toVulnerabilitySnapshotOutput(snapshot))
 		})
 
 		req := httptest.NewRequest(http.MethodGet, "/api/vulnerability-snapshots/1/", nil)
@@ -1380,7 +1380,7 @@ func TestIntegrationLargeDataset(t *testing.T) {
 
 		var resp []dto.VulnerabilitySnapshotResponse
 		for _, s := range snapshots {
-			resp = append(resp, toVulnerabilitySnapshotResponse(&s))
+			resp = append(resp, toVulnerabilitySnapshotOutput(&s))
 		}
 
 		dto.Paginated(c, resp, total, query.GetPage(), query.GetPageSize())
@@ -1451,7 +1451,7 @@ func TestIntegrationFilterAndOrderingCombination(t *testing.T) {
 
 		var resp []dto.VulnerabilitySnapshotResponse
 		for _, s := range snapshots {
-			resp = append(resp, toVulnerabilitySnapshotResponse(&s))
+			resp = append(resp, toVulnerabilitySnapshotOutput(&s))
 		}
 
 		dto.Paginated(c, resp, total, query.GetPage(), query.GetPageSize())
@@ -1880,7 +1880,7 @@ func TestListHandler(t *testing.T) {
 
 				var resp []dto.WebsiteSnapshotResponse
 				for _, s := range snapshots {
-					resp = append(resp, toWebsiteSnapshotResponse(&s))
+					resp = append(resp, toWebsiteSnapshotOutput(&s))
 				}
 
 				dto.Paginated(c, resp, total, query.GetPage(), query.GetPageSize())

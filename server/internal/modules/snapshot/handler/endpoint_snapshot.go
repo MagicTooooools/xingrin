@@ -38,7 +38,7 @@ func (h *EndpointSnapshotHandler) BulkUpsert(c *gin.Context) {
 		return
 	}
 
-	snapshotCount, assetCount, err := h.svc.SaveAndSync(scanID, req.TargetID, toEndpointSnapshotItems(req.Endpoints))
+	snapshotCount, assetCount, err := h.svc.SaveAndSync(scanID, req.TargetID, toEndpointSnapshotItemsInput(req.Endpoints))
 	if err != nil {
 		if errors.Is(err, service.ErrScanNotFoundForSnapshot) {
 			dto.NotFound(c, "Scan not found")
@@ -68,7 +68,7 @@ func (h *EndpointSnapshotHandler) List(c *gin.Context) {
 		return
 	}
 
-	snapshots, total, err := h.svc.ListByScan(scanID, toSnapshotListQuery(query.GetPage(), query.GetPageSize(), query.Filter))
+	snapshots, total, err := h.svc.ListByScan(scanID, toSnapshotListQueryInput(query.GetPage(), query.GetPageSize(), query.Filter))
 	if err != nil {
 		if errors.Is(err, service.ErrScanNotFoundForSnapshot) {
 			dto.NotFound(c, "Scan not found")
@@ -80,7 +80,7 @@ func (h *EndpointSnapshotHandler) List(c *gin.Context) {
 
 	var resp []dto.EndpointSnapshotResponse
 	for _, s := range snapshots {
-		resp = append(resp, toEndpointSnapshotResponse(&s))
+		resp = append(resp, toEndpointSnapshotOutput(&s))
 	}
 
 	dto.Paginated(c, resp, total, query.GetPage(), query.GetPageSize())
@@ -159,7 +159,7 @@ func (h *EndpointSnapshotHandler) Export(c *gin.Context) {
 	}
 }
 
-func toEndpointSnapshotResponse(s *service.EndpointSnapshot) dto.EndpointSnapshotResponse {
+func toEndpointSnapshotOutput(s *service.EndpointSnapshot) dto.EndpointSnapshotResponse {
 	tech := []string(s.Tech)
 	if tech == nil {
 		tech = []string{}

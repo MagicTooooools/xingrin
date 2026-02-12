@@ -101,5 +101,5 @@ func (h *WordlistHandler) UpdateContent(c *gin.Context) {
 		return
 	}
 
-	dto.Success(c, toWordlistResponse(wordlist))
+	dto.Success(c, toWordlistOutput(wordlist))
 }

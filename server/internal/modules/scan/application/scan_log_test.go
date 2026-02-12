@@ -8,7 +8,7 @@ import (
 	"gorm.io/gorm"
 )
 
-type scanLogStoreStub struct {
+type scanLogQueryCommandStoreStub struct {
 	rows          []ScanLogEntry
 	err           error
 	lastScanID    int
@@ -17,7 +17,7 @@ type scanLogStoreStub struct {
 	bulkCreateErr error
 }
 
-func (stub *scanLogStoreStub) FindByScanIDWithCursor(scanID int, afterID int64, limit int) ([]ScanLogEntry, error) {
+func (stub *scanLogQueryCommandStoreStub) FindByScanIDWithCursor(scanID int, afterID int64, limit int) ([]ScanLogEntry, error) {
 	stub.lastScanID = scanID
 	stub.lastAfterID = afterID
 	stub.lastLimit = limit
@@ -29,7 +29,7 @@ func (stub *scanLogStoreStub) FindByScanIDWithCursor(scanID int, afterID int64, 
 	return items, nil
 }
 
-func (stub *scanLogStoreStub) BulkCreate(logs []ScanLogEntry) error {
+func (stub *scanLogQueryCommandStoreStub) BulkCreate(logs []ScanLogEntry) error {
 	_ = logs
 	return stub.bulkCreateErr
 }
@@ -38,7 +38,7 @@ type scanLookupStub struct {
 	err error
 }
 
-func (stub *scanLookupStub) GetActiveByID(id int) (*ScanLogScanRef, error) {
+func (stub *scanLookupStub) GetScanLogRefByID(id int) (*ScanLogScanRef, error) {
 	if stub.err != nil {
 		return nil, stub.err
 	}
@@ -46,46 +46,47 @@ func (stub *scanLookupStub) GetActiveByID(id int) (*ScanLogScanRef, error) {
 }
 
 func TestScanLogServiceListByAfterID(t *testing.T) {
-	store := &scanLogStoreStub{rows: []ScanLogEntry{{ID: 10}, {ID: 11}, {ID: 12}}}
-	service := NewScanLogService(store, &scanLookupStub{})
+	queryCommandStore := &scanLogQueryCommandStoreStub{rows: []ScanLogEntry{{ID: 10}, {ID: 11}, {ID: 12}}}
+	service := NewScanLogService(queryCommandStore, queryCommandStore, &scanLookupStub{})
 
-	items, hasMore, err := service.ListByScanID(context.Background(), 7, 0, 2)
+	items, hasMore, err := service.ListByScanID(context.Background(), 7, &ScanLogListQuery{AfterID: 0, Limit: 2})
 	if err != nil {
 		t.Fatalf("list failed: %v", err)
 	}
 	if !hasMore || len(items) != 2 {
 		t.Fatalf("unexpected page: hasMore=%v len=%d", hasMore, len(items))
 	}
-	if store.lastAfterID != 0 || store.lastLimit != 3 {
-		t.Fatalf("unexpected store args afterID=%d limit=%d", store.lastAfterID, store.lastLimit)
+	if queryCommandStore.lastAfterID != 0 || queryCommandStore.lastLimit != 3 {
+		t.Fatalf("unexpected store args afterID=%d limit=%d", queryCommandStore.lastAfterID, queryCommandStore.lastLimit)
 	}
 
-	_, _, err = service.ListByScanID(context.Background(), 7, 9, 2)
+	_, _, err = service.ListByScanID(context.Background(), 7, &ScanLogListQuery{AfterID: 9, Limit: 2})
 	if err != nil {
 		t.Fatalf("list with afterID failed: %v", err)
 	}
-	if store.lastAfterID != 9 {
-		t.Fatalf("expected afterID 9, got %d", store.lastAfterID)
+	if queryCommandStore.lastAfterID != 9 {
+		t.Fatalf("expected afterID 9, got %d", queryCommandStore.lastAfterID)
 	}
 }
 
 func TestScanLogServiceNegativeAfterIDClamped(t *testing.T) {
-	store := &scanLogStoreStub{rows: []ScanLogEntry{{ID: 1}}}
-	service := NewScanLogService(store, &scanLookupStub{})
+	queryCommandStore := &scanLogQueryCommandStoreStub{rows: []ScanLogEntry{{ID: 1}}}
+	service := NewScanLogService(queryCommandStore, queryCommandStore, &scanLookupStub{})
 
-	_, _, err := service.ListByScanID(context.Background(), 7, -10, 20)
+	_, _, err := service.ListByScanID(context.Background(), 7, &ScanLogListQuery{AfterID: -10, Limit: 20})
 	if err != nil {
 		t.Fatalf("list failed: %v", err)
 	}
-	if store.lastAfterID != 0 {
-		t.Fatalf("expected afterID clamped to 0, got %d", store.lastAfterID)
+	if queryCommandStore.lastAfterID != 0 {
+		t.Fatalf("expected afterID clamped to 0, got %d", queryCommandStore.lastAfterID)
 	}
 }
 
 func TestScanLogServiceScanNotFound(t *testing.T) {
-	service := NewScanLogService(&scanLogStoreStub{}, &scanLookupStub{err: gorm.ErrRecordNotFound})
+	queryCommandStore := &scanLogQueryCommandStoreStub{}
+	service := NewScanLogService(queryCommandStore, queryCommandStore, &scanLookupStub{err: gorm.ErrRecordNotFound})
 
-	_, _, err := service.ListByScanID(context.Background(), 7, 0, 20)
+	_, _, err := service.ListByScanID(context.Background(), 7, &ScanLogListQuery{AfterID: 0, Limit: 20})
 	if !errors.Is(err, ErrScanLogScanNotFound) {
 		t.Fatalf("expected ErrScanLogScanNotFound, got %v", err)
 	}

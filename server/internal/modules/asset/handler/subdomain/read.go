@@ -36,13 +36,13 @@ func (h *SubdomainHandler) List(c *gin.Context) {
 
 	resp := make([]dto.SubdomainResponse, 0, len(subdomains))
 	for _, item := range subdomains {
-		resp = append(resp, toSubdomainResponse(&item))
+		resp = append(resp, toSubdomainOutput(&item))
 	}
 
 	dto.Paginated(c, resp, total, query.GetPage(), query.GetPageSize())
 }
 
-func toSubdomainResponse(subdomain *service.Subdomain) dto.SubdomainResponse {
+func toSubdomainOutput(subdomain *service.Subdomain) dto.SubdomainResponse {
 	return dto.SubdomainResponse{
 		ID:        subdomain.ID,
 		TargetID:  subdomain.TargetID,

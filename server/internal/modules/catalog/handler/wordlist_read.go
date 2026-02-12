@@ -22,7 +22,7 @@ func (h *WordlistHandler) List(c *gin.Context) {
 
 	resp := make([]dto.WordlistResponse, 0, len(wordlists))
 	for index := range wordlists {
-		resp = append(resp, toWordlistResponse(&wordlists[index]))
+		resp = append(resp, toWordlistOutput(&wordlists[index]))
 	}
 
 	dto.Success(c, resp)
@@ -47,7 +47,7 @@ func (h *WordlistHandler) Get(c *gin.Context) {
 		return
 	}
 
-	dto.Success(c, toWordlistResponse(wordlist))
+	dto.Success(c, toWordlistOutput(wordlist))
 }
 
 // GetByName returns a wordlist by name (for worker API).
@@ -69,7 +69,7 @@ func (h *WordlistHandler) GetByName(c *gin.Context) {
 		return
 	}
 
-	dto.Success(c, toWordlistResponse(wordlist))
+	dto.Success(c, toWordlistOutput(wordlist))
 }
 
 // DownloadByID serves the wordlist file by ID.

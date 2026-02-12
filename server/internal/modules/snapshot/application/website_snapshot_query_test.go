@@ -62,7 +62,7 @@ type snapshotScanLookupStub struct {
 	targetErr error
 }
 
-func (stub *snapshotScanLookupStub) GetActiveByID(id int) (*snapshotdomain.ScanRef, error) {
+func (stub *snapshotScanLookupStub) GetScanRefByID(id int) (*snapshotdomain.ScanRef, error) {
 	_ = id
 	if stub.findErr != nil {
 		return nil, stub.findErr
@@ -74,7 +74,7 @@ func (stub *snapshotScanLookupStub) GetActiveByID(id int) (*snapshotdomain.ScanR
 	return &copyScan, nil
 }
 
-func (stub *snapshotScanLookupStub) GetTargetByScanID(scanID int) (*snapshotdomain.ScanTargetRef, error) {
+func (stub *snapshotScanLookupStub) GetTargetRefByScanID(scanID int) (*snapshotdomain.ScanTargetRef, error) {
 	_ = scanID
 	if stub.targetErr != nil {
 		return nil, stub.targetErr

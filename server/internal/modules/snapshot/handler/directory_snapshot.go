@@ -37,7 +37,7 @@ func (h *DirectorySnapshotHandler) BulkUpsert(c *gin.Context) {
 		return
 	}
 
-	snapshotCount, assetCount, err := h.svc.SaveAndSync(scanID, req.TargetID, toDirectorySnapshotItems(req.Directories))
+	snapshotCount, assetCount, err := h.svc.SaveAndSync(scanID, req.TargetID, toDirectorySnapshotItemsInput(req.Directories))
 	if err != nil {
 		if errors.Is(err, service.ErrScanNotFoundForSnapshot) {
 			dto.NotFound(c, "Scan not found")
@@ -71,7 +71,7 @@ func (h *DirectorySnapshotHandler) List(c *gin.Context) {
 		return
 	}
 
-	snapshots, total, err := h.svc.ListByScan(scanID, toSnapshotListQuery(query.GetPage(), query.GetPageSize(), query.Filter))
+	snapshots, total, err := h.svc.ListByScan(scanID, toSnapshotListQueryInput(query.GetPage(), query.GetPageSize(), query.Filter))
 	if err != nil {
 		if errors.Is(err, service.ErrScanNotFoundForSnapshot) {
 			dto.NotFound(c, "Scan not found")
@@ -83,7 +83,7 @@ func (h *DirectorySnapshotHandler) List(c *gin.Context) {
 
 	var resp []dto.DirectorySnapshotResponse
 	for _, s := range snapshots {
-		resp = append(resp, toDirectorySnapshotResponse(&s))
+		resp = append(resp, toDirectorySnapshotOutput(&s))
 	}
 
 	dto.Paginated(c, resp, total, query.GetPage(), query.GetPageSize())
@@ -158,7 +158,7 @@ func (h *DirectorySnapshotHandler) Export(c *gin.Context) {
 	}
 }
 
-func toDirectorySnapshotResponse(s *service.DirectorySnapshot) dto.DirectorySnapshotResponse {
+func toDirectorySnapshotOutput(s *service.DirectorySnapshot) dto.DirectorySnapshotResponse {
 	return dto.DirectorySnapshotResponse{
 		ID:            s.ID,
 		ScanID:        s.ScanID,

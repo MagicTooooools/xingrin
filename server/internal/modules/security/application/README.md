@@ -1,21 +1,11 @@
 # security/application
 
-security 模块 application 命名规范：
+通用规则请遵循：`docs/server-application-naming-template-v1.md`
 
-- `ports.go`：应用层端口接口（漏洞存储、目标查询、原始输出编解码等依赖抽象）。
-- `codec.go`：应用层内的编解码职责实现（如 `vulnerabilityJSONRawOutputCodec`）。
-- `facade_*.go`：按领域能力聚合对外入口（如 vulnerability）。
-- `*_service.go`：可选；仅在 facade 无法承载复杂编排时拆分。
-- `errors.go`：可选；仅在该模块定义应用错误时创建。
+security 模块补充规则：
 
-说明：
-
-- 若实现属于外部能力默认实现，优先放在 `infrastructure` 并按能力命名。
-
-约束：
-
-- 新代码不再使用 `contracts.go`，统一使用 `ports.go`。
-- 新代码不再使用 `defaults.go`。
-- 新代码不在 `application` 层新增 `default_impls.go`。
-- `application` 层不直接依赖 `dto`；DTO 映射放在 `handler`/`wiring` 边界层。
-- 避免使用弱语义泛名文件（如 `types.go`、`common.go`）。
+- **入口聚合**：对外用例入口单点收敛在 `facade_vulnerability.go`。
+- **服务编排**：当前编排集中在 facade，只有当复杂度提升时才新增 `*_service.go`。
+- **端口拆分**：端口统一按 vulnerability 资源命名，`vulnerability_raw_output_codec_ports.go` 与 `vulnerability_raw_output_codec.go` 必须成对维护（port + default implementation）。
+- **模型命名**：`application` 文件统一 `vulnerability_*` 前缀，跨边界模型使用 `vulnerability_item_models.go`，类型别名使用 `vulnerability_aliases.go`。
+- **历史迁移**：无历史聚合文件，保持资源化命名不回退。

@@ -5,7 +5,7 @@ import (
 	"github.com/yyhuni/lunafox/server/internal/modules/security/handler"
 )
 
-func RegisterVulnerabilityRoutes(protected *gin.RouterGroup, vulnerabilityHandler *handler.VulnerabilityHandler) {
+func registerVulnerabilityRoutes(protected *gin.RouterGroup, vulnerabilityHandler *handler.VulnerabilityHandler) {
 	protected.GET("/vulnerabilities", vulnerabilityHandler.ListAll)
 	protected.GET("/vulnerabilities/stats", vulnerabilityHandler.GetStats)
 	protected.GET("/vulnerabilities/:id", vulnerabilityHandler.GetByID)

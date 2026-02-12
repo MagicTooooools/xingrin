@@ -7,6 +7,7 @@ import (
 
 	"github.com/gorilla/websocket"
 	"github.com/yyhuni/lunafox/server/internal/agentproto"
+	agentapp "github.com/yyhuni/lunafox/server/internal/modules/agent/application"
 )
 
 // Client represents a WebSocket client connection
@@ -137,6 +138,24 @@ func (h *Hub) SendTaskCancel(agentID, taskID int) {
 	h.SendTo(agentID, data)
 }
 
+// SendUpdateRequired sends an update_required message and returns whether sending succeeded.
+func (h *Hub) SendUpdateRequired(agentID int, payload agentproto.UpdateRequiredPayload) bool {
+	data, err := json.Marshal(payload)
+	if err != nil {
+		return false
+	}
+	msg := agentproto.Message{
+		Type:      agentproto.MessageTypeUpdateRequired,
+		Payload:   data,
+		Timestamp: time.Now().UTC(),
+	}
+	encoded, err := json.Marshal(msg)
+	if err != nil {
+		return false
+	}
+	return h.SendToWithResult(agentID, encoded)
+}
+
 // SendConfigUpdate sends a config_update message to a specific agent.
 func (h *Hub) SendConfigUpdate(agentID int, payload agentproto.ConfigUpdatePayload) {
 	data, err := json.Marshal(payload)
@@ -153,6 +172,36 @@ func (h *Hub) SendConfigUpdate(agentID int, payload agentproto.ConfigUpdatePaylo
 		return
 	}
 	h.SendTo(agentID, encoded)
+}
+
+// NewAgentMessagePublisher exposes a typed publisher adapter for agent runtime services.
+func NewAgentMessagePublisher(hub *Hub) agentapp.AgentMessagePublisher {
+	return &agentMessagePublisher{hub: hub}
+}
+
+type agentMessagePublisher struct {
+	hub *Hub
+}
+
+func (publisher *agentMessagePublisher) SendConfigUpdate(agentID int, payload agentproto.ConfigUpdatePayload) {
+	if publisher == nil || publisher.hub == nil {
+		return
+	}
+	publisher.hub.SendConfigUpdate(agentID, payload)
+}
+
+func (publisher *agentMessagePublisher) SendUpdateRequired(agentID int, payload agentproto.UpdateRequiredPayload) bool {
+	if publisher == nil || publisher.hub == nil {
+		return false
+	}
+	return publisher.hub.SendUpdateRequired(agentID, payload)
+}
+
+func (publisher *agentMessagePublisher) SendTaskCancel(agentID, taskID int) {
+	if publisher == nil || publisher.hub == nil {
+		return
+	}
+	publisher.hub.SendTaskCancel(agentID, taskID)
 }
 
 // SendToWithResult sends a message to a specific agent and returns success.

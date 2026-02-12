@@ -9,6 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 	agentapp "github.com/yyhuni/lunafox/server/internal/modules/agent/application"
 	"github.com/yyhuni/lunafox/server/internal/modules/agent/dto"
+	scanapp "github.com/yyhuni/lunafox/server/internal/modules/scan/application"
 	scandto "github.com/yyhuni/lunafox/server/internal/modules/scan/dto"
 )
 
@@ -46,7 +47,7 @@ func (h *AgentTaskHandler) PullTask(c *gin.Context) {
 		return
 	}
 
-	dto.Success(c, task)
+	dto.Success(c, toScanTaskAssignmentOutput(task))
 }
 
 // UpdateTaskStatus updates task status for the agent.
@@ -109,5 +110,22 @@ func isValidAgentTaskStatus(status string) bool {
 		return true
 	default:
 		return false
+	}
+}
+
+func toScanTaskAssignmentOutput(task *scanapp.TaskAssignment) scandto.TaskAssignment {
+	if task == nil {
+		return scandto.TaskAssignment{}
+	}
+	return scandto.TaskAssignment{
+		TaskID:       task.TaskID,
+		ScanID:       task.ScanID,
+		Stage:        task.Stage,
+		WorkflowName: task.WorkflowName,
+		TargetID:     task.TargetID,
+		TargetName:   task.TargetName,
+		TargetType:   task.TargetType,
+		WorkspaceDir: task.WorkspaceDir,
+		Config:       task.Config,
 	}
 }

@@ -53,7 +53,7 @@ func (h *WordlistHandler) Create(c *gin.Context) {
 		return
 	}
 
-	dto.Created(c, toWordlistResponse(wordlist))
+	dto.Created(c, toWordlistOutput(wordlist))
 }
 
 // Delete deletes a wordlist.

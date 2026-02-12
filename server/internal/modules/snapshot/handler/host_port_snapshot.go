@@ -37,7 +37,7 @@ func (h *HostPortSnapshotHandler) BulkUpsert(c *gin.Context) {
 		return
 	}
 
-	snapshotCount, assetCount, err := h.svc.SaveAndSync(scanID, req.TargetID, toHostPortSnapshotItems(req.HostPorts))
+	snapshotCount, assetCount, err := h.svc.SaveAndSync(scanID, req.TargetID, toHostPortSnapshotItemsInput(req.HostPorts))
 	if err != nil {
 		if errors.Is(err, service.ErrScanNotFoundForSnapshot) {
 			dto.NotFound(c, "Scan not found")
@@ -71,7 +71,7 @@ func (h *HostPortSnapshotHandler) List(c *gin.Context) {
 		return
 	}
 
-	snapshots, total, err := h.svc.ListByScan(scanID, toSnapshotListQuery(query.GetPage(), query.GetPageSize(), query.Filter))
+	snapshots, total, err := h.svc.ListByScan(scanID, toSnapshotListQueryInput(query.GetPage(), query.GetPageSize(), query.Filter))
 	if err != nil {
 		if errors.Is(err, service.ErrScanNotFoundForSnapshot) {
 			dto.NotFound(c, "Scan not found")
@@ -83,7 +83,7 @@ func (h *HostPortSnapshotHandler) List(c *gin.Context) {
 
 	var resp []dto.HostPortSnapshotResponse
 	for _, s := range snapshots {
-		resp = append(resp, toHostPortSnapshotResponse(&s))
+		resp = append(resp, toHostPortSnapshotOutput(&s))
 	}
 
 	dto.Paginated(c, resp, total, query.GetPage(), query.GetPageSize())
@@ -138,8 +138,8 @@ func (h *HostPortSnapshotHandler) Export(c *gin.Context) {
 	}
 }
 
-// toHostPortSnapshotResponse converts model to response DTO
-func toHostPortSnapshotResponse(s *service.HostPortSnapshot) dto.HostPortSnapshotResponse {
+// toHostPortSnapshotOutput converts model to output DTO
+func toHostPortSnapshotOutput(s *service.HostPortSnapshot) dto.HostPortSnapshotResponse {
 	return dto.HostPortSnapshotResponse{
 		ID:        s.ID,
 		ScanID:    s.ScanID,

@@ -36,13 +36,13 @@ func (h *WebsiteHandler) List(c *gin.Context) {
 
 	resp := make([]dto.WebsiteResponse, 0, len(websites))
 	for _, website := range websites {
-		resp = append(resp, toWebsiteResponse(&website))
+		resp = append(resp, toWebsiteOutput(&website))
 	}
 
 	dto.Paginated(c, resp, total, query.GetPage(), query.GetPageSize())
 }
 
-func toWebsiteResponse(website *service.Website) dto.WebsiteResponse {
+func toWebsiteOutput(website *service.Website) dto.WebsiteResponse {
 	tech := website.Tech
 	if tech == nil {
 		tech = []string{}

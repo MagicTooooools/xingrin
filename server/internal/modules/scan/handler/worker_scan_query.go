@@ -19,7 +19,7 @@ func NewWorkerScanHandler(svc *scanapp.ScanFacade) *WorkerScanHandler {
 }
 
 // GetTargetName returns target name for a scan.
-// GET /api/worker/scans/:id/target-name
+// GET /api/worker/scans/:id/target
 func (handler *WorkerScanHandler) GetTargetName(c *gin.Context) {
 	scanID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -41,5 +41,5 @@ func (handler *WorkerScanHandler) GetTargetName(c *gin.Context) {
 		return
 	}
 
-	dto.Success(c, *target)
+	dto.Success(c, toWorkerTargetNameOutput(target))
 }

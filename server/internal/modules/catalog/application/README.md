@@ -1,19 +1,11 @@
 # catalog/application
 
-catalog 模块 application 命名规范：
+通用规则请遵循：`docs/server-application-naming-template-v1.md`
 
-- `ports.go`：应用层端口接口（仓储、文件存储等依赖抽象）。
-- `facade_*.go`：按场景聚合对外能力（target/engine/wordlist 等）。
-- `*_query.go` / `*_command*.go`：按读写职责拆分应用逻辑。
-- `errors.go`：可选；仅在该模块定义应用错误时创建。
+catalog 模块补充规则：
 
-说明：
-
-- 默认实现优先放在 `infrastructure`，并按能力命名（如 `clock.go`、`token_generator.go`、`codec.go`）。
-
-约束：
-
-- 新代码不再使用 `contracts.go`，统一使用 `ports.go`。
-- 新代码不再使用 `defaults.go`。
-- 新代码不在 `application` 层新增 `default_impls.go`。
-- 避免使用弱语义泛名文件（如 `types.go`、`common.go`）。
+- **入口聚合**：facade 按 target/engine/wordlist 业务视角拆分（含 `facade_target_batch.go`、`facade_target_detail.go`、`facade_wordlist_content.go`、`facade_wordlist_create.go`）。
+- **服务编排**：target command 按场景拆分为 `target_command_crud.go` 与 `target_command_batch.go`；其余资源遵循 query/command 分层。
+- **端口拆分**：端口按资源职责拆分，wordlist 文件能力采用 port + default implementation（`wordlist_file_ports.go` + `local_wordlist_file_store.go`）。
+- **模型命名**：新增输入/输出/中间模型优先资源化命名（如 `*_query_inputs.go`、`*_item_models.go`）。
+- **历史迁移**：`aliases.go`、`errors.go` 为历史聚合文件，后续新增优先资源化命名。
