@@ -1,17 +1,9 @@
 "use client"
 
-import React, { useState } from "react"
+import React from "react"
 import {
-  IconCheck,
-  IconX,
   IconSearch,
-  IconFilter,
-  IconCode,
-  IconBrowser,
-  IconActivity,
-  IconEye,
   IconChevronDown,
-  IconChevronUp,
   Circle,
   CheckCircle2
 } from "@/components/icons"
@@ -22,7 +14,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { cn } from "@/lib/utils"
 import { VulnerabilityAuditDetail } from "@/components/prototypes/vulnerability-audit-detail"
 import type { Vulnerability } from "@/types/vulnerability.types"
-import { SEVERITY_STYLES, SEVERITY_COLORS } from "@/lib/severity-config"
+import { SEVERITY_STYLES } from "@/lib/severity-config"
 import { useVerticalResize } from "@/hooks/use-vertical-resize"
 import { useUrlState } from "@/hooks/use-url-state"
 

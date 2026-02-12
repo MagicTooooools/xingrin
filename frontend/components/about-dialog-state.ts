@@ -20,9 +20,13 @@ type AboutDialogState = {
   handleCheckUpdate: () => Promise<void>
 }
 
-export function useAboutDialogState(): AboutDialogState {
+interface UseAboutDialogStateOptions {
+  enabled?: boolean
+}
+
+export function useAboutDialogState({ enabled = true }: UseAboutDialogStateOptions = {}): AboutDialogState {
   const t = useTranslations("about")
-  const { data: versionData } = useVersion()
+  const { data: versionData } = useVersion({ enabled })
   const queryClient = useQueryClient()
 
   const [isChecking, setIsChecking] = React.useState(false)

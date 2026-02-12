@@ -1,29 +1,22 @@
 "use client"
 
 import React, { useState, useEffect } from "react"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion } from "framer-motion"
 import {
-  IconShield,
-  IconAlertTriangle,
   IconCheck,
   IconX,
-  IconChevronRight,
-  IconChevronLeft,
   IconSearch,
   IconFilter,
   IconCode,
   IconActivity,
-  IconClock,
   IconDotsVertical,
   IconEye,
-  IconBug,
   IconWorld,
 } from "@/components/icons"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Separator } from "@/components/ui/separator"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { cn } from "@/lib/utils"
 
@@ -288,8 +281,8 @@ export function VulnAuditDesign() {
                           <br/>
                           {`{`}
                           <div className="pl-4">
-                             <span className="text-[#9cdcfe]">"username"</span>: <span className="text-[#ce9178]">"admin"</span>,<br/>
-                             <span className="text-[#9cdcfe]">"password"</span>: <span className="text-[#ce9178]">"' OR '1'='1"</span>
+                             <span className="text-[#9cdcfe]">{`"username"`}</span>: <span className="text-[#ce9178]">{`"admin"`}</span>,<br/>
+                             <span className="text-[#9cdcfe]">{`"password"`}</span>: <span className="text-[#ce9178]">{`"' OR '1'='1"`}</span>
                           </div>
                           {`}`}
                        </div>
@@ -303,12 +296,12 @@ export function VulnAuditDesign() {
                           <br/>
                           {`{`}
                           <div className="pl-4">
-                             <span className="text-[#9cdcfe]">"success"</span>: <span className="text-[#569cd6]">true</span>,<br/>
-                             <span className="text-[#9cdcfe]">"token"</span>: <span className="text-[#ce9178]">"admin_access_granted_8829"</span>,<br/>
-                             <span className="text-[#9cdcfe]">"user"</span>: {`{`}<br/>
+                             <span className="text-[#9cdcfe]">{`"success"`}</span>: <span className="text-[#569cd6]">true</span>,<br/>
+                             <span className="text-[#9cdcfe]">{`"token"`}</span>: <span className="text-[#ce9178]">{`"admin_access_granted_8829"`}</span>,<br/>
+                             <span className="text-[#9cdcfe]">{`"user"`}</span>: {`{`}<br/>
                                 <div className="pl-4">
-                                   <span className="text-[#9cdcfe]">"id"</span>: <span className="text-[#b5cea8]">1</span>,<br/>
-                                   <span className="text-[#9cdcfe]">"role"</span>: <span className="text-[#ce9178]">"superuser"</span>
+                                   <span className="text-[#9cdcfe]">{`"id"`}</span>: <span className="text-[#b5cea8]">1</span>,<br/>
+                                   <span className="text-[#9cdcfe]">{`"role"`}</span>: <span className="text-[#ce9178]">{`"superuser"`}</span>
                                 </div>
                              {`}`}
                           </div>

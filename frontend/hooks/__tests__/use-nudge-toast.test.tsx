@@ -12,6 +12,10 @@ vi.mock("sonner", () => ({
   toast: sonnerMocks,
 }))
 
+vi.mock("@/components/nudges/nudge-toast-card", () => ({
+  NudgeToastCard: (props: Record<string, unknown>) => React.createElement("div", props),
+}))
+
 const baseVariant: NudgeToastVariant = {
   title: "Nudge title",
   description: "Nudge description",
@@ -32,7 +36,7 @@ describe("useNudgeToast", () => {
     vi.useRealTimers()
   })
 
-  it("triggerWithVariant 会触发 toast.custom 且回调返回可渲染节点", () => {
+  it("triggerWithVariant 会触发 toast.custom 且回调返回可渲染节点", async () => {
     const { result } = renderHook(() =>
       useNudgeToast({
         variants: [baseVariant],
@@ -43,8 +47,9 @@ describe("useNudgeToast", () => {
     act(() => {
       result.current.triggerWithVariant(baseVariant)
     })
-    act(() => {
+    await act(async () => {
       vi.runAllTimers()
+      await vi.dynamicImportSettled()
     })
 
     expect(sonnerMocks.custom).toHaveBeenCalledTimes(1)
@@ -61,7 +66,7 @@ describe("useNudgeToast", () => {
     })
   })
 
-  it("primaryAction 缺失时仍返回组件并注入兜底动作", () => {
+  it("primaryAction 缺失时仍返回组件并注入兜底动作", async () => {
     const unsafeVariant = {
       ...baseVariant,
       primaryAction: undefined,
@@ -77,8 +82,9 @@ describe("useNudgeToast", () => {
     act(() => {
       result.current.triggerWithVariant(unsafeVariant)
     })
-    act(() => {
+    await act(async () => {
       vi.runAllTimers()
+      await vi.dynamicImportSettled()
     })
 
     const [renderContent] = sonnerMocks.custom.mock.calls[0] as [(id: string) => React.ReactNode]

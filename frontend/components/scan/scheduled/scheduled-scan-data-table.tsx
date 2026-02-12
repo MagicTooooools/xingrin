@@ -1,14 +1,12 @@
 "use client"
 
-import * as React from "react"
 import type { ColumnDef } from "@tanstack/react-table"
-import { useTranslations } from "next-intl"
+
 import { UnifiedDataTable } from "@/components/ui/data-table/unified-data-table"
 import { SimpleSearchToolbar } from "@/components/ui/data-table/simple-search-toolbar"
-import { useSimpleSearchState } from "@/components/ui/data-table/use-simple-search"
+import { useScheduledScanDataTableState } from "./scheduled-scan-data-table-state"
+
 import type { ScheduledScan } from "@/types/scheduled-scan.types"
-import type { PaginationInfo } from "@/types/common.types"
-import { buildPaginationInfo } from "@/hooks/_shared/pagination"
 
 interface ScheduledScanDataTableProps {
   data: ScheduledScan[]
@@ -19,7 +17,6 @@ interface ScheduledScanDataTableProps {
   onSearch?: (value: string) => void
   isSearching?: boolean
   addButtonText?: string
-  // Server-side pagination related
   page?: number
   pageSize?: number
   total?: number
@@ -48,23 +45,13 @@ export function ScheduledScanDataTable({
   onPageChange,
   onPageSizeChange,
 }: ScheduledScanDataTableProps) {
-  const t = useTranslations("common.status")
-  const tScan = useTranslations("scan.scheduled")
-  
-  const {
-    value: localSearchValue,
-    setValue: setLocalSearchValue,
-    submit: handleSearchSubmit,
-  } = useSimpleSearchState({ searchValue, onSearch })
-
-  // Convert to pagination format required by UnifiedDataTable
-  const pagination = { pageIndex: page - 1, pageSize }
-  const paginationInfo: PaginationInfo = buildPaginationInfo({
-    total,
+  const state = useScheduledScanDataTableState({
+    searchValue,
+    onSearch,
     page,
     pageSize,
+    total,
     totalPages,
-    minTotalPages: 1,
   })
 
   const handlePaginationChange = (newPagination: { pageIndex: number; pageSize: number }) => {
@@ -82,25 +69,25 @@ export function ScheduledScanDataTable({
       columns={columns}
       getRowId={(row) => String(row.id)}
       state={{
-        pagination,
-        paginationInfo,
+        pagination: state.pagination,
+        paginationInfo: state.paginationInfo,
         onPaginationChange: handlePaginationChange,
       }}
       behavior={{ enableRowSelection: false }}
       actions={{
         showBulkDelete: false,
         onAddNew,
-        addButtonLabel: addButtonText || tScan("createTitle"),
+        addButtonLabel: addButtonText || state.tScan("createTitle"),
       }}
       ui={{
-        emptyMessage: t("noData"),
+        emptyMessage: state.t("noData"),
         toolbarLeft: (
           <SimpleSearchToolbar
-            value={localSearchValue}
-            onChange={setLocalSearchValue}
-            onSubmit={handleSearchSubmit}
+            value={state.localSearchValue}
+            onChange={state.setLocalSearchValue}
+            onSubmit={state.handleSearchSubmit}
             loading={isSearching}
-            placeholder={searchPlaceholder || tScan("searchPlaceholder")}
+            placeholder={searchPlaceholder || state.tScan("searchPlaceholder")}
           />
         ),
       }}

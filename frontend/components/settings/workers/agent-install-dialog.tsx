@@ -43,7 +43,6 @@ export function AgentInstallDialog({
     verificationState,
     copied,
     hasToken,
-    tokenExpiresAt,
     isTokenValid,
     handleCopy,
     installCommand,

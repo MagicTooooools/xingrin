@@ -2,6 +2,7 @@
 
 // Import React library
 import React from "react"
+import dynamic from "next/dynamic"
 // Import various icons from Tabler Icons library
 import {
   IconDashboard, // Dashboard icon
@@ -51,8 +52,11 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible"
-import { useBroadcastSSE } from "@/hooks/use-broadcast-sse"
-import { useNudgeGuardian } from "@/hooks/use-nudge-guardian"
+
+const AppSidebarBackgroundTasks = dynamic(
+  () => import("@/components/app-sidebar-background-tasks").then((mod) => mod.AppSidebarBackgroundTasks),
+  { ssr: false }
+)
 
 /**
  * Application sidebar component
@@ -66,12 +70,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const normalize = (p: string) => (p !== "/" && p.endsWith("/") ? p.slice(0, -1) : p)
   const current = normalize(pathname)
   
-  // 监听 SSE 广播推送
-  useBroadcastSSE()
-
-  // 启动本地 Nudge 守护进程 (深夜/久坐提醒)
-  useNudgeGuardian()
-  
   const handleNavClick = React.useCallback(() => {
     if (typeof window !== "undefined") {
       window.dispatchEvent(new Event("lunafox:route-progress-start"))
@@ -79,115 +77,121 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   }, [])
   const showDevTools = process.env.NODE_ENV === "development"
 
-  // User information
-  const user = {
-    name: "admin",
-    email: "admin@admin.com",
-    avatar: "/images/icon-64.png",
-  }
+  const user = React.useMemo(
+    () => ({
+      name: "admin",
+      email: "admin@admin.com",
+      avatar: "/images/icon-64.png",
+    }),
+    []
+  )
 
-  // Main navigation menu items - using translations
-  const navMain = [
-    {
-      title: t('dashboard'),
-      url: "/dashboard/",
-      icon: IconDashboard,
-    },
-    {
-      title: t('search'),
-      url: "/search/",
-      icon: IconSearch,
-    },
-    {
-      title: t('organization'),
-      url: "/organization/",
-      icon: IconUsers,
-    },
-    {
-      title: t('target'),
-      url: "/target/",
-      icon: IconListDetails,
-    },
-    {
-      title: t('vulnerabilities'),
-      url: "/vulnerabilities/",
-      icon: IconBug,
-    },
-    {
-      title: t('scan'),
-      url: "/scan/",
-      icon: IconRadar,
-      items: [
-        {
-          title: t('scanHistory'),
-          url: "/scan/history/",
-        },
-        {
-          title: t('scheduledScan'),
-          url: "/scan/scheduled/",
-        },
-        {
-          title: t('scanEngine'),
-          url: "/scan/engine/",
-        },
-      ],
-    },
-    {
-      title: t('tools'),
-      url: "/tools/",
-      icon: IconTool,
-      items: [
-        {
-          title: t('wordlists'),
-          url: "/tools/wordlists/",
-        },
-        {
-          title: t('fingerprints'),
-          url: "/tools/fingerprints/",
-        },
-        {
-          title: t('nucleiTemplates'),
-          url: "/tools/nuclei/",
-        },
-      ],
-    },
-  ]
+  const navMain = React.useMemo(
+    () => [
+      {
+        title: t('dashboard'),
+        url: "/dashboard/",
+        icon: IconDashboard,
+      },
+      {
+        title: t('search'),
+        url: "/search/",
+        icon: IconSearch,
+      },
+      {
+        title: t('organization'),
+        url: "/organization/",
+        icon: IconUsers,
+      },
+      {
+        title: t('target'),
+        url: "/target/",
+        icon: IconListDetails,
+      },
+      {
+        title: t('vulnerabilities'),
+        url: "/vulnerabilities/",
+        icon: IconBug,
+      },
+      {
+        title: t('scan'),
+        url: "/scan/",
+        icon: IconRadar,
+        items: [
+          {
+            title: t('scanHistory'),
+            url: "/scan/history/",
+          },
+          {
+            title: t('scheduledScan'),
+            url: "/scan/scheduled/",
+          },
+          {
+            title: t('scanEngine'),
+            url: "/scan/engine/",
+          },
+        ],
+      },
+      {
+        title: t('tools'),
+        url: "/tools/",
+        icon: IconTool,
+        items: [
+          {
+            title: t('wordlists'),
+            url: "/tools/wordlists/",
+          },
+          {
+            title: t('fingerprints'),
+            url: "/tools/fingerprints/",
+          },
+          {
+            title: t('nucleiTemplates'),
+            url: "/tools/nuclei/",
+          },
+        ],
+      },
+    ],
+    [t]
+  )
 
-  // System settings related menu items
-  const documents = [
-    {
-      name: t('workers'),
-      url: "/settings/workers/",
-      icon: IconServer,
-    },
-    {
-      name: t('systemLogs'),
-      url: "/settings/system-logs/",
-      icon: IconTerminal2,
-    },
-    {
-      name: t('databaseHealth'),
-      url: "/settings/database-health/",
-      icon: IconDatabase,
-    },
-    {
-      name: t('notifications'),
-      url: "/settings/notifications/",
-      icon: IconSettings,
-    },
-    {
-      name: t('apiKeys'),
-      url: "/settings/api-keys/",
-      icon: IconKey,
-    },
-    {
-      name: t('globalBlacklist'),
-      url: "/settings/blacklist/",
-      icon: IconBan,
-    },
-  ]
+  const documents = React.useMemo(
+    () => [
+      {
+        name: t('workers'),
+        url: "/settings/workers/",
+        icon: IconServer,
+      },
+      {
+        name: t('systemLogs'),
+        url: "/settings/system-logs/",
+        icon: IconTerminal2,
+      },
+      {
+        name: t('databaseHealth'),
+        url: "/settings/database-health/",
+        icon: IconDatabase,
+      },
+      {
+        name: t('notifications'),
+        url: "/settings/notifications/",
+        icon: IconSettings,
+      },
+      {
+        name: t('apiKeys'),
+        url: "/settings/api-keys/",
+        icon: IconKey,
+      },
+      {
+        name: t('globalBlacklist'),
+        url: "/settings/blacklist/",
+        icon: IconBan,
+      },
+    ],
+    [t]
+  )
 
-  const devToolGroups = [
+  const devToolGroups = React.useMemo(() => [
     {
       title: "组件演示",
       icon: IconTool,
@@ -243,11 +247,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         { title: "Arknights UI Demo", url: "/prototypes/arknights-ui/" },
       ],
     },
-  ]
+  ], [])
 
   return (
     // collapsible="icon" means the sidebar can be collapsed to icon-only mode
     <Sidebar collapsible="icon" {...props}>
+      <AppSidebarBackgroundTasks />
       {/* Sidebar main content area - Logo 已移至顶栏 */}
       <SidebarContent>
         {/* Main navigation menu */}

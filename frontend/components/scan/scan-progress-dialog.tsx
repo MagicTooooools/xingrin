@@ -12,7 +12,6 @@ import {
   ScanStatusIcon,
 } from "@/components/scan/scan-progress-dialog-sections"
 import { useScanProgressDialogState } from "@/components/scan/scan-progress-dialog-state"
-import { buildScanProgressData } from "@/components/scan/scan-progress-dialog-utils"
 
 interface ScanProgressDialogProps {
   open: boolean

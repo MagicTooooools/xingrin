@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useState, useMemo } from "react"
+import dynamic from "next/dynamic"
 import { AlertTriangle } from "@/components/icons"
 import { toast } from "sonner"
 import { useTranslations, useLocale } from "next-intl"
@@ -14,13 +15,21 @@ import { useStablePaginationInfo } from "@/hooks/_shared/use-stable-pagination-i
 import { FingerprintService } from "@/services/fingerprint.service"
 import { GobyFingerprintDataTable } from "./goby-fingerprint-data-table"
 import { createGobyFingerprintColumns } from "./goby-fingerprint-columns"
-import { GobyFingerprintDialog } from "./goby-fingerprint-dialog"
-import { ImportFingerprintDialog } from "./import-fingerprint-dialog"
 import { DataTableSkeleton } from "@/components/ui/data-table-skeleton"
 import { getDateLocale } from "@/lib/date-utils"
 import { downloadBlob } from "@/lib/download-utils"
 import { getErrorMessage } from "@/lib/error-utils"
 import type { GobyFingerprint } from "@/types/fingerprint.types"
+
+const GobyFingerprintDialog = dynamic(
+  () => import("./goby-fingerprint-dialog").then((mod) => mod.GobyFingerprintDialog),
+  { ssr: false }
+)
+
+const ImportFingerprintDialog = dynamic(
+  () => import("./import-fingerprint-dialog").then((mod) => mod.ImportFingerprintDialog),
+  { ssr: false }
+)
 
 export function GobyFingerprintView() {
   const [selectedFingerprints, setSelectedFingerprints] = useState<GobyFingerprint[]>([])
@@ -157,20 +166,22 @@ export function GobyFingerprintView() {
         onPaginationChange={setPagination}
       />
 
-      {/* Add fingerprint dialog */}
-      <GobyFingerprintDialog
-        open={addDialogOpen}
-        onOpenChange={setAddDialogOpen}
-        onSuccess={() => refetch()}
-      />
+      {addDialogOpen ? (
+        <GobyFingerprintDialog
+          open={addDialogOpen}
+          onOpenChange={setAddDialogOpen}
+          onSuccess={() => refetch()}
+        />
+      ) : null}
 
-      {/* Import fingerprint dialog */}
-      <ImportFingerprintDialog
-        open={importDialogOpen}
-        onOpenChange={setImportDialogOpen}
-        onSuccess={() => refetch()}
-        fingerprintType="goby"
-      />
+      {importDialogOpen ? (
+        <ImportFingerprintDialog
+          open={importDialogOpen}
+          onOpenChange={setImportDialogOpen}
+          onSuccess={() => refetch()}
+          fingerprintType="goby"
+        />
+      ) : null}
     </>
   )
 }

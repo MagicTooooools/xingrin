@@ -1,11 +1,9 @@
 "use client"
 
-import * as React from "react"
+import type { Dispatch, SetStateAction } from "react"
 import { Filter } from "@/components/icons"
-import { useTranslations } from "next-intl"
 import { UnifiedDataTable } from "@/components/ui/data-table/unified-data-table"
 import { SimpleSearchToolbar } from "@/components/ui/data-table/simple-search-toolbar"
-import { useSimpleSearchState } from "@/components/ui/data-table/use-simple-search"
 import {
   Select,
   SelectContent,
@@ -16,6 +14,7 @@ import {
 import type { ColumnDef } from "@tanstack/react-table"
 import type { Target } from "@/types/target.types"
 import type { PaginationInfo } from "@/types/common.types"
+import { useOrganizationTargetsDataTableState } from "./targets-data-table-state"
 
 interface TargetsDataTableProps {
   data: Target[]
@@ -30,7 +29,7 @@ interface TargetsDataTableProps {
   isSearching?: boolean
   addButtonText?: string
   pagination?: { pageIndex: number; pageSize: number }
-  setPagination?: React.Dispatch<React.SetStateAction<{ pageIndex: number; pageSize: number }>>
+  setPagination?: Dispatch<SetStateAction<{ pageIndex: number; pageSize: number }>>
   paginationInfo?: PaginationInfo
   onPaginationChange?: (pagination: { pageIndex: number; pageSize: number }) => void
   typeFilter?: string
@@ -60,16 +59,7 @@ export function TargetsDataTable({
   typeFilter,
   onTypeFilterChange,
 }: TargetsDataTableProps) {
-  const t = useTranslations("common.status")
-  const tTarget = useTranslations("target")
-  const tTooltips = useTranslations("tooltips")
-  const tCommon = useTranslations("common")
-  
-  const {
-    value: localSearchValue,
-    setValue: setLocalSearchValue,
-    submit: handleSearchSubmit,
-  } = useSimpleSearchState({ searchValue, onSearch })
+  const state = useOrganizationTargetsDataTableState({ searchValue, onSearch })
 
   return (
     <UnifiedDataTable
@@ -86,32 +76,35 @@ export function TargetsDataTable({
       actions={{
         showBulkDelete: !!onBulkDelete,
         onBulkDelete,
-        bulkDeleteLabel: tTooltips("unlinkTarget"),
+        bulkDeleteLabel: state.tTooltips("unlinkTarget"),
         showAddButton: !!onAddNew,
         onAddNew,
         onAddHover,
-        addButtonLabel: addButtonText || tTarget("addTarget"),
+        addButtonLabel: addButtonText || state.tTarget("addTarget"),
       }}
       ui={{
-        emptyMessage: t("noData"),
+        emptyMessage: state.t("noData"),
         toolbarLeft: (
           <SimpleSearchToolbar
-            value={localSearchValue}
-            onChange={setLocalSearchValue}
-            onSubmit={handleSearchSubmit}
+            value={state.localSearchValue}
+            onChange={state.setLocalSearchValue}
+            onSubmit={state.handleSearchSubmit}
             loading={isSearching}
-            placeholder={searchPlaceholder || tTarget("title")}
+            placeholder={searchPlaceholder || state.tTarget("title")}
             after={onTypeFilterChange ? (
-              <Select value={typeFilter || "all"} onValueChange={(value) => onTypeFilterChange(value === "all" ? "" : value)}>
+              <Select
+                value={typeFilter || "all"}
+                onValueChange={(value) => onTypeFilterChange(value === "all" ? "" : value)}
+              >
                 <SelectTrigger size="sm" className="w-auto">
                   <Filter className="h-4 w-4" />
-                  <SelectValue placeholder={tCommon("actions.filter")} />
+                  <SelectValue placeholder={state.tCommon("actions.filter")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">{tCommon("actions.all")}</SelectItem>
-                  <SelectItem value="domain">{tTarget("types.domain")}</SelectItem>
-                  <SelectItem value="ip">{tTarget("types.ip")}</SelectItem>
-                  <SelectItem value="cidr">{tTarget("types.cidr")}</SelectItem>
+                  <SelectItem value="all">{state.tCommon("actions.all")}</SelectItem>
+                  <SelectItem value="domain">{state.tTarget("types.domain")}</SelectItem>
+                  <SelectItem value="ip">{state.tTarget("types.ip")}</SelectItem>
+                  <SelectItem value="cidr">{state.tTarget("types.cidr")}</SelectItem>
                 </SelectContent>
               </Select>
             ) : null}

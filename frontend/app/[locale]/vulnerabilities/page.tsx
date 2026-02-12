@@ -1,9 +1,18 @@
 "use client"
 
 import React from "react"
+import dynamic from "next/dynamic"
 import { useTranslations } from "next-intl"
-import { VulnerabilitiesDetailView } from "@/components/vulnerabilities/vulnerabilities-detail-view"
 import { PageHeader } from "@/components/common/page-header"
+import { DataTableSkeleton } from "@/components/ui/data-table-skeleton"
+
+const VulnerabilitiesDetailView = dynamic(
+  () => import("@/components/vulnerabilities/vulnerabilities-detail-view").then((mod) => mod.VulnerabilitiesDetailView),
+  {
+    ssr: false,
+    loading: () => <DataTableSkeleton toolbarButtonCount={2} rows={6} columns={6} />,
+  }
+)
 
 /**
  * All vulnerabilities page

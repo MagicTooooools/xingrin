@@ -1,16 +1,7 @@
 "use client"
 
-import * as React from "react"
-import { useTranslations } from "next-intl"
-import {
-  AlertDialog,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
-import { Button } from "@/components/ui/button"
+import { ConfirmDialogLayout } from "@/components/ui/confirm-dialog-sections"
+import { useConfirmDialogState } from "@/components/ui/confirm-dialog-state"
 
 interface ConfirmDialogProps {
   open: boolean
@@ -35,32 +26,21 @@ export function ConfirmDialog({
   confirmText,
   cancelText,
 }: ConfirmDialogProps) {
-  const t = useTranslations("common.actions")
+  const state = useConfirmDialogState({
+    confirmText,
+    cancelText,
+  })
 
   return (
-    <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>{title}</AlertDialogTitle>
-          <AlertDialogDescription>{description}</AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <Button
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-            disabled={loading}
-          >
-            {cancelText || t("cancel")}
-          </Button>
-          <Button
-            variant={variant}
-            onClick={onConfirm}
-            disabled={loading}
-          >
-            {loading ? t("processing") : (confirmText || t("confirm"))}
-          </Button>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+    <ConfirmDialogLayout
+      state={state}
+      open={open}
+      onOpenChange={onOpenChange}
+      title={title}
+      description={description}
+      onConfirm={onConfirm}
+      loading={loading}
+      variant={variant}
+    />
   )
 }

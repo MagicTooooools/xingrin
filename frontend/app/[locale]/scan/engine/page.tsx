@@ -3,14 +3,13 @@
 import React, { useState, useMemo } from "react"
 import dynamic from "next/dynamic"
 import { Settings, Search, Pencil, Trash2, Check, Plus, Lock, AlertTriangle, ChevronDown, ChevronRight } from "@/components/icons"
-import * as yaml from "js-yaml"
 import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
-import { YamlViewer } from "@/components/ui/yaml-viewer"
+import { Skeleton } from "@/components/ui/skeleton"
 import {
   Collapsible,
   CollapsibleContent,
@@ -41,6 +40,14 @@ const EngineCreateDialog = dynamic(
   { ssr: false }
 )
 
+const YamlViewer = dynamic(
+  () => import("@/components/ui/yaml-viewer").then((mod) => mod.YamlViewer),
+  {
+    ssr: false,
+    loading: () => <Skeleton className="min-h-[280px] w-full" />,
+  }
+)
+
 /** Feature configuration item definition - corresponds to YAML configuration structure */
 const FEATURE_LIST = [
   { key: "subdomain_discovery" },
@@ -54,6 +61,17 @@ const FEATURE_LIST = [
 ] as const
 
 type FeatureKey = typeof FEATURE_LIST[number]["key"]
+
+const FEATURE_PATTERNS: Record<FeatureKey, RegExp> = {
+  subdomain_discovery: /(?:^|\n)subdomain_discovery\s*:/m,
+  port_scan: /(?:^|\n)port_scan\s*:/m,
+  site_scan: /(?:^|\n)site_scan\s*:/m,
+  fingerprint_detect: /(?:^|\n)fingerprint_detect\s*:/m,
+  directory_scan: /(?:^|\n)directory_scan\s*:/m,
+  screenshot: /(?:^|\n)screenshot\s*:/m,
+  url_fetch: /(?:^|\n)url_fetch\s*:/m,
+  vuln_scan: /(?:^|\n)vuln_scan\s*:/m,
+}
 
 /** Parse engine configuration to get enabled features */
 function parseEngineFeatures(configuration?: string): Record<FeatureKey, boolean> {
@@ -70,23 +88,12 @@ function parseEngineFeatures(configuration?: string): Record<FeatureKey, boolean
 
   if (!configuration) return defaultFeatures
 
-  try {
-    const config = yaml.load(configuration) as Record<string, unknown>
-    if (!config) return defaultFeatures
-
-    return {
-      subdomain_discovery: !!config.subdomain_discovery,
-      port_scan: !!config.port_scan,
-      site_scan: !!config.site_scan,
-      fingerprint_detect: !!config.fingerprint_detect,
-      directory_scan: !!config.directory_scan,
-      screenshot: !!config.screenshot,
-      url_fetch: !!config.url_fetch,
-      vuln_scan: !!config.vuln_scan,
-    }
-  } catch {
-    return defaultFeatures
+  const normalizedConfiguration = configuration.replace(/\r\n?/g, "\n")
+  for (const { key } of FEATURE_LIST) {
+    defaultFeatures[key] = FEATURE_PATTERNS[key].test(normalizedConfiguration)
   }
+
+  return defaultFeatures
 }
 
 /** Calculate the number of enabled features */

@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useCallback } from "react"
 import { toast } from "sonner"
-import { NudgeToastCard } from "@/components/nudges/nudge-toast-card"
 
 /**
  * LunaFox SSE 广播推送 Hook
@@ -26,6 +25,19 @@ interface BroadcastMessage {
   primaryAction?: { label: string; href?: string }
   secondaryAction?: { label: string; href?: string } | null
   timestamp?: number
+}
+
+let nudgeToastCardLoader: Promise<
+  (typeof import("@/components/nudges/nudge-toast-card"))["NudgeToastCard"]
+> | null = null
+
+function loadNudgeToastCard() {
+  if (!nudgeToastCardLoader) {
+    nudgeToastCardLoader = import("@/components/nudges/nudge-toast-card").then(
+      (mod) => mod.NudgeToastCard
+    )
+  }
+  return nudgeToastCardLoader
 }
 
 function isSuppressed(): boolean {
@@ -67,39 +79,41 @@ export function useBroadcastSSE() {
 
     // 稍微延迟显示新弹窗，确保旧的已关闭
     setTimeout(() => {
-      toast.custom(
-        (t) => (
-          <NudgeToastCard
-            title={data.title || "系统通知"}
-            description={data.description || ""}
-            icon={<span className="text-2xl">{data.icon || "📢"}</span>}
-            primaryAction={{
-              label: data.primaryAction?.label || "知道了",
-              href: data.primaryAction?.href,
-              onClick: () => toast.dismiss(t),
-            }}
-            secondaryAction={
-              data.secondaryAction
-                ? {
-                    label: data.secondaryAction.label,
-                    href: data.secondaryAction.href,
-                    buttonVariant: "outline",
-                    onClick: () => {
-                      suppress()
-                      toast.dismiss(t)
-                    },
-                  }
-                : undefined
-            }
-            onDismiss={() => toast.dismiss(t)}
-          />
-        ),
-        {
-          id: BROADCAST_TOAST_ID,
-          duration: 15000,
-          position: "bottom-right",
-        }
-      )
+      void loadNudgeToastCard().then((NudgeToastCard) => {
+        toast.custom(
+          (t) => (
+            <NudgeToastCard
+              title={data.title || "系统通知"}
+              description={data.description || ""}
+              icon={<span className="text-2xl">{data.icon || "📢"}</span>}
+              primaryAction={{
+                label: data.primaryAction?.label || "知道了",
+                href: data.primaryAction?.href,
+                onClick: () => toast.dismiss(t),
+              }}
+              secondaryAction={
+                data.secondaryAction
+                  ? {
+                      label: data.secondaryAction.label,
+                      href: data.secondaryAction.href,
+                      buttonVariant: "outline",
+                      onClick: () => {
+                        suppress()
+                        toast.dismiss(t)
+                      },
+                    }
+                  : undefined
+              }
+              onDismiss={() => toast.dismiss(t)}
+            />
+          ),
+          {
+            id: BROADCAST_TOAST_ID,
+            duration: 15000,
+            position: "bottom-right",
+          }
+        )
+      })
     }, 100)
   }, [])
 

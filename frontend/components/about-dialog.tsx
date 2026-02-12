@@ -1,6 +1,6 @@
 "use client"
 
-import type { ReactNode } from "react"
+import { useState, type ReactNode } from "react"
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"
 import { useAboutDialogState } from "@/components/about-dialog-state"
 import {
@@ -17,6 +17,7 @@ interface AboutDialogProps {
 }
 
 export function AboutDialog({ children }: AboutDialogProps) {
+  const [open, setOpen] = useState(false)
   const {
     t,
     isChecking,
@@ -28,10 +29,10 @@ export function AboutDialog({ children }: AboutDialogProps) {
     releaseUrl,
     logoSrc,
     handleCheckUpdate,
-  } = useAboutDialogState()
+  } = useAboutDialogState({ enabled: open })
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         {children}
       </DialogTrigger>

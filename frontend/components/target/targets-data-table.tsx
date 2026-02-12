@@ -1,11 +1,8 @@
 "use client"
 
-import * as React from "react"
 import { Filter } from "@/components/icons"
-import { useTranslations } from "next-intl"
 import { UnifiedDataTable } from "@/components/ui/data-table/unified-data-table"
 import { SimpleSearchToolbar } from "@/components/ui/data-table/simple-search-toolbar"
-import { useSimpleSearchState } from "@/components/ui/data-table/use-simple-search"
 import {
   Select,
   SelectContent,
@@ -15,8 +12,7 @@ import {
 } from "@/components/ui/select"
 import type { ColumnDef } from "@tanstack/react-table"
 import type { Target } from "@/types/target.types"
-import type { PaginationInfo } from "@/types/common.types"
-import { buildPaginationInfo } from "@/hooks/_shared/pagination"
+import { useTargetTargetsDataTableState } from "./targets-data-table-state"
 
 interface TargetsDataTableProps {
   data: Target[]
@@ -72,43 +68,14 @@ export function TargetsDataTable({
   hideToolbar = false,
   hidePagination = false,
 }: TargetsDataTableProps) {
-  const t = useTranslations("common.status")
-  const tActions = useTranslations("common.actions")
-  const tTarget = useTranslations("target")
-  
-  // Internal pagination state
-  const [internalPagination, setInternalPagination] = React.useState<{ pageIndex: number, pageSize: number }>({
-    pageIndex: 0,
-    pageSize: 10,
+  const state = useTargetTargetsDataTableState({
+    searchValue,
+    onSearch,
+    externalPagination,
+    onPaginationChange,
+    manualPagination,
+    totalCount,
   })
-
-  const {
-    value: localSearchValue,
-    setValue: setLocalSearchValue,
-    submit: handleSearchSubmit,
-  } = useSimpleSearchState({ searchValue, onSearch })
-
-  const pagination = externalPagination || internalPagination
-
-  // Handle pagination state change
-  const handlePaginationChange = (newPagination: { pageIndex: number, pageSize: number }) => {
-    if (onPaginationChange) {
-      onPaginationChange(newPagination)
-    } else {
-      setInternalPagination(newPagination)
-    }
-  }
-
-  // Build paginationInfo
-  const paginationInfo: PaginationInfo | undefined =
-    manualPagination && totalCount !== undefined
-      ? buildPaginationInfo({
-        total: totalCount ?? 0,
-        page: pagination.pageIndex + 1,
-        pageSize: pagination.pageSize,
-        minTotalPages: 1,
-      })
-      : undefined
 
   return (
     <UnifiedDataTable
@@ -116,40 +83,43 @@ export function TargetsDataTable({
       columns={columns}
       getRowId={(row) => String(row.id)}
       state={{
-        pagination,
-        setPagination: onPaginationChange ? undefined : setInternalPagination,
-        paginationInfo,
-        onPaginationChange: handlePaginationChange,
+        pagination: state.pagination,
+        setPagination: onPaginationChange ? undefined : state.setInternalPagination,
+        paginationInfo: state.paginationInfo,
+        onPaginationChange: state.handlePaginationChange,
         onSelectionChange,
       }}
       actions={{
         onBulkDelete,
-        bulkDeleteLabel: tActions("delete"),
+        bulkDeleteLabel: state.tActions("delete"),
         onAddNew,
         onAddHover,
-        addButtonLabel: addButtonText || tTarget("addTarget"),
+        addButtonLabel: addButtonText || state.tTarget("addTarget"),
         showAddButton: !!onAddNew,
       }}
       ui={{
-        emptyMessage: t("noData"),
+        emptyMessage: state.t("noData"),
         toolbarLeft: (
           <SimpleSearchToolbar
-            value={localSearchValue}
-            onChange={setLocalSearchValue}
-            onSubmit={handleSearchSubmit}
+            value={state.localSearchValue}
+            onChange={state.setLocalSearchValue}
+            onSubmit={state.handleSearchSubmit}
             loading={isSearching}
-            placeholder={searchPlaceholder || tTarget("title")}
+            placeholder={searchPlaceholder || state.tTarget("title")}
             after={onTypeFilterChange ? (
-              <Select value={typeFilter || "all"} onValueChange={(value) => onTypeFilterChange(value === "all" ? "" : value)}>
+              <Select
+                value={typeFilter || "all"}
+                onValueChange={(value) => onTypeFilterChange(value === "all" ? "" : value)}
+              >
                 <SelectTrigger size="sm" className="w-auto">
                   <Filter className="h-4 w-4" />
-                  <SelectValue placeholder={tActions("filter")} />
+                  <SelectValue placeholder={state.tActions("filter")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">{tActions("all")}</SelectItem>
-                  <SelectItem value="domain">{tTarget("types.domain")}</SelectItem>
-                  <SelectItem value="ip">{tTarget("types.ip")}</SelectItem>
-                  <SelectItem value="cidr">{tTarget("types.cidr")}</SelectItem>
+                  <SelectItem value="all">{state.tActions("all")}</SelectItem>
+                  <SelectItem value="domain">{state.tTarget("types.domain")}</SelectItem>
+                  <SelectItem value="ip">{state.tTarget("types.ip")}</SelectItem>
+                  <SelectItem value="cidr">{state.tTarget("types.cidr")}</SelectItem>
                 </SelectContent>
               </Select>
             ) : null}

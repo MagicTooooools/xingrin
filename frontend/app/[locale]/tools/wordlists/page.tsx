@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useMemo } from "react"
+import dynamic from "next/dynamic"
 import { Search, Trash2, Pencil, FileText } from "@/components/icons"
 import { useTranslations, useLocale } from "next-intl"
 import { Button } from "@/components/ui/button"
@@ -8,7 +9,6 @@ import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
 import { useWordlists, useDeleteWordlist } from "@/hooks/use-wordlists"
-import { WordlistEditDialog } from "@/components/tools/wordlist-edit-dialog"
 import { WordlistUploadDialog } from "@/components/tools/wordlist-upload-dialog"
 import {
   AlertDialog,
@@ -24,6 +24,11 @@ import { cn } from "@/lib/utils"
 import type { Wordlist } from "@/types/wordlist.types"
 import { MasterDetailSkeleton } from "@/components/ui/master-detail-skeleton"
 import { getDateLocale } from "@/lib/date-utils"
+
+const WordlistEditDialog = dynamic(
+  () => import("@/components/tools/wordlist-edit-dialog").then((mod) => mod.WordlistEditDialog),
+  { ssr: false }
+)
 
 export default function WordlistsPage() {
   const [selectedId, setSelectedId] = useState<number | null>(null)
@@ -267,11 +272,13 @@ export default function WordlistsPage() {
       </div>
 
       {/* Edit dialog */}
-      <WordlistEditDialog
-        wordlist={editingWordlist}
-        open={isEditDialogOpen}
-        onOpenChange={setIsEditDialogOpen}
-      />
+      {isEditDialogOpen ? (
+        <WordlistEditDialog
+          wordlist={editingWordlist}
+          open={isEditDialogOpen}
+          onOpenChange={setIsEditDialogOpen}
+        />
+      ) : null}
 
       {/* Delete confirmation dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>

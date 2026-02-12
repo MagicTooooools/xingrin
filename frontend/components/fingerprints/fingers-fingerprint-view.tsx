@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useState, useMemo } from "react"
+import dynamic from "next/dynamic"
 import { AlertTriangle } from "@/components/icons"
 import { toast } from "sonner"
 import { useTranslations, useLocale } from "next-intl"
@@ -14,13 +15,21 @@ import { useStablePaginationInfo } from "@/hooks/_shared/use-stable-pagination-i
 import { FingerprintService } from "@/services/fingerprint.service"
 import { FingersFingerprintDataTable } from "./fingers-fingerprint-data-table"
 import { createFingersFingerprintColumns } from "./fingers-fingerprint-columns"
-import { FingersFingerprintDialog } from "./fingers-fingerprint-dialog"
-import { ImportFingerprintDialog } from "./import-fingerprint-dialog"
 import { DataTableSkeleton } from "@/components/ui/data-table-skeleton"
 import { getDateLocale } from "@/lib/date-utils"
 import { downloadBlob } from "@/lib/download-utils"
 import { getErrorMessage } from "@/lib/error-utils"
 import type { FingersFingerprint } from "@/types/fingerprint.types"
+
+const FingersFingerprintDialog = dynamic(
+  () => import("./fingers-fingerprint-dialog").then((mod) => mod.FingersFingerprintDialog),
+  { ssr: false }
+)
+
+const ImportFingerprintDialog = dynamic(
+  () => import("./import-fingerprint-dialog").then((mod) => mod.ImportFingerprintDialog),
+  { ssr: false }
+)
 
 export function FingersFingerprintView() {
   const tFingerprints = useTranslations("tools.fingerprints")
@@ -157,20 +166,22 @@ export function FingersFingerprintView() {
         onPaginationChange={setPagination}
       />
 
-      {/* Add fingerprint dialog */}
-      <FingersFingerprintDialog
-        open={addDialogOpen}
-        onOpenChange={setAddDialogOpen}
-        onSuccess={() => refetch()}
-      />
+      {addDialogOpen ? (
+        <FingersFingerprintDialog
+          open={addDialogOpen}
+          onOpenChange={setAddDialogOpen}
+          onSuccess={() => refetch()}
+        />
+      ) : null}
 
-      {/* Import fingerprint dialog */}
-      <ImportFingerprintDialog
-        open={importDialogOpen}
-        onOpenChange={setImportDialogOpen}
-        fingerprintType="fingers"
-        onSuccess={() => refetch()}
-      />
+      {importDialogOpen ? (
+        <ImportFingerprintDialog
+          open={importDialogOpen}
+          onOpenChange={setImportDialogOpen}
+          fingerprintType="fingers"
+          onSuccess={() => refetch()}
+        />
+      ) : null}
     </>
   )
 }

@@ -22,6 +22,7 @@ const nextConfig: NextConfig = {
   // Optimize package imports to reduce bundle size and improve performance
   experimental: {
     optimizePackageImports: [
+      '@carbon/icons-react',
       '@tabler/icons-react',
       'lucide-react',
       '@radix-ui/react-*',

@@ -1,294 +1,37 @@
 "use client"
 
-import React, { useState, useMemo } from "react"
-import { AlertTriangle } from "@/components/icons"
-import { useTranslations, useLocale } from "next-intl"
-import { useTarget } from "@/hooks/use-targets"
 import {
-  useTargetSubdomains,
-  useScanSubdomains
-} from "@/hooks/use-subdomains"
-import { SubdomainsDataTable } from "./subdomains-data-table"
-import { createSubdomainColumns } from "./subdomains-columns"
-import { DataTableSkeleton } from "@/components/ui/data-table-skeleton"
-import { SubdomainService } from "@/services/subdomain.service"
-import { BulkAddSubdomainsDialog } from "./bulk-add-subdomains-dialog"
-import { ConfirmDialog } from "@/components/ui/confirm-dialog"
-import { getDateLocale } from "@/lib/date-utils"
-import { escapeCSV, formatDateForCSV } from "@/lib/csv-utils"
-import { downloadBlob } from "@/lib/download-utils"
-import { useSearchState } from "@/hooks/_shared/use-search-state"
-import { buildPaginationInfo, normalizePagination } from "@/hooks/_shared/pagination"
-import type { Subdomain } from "@/types/subdomain.types"
-import { toast } from "sonner"
+  SubdomainsDetailViewContent,
+  SubdomainsDetailViewDialogs,
+  SubdomainsDetailViewErrorState,
+  SubdomainsDetailViewLoadingState,
+} from "./subdomains-detail-view-sections"
+import { useSubdomainsDetailViewState } from "./subdomains-detail-view-state"
+
+interface SubdomainsDetailViewProps {
+  targetId?: number
+  scanId?: number
+}
 
 /**
  * Subdomain detail view component
- * Supports two modes:
- * 1. targetId: Display all subdomains under a target
- * 2. scanId: Display subdomains from scan history
+ * Supports target and scan history modes.
  */
-export function SubdomainsDetailView({
-  targetId,
-  scanId
-}: {
-  targetId?: number
-  scanId?: number
-}) {
-  const [selectedSubdomains, setSelectedSubdomains] = useState<Subdomain[]>([])
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-  const [isDeleting, setIsDeleting] = useState(false)
+export function SubdomainsDetailView({ targetId, scanId }: SubdomainsDetailViewProps) {
+  const state = useSubdomainsDetailViewState({ targetId, scanId })
 
-  // Internationalization
-  const tColumns = useTranslations("columns")
-  const tCommon = useTranslations("common")
-  const tSubdomains = useTranslations("subdomains")
-  const tToast = useTranslations("toast")
-  const locale = useLocale()
-
-  // Build translation object
-  const translations = useMemo(() => ({
-    columns: {
-      subdomain: tColumns("subdomain.subdomain"),
-      createdAt: tColumns("common.createdAt"),
-    },
-    actions: {
-      selectAll: tCommon("actions.selectAll"),
-      selectRow: tCommon("actions.selectRow"),
-    },
-  }), [tColumns, tCommon])
-
-  // Bulk add dialog state
-  const [bulkAddOpen, setBulkAddOpen] = useState(false)
-
-  // Pagination state
-  const [pagination, setPagination] = useState({
-    pageIndex: 0,  // 0-based for react-table
-    pageSize: 10,
-  })
-
-  // Filter state (smart filter syntax)
-  const [filterQuery, setFilterQuery] = useState("")
-
-  // Fetch subdomain data based on targetId or scanId (with pagination and filter params)
-  const targetSubdomainsQuery = useTargetSubdomains(
-    targetId || 0,
-    {
-      page: pagination.pageIndex + 1, // Convert to 1-based
-      pageSize: pagination.pageSize,
-      filter: filterQuery || undefined,
-    },
-    { enabled: !!targetId }
-  )
-  const scanSubdomainsQuery = useScanSubdomains(
-    scanId || 0,
-    {
-      page: pagination.pageIndex + 1, // Convert to 1-based
-      pageSize: pagination.pageSize,
-      filter: filterQuery || undefined,
-    },
-    { enabled: !!scanId }
-  )
-
-  // Select the active query result
-  const activeQuery = targetId ? targetSubdomainsQuery : scanSubdomainsQuery
-  const { data: subdomainsData, isLoading, isFetching, error, refetch } = activeQuery
-  const { isSearching, handleSearchChange: handleFilterChange } = useSearchState({
-    isFetching,
-    setSearchValue: setFilterQuery,
-    onResetPage: () => setPagination((prev) => ({ ...prev, pageIndex: 0 })),
-  })
-  const paginationInfo = subdomainsData
-    ? buildPaginationInfo({
-      ...normalizePagination(subdomainsData, pagination.pageIndex + 1, pagination.pageSize),
-      minTotalPages: 1,
-    })
-    : undefined
-
-  // Get target info (only in targetId mode)
-  const { data: targetData } = useTarget(targetId || 0)
-
-  // Helper function - format date
-  const formatDate = React.useCallback((dateString: string): string => {
-    return new Date(dateString).toLocaleString(getDateLocale(locale), {
-      year: "numeric",
-      month: "numeric",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-      hour12: false,
-    })
-  }, [locale])
-
-  // Handle pagination change
-  const handlePaginationChange = (newPagination: { pageIndex: number; pageSize: number }) => {
-    setPagination(newPagination)
+  if (state.error) {
+    return <SubdomainsDetailViewErrorState state={state} />
   }
 
-  // Generate CSV content
-  const generateCSV = (items: Subdomain[]): string => {
-    const BOM = '\ufeff'
-    const headers = ['name', 'created_at']
-    
-    const rows = items.map(item => [
-      escapeCSV(item.name),
-      escapeCSV(formatDateForCSV(item.createdAt))
-    ].join(','))
-    
-    return BOM + [headers.join(','), ...rows].join('\n')
-  }
-
-  // Handle download all subdomains
-  const handleDownloadAll = async () => {
-    try {
-      let blob: Blob | null = null
-
-      if (scanId) {
-        const data = await SubdomainService.exportSubdomainsByScanId(scanId)
-        blob = data
-      } else if (targetId) {
-        const data = await SubdomainService.exportSubdomainsByTargetId(targetId)
-        blob = data
-      } else {
-        if (!subdomains || subdomains.length === 0) {
-          return
-        }
-        const csvContent = generateCSV(subdomains)
-        blob = new Blob([csvContent], { type: "text/csv;charset=utf-8" })
-      }
-
-      if (!blob) return
-
-      const prefix = scanId ? `scan-${scanId}` : targetId ? `target-${targetId}` : "subdomains"
-      downloadBlob(blob, `${prefix}-subdomains-${Date.now()}.csv`)
-    } catch (error) {
-      void error
-    }
-  }
-
-  // Handle download selected subdomains
-  const handleDownloadSelected = () => {
-    if (selectedSubdomains.length === 0) {
-      return
-    }
-    const csvContent = generateCSV(selectedSubdomains)
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8" })
-    downloadBlob(blob, `subdomains-selected-${scanId ?? targetId ?? "all"}-${Date.now()}.csv`)
-  }
-
-  // Handle bulk delete
-  const handleBulkDelete = async () => {
-    if (selectedSubdomains.length === 0) return
-    
-    setIsDeleting(true)
-    try {
-      const ids = selectedSubdomains.map(s => s.id)
-      const result = await SubdomainService.bulkDeleteSubdomains(ids)
-      toast.success(tToast("deleteSuccess", { count: result.deletedCount }))
-      setSelectedSubdomains([])
-      setDeleteDialogOpen(false)
-      refetch()
-    } catch {
-      toast.error(tToast("deleteFailed"))
-    } finally {
-      setIsDeleting(false)
-    }
-  }
-
-  // Create column definitions
-  const subdomainColumns = useMemo(
-    () =>
-      createSubdomainColumns({
-        formatDate,
-        t: translations,
-      }),
-    [formatDate, translations]
-  )
-
-  // Convert backend data format to frontend Subdomain type (must be called before conditional rendering)
-  // Note: Backend uses djangorestframework-camel-case to automatically convert field names to camelCase
-  const subdomains: Subdomain[] = useMemo(() => {
-    if (!subdomainsData?.results) return []
-    return subdomainsData.results.map((item) => ({
-      id: item.id,
-      name: item.name,
-      createdAt: item.createdAt,  // Created time (already converted to camelCase by backend)
-    }))
-  }, [subdomainsData])
-
-  // Error state
-  if (error) {
-    return (
-      <div className="flex flex-col items-center justify-center py-12">
-        <div className="rounded-full bg-destructive/10 p-3 mb-4">
-          <AlertTriangle className="h-10 w-10 text-destructive" />
-        </div>
-        <h3 className="text-lg font-semibold mb-2">{tSubdomains("loadFailed")}</h3>
-        <p className="text-muted-foreground text-center mb-4">
-          {error.message || tSubdomains("loadError")}
-        </p>
-        <button
-          onClick={() => refetch()}
-          className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
-        >
-          {tSubdomains("reload")}
-        </button>
-      </div>
-    )
-  }
-
-  // Loading state (only show skeleton on first load, not during search)
-  if (isLoading && !subdomainsData) {
-    return (
-      <DataTableSkeleton
-        toolbarButtonCount={2}
-        rows={6}
-        columns={5}
-      />
-    )
+  if (state.isLoading && !state.subdomainsData) {
+    return <SubdomainsDetailViewLoadingState />
   }
 
   return (
     <>
-      <SubdomainsDataTable
-        data={subdomains}
-        columns={subdomainColumns}
-        onSelectionChange={setSelectedSubdomains}
-        filterValue={filterQuery}
-        onFilterChange={handleFilterChange}
-        isSearching={isSearching}
-        onDownloadAll={handleDownloadAll}
-        onDownloadSelected={handleDownloadSelected}
-        onBulkDelete={targetId ? () => setDeleteDialogOpen(true) : undefined}
-        pagination={pagination}
-        setPagination={setPagination}
-        paginationInfo={paginationInfo}
-        onPaginationChange={handlePaginationChange}
-        onBulkAdd={targetId ? () => setBulkAddOpen(true) : undefined}
-      />
-      
-      {/* Bulk add subdomains dialog */}
-      {targetId && (
-        <BulkAddSubdomainsDialog
-          targetId={targetId}
-          targetName={targetData?.name}
-          open={bulkAddOpen}
-          onOpenChange={setBulkAddOpen}
-          onSuccess={() => refetch()}
-        />
-      )}
-
-      {/* Delete confirmation dialog */}
-      <ConfirmDialog
-        open={deleteDialogOpen}
-        onOpenChange={setDeleteDialogOpen}
-        title={tCommon("actions.confirmDelete")}
-        description={tCommon("actions.deleteConfirmMessage", { count: selectedSubdomains.length })}
-        onConfirm={handleBulkDelete}
-        loading={isDeleting}
-        variant="destructive"
-      />
+      <SubdomainsDetailViewContent state={state} />
+      <SubdomainsDetailViewDialogs state={state} />
     </>
   )
 }

@@ -107,7 +107,7 @@ export function useOrganizationDetailViewState({ organizationId }: OrganizationD
 
   const isLoading = isLoadingOrg || isLoadingTargets
   const error = orgError || targetsError
-  const targetRows = targetsData?.targets ?? []
+  const targetRows = targetsData?.results ?? []
 
   const formatDate = React.useCallback(
     (dateString: string): string => {

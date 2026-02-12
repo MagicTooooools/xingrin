@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useState, useMemo } from "react"
+import dynamic from "next/dynamic"
 import { AlertTriangle } from "@/components/icons"
 import { toast } from "sonner"
 import { useTranslations, useLocale } from "next-intl"
@@ -14,13 +15,21 @@ import { useStablePaginationInfo } from "@/hooks/_shared/use-stable-pagination-i
 import { FingerprintService } from "@/services/fingerprint.service"
 import { ARLFingerprintDataTable } from "./arl-fingerprint-data-table"
 import { createARLFingerprintColumns } from "./arl-fingerprint-columns"
-import { ARLFingerprintDialog } from "./arl-fingerprint-dialog"
-import { ImportFingerprintDialog } from "./import-fingerprint-dialog"
 import { DataTableSkeleton } from "@/components/ui/data-table-skeleton"
 import { getDateLocale } from "@/lib/date-utils"
 import { downloadBlob } from "@/lib/download-utils"
 import { getErrorMessage } from "@/lib/error-utils"
 import type { ARLFingerprint } from "@/types/fingerprint.types"
+
+const ARLFingerprintDialog = dynamic(
+  () => import("./arl-fingerprint-dialog").then((mod) => mod.ARLFingerprintDialog),
+  { ssr: false }
+)
+
+const ImportFingerprintDialog = dynamic(
+  () => import("./import-fingerprint-dialog").then((mod) => mod.ImportFingerprintDialog),
+  { ssr: false }
+)
 
 export function ARLFingerprintView() {
   const tFingerprints = useTranslations("tools.fingerprints")
@@ -145,19 +154,23 @@ export function ARLFingerprintView() {
         onPaginationChange={setPagination}
       />
 
-      <ARLFingerprintDialog
-        open={addDialogOpen}
-        onOpenChange={setAddDialogOpen}
-        onSuccess={() => refetch()}
-      />
+      {addDialogOpen ? (
+        <ARLFingerprintDialog
+          open={addDialogOpen}
+          onOpenChange={setAddDialogOpen}
+          onSuccess={() => refetch()}
+        />
+      ) : null}
 
-      <ImportFingerprintDialog
-        open={importDialogOpen}
-        onOpenChange={setImportDialogOpen}
-        fingerprintType="arl"
-        acceptedFileTypes=".yaml,.yml,.json"
-        onSuccess={() => refetch()}
-      />
+      {importDialogOpen ? (
+        <ImportFingerprintDialog
+          open={importDialogOpen}
+          onOpenChange={setImportDialogOpen}
+          fingerprintType="arl"
+          acceptedFileTypes=".yaml,.yml,.json"
+          onSuccess={() => refetch()}
+        />
+      ) : null}
     </>
   )
 }

@@ -1042,9 +1042,6 @@ function CardCuratedMetaTiles({ node }: { node: AgentNode }) {
 
 // --- Card Variant 13: Production Ready (Balanced) ---
 function CardProduction({ node }: { node: AgentNode }) {
-  const statusColor = node.status === "online" ? "bg-[var(--success)]" : node.status === "maintenance" ? "bg-[var(--warning)]" : "bg-muted-foreground"
-  const statusBorder = node.status === "online" ? "border-[var(--success)]" : node.status === "maintenance" ? "border-[var(--warning)]" : "border-muted-foreground"
-  
   return (
     <Card className="group overflow-hidden transition-all hover:shadow-md border-l-4" style={{ borderLeftColor: node.status === "online" ? "var(--success)" : node.status === "maintenance" ? "var(--warning)" : "var(--muted-foreground)" }}>
       <CardHeader className="p-4 pb-3">
@@ -2013,7 +2010,7 @@ export function AgentNodeDesigns() {
 
         <div className="space-y-4">
           <h3 className="text-lg font-medium">Variant 15: Density Grid</h3>
-          <p className="text-sm text-muted-foreground">Explicit "Value / Limit" text for all metrics.</p>
+          <p className="text-sm text-muted-foreground">Explicit &quot;Value / Limit&quot; text for all metrics.</p>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {MOCK_NODES.slice(0, 3).map(node => (
               <CardDensityGrid key={node.id} node={node} />
@@ -2045,7 +2042,7 @@ export function AgentNodeDesigns() {
       {/* Section 7: Variant 15 Evolutions (Stylistic Variations) */}
       <section className="space-y-8">
         <h2 className="text-xl font-semibold border-b pb-2">Variant 15 Layout Evolutions</h2>
-        <p className="text-sm text-muted-foreground">Exploring different visual styles for the same "Density Grid" information architecture.</p>
+        <p className="text-sm text-muted-foreground">Exploring different visual styles for the same &quot;Density Grid&quot; information architecture.</p>
 
         <div className="space-y-4">
            <h3 className="text-lg font-medium">Evolution A: Clean Corporate</h3>
@@ -2069,7 +2066,7 @@ export function AgentNodeDesigns() {
 
         <div className="space-y-4">
            <h3 className="text-lg font-medium">Evolution B2: Adaptive Console (Light/Dark Aware)</h3>
-           <p className="text-sm text-muted-foreground">The same "Console" layout, but adapted to project theme colors (works in Light Mode).</p>
+           <p className="text-sm text-muted-foreground">The same &quot;Console&quot; layout, but adapted to project theme colors (works in Light Mode).</p>
            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
              {MOCK_NODES.slice(0, 3).map(node => (
                <CardDensityMonospace key={node.id} node={node} />
@@ -2121,4 +2118,3 @@ export function AgentNodeDesigns() {
     </div>
   )
 }
-

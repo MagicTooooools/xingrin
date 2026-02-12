@@ -1,9 +1,9 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
+import dynamic from "next/dynamic"
 import Link from "next/link"
 import { useParams } from "next/navigation"
-import { CodeEditor } from "@/components/ui/code-editor"
 import {
   ChevronDown,
   ChevronRight,
@@ -20,6 +20,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
+import { Skeleton } from "@/components/ui/skeleton"
 import {
   useNucleiRepoTree,
   useNucleiRepoContent,
@@ -33,6 +34,14 @@ import { useTranslations } from "next-intl"
 interface FlattenedNode extends NucleiTemplateTreeNode {
   level: number
 }
+
+const CodeEditor = dynamic(
+  () => import("@/components/ui/code-editor").then((mod) => mod.CodeEditor),
+  {
+    ssr: false,
+    loading: () => <Skeleton className="h-full w-full rounded-none" />,
+  }
+)
 
 /** Parse YAML content to extract template information */
 function parseTemplateInfo(content: string) {

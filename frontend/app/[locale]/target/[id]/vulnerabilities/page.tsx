@@ -1,8 +1,17 @@
 "use client"
 
 import React from "react"
+import dynamic from "next/dynamic"
 import { useParams } from "next/navigation"
-import { VulnerabilitiesDetailView } from "@/components/vulnerabilities/vulnerabilities-detail-view"
+import { DataTableSkeleton } from "@/components/ui/data-table-skeleton"
+
+const VulnerabilitiesDetailView = dynamic(
+  () => import("@/components/vulnerabilities/vulnerabilities-detail-view").then((mod) => mod.VulnerabilitiesDetailView),
+  {
+    ssr: false,
+    loading: () => <DataTableSkeleton toolbarButtonCount={2} rows={6} columns={6} />,
+  }
+)
 /**
  * Target vulnerabilities page
  * Displays vulnerability details under the target
@@ -16,4 +25,3 @@ export default function TargetVulnerabilitiesPage() {
     </div>
   )
 }
-

@@ -11,16 +11,14 @@ import localFont from 'next/font/local'
 import "../globals.css"
 // Import color themes
 import "@/styles/themes/bauhaus.css"
-import { Suspense } from "react"
 import { QueryProvider } from "@/components/providers/query-provider"
 import { ThemeProvider } from "@/components/providers/theme-provider"
 import { UiI18nProvider } from "@/components/providers/ui-i18n-provider"
 import { ColorThemeInit } from "@/components/color-theme-init"
 import { ErrorBoundary } from "@/components/error-boundary"
+import { LayoutClientEnhancements } from "@/components/layout-client-enhancements"
 
 // Import common layout components
-import { RoutePrefetch } from "@/components/route-prefetch"
-import { RouteProgress } from "@/components/route-progress"
 import { AuthLayout } from "@/components/auth/auth-layout"
 
 // Dynamically generate metadata
@@ -120,10 +118,7 @@ export default async function LocaleLayout({
     >
       <body className={harmonyOS.className}>
         <ColorThemeInit />
-        {/* Route loading progress bar */}
-        <Suspense fallback={null}>
-          <RouteProgress />
-        </Suspense>
+        <LayoutClientEnhancements />
         {/* ThemeProvider provides theme switching functionality */}
         <ThemeProvider>
           {/* NextIntlClientProvider provides internationalization context */}
@@ -134,8 +129,6 @@ export default async function LocaleLayout({
               <ErrorBoundary>
                 {/* UiI18nProvider provides UI component translations */}
                 <UiI18nProvider>
-                  {/* Route prefetch */}
-                  <RoutePrefetch />
                   {/* AuthLayout handles authentication and sidebar display */}
                   <AuthLayout>
                     {children}

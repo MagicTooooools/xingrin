@@ -2,20 +2,13 @@
 
 import * as React from "react"
 import type { ColumnDef } from "@tanstack/react-table"
-import { useTranslations } from "next-intl"
-import { Filter } from "@/components/icons"
+
 import { UnifiedDataTable } from "@/components/ui/data-table/unified-data-table"
-import { SimpleSearchToolbar } from "@/components/ui/data-table/simple-search-toolbar"
-import { useSimpleSearchState } from "@/components/ui/data-table/use-simple-search"
+
 import type { ScanRecord, ScanStatus } from "@/types/scan.types"
 import type { PaginationInfo } from "@/types/common.types"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+import { ScanHistoryToolbar } from "./scan-history-data-table-sections"
+import { useScanHistoryDataTableState } from "./scan-history-data-table-state"
 
 interface ScanHistoryDataTableProps {
   data: ScanRecord[]
@@ -64,25 +57,16 @@ export function ScanHistoryDataTable({
   statusFilter = "all",
   onStatusFilterChange,
 }: ScanHistoryDataTableProps) {
-  const t = useTranslations("common.status")
-  const tScan = useTranslations("scan.history")
-  const tActions = useTranslations("common.actions")
-  
-  const {
-    value: localSearchValue,
-    setValue: setLocalSearchValue,
-    submit: handleSearchSubmit,
-  } = useSimpleSearchState({ searchValue, onSearch })
-
-  // Status options
-  const statusOptions: { value: ScanStatus | "all"; label: string }[] = [
-    { value: "all", label: tScan("allStatus") },
-    { value: "running", label: t("running") },
-    { value: "completed", label: t("completed") },
-    { value: "failed", label: t("failed") },
-    { value: "pending", label: t("pending") },
-    { value: "cancelled", label: t("cancelled") },
-  ]
+  const state = useScanHistoryDataTableState({ searchValue, onSearch })
+  const toolbar = (
+    <ScanHistoryToolbar
+      state={state}
+      loading={isSearching}
+      placeholder={searchPlaceholder}
+      status={statusFilter}
+      onStatusChange={onStatusFilterChange}
+    />
+  )
 
   return (
     <UnifiedDataTable
@@ -102,42 +86,16 @@ export function ScanHistoryDataTable({
       }}
       actions={{
         onBulkDelete,
-        bulkDeleteLabel: tActions("delete"),
+        bulkDeleteLabel: state.tActions("delete"),
         onAddNew,
-        addButtonLabel: addButtonText || tScan("title"),
+        addButtonLabel: addButtonText || state.tScan("title"),
       }}
       ui={{
         hidePagination,
         pageSizeOptions,
         hideToolbar,
-        emptyMessage: t("noData"),
-        toolbarLeft: (
-          <SimpleSearchToolbar
-            value={localSearchValue}
-            onChange={setLocalSearchValue}
-            onSubmit={handleSearchSubmit}
-            loading={isSearching}
-            placeholder={searchPlaceholder || tScan("searchPlaceholder")}
-            after={onStatusFilterChange ? (
-              <Select
-                value={statusFilter}
-                onValueChange={(value) => onStatusFilterChange(value as ScanStatus | "all")}
-              >
-                <SelectTrigger size="sm" className="w-auto">
-                  <Filter className="h-4 w-4" />
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {statusOptions.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            ) : null}
-          />
-        ),
+        emptyMessage: state.t("noData"),
+        toolbarLeft: toolbar,
       }}
     />
   )

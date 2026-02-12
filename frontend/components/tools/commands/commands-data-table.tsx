@@ -1,10 +1,11 @@
 "use client"
 
-import * as React from "react"
 import type { ColumnDef } from "@tanstack/react-table"
-import { useTranslations } from "next-intl"
+
 import { UnifiedDataTable } from "@/components/ui/data-table/unified-data-table"
 import { SimpleSearchToolbar } from "@/components/ui/data-table/simple-search-toolbar"
+import { useCommandsDataTableState } from "./commands-data-table-state"
+
 interface CommandsDataTableProps<TData extends { id: number; displayName?: string }> {
   columns: ColumnDef<TData, unknown>[]
   data: TData[]
@@ -18,51 +19,29 @@ export function CommandsDataTable<TData extends { id: number; displayName?: stri
   onBulkDelete,
   onAdd,
 }: CommandsDataTableProps<TData>) {
-  const t = useTranslations("tools.commands")
-  const tCommon = useTranslations("common")
-  
-  // Local search state
-  const [searchValue, setSearchValue] = React.useState("")
-  const [selectedRows, setSelectedRows] = React.useState<TData[]>([])
-
-  // Filter data (local filtering)
-  const filteredData = React.useMemo(() => {
-    if (!searchValue) return data
-    return data.filter((item) => {
-      const displayName = item.displayName || ""
-      return displayName.toLowerCase().includes(searchValue.toLowerCase())
-    })
-  }, [data, searchValue])
-
-  // Handle bulk delete
-  const handleBulkDelete = () => {
-    if (onBulkDelete && selectedRows.length > 0) {
-      const selectedIds = selectedRows.map((row) => row.id)
-      onBulkDelete(selectedIds)
-    }
-  }
+  const state = useCommandsDataTableState({ data, onBulkDelete })
 
   return (
     <UnifiedDataTable
-      data={filteredData}
+      data={state.filteredData}
       columns={columns}
       getRowId={(row) => String(row.id)}
       state={{
-        onSelectionChange: setSelectedRows,
+        onSelectionChange: state.setSelectedRows,
       }}
       actions={{
-        onBulkDelete: onBulkDelete ? handleBulkDelete : undefined,
+        onBulkDelete: onBulkDelete ? state.handleBulkDelete : undefined,
         onAddNew: onAdd,
-        addButtonLabel: tCommon("actions.add"),
-        bulkDeleteLabel: tCommon("actions.delete"),
+        addButtonLabel: state.tCommon("actions.add"),
+        bulkDeleteLabel: state.tCommon("actions.delete"),
       }}
       ui={{
-        emptyMessage: tCommon("status.noData"),
+        emptyMessage: state.tCommon("status.noData"),
         toolbarLeft: (
           <SimpleSearchToolbar
-            value={searchValue}
-            onChange={setSearchValue}
-            placeholder={t("searchPlaceholder")}
+            value={state.searchValue}
+            onChange={state.setSearchValue}
+            placeholder={state.t("searchPlaceholder")}
             showButton={false}
           />
         ),

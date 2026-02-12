@@ -1,11 +1,11 @@
 "use client"
 
 import React from "react"
+import dynamic from "next/dynamic"
 import { AlertTriangle } from "@/components/icons"
 
 import { DataTableSkeleton } from "@/components/ui/data-table-skeleton"
 import { TargetsDataTable } from "./targets/targets-data-table"
-import { AddTargetDialog } from "./targets/add-target-dialog"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,6 +18,11 @@ import {
 } from "@/components/ui/alert-dialog"
 
 import type { OrganizationDetailViewState } from "./organization-detail-view-state"
+
+const AddTargetDialog = dynamic(
+  () => import("./targets/add-target-dialog").then((mod) => mod.AddTargetDialog),
+  { ssr: false }
+)
 
 export function OrganizationDetailViewLoadingState() {
   return <DataTableSkeleton toolbarButtonCount={3} rows={6} columns={4} />
@@ -95,13 +100,15 @@ export function OrganizationDetailViewDialogs({
 }) {
   return (
     <>
-      <AddTargetDialog
-        organizationId={state.organization?.id ?? 0}
-        organizationName={state.organization?.name ?? ""}
-        onAdd={state.handleAddSuccess}
-        open={state.isAddDialogOpen}
-        onOpenChange={state.setIsAddDialogOpen}
-      />
+      {state.isAddDialogOpen ? (
+        <AddTargetDialog
+          organizationId={state.organization?.id ?? 0}
+          organizationName={state.organization?.name ?? ""}
+          onAdd={state.handleAddSuccess}
+          open={state.isAddDialogOpen}
+          onOpenChange={state.setIsAddDialogOpen}
+        />
+      ) : null}
 
       <AlertDialog open={state.deleteDialogOpen} onOpenChange={state.setDeleteDialogOpen}>
         <AlertDialogContent>

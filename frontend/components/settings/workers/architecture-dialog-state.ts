@@ -1,8 +1,6 @@
 import React from "react"
 import { useTranslations } from "next-intl"
 
-type TranslationFn = (key: string, params?: Record<string, string | number | Date>) => string
-
 export type ArchitectureLabels = {
   location: string
   comms: string

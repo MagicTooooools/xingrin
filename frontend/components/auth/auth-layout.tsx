@@ -1,16 +1,21 @@
 "use client"
 
 import React from "react"
+import dynamic from "next/dynamic"
 import { usePathname } from "next/navigation"
 import { useLocale, useTranslations } from "next-intl"
 import { AppSidebar } from "@/components/app-sidebar"
 import { UnifiedHeader } from "@/components/unified-header"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
-import { Toaster } from "@/components/ui/sonner"
 import { LoadingState } from "@/components/loading-spinner"
 import { Suspense } from "react"
 import { useAuth } from "@/hooks/use-auth"
 import { useRouter } from "next/navigation"
+
+const Toaster = dynamic(
+  () => import("@/components/ui/sonner").then((mod) => mod.Toaster),
+  { ssr: false }
+)
 
 // Public routes that don't require authentication (without locale prefix)
 const PUBLIC_ROUTES = ["/login"]

@@ -1,11 +1,20 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import mermaid from "mermaid"
+import type mermaidType from "mermaid"
 
 interface MermaidDiagramProps {
   chart: string
   className?: string
+}
+
+let mermaidLoader: Promise<typeof mermaidType> | null = null
+
+function loadMermaid() {
+  if (!mermaidLoader) {
+    mermaidLoader = import("mermaid").then((mod) => mod.default)
+  }
+  return mermaidLoader
 }
 
 export function MermaidDiagram({ chart, className = "" }: MermaidDiagramProps) {
@@ -13,10 +22,15 @@ export function MermaidDiagram({ chart, className = "" }: MermaidDiagramProps) {
   const [svg, setSvg] = useState<string>("")
 
   useEffect(() => {
+    let cancelled = false
+
     const renderDiagram = async () => {
       if (!containerRef.current) return
 
       try {
+        const mermaid = await loadMermaid()
+        if (cancelled) return
+
         const rootStyle = getComputedStyle(document.documentElement)
         const resolveColor = (value: string, fallback: string) => {
           if (!value || !document.body) return fallback
@@ -77,17 +91,24 @@ export function MermaidDiagram({ chart, className = "" }: MermaidDiagramProps) {
         })
 
         // 生成唯一 ID
-        const id = `mermaid-${Math.random().toString(36).substr(2, 9)}`
+        const id =
+          typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+            ? `mermaid-${crypto.randomUUID()}`
+            : `mermaid-${Math.random().toString(36).slice(2, 11)}`
 
         // 渲染图表
         const { svg: renderedSvg } = await mermaid.render(id, chart)
+        if (cancelled) return
         setSvg(renderedSvg)
       } catch (error) {
         void error
       }
     }
 
-    renderDiagram()
+    void renderDiagram()
+    return () => {
+      cancelled = true
+    }
   }, [chart])
 
   return (

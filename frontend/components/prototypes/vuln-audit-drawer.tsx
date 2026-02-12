@@ -6,7 +6,6 @@ import {
   IconCheck,
   IconX,
   IconSearch,
-  IconFilter,
   IconCode,
   IconBrowser,
   IconActivity,
@@ -17,7 +16,6 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { cn } from "@/lib/utils"
 
 // --- Shared Mock Data & Components (Same as above) ---
@@ -70,7 +68,7 @@ function SourceBadge({ source }: { source: string }) {
 
 export function VulnAuditDrawer() {
   const [selectedId, setSelectedId] = useState<string | null>(null)
-  const [items, setItems] = useState(MOCK_VULNS)
+  const [items] = useState(MOCK_VULNS)
   
   const selectedItem = items.find(i => i.id === selectedId)
 
@@ -192,7 +190,7 @@ export function VulnAuditDrawer() {
                         <div className="border rounded-md overflow-hidden">
                            <div className="bg-muted/30 px-3 py-2 text-xs font-bold border-b text-muted-foreground uppercase">Description</div>
                            <div className="p-3 text-sm text-muted-foreground leading-relaxed">
-                              The application appears to be vulnerable to SQL Injection. The input parameter 'id' is not properly sanitized before being used in a SQL query.
+                              The application appears to be vulnerable to SQL Injection. The input parameter <code>id</code> is not properly sanitized before being used in a SQL query.
                            </div>
                         </div>
                      </div>

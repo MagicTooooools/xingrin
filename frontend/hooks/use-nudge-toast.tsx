@@ -3,7 +3,7 @@
 import * as React from "react"
 import { toast, type ToasterProps } from "sonner"
 
-import { NudgeToastCard, type NudgeToastCardProps } from "@/components/nudges/nudge-toast-card"
+import type { NudgeToastCardProps } from "@/components/nudges/nudge-toast-card"
 import {
   isLocalStorageAvailable,
   isNudgeSuppressed,
@@ -60,6 +60,19 @@ export interface UseNudgeToastOptions {
 
 const withDismiss = withNudgeDismiss
 
+let nudgeToastCardLoader: Promise<
+  (typeof import("@/components/nudges/nudge-toast-card"))["NudgeToastCard"]
+> | null = null
+
+function loadNudgeToastCard() {
+  if (!nudgeToastCardLoader) {
+    nudgeToastCardLoader = import("@/components/nudges/nudge-toast-card").then(
+      (mod) => mod.NudgeToastCard
+    )
+  }
+  return nudgeToastCardLoader
+}
+
 export function useNudgeToast({
   storageKey,
   cooldownMs,
@@ -81,32 +94,34 @@ export function useNudgeToast({
   }, [])
 
   const showVariant = React.useCallback((variant: NudgeToastVariant) => {
-    toast.custom(
-      (t) => {
-        const onDismiss = () => {
-          toast.dismiss(t)
-          if (storageKey) suppressNudge(storageKey, cooldownMs)
-        }
+    void loadNudgeToastCard().then((NudgeToastCard) => {
+      toast.custom(
+        (t) => {
+          const onDismiss = () => {
+            toast.dismiss(t)
+            if (storageKey) suppressNudge(storageKey, cooldownMs)
+          }
 
-        const primaryAction = withDismiss(variant.primaryAction, onDismiss) ?? {
-          label: "OK",
-          onClick: onDismiss,
-        }
+          const primaryAction = withDismiss(variant.primaryAction, onDismiss) ?? {
+            label: "OK",
+            onClick: onDismiss,
+          }
 
-        return (
-          <NudgeToastCard
-            {...variant}
-            onDismiss={onDismiss}
-            primaryAction={primaryAction}
-            secondaryAction={withDismiss(variant.secondaryAction, onDismiss)}
-          />
-        )
-      },
-      {
-        duration,
-        position,
-      }
-    )
+          return (
+            <NudgeToastCard
+              {...variant}
+              onDismiss={onDismiss}
+              primaryAction={primaryAction}
+              secondaryAction={withDismiss(variant.secondaryAction, onDismiss)}
+            />
+          )
+        },
+        {
+          duration,
+          position,
+        }
+      )
+    })
   }, [cooldownMs, duration, position, storageKey])
 
   const triggerInternal = React.useCallback((variantOverride?: NudgeToastVariant) => {

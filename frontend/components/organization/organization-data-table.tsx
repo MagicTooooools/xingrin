@@ -1,11 +1,9 @@
 "use client"
 
-import * as React from "react"
-import { useTranslations } from "next-intl"
 import { UnifiedDataTable } from "@/components/ui/data-table/unified-data-table"
 import { SimpleSearchToolbar } from "@/components/ui/data-table/simple-search-toolbar"
-import { useSimpleSearchState } from "@/components/ui/data-table/use-simple-search"
 import type { OrganizationDataTableProps } from "@/types/organization.types"
+import { useOrganizationDataTableState } from "./organization-data-table-state"
 
 export function OrganizationDataTable({
   data,
@@ -21,16 +19,7 @@ export function OrganizationDataTable({
   paginationInfo,
   onPaginationChange,
 }: OrganizationDataTableProps) {
-  const t = useTranslations("organization")
-  const tActions = useTranslations("common.actions")
-  const {
-    value: localSearchValue,
-    setValue: setLocalSearchValue,
-    submit: handleSearchSubmit,
-  } = useSimpleSearchState({ searchValue, onSearch })
-
-  // 默认排序
-  const defaultSorting = [{ id: "createdAt", desc: true }]
+  const state = useOrganizationDataTableState({ searchValue, onSearch })
 
   return (
     <UnifiedDataTable
@@ -42,23 +31,23 @@ export function OrganizationDataTable({
         paginationInfo,
         onPaginationChange,
         onSelectionChange,
-        defaultSorting,
+        defaultSorting: state.defaultSorting,
       }}
       actions={{
         onBulkDelete,
-        bulkDeleteLabel: tActions("delete"),
+        bulkDeleteLabel: state.tActions("delete"),
         onAddNew,
-        addButtonLabel: t("addOrganization"),
+        addButtonLabel: state.t("addOrganization"),
       }}
       ui={{
-        emptyMessage: t("noResults"),
+        emptyMessage: state.t("noResults"),
         toolbarLeft: (
           <SimpleSearchToolbar
-            value={localSearchValue}
-            onChange={setLocalSearchValue}
-            onSubmit={handleSearchSubmit}
+            value={state.localSearchValue}
+            onChange={state.setLocalSearchValue}
+            onSubmit={state.handleSearchSubmit}
             loading={isSearching}
-            placeholder={searchPlaceholder ?? t("searchPlaceholder")}
+            placeholder={searchPlaceholder ?? state.t("searchPlaceholder")}
           />
         ),
       }}

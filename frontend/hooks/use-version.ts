@@ -1,10 +1,15 @@
 import { useQuery } from '@tanstack/react-query'
 import { VersionService } from '@/services/version.service'
 
-export function useVersion() {
+interface UseVersionOptions {
+  enabled?: boolean
+}
+
+export function useVersion({ enabled = true }: UseVersionOptions = {}) {
   return useQuery({
     queryKey: ['version'],
     queryFn: () => VersionService.getVersion(),
+    enabled,
     staleTime: Infinity,
   })
 }
