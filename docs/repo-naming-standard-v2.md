@@ -14,7 +14,7 @@
 - 允许角色后缀：`query`、`command`、`facade`、`mapper`、`ports`、`contracts`、`errors`、`aliases`、`adapter`、`codec`、`service`
 - 禁止泛名文件：`commands.go`、`ports.go`、`types_alias.go`
 - 端口接口建议使用资源化命名：`*_ports.go`（例如 `scan_ports.go`、`identity_ports.go`）
-- 端口文件优先按职责拆分：`query_ports.go`、`command_ports.go`，必要时补充 `runtime_ports.go`、`codec_ports.go`
+- 端口文件优先按职责拆分：`*_query_ports.go`、`*_command_ports.go`，必要时补充 `*_runtime_ports.go`、`*_codec_ports.go`
 - 禁止资源无前缀泛名：`service.go`（必须资源化，如 `scan_command_service.go`、`agent_service.go`）
 - handler/application 映射函数命名（`to*Input` / `to*Output`）见：`docs/server-mapper-naming-standard-v1.md`
 

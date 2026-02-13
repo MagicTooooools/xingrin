@@ -15,24 +15,33 @@ server/internal/modules/agent/
 │   ├── repository.go
 │   └── events.go
 ├── application/
-│   ├── agent_facade.go
+│   ├── facade_agent.go
 │   ├── agent_query_service.go
 │   ├── agent_command_service.go
 │   ├── agent_registration_service.go
 │   ├── agent_runtime_service.go
 │   ├── agent_task_service.go
-│   ├── contracts.go
-│   └── errors.go
+│   ├── agent_query_ports.go
+│   ├── agent_command_ports.go
+│   ├── agent_store_ports.go
+│   ├── registration_token_store_ports.go
+│   ├── agent_message_ports.go
+│   ├── task_runtime_ports.go
+│   ├── clock_ports.go
+│   ├── token_generator_ports.go
+│   ├── heartbeat_cache_ports.go
+│   └── agent_errors.go
 ├── repository/
-│   ├── agent_repository.go
+│   ├── agent.go
 │   ├── agent_query.go
 │   ├── agent_command.go
 │   ├── agent_mapper.go
-│   ├── registration_token_repository.go
+│   ├── registration_token.go
 │   ├── registration_token_query.go
 │   ├── registration_token_command.go
 │   └── persistence/agent.go
 ├── handler/
+│   ├── agent_http_helpers.go
 │   ├── agent_handler.go
 │   ├── agent_registration_handler.go
 │   ├── agent_query_handler.go
@@ -47,9 +56,10 @@ server/internal/modules/agent/
 ## 3. 命名矩阵
 
 - `*_service.go`：application 用例逻辑
+- `*_ports.go`：application 端口接口
+- `*_errors.go`：application 错误别名与错误语义
 - `*_handler.go`：HTTP/WS 适配
 - `*_mapper.go`：DTO、payload、model 映射
-- `*_repository.go`：仓储构造与依赖注入入口
 - `*_query.go`：查询读口实现
 - `*_command.go`：写口实现
 
@@ -58,7 +68,7 @@ server/internal/modules/agent/
 - `handler/types.go`
 - `handler/helpers.go`
 - `handler/ws_types.go`
-- 在 `application/contracts.go` 定义 repository 端口
+- 在 `application` 使用泛名 `contracts.go` 或 `ports.go`
 - 在 `handler` 中直接实现业务编排（不经 application）
 
 ## 5. API 分组规范
