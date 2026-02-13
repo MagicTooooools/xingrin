@@ -33,6 +33,7 @@ const ImportFingerprintDialog = dynamic(
 
 export function ARLFingerprintView() {
   const tFingerprints = useTranslations("tools.fingerprints")
+  const tActions = useTranslations("common.actions")
   const locale = useLocale()
   
   const [selectedFingerprints, setSelectedFingerprints] = useState<ARLFingerprint[]>([])
@@ -99,8 +100,15 @@ export function ARLFingerprintView() {
   }
 
   const columns = useMemo(
-    () => createARLFingerprintColumns({ formatDate }),
-    [formatDate]
+    () =>
+      createARLFingerprintColumns({
+        formatDate,
+        selectLabels: {
+          selectAll: tActions("selectAll"),
+          selectRow: tActions("selectRow"),
+        },
+      }),
+    [formatDate, tActions]
   )
 
   const fingerprints: ARLFingerprint[] = useMemo(() => {

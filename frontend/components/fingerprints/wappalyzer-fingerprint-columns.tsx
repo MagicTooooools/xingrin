@@ -11,6 +11,10 @@ import type { WappalyzerFingerprint } from "@/types/fingerprint.types"
 
 interface ColumnOptions {
   formatDate: (date: string) => string
+  selectLabels: {
+    selectAll: string
+    selectRow: string
+  }
 }
 
 interface RuleItem {
@@ -86,6 +90,7 @@ function RulesCell({ fp }: { fp: WappalyzerFingerprint }) {
  */
 export function createWappalyzerFingerprintColumns({
   formatDate,
+  selectLabels,
 }: ColumnOptions): ColumnDef<WappalyzerFingerprint>[] {
   return [
     {
@@ -97,14 +102,14 @@ export function createWappalyzerFingerprintColumns({
             (table.getIsSomePageRowsSelected() && "indeterminate")
           }
           onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-          aria-label="Select all"
+          aria-label={selectLabels.selectAll}
         />
       ),
       cell: ({ row }) => (
         <Checkbox
           checked={row.getIsSelected()}
           onCheckedChange={(value) => row.toggleSelected(!!value)}
-          aria-label="Select row"
+          aria-label={selectLabels.selectRow}
         />
       ),
       enableSorting: false,

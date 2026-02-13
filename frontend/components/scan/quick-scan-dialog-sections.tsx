@@ -21,35 +21,33 @@ type TranslationFn = (key: string, params?: Record<string, string | number | Dat
 
 interface QuickScanTriggerProps {
   t: TranslationFn
-  trigger?: React.ReactNode
+  trigger?: React.ReactElement
 }
 
 export function QuickScanTrigger({ t, trigger }: QuickScanTriggerProps) {
-  return (
-    <>
-      {trigger || (
-        <Button
-          variant="outline"
-          size="sm"
-          className="
-              relative group border-0
-              bg-secondary/50
-              px-4 overflow-hidden
-            "
-        >
-          <div className="absolute inset-0 border border-highlight/0 group-hover:border-highlight/100 transition-colors duration-300 scale-95 group-hover:scale-100" />
-          <div className="absolute top-0 left-0 w-1 h-1 bg-highlight opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-          <div className="absolute top-0 right-0 w-1 h-1 bg-highlight opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-          <div className="absolute bottom-0 left-0 w-1 h-1 bg-highlight opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-          <div className="absolute bottom-0 right-0 w-1 h-1 bg-highlight opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+  if (trigger) return trigger
 
-          <span className="mr-2 text-xs font-mono text-highlight opacity-0 group-hover:opacity-100 absolute left-2 transition-[opacity,transform] duration-300 -translate-x-2 group-hover:translate-x-0">{">"}</span>
-          <div className="flex items-center transition-transform duration-300 group-hover:translate-x-2">
-            <span className="font-medium">{t("title")}</span>
-          </div>
-        </Button>
-      )}
-    </>
+  return (
+    <Button
+      variant="outline"
+      size="sm"
+      className="
+          relative group border-0
+          bg-secondary/50
+          px-4 overflow-hidden
+        "
+    >
+      <div className="absolute inset-0 border border-highlight/0 group-hover:border-highlight/100 transition-colors duration-300 scale-95 group-hover:scale-100" />
+      <div className="absolute top-0 left-0 w-1 h-1 bg-highlight opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      <div className="absolute top-0 right-0 w-1 h-1 bg-highlight opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      <div className="absolute bottom-0 left-0 w-1 h-1 bg-highlight opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      <div className="absolute bottom-0 right-0 w-1 h-1 bg-highlight opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+      <span className="mr-2 text-xs font-mono text-highlight opacity-0 group-hover:opacity-100 absolute left-2 transition-[opacity,transform] duration-300 -translate-x-2 group-hover:translate-x-0">{">"}</span>
+      <div className="flex items-center transition-transform duration-300 group-hover:translate-x-2">
+        <span className="font-medium">{t("title")}</span>
+      </div>
+    </Button>
   )
 }
 

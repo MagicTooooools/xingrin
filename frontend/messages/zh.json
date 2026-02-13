@@ -471,10 +471,10 @@
       "noData": "暂无漏洞数据"
     },
     "bauhausHeader": {
-      "operationsCommand": "运维指挥",
+      "operationsCommand": "仪表盘",
       "systemOverview": "系统总览",
       "networkOnline": "网络：在线",
-      "cycleLabel": "周期："
+      "cycleLabel": "当前时间："
     }
   },
   "dataTable": {
@@ -943,6 +943,8 @@
         "selectTarget": "选择扫描目标",
         "searchOrganization": "搜索组织名称...",
         "searchTarget": "搜索目标名称...",
+        "clearSelectedOrganization": "清除已选组织",
+        "clearSelectedTarget": "清除已选目标",
         "noOrganization": "未找到组织",
         "noTarget": "未找到目标",
         "targetCount": "{count} 个目标",
@@ -2371,6 +2373,12 @@
       "loadError": "加载截图失败",
       "noResults": "没有匹配的截图",
       "lightboxTitle": "截图预览",
+      "openInNewTab": "在新标签页打开截图 URL",
+      "previousPage": "上一页",
+      "nextPage": "下一页",
+      "closeLightbox": "关闭预览",
+      "previousScreenshot": "上一张截图",
+      "nextScreenshot": "下一张截图",
       "empty": {
         "title": "暂无截图",
         "description": "启用截图功能进行站点扫描后，截图将显示在这里。"

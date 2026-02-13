@@ -43,6 +43,7 @@ export function useAllTargetsDetailViewState({
         delete: tCommon("actions.delete"),
         selectAll: tCommon("actions.selectAll"),
         selectRow: tCommon("actions.selectRow"),
+        openMenu: tCommon("actions.openMenu"),
       },
       tooltips: {
         targetDetails: tTooltips("targetDetails"),

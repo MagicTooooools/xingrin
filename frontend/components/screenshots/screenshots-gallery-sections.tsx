@@ -99,7 +99,12 @@ export function ScreenshotsGalleryContent({
             onKeyDown={state.handleKeyDown}
             className="w-64"
           />
-          <Button variant="outline" size="icon" onClick={state.handleSearch} aria-label="Search screenshots">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={state.handleSearch}
+            aria-label={state.tCommon("actions.search")}
+          >
             <Search className="h-4 w-4" />
           </Button>
         </div>
@@ -191,7 +196,7 @@ export function ScreenshotsGalleryContent({
                 rel="noopener noreferrer"
                 onClick={(e) => e.stopPropagation()}
                 className="inline-flex items-center justify-center h-8 w-8 rounded-md bg-background/80 backdrop-blur-sm hover:bg-background"
-                aria-label="Open screenshot URL in new tab"
+                aria-label={state.t("openInNewTab")}
               >
                 <ExternalLink className="h-4 w-4" />
               </a>
@@ -216,7 +221,7 @@ export function ScreenshotsGalleryContent({
                 state.setPagination((prev) => ({ ...prev, pageIndex: Math.max(0, prev.pageIndex - 1) }))
               }
               disabled={state.pagination.pageIndex === 0}
-              aria-label="Previous page"
+              aria-label={state.t("previousPage")}
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
@@ -233,7 +238,7 @@ export function ScreenshotsGalleryContent({
                 }))
               }
               disabled={state.pagination.pageIndex >= state.maxPageIndex}
-              aria-label="Next page"
+              aria-label={state.t("nextPage")}
             >
               <ChevronRight className="h-4 w-4" />
             </Button>
@@ -262,7 +267,7 @@ export function ScreenshotsGalleryContent({
             <button type="button"
               onClick={() => state.setLightboxOpen(false)}
               className="absolute top-4 right-4 z-50 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
-              aria-label="Close lightbox"
+              aria-label={state.t("closeLightbox")}
             >
               <X className="h-6 w-6 text-white" />
             </button>
@@ -272,14 +277,14 @@ export function ScreenshotsGalleryContent({
                 <button type="button"
                   onClick={state.prevImage}
                   className="absolute left-4 z-50 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
-                  aria-label="Previous screenshot"
+                  aria-label={state.t("previousScreenshot")}
                 >
                   <ChevronLeft className="h-8 w-8 text-white" />
                 </button>
                 <button type="button"
                   onClick={state.nextImage}
                   className="absolute right-4 z-50 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
-                  aria-label="Next screenshot"
+                  aria-label={state.t("nextScreenshot")}
                 >
                   <ChevronRight className="h-8 w-8 text-white" />
                 </button>

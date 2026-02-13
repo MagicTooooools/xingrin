@@ -839,7 +839,7 @@ const PixelBlast = ({
         ref={containerRef}
         className={`pixel-blast-container ${className ?? ''}`}
         style={{ ...style, backgroundColor: 'transparent' }}
-        aria-label="PixelBlast background (disabled for reduced motion)"
+        aria-hidden="true"
       />
     );
   }
@@ -849,7 +849,7 @@ const PixelBlast = ({
       ref={containerRef}
       className={`pixel-blast-container ${className ?? ''}`}
       style={style}
-      aria-label="PixelBlast interactive background"
+      aria-hidden="true"
     />
   );
 };

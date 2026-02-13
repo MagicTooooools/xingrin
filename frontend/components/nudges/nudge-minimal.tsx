@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { useTranslations } from "next-intl"
 import { IconX } from "@/components/icons"
 import { cn } from "@/lib/utils"
 import type { NudgeToastCardProps } from "./nudge-toast-card"
@@ -14,6 +15,8 @@ export function NudgeTerminal({
   onDismiss,
   className,
 }: NudgeToastCardProps) {
+  const tActions = useTranslations("common.actions")
+
   return (
     <div
       className={cn(
@@ -68,7 +71,7 @@ export function NudgeTerminal({
       <button type="button"
         onClick={onDismiss}
         className="absolute right-2 top-1.5 p-0.5 text-zinc-600 hover:text-zinc-400 opacity-0 hover:opacity-100"
-        aria-label="Dismiss notification"
+        aria-label={tActions("close")}
       >
         <IconX className="size-3" />
       </button>

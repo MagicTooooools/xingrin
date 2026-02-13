@@ -77,11 +77,6 @@ const harmonyOS = localFont({
   fallback: ['system-ui', '-apple-system', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'sans-serif'],
 })
 
-// Generate static parameters, support all languages
-export function generateStaticParams() {
-  return locales.map((locale) => ({ locale }))
-}
-
 interface Props {
   children: React.ReactNode
   params: Promise<{ locale: string }>

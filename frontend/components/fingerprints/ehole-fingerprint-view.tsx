@@ -33,6 +33,7 @@ const ImportFingerprintDialog = dynamic(
 
 export function EholeFingerprintView() {
   const tFingerprints = useTranslations("tools.fingerprints")
+  const tActions = useTranslations("common.actions")
   const locale = useLocale()
   
   const [selectedFingerprints, setSelectedFingerprints] = useState<EholeFingerprint[]>([])
@@ -107,8 +108,15 @@ export function EholeFingerprintView() {
 
   // Column definitions
   const columns = useMemo(
-    () => createEholeFingerprintColumns({ formatDate }),
-    [formatDate]
+    () =>
+      createEholeFingerprintColumns({
+        formatDate,
+        selectLabels: {
+          selectAll: tActions("selectAll"),
+          selectRow: tActions("selectRow"),
+        },
+      }),
+    [formatDate, tActions]
   )
 
   // Transform data

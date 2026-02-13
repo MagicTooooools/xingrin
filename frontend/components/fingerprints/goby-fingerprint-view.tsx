@@ -39,6 +39,7 @@ export function GobyFingerprintView() {
   const [importDialogOpen, setImportDialogOpen] = useState(false)
 
   const tFingerprints = useTranslations("tools.fingerprints")
+  const tActions = useTranslations("common.actions")
   const locale = useLocale()
 
   // Query data
@@ -107,8 +108,15 @@ export function GobyFingerprintView() {
 
   // Column definitions
   const columns = useMemo(
-    () => createGobyFingerprintColumns({ formatDate }),
-    [formatDate]
+    () =>
+      createGobyFingerprintColumns({
+        formatDate,
+        selectLabels: {
+          selectAll: tActions("selectAll"),
+          selectRow: tActions("selectRow"),
+        },
+      }),
+    [formatDate, tActions]
   )
 
   // Transform data

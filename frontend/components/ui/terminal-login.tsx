@@ -48,6 +48,8 @@ export function TerminalLogin({
     if (target.closest("button, a, input, textarea, select, [role='button']")) {
       return
     }
+    // Prevent default focus behavior from blurring the hidden input after we focus it.
+    event.preventDefault()
     inputRef.current?.focus()
   }
 

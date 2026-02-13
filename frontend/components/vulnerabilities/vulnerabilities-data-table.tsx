@@ -224,7 +224,7 @@ export function VulnerabilitiesDataTable({
             size="icon"
             onClick={() => onSelectionChange([])}
             className="h-8 w-8 text-muted-foreground hover:text-foreground"
-            aria-label="Clear selection"
+            aria-label={tActions("deselectAll")}
           >
             <X className="h-4 w-4" />
           </Button>

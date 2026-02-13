@@ -334,7 +334,7 @@ export const createScanHistoryColumns = ({
           <button
             type="button"
             onClick={() => handleViewProgress?.(row.original)}
-            className={cn("cursor-pointer text-left")}
+            className={cn("w-full cursor-pointer text-left")}
             aria-label={t.tooltips.viewProgress}
           >
             <ScanStatusBadge

@@ -62,24 +62,40 @@ export function AuthLayout({ children }: AuthLayoutProps) {
   const { data: auth, isLoading } = useAuth()
   const tCommon = useTranslations("common")
   const locale = useLocale()
+  const [hydrated, setHydrated] = React.useState(false)
 
   // Check if it's a public route (login page)
   const isPublicRoute = isPublicPath(pathname)
 
+  React.useEffect(() => {
+    setHydrated(true)
+  }, [])
+
   // Redirect to login page if not authenticated (useEffect must be before all conditional returns)
   React.useEffect(() => {
+    if (!hydrated) return
     if (!isLoading && !auth?.authenticated && !isPublicRoute) {
       const normalized = "/login/"
       const loginPath = `/${locale}${normalized}`
       router.replace(loginPath)
     }
-  }, [auth, isLoading, isPublicRoute, router, locale])
+  }, [auth, hydrated, isLoading, isPublicRoute, router, locale])
 
   // If it's login page, render content directly (without sidebar)
   if (isPublicRoute) {
     return (
       <>
         {children}
+        <Toaster />
+      </>
+    )
+  }
+
+  // Keep first SSR/CSR frame stable on protected routes to avoid hydration mismatches.
+  if (!hydrated) {
+    return (
+      <>
+        <LoadingState active message="loading…" />
         <Toaster />
       </>
     )

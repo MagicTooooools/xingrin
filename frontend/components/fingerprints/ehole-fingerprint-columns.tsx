@@ -12,6 +12,10 @@ import type { EholeFingerprint } from "@/types/fingerprint.types"
 
 interface ColumnOptions {
   formatDate: (date: string) => string
+  selectLabels: {
+    selectAll: string
+    selectRow: string
+  }
 }
 
 /**
@@ -62,6 +66,7 @@ function KeywordListCell({ keywords }: { keywords: string[] }) {
  */
 export function createEholeFingerprintColumns({
   formatDate,
+  selectLabels,
 }: ColumnOptions): ColumnDef<EholeFingerprint>[] {
   return [
     {
@@ -73,14 +78,14 @@ export function createEholeFingerprintColumns({
             (table.getIsSomePageRowsSelected() && "indeterminate")
           }
           onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-          aria-label="Select all"
+          aria-label={selectLabels.selectAll}
         />
       ),
       cell: ({ row }) => (
         <Checkbox
           checked={row.getIsSelected()}
           onCheckedChange={(value) => row.toggleSelected(!!value)}
-          aria-label="Select row"
+          aria-label={selectLabels.selectRow}
         />
       ),
       enableSorting: false,

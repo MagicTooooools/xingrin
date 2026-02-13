@@ -19,6 +19,8 @@ import { USE_MOCK, mockDelay, mockLoginResponse, mockLogoutResponse, mockMeRespo
 export async function login(data: LoginRequest): Promise<LoginResponse> {
   if (USE_MOCK) {
     await mockDelay()
+    // Keep mock auth behavior aligned with real mode so refresh can restore auth state.
+    tokenManager.setTokens(mockLoginResponse.accessToken, mockLoginResponse.refreshToken)
     return mockLoginResponse
   }
   const res = await api.post<LoginResponse>('/auth/login/', data)
@@ -62,6 +64,9 @@ export async function logout(): Promise<LogoutResponse> {
 export async function getMe(): Promise<MeResponse> {
   if (USE_MOCK) {
     await mockDelay()
+    if (!tokenManager.hasTokens()) {
+      return { authenticated: false, user: null }
+    }
     return mockMeResponse
   }
   

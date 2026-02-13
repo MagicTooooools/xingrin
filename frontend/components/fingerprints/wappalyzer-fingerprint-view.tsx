@@ -39,6 +39,7 @@ export function WappalyzerFingerprintView() {
   const [importDialogOpen, setImportDialogOpen] = useState(false)
 
   const tFingerprints = useTranslations("tools.fingerprints")
+  const tActions = useTranslations("common.actions")
   const locale = useLocale()
 
   // Query data
@@ -107,8 +108,15 @@ export function WappalyzerFingerprintView() {
 
   // Column definitions
   const columns = useMemo(
-    () => createWappalyzerFingerprintColumns({ formatDate }),
-    [formatDate]
+    () =>
+      createWappalyzerFingerprintColumns({
+        formatDate,
+        selectLabels: {
+          selectAll: tActions("selectAll"),
+          selectRow: tActions("selectRow"),
+        },
+      }),
+    [formatDate, tActions]
   )
 
   // Transform data

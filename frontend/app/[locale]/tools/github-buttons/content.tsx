@@ -6,6 +6,8 @@ import { IconBrandGithub, IconStarFilled, IconStar } from "@/components/icons"
 import { PageHeader } from "@/components/common/page-header"
 import { motion } from "framer-motion"
 
+const PENGUIN_LOGISTICS_BARCODE_HEIGHTS = [2, 4, 3, 5, 2, 4] as const
+
 export default function GithubButtonDemoPage() {
   const [stars, setStars] = useState<number | null>(null)
   
@@ -326,7 +328,7 @@ export default function GithubButtonDemoPage() {
               {/* Variant: Arknights Light (Industrial) */}
               <div className="flex flex-col items-center gap-2">
                 <span className="text-xs text-muted-foreground">Arknights (Light)</span>
-                <a href="https://github.com" aria-label="Arknights light industrial GitHub star button" className="group relative flex items-center h-10 bg-white border-l-4 border-l-[#00C8FF] border-y border-r border-y-zinc-200 border-r-zinc-200 min-w-[140px] hover:bg-zinc-50 transition-colors">
+                <a href="https://github.com" className="group relative flex items-center h-10 bg-white border-l-4 border-l-[#00C8FF] border-y border-r border-y-zinc-200 border-r-zinc-200 min-w-[140px] hover:bg-zinc-50 transition-colors">
                    <div className="flex-1 flex flex-col justify-center px-3">
                       <div className="flex items-center justify-between mb-0.5">
                          <span className="text-[8px] font-bold text-zinc-400 uppercase tracking-widest">Rhodes Island</span>
@@ -354,8 +356,8 @@ export default function GithubButtonDemoPage() {
                 <a href="https://github.com" className="group flex items-center h-9 bg-white border-2 border-black relative overflow-hidden min-w-[130px] hover:shadow-[4px_4px_0px_#000] transition-shadow">
                   {/* Barcode Strip */}
                   <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-black flex flex-col justify-between py-0.5">
-                    {[...Array(6)].map((_, i) => (
-                      <div key={i} className="w-full bg-white" style={{ height: Math.random() * 4 + 1 }} />
+                    {PENGUIN_LOGISTICS_BARCODE_HEIGHTS.map((height, i) => (
+                      <div key={i} className="w-full bg-white" style={{ height }} />
                     ))}
                   </div>
 
@@ -808,7 +810,7 @@ export default function GithubButtonDemoPage() {
               {/* Variant: Atlas (Titanfall) */}
               <div className="flex flex-col items-center gap-2">
                 <span className="text-xs text-muted-foreground">Atlas (Mech)</span>
-                <a href="https://github.com" aria-label="Atlas mech GitHub star button" className="group relative flex items-center h-10 bg-white border-l-4 border-l-[#F85A3E] border-y border-r border-y-zinc-200 border-r-zinc-200 min-w-[140px] hover:bg-zinc-50 transition-colors">
+                <a href="https://github.com" className="group relative flex items-center h-10 bg-white border-l-4 border-l-[#F85A3E] border-y border-r border-y-zinc-200 border-r-zinc-200 min-w-[140px] hover:bg-zinc-50 transition-colors">
                    <div className="flex-1 flex flex-col justify-center px-3">
                       <div className="flex items-center justify-between mb-0.5">
                          <span className="text-[8px] font-bold text-zinc-400 uppercase">IMC Mfg.</span>
@@ -986,7 +988,7 @@ export default function GithubButtonDemoPage() {
               {/* Variant: Pixel RPG UI */}
               <div className="flex flex-col items-center gap-2">
                 <span className="text-xs text-muted-foreground">RPG Menu</span>
-                <a href="https://github.com" aria-label="RPG menu GitHub star button" className="group relative flex items-center h-9 bg-[#E6D6BF] border-2 border-[#5C4033] shadow-[2px_2px_0px_#5C4033] active:translate-y-[2px] active:shadow-none active:translate-x-[2px] transition-[background-color,border-color,color,opacity,box-shadow,transform,width,height,top] rounded-[2px] min-w-[130px]">
+                <a href="https://github.com" className="group relative flex items-center h-9 bg-[#E6D6BF] border-2 border-[#5C4033] shadow-[2px_2px_0px_#5C4033] active:translate-y-[2px] active:shadow-none active:translate-x-[2px] transition-[background-color,border-color,color,opacity,box-shadow,transform,width,height,top] rounded-[2px] min-w-[130px]">
                    <div className="absolute inset-0 border border-[#C0A080] m-[2px]" />
                    
                    <div className="relative z-10 flex w-full items-center justify-between px-3">

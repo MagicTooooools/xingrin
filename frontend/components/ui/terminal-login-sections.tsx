@@ -183,7 +183,7 @@ export function TerminalMobilePanel({
               value={username}
               onChange={(event) => onUsernameChange(event.target.value)}
               disabled={isInputDisabled}
-              className="w-full bg-background/60 border border-border rounded px-3 py-2 text-foreground outline-none focus:border-primary font-mono text-sm"
+              className="w-full bg-background/60 border border-border rounded px-3 py-2 text-foreground outline-none focus:border-primary focus-visible:ring-2 focus-visible:ring-primary/40 font-mono text-sm"
               autoComplete="username"
               inputMode="text"
               spellCheck={false}
@@ -199,7 +199,7 @@ export function TerminalMobilePanel({
               value={password}
               onChange={(event) => onPasswordChange(event.target.value)}
               disabled={isInputDisabled}
-              className="w-full bg-background/60 border border-border rounded px-3 py-2 text-foreground outline-none focus:border-primary font-mono text-sm"
+              className="w-full bg-background/60 border border-border rounded px-3 py-2 text-foreground outline-none focus:border-primary focus-visible:ring-2 focus-visible:ring-primary/40 font-mono text-sm"
               autoComplete="current-password"
             />
           </div>

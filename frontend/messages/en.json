@@ -929,6 +929,8 @@
         "selectTarget": "Select Scan Target",
         "searchOrganization": "Search organization name...",
         "searchTarget": "Search target name...",
+        "clearSelectedOrganization": "Clear selected organization",
+        "clearSelectedTarget": "Clear selected target",
         "noOrganization": "No organization found",
         "noTarget": "No target found",
         "targetCount": "{count} targets",
@@ -2348,6 +2350,12 @@
       "loadError": "Failed to load screenshots",
       "noResults": "No screenshots match your filter",
       "lightboxTitle": "Screenshot Preview",
+      "openInNewTab": "Open screenshot URL in new tab",
+      "previousPage": "Previous page",
+      "nextPage": "Next page",
+      "closeLightbox": "Close lightbox",
+      "previousScreenshot": "Previous screenshot",
+      "nextScreenshot": "Next screenshot",
       "empty": {
         "title": "No Screenshots",
         "description": "Screenshots will appear here after running a site scan with screenshot enabled."

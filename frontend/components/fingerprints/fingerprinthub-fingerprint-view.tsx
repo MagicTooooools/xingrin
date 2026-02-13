@@ -33,6 +33,7 @@ const ImportFingerprintDialog = dynamic(
 
 export function FingerPrintHubFingerprintView() {
   const tFingerprints = useTranslations("tools.fingerprints")
+  const tActions = useTranslations("common.actions")
   const locale = useLocale()
   
   const [selectedFingerprints, setSelectedFingerprints] = useState<FingerPrintHubFingerprint[]>([])
@@ -99,8 +100,15 @@ export function FingerPrintHubFingerprintView() {
   }
 
   const columns = useMemo(
-    () => createFingerPrintHubFingerprintColumns({ formatDate }),
-    [formatDate]
+    () =>
+      createFingerPrintHubFingerprintColumns({
+        formatDate,
+        selectLabels: {
+          selectAll: tActions("selectAll"),
+          selectRow: tActions("selectRow"),
+        },
+      }),
+    [formatDate, tActions]
   )
 
   const fingerprints: FingerPrintHubFingerprint[] = useMemo(() => {

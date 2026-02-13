@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { useTranslations } from "next-intl"
 import { IconX, IconActivity } from "@/components/icons"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -15,6 +16,8 @@ export function NudgeReport({
   onDismiss,
   className,
 }: NudgeToastCardProps) {
+  const tActions = useTranslations("common.actions")
+
   return (
     <div
       className={cn(
@@ -42,7 +45,7 @@ export function NudgeReport({
           <button type="button"
             onClick={onDismiss}
             className="text-muted-foreground hover:text-foreground"
-            aria-label="Dismiss notification"
+            aria-label={tActions("close")}
           >
             <IconX className="size-4" />
           </button>

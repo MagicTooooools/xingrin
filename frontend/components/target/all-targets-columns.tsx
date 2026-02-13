@@ -37,6 +37,7 @@ export interface AllTargetsTranslations {
     delete: string
     selectAll: string
     selectRow: string
+    openMenu: string
   }
   tooltips: {
     targetDetails: string
@@ -207,7 +208,7 @@ const TargetRowActions = React.memo(function TargetRowActions({
           <Button
             variant="ghost"
             className="h-8 w-8 p-0 data-[state=open]:bg-muted"
-            aria-label="More actions"
+            aria-label={t.actions.openMenu}
           >
             <MoreHorizontal className="h-4 w-4" />
           </Button>

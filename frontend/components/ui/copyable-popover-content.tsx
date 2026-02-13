@@ -18,7 +18,9 @@ export function CopyablePopoverContent({
   className?: string 
 }) {
   const [copied, setCopied] = React.useState(false)
+  const tActions = useTranslations("common.actions")
   const tToast = useTranslations("toast")
+  const tTooltips = useTranslations("tooltips")
   
   const handleCopy = async () => {
     try {
@@ -38,7 +40,7 @@ export function CopyablePopoverContent({
         size="icon"
         className="absolute -top-1 -right-1 h-6 w-6 opacity-60 hover:opacity-100"
         onClick={handleCopy}
-        aria-label={copied ? "Copied" : "Copy content"}
+        aria-label={copied ? tTooltips("copied") : tActions("copy")}
       >
         {copied ? (
           <Check className="h-3.5 w-3.5 text-[var(--success)]" />

@@ -239,7 +239,7 @@ export function ScheduledScanTargetSelectionStep({
               className="h-9 w-9"
               onClick={handleOrgSearch}
               disabled={isOrgFetching}
-              aria-label="Search organizations"
+              aria-label={t("form.searchOrganization")}
             >
               {isOrgFetching ? <IconLoader2 className="h-4 w-4 animate-spin" /> : <IconSearch className="h-4 w-4" />}
             </Button>
@@ -277,7 +277,7 @@ export function ScheduledScanTargetSelectionStep({
                   type="button"
                   className="ml-1 inline-flex items-center justify-center rounded-sm hover:bg-muted/60"
                   onClick={() => setSelectedOrgId(null)}
-                  aria-label="Clear selected organization"
+                  aria-label={t("form.clearSelectedOrganization")}
                 >
                   <IconX className="h-3 w-3" />
                 </button>
@@ -306,7 +306,7 @@ export function ScheduledScanTargetSelectionStep({
               className="h-9 w-9"
               onClick={handleTargetSearch}
               disabled={isTargetFetching}
-              aria-label="Search targets"
+              aria-label={t("form.searchTarget")}
             >
               {isTargetFetching ? <IconLoader2 className="h-4 w-4 animate-spin" /> : <IconSearch className="h-4 w-4" />}
             </Button>
@@ -346,7 +346,7 @@ export function ScheduledScanTargetSelectionStep({
                   type="button"
                   className="ml-1 inline-flex items-center justify-center rounded-sm hover:bg-muted/60"
                   onClick={() => setSelectedTargetId(null)}
-                  aria-label="Clear selected target"
+                  aria-label={t("form.clearSelectedTarget")}
                 >
                   <IconX className="h-3 w-3" />
                 </button>
