@@ -131,7 +131,7 @@ function MetricSlim({
       </div>
       <div className="h-1 w-full bg-muted rounded-full overflow-hidden">
         <div 
-          className={cn("h-full transition-all duration-500", getMetricColor(value))} 
+          className={cn("h-full transition-[color,background-color,border-color,opacity,transform,box-shadow] duration-500", getMetricColor(value))} 
           style={{ width: `${value}%` }}
         />
       </div>
@@ -145,11 +145,11 @@ function MetricThick({ label, value }: { label: string, value: number }) {
   return (
     <div className="relative h-6 w-full bg-muted/50 rounded overflow-hidden">
       <div 
-        className={cn("absolute inset-y-0 left-0 transition-all duration-500 opacity-20", colorClass)}
+        className={cn("absolute inset-y-0 left-0 transition-[color,background-color,border-color,opacity,transform,box-shadow] duration-500 opacity-20", colorClass)}
         style={{ width: `${value}%` }}
       />
       <div 
-        className={cn("absolute inset-y-0 left-0 transition-all duration-500 w-1", colorClass)}
+        className={cn("absolute inset-y-0 left-0 transition-[color,background-color,border-color,opacity,transform,box-shadow] duration-500 w-1", colorClass)}
         style={{ left: `${value}%` }}
       />
       <div className="absolute inset-0 flex items-center justify-between px-2 text-xs font-medium">
@@ -174,7 +174,7 @@ function MetricSegmented({ label, value }: { label: string, value: number }) {
           <div 
             key={i}
             className={cn(
-              "flex-1 rounded-[1px] transition-all",
+              "flex-1 rounded-[1px] transition-[color,background-color,border-color,opacity,transform,box-shadow]",
               i < active ? colorClass : "bg-muted/30"
             )}
           />
@@ -211,7 +211,7 @@ function MetricCircular({
           <circle 
             cx={size/2} cy={size/2} r={radius} fill="none" stroke={colorVar} strokeWidth={stroke}
             strokeDasharray={circumference} strokeDashoffset={offset} strokeLinecap="round"
-            className="transition-all duration-500"
+            className="transition-[color,background-color,border-color,opacity,transform,box-shadow] duration-500"
           />
         </svg>
         <div className="absolute inset-0 flex items-center justify-center">
@@ -230,7 +230,7 @@ function MetricCircular({
 // --- Card Variant 1: Compact List Item ---
 function CardCompact({ node }: { node: AgentNode }) {
   return (
-    <div className="group flex items-center justify-between p-3 border rounded-lg bg-card hover:shadow-sm transition-all hover:border-primary/20">
+    <div className="group flex items-center justify-between p-3 border rounded-lg bg-card hover:shadow-sm transition-[color,background-color,border-color,opacity,transform,box-shadow] hover:border-primary/20">
       <div className="flex items-center gap-3">
         <div className={cn(
           "w-2 h-2 rounded-full",
@@ -254,7 +254,7 @@ function CardCompact({ node }: { node: AgentNode }) {
 
       <div className="flex items-center gap-2">
          <span className="text-xs text-muted-foreground mr-2">{node.metrics.uptime}</span>
-         <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground"><IconSettings className="w-4 h-4" /></Button>
+         <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground" aria-label="Open settings"><IconSettings className="w-4 h-4" /></Button>
       </div>
     </div>
   )
@@ -372,7 +372,7 @@ function CardHeroStatus({ node }: { node: AgentNode }) {
   const healthScore = Math.max(0, 100 - Math.max(node.metrics.cpu, node.metrics.mem) / 2)
 
   return (
-    <div className="flex border rounded-xl overflow-hidden bg-card hover:shadow-md transition-all">
+    <div className="flex border rounded-xl overflow-hidden bg-card hover:shadow-md transition-[color,background-color,border-color,opacity,transform,box-shadow]">
       {/* Left: Status Hero */}
       <div className={cn(
         "w-24 flex flex-col items-center justify-center gap-2 p-2 border-r",
@@ -545,7 +545,7 @@ function CardGlass({ node }: { node: AgentNode }) {
   const load = Math.max(node.metrics.cpu, node.metrics.mem, node.metrics.disk)
 
   return (
-    <div className="group relative overflow-hidden rounded-xl border bg-background/50 backdrop-blur-sm p-4 hover:bg-muted/20 transition-all">
+    <div className="group relative overflow-hidden rounded-xl border bg-background/50 backdrop-blur-sm p-4 hover:bg-muted/20 transition-[color,background-color,border-color,opacity,transform,box-shadow]">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
@@ -614,7 +614,7 @@ function CardGlass({ node }: { node: AgentNode }) {
 // --- Card Variant 9: Data Grid (Information Density) ---
 function CardDataGrid({ node }: { node: AgentNode }) {
   return (
-    <Card className="hover:border-primary/50 transition-all">
+    <Card className="hover:border-primary/50 transition-[color,background-color,border-color,opacity,transform,box-shadow]">
       <CardHeader className="p-3 pb-2 border-b bg-muted/20">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -673,7 +673,7 @@ function CardDataGrid({ node }: { node: AgentNode }) {
 // --- Card Variant 10: Infrastructure Rack (Blade Server) ---
 function CardInfraRack({ node }: { node: AgentNode }) {
   return (
-    <div className="flex h-24 border rounded-md overflow-hidden bg-zinc-950 text-zinc-400 group hover:ring-1 hover:ring-zinc-700 transition-all">
+    <div className="flex h-24 border rounded-md overflow-hidden bg-zinc-950 text-zinc-400 group hover:ring-1 hover:ring-zinc-700 transition-[color,background-color,border-color,opacity,transform,box-shadow]">
       {/* Handle/Status Strip */}
       <div className={cn(
         "w-1.5 h-full",
@@ -849,7 +849,7 @@ function CardCompactRow({ node }: { node: AgentNode }) {
           </div>
        </div>
        
-       <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
+       <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" aria-label="More actions">
           <IconDotsVertical className="w-4 h-4" />
        </Button>
     </div>
@@ -961,7 +961,7 @@ function CardCuratedSplitPanel({ node }: { node: AgentNode }) {
               </div>
             </div>
 
-            <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
+            <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" aria-label="More actions">
               <IconDotsVertical className="w-4 h-4" />
             </Button>
           </div>
@@ -1043,7 +1043,7 @@ function CardCuratedMetaTiles({ node }: { node: AgentNode }) {
 // --- Card Variant 13: Production Ready (Balanced) ---
 function CardProduction({ node }: { node: AgentNode }) {
   return (
-    <Card className="group overflow-hidden transition-all hover:shadow-md border-l-4" style={{ borderLeftColor: node.status === "online" ? "var(--success)" : node.status === "maintenance" ? "var(--warning)" : "var(--muted-foreground)" }}>
+    <Card className="group overflow-hidden transition-[color,background-color,border-color,opacity,transform,box-shadow] hover:shadow-md border-l-4" style={{ borderLeftColor: node.status === "online" ? "var(--success)" : node.status === "maintenance" ? "var(--warning)" : "var(--muted-foreground)" }}>
       <CardHeader className="p-4 pb-3">
         <div className="flex justify-between items-start">
           <div>
@@ -1062,7 +1062,7 @@ function CardProduction({ node }: { node: AgentNode }) {
               <span>{node.ip}</span>
             </div>
           </div>
-          <Button variant="ghost" size="icon" className="h-8 w-8 -mr-2 -mt-2 text-muted-foreground hover:text-foreground">
+          <Button variant="ghost" size="icon" className="h-8 w-8 -mr-2 -mt-2 text-muted-foreground hover:text-foreground" aria-label="More actions">
             <IconDotsVertical className="w-4 h-4" />
           </Button>
         </div>
@@ -1118,7 +1118,7 @@ function CardProduction({ node }: { node: AgentNode }) {
 // --- Card Variant 14: Production List (Horizontal) ---
 function CardProductionList({ node }: { node: AgentNode }) {
   return (
-    <div className="group flex items-center gap-4 p-3 rounded-lg border bg-card hover:bg-muted/30 transition-all hover:shadow-sm">
+    <div className="group flex items-center gap-4 p-3 rounded-lg border bg-card hover:bg-muted/30 transition-[color,background-color,border-color,opacity,transform,box-shadow] hover:shadow-sm">
       {/* Status Bar */}
       <div className={cn(
         "w-1 h-8 rounded-full",
@@ -1146,7 +1146,7 @@ function CardProductionList({ node }: { node: AgentNode }) {
             <span>{node.metrics.cpu}%</span>
           </div>
           <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
-            <div className={cn("h-full rounded-full transition-all", getMetricColor(node.metrics.cpu))} style={{ width: `${node.metrics.cpu}%` }} />
+            <div className={cn("h-full rounded-full transition-[color,background-color,border-color,opacity,transform,box-shadow]", getMetricColor(node.metrics.cpu))} style={{ width: `${node.metrics.cpu}%` }} />
           </div>
         </div>
         <div className="space-y-1">
@@ -1155,7 +1155,7 @@ function CardProductionList({ node }: { node: AgentNode }) {
             <span>{node.metrics.mem}%</span>
           </div>
           <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
-            <div className={cn("h-full rounded-full transition-all", getMetricColor(node.metrics.mem))} style={{ width: `${node.metrics.mem}%` }} />
+            <div className={cn("h-full rounded-full transition-[color,background-color,border-color,opacity,transform,box-shadow]", getMetricColor(node.metrics.mem))} style={{ width: `${node.metrics.mem}%` }} />
           </div>
         </div>
         <div className="space-y-1 hidden xl:block">
@@ -1164,7 +1164,7 @@ function CardProductionList({ node }: { node: AgentNode }) {
             <span>{node.metrics.disk}%</span>
           </div>
           <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
-            <div className={cn("h-full rounded-full transition-all", getMetricColor(node.metrics.disk))} style={{ width: `${node.metrics.disk}%` }} />
+            <div className={cn("h-full rounded-full transition-[color,background-color,border-color,opacity,transform,box-shadow]", getMetricColor(node.metrics.disk))} style={{ width: `${node.metrics.disk}%` }} />
           </div>
         </div>
       </div>
@@ -1182,7 +1182,7 @@ function CardProductionList({ node }: { node: AgentNode }) {
       </div>
 
       {/* Actions */}
-      <Button variant="ghost" size="icon" className="h-8 w-8 ml-2">
+      <Button variant="ghost" size="icon" className="h-8 w-8 ml-2" aria-label="More actions">
         <IconDotsVertical className="w-4 h-4" />
       </Button>
     </div>
@@ -1209,7 +1209,7 @@ function MetricWithLimit({ label, value, limit }: { label: string, value: number
          {/* Limit Marker */}
          <div className="absolute top-0 bottom-0 w-px bg-foreground/20 z-10" style={{ left: `${limit}%` }} />
          {/* Bar */}
-         <div className={cn("h-full rounded-full transition-all", color)} style={{ width: `${Math.min(100, value)}%` }} />
+         <div className={cn("h-full rounded-full transition-[color,background-color,border-color,opacity,transform,box-shadow]", color)} style={{ width: `${Math.min(100, value)}%` }} />
       </div>
     </div>
   )
@@ -1228,7 +1228,7 @@ function CardDensityGrid({ node }: { node: AgentNode }) {
                  <div className="text-[10px] text-muted-foreground font-mono mt-0.5">{node.ip}</div>
               </div>
            </div>
-           <Button variant="ghost" size="icon" className="h-6 w-6 -mr-1 -mt-1"><IconSettings className="w-3.5 h-3.5" /></Button>
+           <Button variant="ghost" size="icon" className="h-6 w-6 -mr-1 -mt-1" aria-label="Open settings"><IconSettings className="w-3.5 h-3.5" /></Button>
         </div>
       </CardHeader>
       
@@ -1311,7 +1311,7 @@ function CardDensityRow({ node }: { node: AgentNode }) {
              <div className="font-medium">{node.metrics.tasks} / {node.config.maxTasks}</div>
              <div className="text-[9px] text-muted-foreground uppercase">Tasks</div>
           </div>
-          <Button variant="ghost" size="icon" className="h-7 w-7"><IconSettings className="w-3.5 h-3.5" /></Button>
+          <Button variant="ghost" size="icon" className="h-7 w-7" aria-label="Open settings"><IconSettings className="w-3.5 h-3.5" /></Button>
        </div>
     </div>
   )
@@ -1367,7 +1367,7 @@ function CardTabbedTech({ node }: { node: AgentNode }) {
 // --- Variant 15A: Density Grid (Clean Corporate) ---
 function CardDensityCorporate({ node }: { node: AgentNode }) {
   return (
-    <Card className="shadow-sm border-2 border-muted/40 hover:border-primary/20 transition-all">
+    <Card className="shadow-sm border-2 border-muted/40 hover:border-primary/20 transition-[color,background-color,border-color,opacity,transform,box-shadow]">
       <CardHeader className="p-3 pb-2 bg-muted/20 border-b border-muted/20">
         <div className="flex items-start justify-between">
            <div className="flex items-center gap-3">
@@ -1387,7 +1387,7 @@ function CardDensityCorporate({ node }: { node: AgentNode }) {
                  </div>
               </div>
            </div>
-           <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground/60"><IconSettings className="w-3.5 h-3.5" /></Button>
+           <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground/60" aria-label="Open settings"><IconSettings className="w-3.5 h-3.5" /></Button>
         </div>
       </CardHeader>
       
@@ -1499,7 +1499,7 @@ function CardDensityMonospace({ node }: { node: AgentNode }) {
             <div className="px-2 py-0.5 bg-background border border-border rounded text-[10px] text-muted-foreground">
                {node.ip}
             </div>
-            <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-foreground">
+            <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-foreground" aria-label="More actions">
                <IconDotsVertical className="w-3.5 h-3.5" />
             </Button>
          </div>
@@ -1570,7 +1570,7 @@ function CardDensityMonoSegmented({ node }: { node: AgentNode }) {
          </div>
          <div className="flex items-center gap-2">
             <div className="px-2 py-0.5 bg-background border border-border rounded text-[10px] text-muted-foreground">{node.ip}</div>
-            <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-foreground"><IconDotsVertical className="w-3.5 h-3.5" /></Button>
+            <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-foreground" aria-label="More actions"><IconDotsVertical className="w-3.5 h-3.5" /></Button>
          </div>
       </div>
       
@@ -1642,7 +1642,7 @@ function CardDensityMonoStriped({ node }: { node: AgentNode }) {
          </div>
          <div className="flex items-center gap-2">
             <div className="px-2 py-0.5 bg-background border border-border rounded text-[10px] text-muted-foreground">{node.ip}</div>
-            <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-foreground"><IconDotsVertical className="w-3.5 h-3.5" /></Button>
+            <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-foreground" aria-label="More actions"><IconDotsVertical className="w-3.5 h-3.5" /></Button>
          </div>
       </div>
       
@@ -1667,7 +1667,7 @@ function CardDensityMonoStriped({ node }: { node: AgentNode }) {
                    <div className="h-2 w-full bg-muted rounded-sm overflow-hidden relative">
                       <div className="absolute top-0 bottom-0 w-[1px] bg-foreground/50 z-10" style={{ left: `${m.lim}%` }} />
                       <div 
-                        className={cn("h-full transition-all bg-[length:8px_8px] bg-[linear-gradient(45deg,rgba(255,255,255,0.2)_25%,transparent_25%,transparent_50%,rgba(255,255,255,0.2)_50%,rgba(255,255,255,0.2)_75%,transparent_75%,transparent)]", 
+                        className={cn("h-full transition-[color,background-color,border-color,opacity,transform,box-shadow] bg-[length:8px_8px] bg-[linear-gradient(45deg,rgba(255,255,255,0.2)_25%,transparent_25%,transparent_50%,rgba(255,255,255,0.2)_50%,rgba(255,255,255,0.2)_75%,transparent_75%,transparent)]", 
                            m.v >= m.lim ? "bg-[var(--error)]" : "bg-[var(--success)]"
                         )} 
                         style={{ width: `${m.v}%` }} 
@@ -1706,7 +1706,7 @@ function CardDensityMonoGradient({ node }: { node: AgentNode }) {
          </div>
          <div className="flex items-center gap-2">
             <div className="px-2 py-0.5 bg-background border border-border rounded text-[10px] text-muted-foreground">{node.ip}</div>
-            <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-foreground"><IconDotsVertical className="w-3.5 h-3.5" /></Button>
+            <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-foreground" aria-label="More actions"><IconDotsVertical className="w-3.5 h-3.5" /></Button>
          </div>
       </div>
       
@@ -1731,7 +1731,7 @@ function CardDensityMonoGradient({ node }: { node: AgentNode }) {
                    <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden relative">
                       <div className="absolute top-0 bottom-0 w-[1px] bg-foreground/50 z-10" style={{ left: `${m.lim}%` }} />
                       <div 
-                        className="h-full transition-all"
+                        className="h-full transition-[color,background-color,border-color,opacity,transform,box-shadow]"
                         style={{ 
                            width: `${m.v}%`,
                            background: m.v >= m.lim ? "var(--error)" : `linear-gradient(90deg, var(--success) 0%, var(--success) 60%, var(--warning) 100%)`
@@ -1763,7 +1763,7 @@ function CardDensityMonoGradient({ node }: { node: AgentNode }) {
 // --- Variant 15C: Density Grid (Glassmorphism) ---
 function CardDensityGlass({ node }: { node: AgentNode }) {
   return (
-    <div className="group relative overflow-hidden rounded-xl border bg-background/40 backdrop-blur-md transition-all hover:bg-background/60 hover:shadow-lg">
+    <div className="group relative overflow-hidden rounded-xl border bg-background/40 backdrop-blur-md transition-[color,background-color,border-color,opacity,transform,box-shadow] hover:bg-background/60 hover:shadow-lg">
       <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
       
       <div className="relative p-4 space-y-4">

@@ -60,7 +60,7 @@ function RulesCell({ fp }: { fp: WappalyzerFingerprint }) {
         ))}
       </div>
       {hasMore && (
-        <button
+        <button type="button"
           onClick={() => setExpanded(!expanded)}
           className="text-xs text-primary hover:underline self-start inline-flex items-center gap-0.5"
         >

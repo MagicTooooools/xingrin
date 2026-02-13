@@ -152,14 +152,6 @@ export function VulnAuditVertical() {
     info: { className: SEVERITY_STYLES.info.className },
   }
 
-  // Keyboard Navigation
-  const handleKeyDown = (e: React.KeyboardEvent, id: number) => {
-    if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault()
-      setSelectedId(String(id))
-    }
-  }
-
   return (
     <div ref={containerRef} className="flex flex-col h-full min-h-0 bg-background border rounded-lg overflow-hidden select-none">
       {/* Top: List View (Table) */}
@@ -172,19 +164,19 @@ export function VulnAuditVertical() {
               <div className="flex items-center bg-muted/50 p-1 rounded-lg border">
                  <button 
                     onClick={() => { setFilter("all"); setPage("1") }}
-                    className={cn("px-3 py-1 text-xs font-medium rounded-md transition-all", filter === "all" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground")}
+                    className={cn("px-3 py-1 text-xs font-medium rounded-md transition-[color,background-color,border-color,opacity,transform,box-shadow]", filter === "all" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground")}
                  >
                     All <span className="opacity-50 ml-1">{MOCK_VULNS.length}</span>
                  </button>
                  <button 
                     onClick={() => { setFilter("pending"); setPage("1") }}
-                    className={cn("px-3 py-1 text-xs font-medium rounded-md transition-all", filter === "pending" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground")}
+                    className={cn("px-3 py-1 text-xs font-medium rounded-md transition-[color,background-color,border-color,opacity,transform,box-shadow]", filter === "pending" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground")}
                  >
                     Pending <span className="opacity-50 ml-1">{MOCK_VULNS.filter(i => !i.isReviewed).length}</span>
                  </button>
                  <button 
                     onClick={() => { setFilter("reviewed"); setPage("1") }}
-                    className={cn("px-3 py-1 text-xs font-medium rounded-md transition-all", filter === "reviewed" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground")}
+                    className={cn("px-3 py-1 text-xs font-medium rounded-md transition-[color,background-color,border-color,opacity,transform,box-shadow]", filter === "reviewed" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground")}
                  >
                     Reviewed <span className="opacity-50 ml-1">{MOCK_VULNS.filter(i => i.isReviewed).length}</span>
                  </button>
@@ -195,17 +187,17 @@ export function VulnAuditVertical() {
               <div className="flex items-center gap-1 text-xs text-muted-foreground mr-2">
                  <span>Page {page} of {totalPages || 1}</span>
                  <div className="flex gap-1 ml-2">
-                    <Button variant="outline" size="icon" className="h-6 w-6" disabled={page <= 1} onClick={() => setPage(String(page - 1))}>
+                    <Button variant="outline" size="icon" className="h-6 w-6" disabled={page <= 1} onClick={() => setPage(String(page - 1))} aria-label="Previous page">
                        <IconChevronDown className="h-3 w-3 rotate-90" />
                     </Button>
-                    <Button variant="outline" size="icon" className="h-6 w-6" disabled={page >= totalPages} onClick={() => setPage(String(page + 1))}>
+                    <Button variant="outline" size="icon" className="h-6 w-6" disabled={page >= totalPages} onClick={() => setPage(String(page + 1))} aria-label="Next page">
                        <IconChevronDown className="h-3 w-3 -rotate-90" />
                     </Button>
                  </div>
               </div>
               <div className="relative w-48">
                  <IconSearch className="absolute left-2 top-2 size-3 text-muted-foreground" />
-                 <Input placeholder="Search..." className="h-7 pl-7 text-xs bg-background" />
+                 <Input type="search" name="vulnerabilitySearch" autoComplete="off" placeholder="Search…" className="h-7 pl-7 text-xs bg-background" />
               </div>
            </div>
         </div>
@@ -225,13 +217,9 @@ export function VulnAuditVertical() {
 
               {paginatedItems.map(item => (
                  <div 
-                    role="button"
-                    tabIndex={0}
                     key={item.id} 
-                    onClick={() => setSelectedId(String(item.id))}
-                    onKeyDown={(e) => handleKeyDown(e, item.id)}
                     className={cn(
-                       "group flex items-center py-2 px-4 cursor-pointer hover:bg-muted/40 transition-colors relative border-b border-border/40 last:border-0 min-w-max outline-none focus-visible:bg-muted/60 focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-primary",
+                       "group flex items-center py-2 px-4 hover:bg-muted/40 transition-colors relative border-b border-border/40 last:border-0 min-w-max",
                        selectedId === item.id ? "bg-muted/60" : ""
                     )}
                  >
@@ -241,8 +229,12 @@ export function VulnAuditVertical() {
                     )}
 
                     {/* Checkbox */}
-                    <div className="w-8 flex justify-center shrink-0" onClick={(e) => e.stopPropagation()}>
-                       <Checkbox className="h-3.5 w-3.5 opacity-0 group-hover:opacity-100 data-[state=checked]:opacity-100 transition-opacity" />
+                    <div className="w-8 flex justify-center shrink-0">
+                       <Checkbox
+                          className="h-3.5 w-3.5 opacity-0 group-hover:opacity-100 data-[state=checked]:opacity-100 transition-opacity"
+                          onClick={(e) => e.stopPropagation()}
+                          onKeyDown={(e) => e.stopPropagation()}
+                       />
                     </div>
                     
                     {/* Status */}
@@ -266,8 +258,16 @@ export function VulnAuditVertical() {
                     </div>
 
                     {/* Vuln Type (Title) */}
-                    <div className="flex-[2] min-w-[200px] px-2 font-medium text-sm text-foreground truncate" title={item.vulnType}>
-                       {item.vulnType}
+                    <div className="flex-[2] min-w-[200px] px-2">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedId(String(item.id))}
+                        className="w-full truncate text-left font-medium text-sm text-foreground hover:underline focus-visible:underline focus-visible:outline-none"
+                        title={item.vulnType}
+                        aria-label={`Open details for ${item.vulnType}`}
+                      >
+                        {item.vulnType}
+                      </button>
                     </div>
 
                     {/* Source */}
@@ -298,18 +298,20 @@ export function VulnAuditVertical() {
         </div>
         
         {/* Resize Handle */}
-        <div 
+        <button
+           type="button"
            className={cn(
               "absolute bottom-0 left-0 right-0 h-1.5 cursor-row-resize z-50 transition-colors flex items-center justify-center group/handle hover:bg-primary/10",
               isResizing ? "bg-primary/20" : "bg-transparent"
            )}
            onMouseDown={startResizing}
+           aria-label="Resize vulnerability list and details panels"
         >
            <div className={cn(
               "w-12 h-1 rounded-full transition-colors",
               isResizing ? "bg-primary" : "bg-border group-hover/handle:bg-primary/50"
            )}></div>
-        </div>
+        </button>
       </div>
 
       {/* Bottom: Detail View (New Audit Layout) */}

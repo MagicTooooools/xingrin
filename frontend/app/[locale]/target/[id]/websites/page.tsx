@@ -1,7 +1,11 @@
 "use client"
 
+import { lazyPage } from "@/components/common/lazy-page"
 import { useParams } from "next/navigation"
-import { WebSitesView } from "@/components/websites/websites-view"
+
+const WebSitesView = lazyPage(
+  () => import("@/components/websites/websites-view").then((m) => ({ default: m.WebSitesView }))
+)
 
 export default function WebSitesPage() {
   const { id } = useParams<{ id: string }>()

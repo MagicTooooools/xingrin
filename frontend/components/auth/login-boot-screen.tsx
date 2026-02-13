@@ -6,11 +6,11 @@ import Image from "next/image"
 import { cn } from "@/lib/utils"
 
 const STATUS_MESSAGES = [
-  "Initializing security modules...",
-  "Loading vulnerability database...",
-  "Connecting to scan engine...",
-  "Preparing templates...",
-  "Almost ready...",
+  "Initializing security modules…",
+  "Loading vulnerability database…",
+  "Connecting to scan engine…",
+  "Preparing templates…",
+  "Almost ready…",
 ]
 
 export function LoginBootScreen({ className }: { className?: string; success?: boolean }) {

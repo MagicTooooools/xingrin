@@ -286,7 +286,7 @@ function SidebarRail({ className, ...props }: React.ComponentProps<"button">) {
   const t = useTranslations("common.ui")
 
   return (
-    <button
+    <button type="button"
       data-sidebar="rail"
       data-slot="sidebar-rail"
       aria-label={t("toggleSidebar")}
@@ -294,7 +294,7 @@ function SidebarRail({ className, ...props }: React.ComponentProps<"button">) {
       onClick={toggleSidebar}
       title={t("toggleSidebar")}
       className={cn(
-        "hover:after:bg-sidebar-border absolute inset-y-0 z-20 hidden w-4 -translate-x-1/2 transition-all ease-linear group-data-[side=left]:-right-4 group-data-[side=right]:left-0 after:absolute after:inset-y-0 after:left-1/2 after:w-[2px] sm:flex",
+        "hover:after:bg-sidebar-border absolute inset-y-0 z-20 hidden w-4 -translate-x-1/2 transition-[left,right,transform,background-color] ease-linear group-data-[side=left]:-right-4 group-data-[side=right]:left-0 after:absolute after:inset-y-0 after:left-1/2 after:w-[2px] sm:flex",
         "in-data-[side=left]:cursor-w-resize in-data-[side=right]:cursor-e-resize",
         "[[data-side=left][data-state=collapsed]_&]:cursor-e-resize [[data-side=right][data-state=collapsed]_&]:cursor-w-resize",
         "hover:group-data-[collapsible=offcanvas]:bg-sidebar group-data-[collapsible=offcanvas]:translate-x-0 group-data-[collapsible=offcanvas]:after:left-full",
@@ -307,9 +307,10 @@ function SidebarRail({ className, ...props }: React.ComponentProps<"button">) {
   )
 }
 
-function SidebarInset({ className, ...props }: React.ComponentProps<"main">) {
+function SidebarInset({ className, id, ...props }: React.ComponentProps<"main">) {
   return (
     <main
+      id={id ?? "main-content"}
       data-slot="sidebar-inset"
       className={cn(
         "bg-background relative flex w-full flex-1 flex-col",
@@ -329,6 +330,8 @@ function SidebarInput({
     <Input
       data-slot="sidebar-input"
       data-sidebar="input"
+      name={props.name ?? "sidebar-input"}
+      autoComplete="off"
       className={cn("bg-background h-8 w-full shadow-none", className)}
       {...props}
     />

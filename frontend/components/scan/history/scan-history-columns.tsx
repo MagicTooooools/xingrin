@@ -2,6 +2,7 @@
 
 import React from "react"
 import { ColumnDef } from "@tanstack/react-table"
+import Link from "next/link"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -70,7 +71,6 @@ export interface ScanHistoryTranslations {
 // Column creation function parameter types
 interface CreateColumnsProps {
   formatDate: (dateString: string) => string
-  navigate: (path: string) => void
   handleDelete: (scan: ScanRecord) => void
   handleStop: (scan: ScanRecord) => void
   handleViewProgress?: (scan: ScanRecord) => void
@@ -84,7 +84,6 @@ interface CreateColumnsProps {
  */
 export const createScanHistoryColumns = ({
   formatDate,
-  navigate,
   handleDelete,
   handleStop,
   handleViewProgress,
@@ -137,12 +136,12 @@ export const createScanHistoryColumns = ({
           {targetId ? (
             <Tooltip>
               <TooltipTrigger asChild>
-                <button
-                  onClick={() => navigate(`/target/${targetId}/details`)}
-                  className="text-sm font-medium hover:text-primary hover:underline underline-offset-2 transition-colors cursor-pointer text-left break-all leading-relaxed whitespace-normal"
+                <Link
+                  href={`/target/${targetId}/details`}
+                  className="text-sm font-medium hover:text-primary hover:underline underline-offset-2 transition-colors text-left break-all leading-relaxed whitespace-normal"
                 >
                   {targetName}
-                </button>
+                </Link>
               </TooltipTrigger>
               <TooltipContent>{t.tooltips.targetDetails}</TooltipContent>
             </Tooltip>
@@ -329,13 +328,28 @@ export const createScanHistoryColumns = ({
       const status = row.getValue("status") as ScanStatus
       const progress = row.original.progress
       const isClickable = Boolean(handleViewProgress) && statusClickable
-      
+
+      if (isClickable) {
+        return (
+          <button
+            type="button"
+            onClick={() => handleViewProgress?.(row.original)}
+            className={cn("cursor-pointer text-left")}
+            aria-label={t.tooltips.viewProgress}
+          >
+            <ScanStatusBadge
+              status={status}
+              progress={progress}
+              labels={t.status}
+              variant="inline" // Using F2 variant (Inline Block)
+            />
+          </button>
+        )
+      }
+
       return (
-        <div 
-          onClick={isClickable ? () => handleViewProgress?.(row.original) : undefined}
-          className={cn(isClickable ? "cursor-pointer" : "cursor-default")}
-        >
-          <ScanStatusBadge 
+        <div className={cn("cursor-default")}>
+          <ScanStatusBadge
             status={status}
             progress={progress}
             labels={t.status}
@@ -366,12 +380,15 @@ export const createScanHistoryColumns = ({
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
+                  asChild
                   variant="ghost"
                   size="icon"
                   className="h-8 w-8 text-primary hover:bg-primary/10"
-                  onClick={() => navigate(`/scan/history/${scan.id}/`)}
+                  aria-label={t.actions.snapshot}
                 >
-                  <Eye className="h-4 w-4" />
+                  <Link href={`/scan/history/${scan.id}/`}>
+                    <Eye className="h-4 w-4" />
+                  </Link>
                 </Button>
               </TooltipTrigger>
               <TooltipContent>{t.actions.snapshot}</TooltipContent>

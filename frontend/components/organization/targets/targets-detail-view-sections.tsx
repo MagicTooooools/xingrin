@@ -41,7 +41,7 @@ export function TargetsDetailViewErrorState({
       <p className="text-muted-foreground text-center mb-4">
         {error instanceof Error ? error.message : String(error)}
       </p>
-      <button
+      <button type="button"
         onClick={onRetry}
         className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
       >

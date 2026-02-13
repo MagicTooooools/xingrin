@@ -94,12 +94,17 @@ export function SearchPageContent({ state }: { state: SearchPageState }) {
             <div className="flex flex-wrap justify-center gap-2">
               {QUICK_SEARCH_TAGS.map((tag) => (
                 <Badge
+                  asChild
                   key={tag.query}
                   variant="outline"
-                  className="cursor-pointer hover:bg-accent transition-colors px-3 py-1"
-                  onClick={() => state.handleQuickTagClick(tag.query)}
+                  className="hover:bg-accent transition-colors px-3 py-1"
                 >
-                  {tag.label}
+                  <button
+                    type="button"
+                    onClick={() => state.handleQuickTagClick(tag.query)}
+                  >
+                    {tag.label}
+                  </button>
                 </Badge>
               ))}
             </div>
@@ -116,13 +121,19 @@ export function SearchPageContent({ state }: { state: SearchPageState }) {
                       key={search}
                       variant="secondary"
                       className={cn(
-                        "cursor-pointer hover:bg-secondary/80 transition-colors",
+                        "hover:bg-secondary/80 transition-colors",
                         "pl-3 pr-1.5 py-1 gap-1 group"
                       )}
-                      onClick={() => state.handleRecentSearchClick(search)}
                     >
-                      <span className="font-mono text-xs truncate max-w-[200px]">{search}</span>
                       <button
+                        type="button"
+                        onClick={() => state.handleRecentSearchClick(search)}
+                        className="font-mono text-xs truncate max-w-[200px] text-left"
+                      >
+                        {search}
+                      </button>
+                      <button
+                        type="button"
                         onClick={(e) => state.handleRemoveRecentSearch(e, search)}
                         className="ml-1 p-0.5 rounded hover:bg-muted-foreground/20 opacity-0 group-hover:opacity-100 transition-opacity"
                       >

@@ -40,6 +40,9 @@ export function SimpleSearchToolbar({
   return (
     <div className={cn("flex items-center gap-2", className)}>
       <Input
+        type="search"
+        name="search"
+        autoComplete="off"
         placeholder={placeholder}
         value={value}
         onChange={(event) => onChange(event.target.value)}

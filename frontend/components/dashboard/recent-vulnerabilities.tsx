@@ -3,7 +3,6 @@
 import { useMemo } from "react"
 import { useQuery } from "@tanstack/react-query"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
 import { VulnerabilityService } from "@/services/vulnerability.service"
 import {
   Card,
@@ -30,7 +29,6 @@ import { useLocale } from "next-intl"
 import { SEVERITY_STYLES } from "@/lib/severity-config"
 
 export function RecentVulnerabilities() {
-  const router = useRouter()
   const t = useTranslations("dashboard.recentVulns")
   const tSeverity = useTranslations("severity")
   const tColumns = useTranslations("columns")
@@ -105,45 +103,57 @@ export function RecentVulnerabilities() {
                 {vulnerabilities.map((vuln: Vulnerability) => {
                   const isReviewed = vuln.isReviewed
                   const isPending = !isReviewed
+                  const detailHref = `/vulnerabilities/?id=${vuln.id}`
 
                   return (
                     <TableRow
                       key={vuln.id}
-                      className="cursor-pointer hover:bg-muted/50"
-                      onClick={() => router.push(`/vulnerabilities/?id=${vuln.id}`)}
+                      className="hover:bg-muted/50"
                     >
                       <TableCell>
-                        <Badge
-                          variant="outline"
-                          className={`transition-all gap-1.5 cursor-default ${isPending
-                            ? "bg-blue-500/10 text-blue-600 border-blue-500/30 dark:text-blue-400 dark:border-blue-400/30"
-                            : "bg-muted/50 text-muted-foreground border-muted-foreground/20"
-                          }`}
-                        >
-                          {isPending ? (
-                            <Circle className="h-3 w-3" />
-                          ) : (
-                            <CheckCircle2 className="h-3 w-3" />
-                          )}
-                          {isPending ? tTooltips("pending") : tTooltips("reviewed")}
-                        </Badge>
+                        <Link href={detailHref} className="block w-full">
+                          <Badge
+                            variant="outline"
+                            className={`transition-[background-color,border-color,color] gap-1.5 cursor-default ${isPending
+                              ? "bg-blue-500/10 text-blue-600 border-blue-500/30 dark:text-blue-400 dark:border-blue-400/30"
+                              : "bg-muted/50 text-muted-foreground border-muted-foreground/20"
+                            }`}
+                          >
+                            {isPending ? (
+                              <Circle className="h-3 w-3" />
+                            ) : (
+                              <CheckCircle2 className="h-3 w-3" />
+                            )}
+                            {isPending ? tTooltips("pending") : tTooltips("reviewed")}
+                          </Badge>
+                        </Link>
                       </TableCell>
                       <TableCell>
-                        <Badge className={severityConfig[vuln.severity as VulnerabilitySeverity]?.className}>
-                          {severityConfig[vuln.severity as VulnerabilitySeverity]?.label ?? vuln.severity}
-                        </Badge>
+                        <Link href={detailHref} className="block w-full">
+                          <Badge className={severityConfig[vuln.severity as VulnerabilitySeverity]?.className}>
+                            {severityConfig[vuln.severity as VulnerabilitySeverity]?.label ?? vuln.severity}
+                          </Badge>
+                        </Link>
                       </TableCell>
                       <TableCell>
-                        <Badge variant="outline">{vuln.source}</Badge>
+                        <Link href={detailHref} className="block w-full">
+                          <Badge variant="outline">{vuln.source}</Badge>
+                        </Link>
                       </TableCell>
                       <TableCell className="font-medium max-w-[120px] truncate">
-                        {vuln.vulnType}
+                        <Link href={detailHref} className="block w-full truncate">
+                          {vuln.vulnType}
+                        </Link>
                       </TableCell>
                       <TableCell className="text-muted-foreground text-xs max-w-[200px] truncate">
-                        {vuln.url}
+                        <Link href={detailHref} className="block w-full truncate">
+                          {vuln.url}
+                        </Link>
                       </TableCell>
                       <TableCell className="text-muted-foreground text-xs whitespace-nowrap">
-                        {formatTime(vuln.createdAt)}
+                        <Link href={detailHref} className="block w-full">
+                          {formatTime(vuln.createdAt)}
+                        </Link>
                       </TableCell>
                     </TableRow>
                   )

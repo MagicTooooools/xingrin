@@ -1,8 +1,11 @@
 "use client"
 
-import React from "react"
+import { lazyPage } from "@/components/common/lazy-page"
 import { useParams } from "next/navigation"
-import { EndpointsDetailView } from "@/components/endpoints/endpoints-detail-view"
+
+const EndpointsDetailView = lazyPage(
+  () => import("@/components/endpoints/endpoints-detail-view").then((m) => ({ default: m.EndpointsDetailView }))
+)
 /**
  * Target endpoints page
  * Displays endpoint details under the target
@@ -12,8 +15,7 @@ export default function TargetEndpointsPage() {
 
   return (
     <div className="px-4 lg:px-6">
-      <EndpointsDetailView targetId={parseInt(id)} />
+      <EndpointsDetailView targetId={Number(id)} />
     </div>
   )
 }
-

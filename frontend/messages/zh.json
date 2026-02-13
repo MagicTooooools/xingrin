@@ -215,7 +215,11 @@
     "ui": {
       "toggleSidebar": "切换侧边栏",
       "loading": "加载中",
-      "commandDialog": "命令对话框"
+      "commandDialog": "命令对话框",
+      "skipToMainContent": "跳转到主要内容",
+      "statusLabel": "状态",
+      "cycleLabel": "周期",
+      "activeStatus": "活跃"
     },
     "dropzone": {
       "uploadFile": "上传文件",
@@ -465,6 +469,12 @@
       "description": "最近发现的安全漏洞",
       "viewAll": "查看全部",
       "noData": "暂无漏洞数据"
+    },
+    "bauhausHeader": {
+      "operationsCommand": "运维指挥",
+      "systemOverview": "系统总览",
+      "networkOnline": "网络：在线",
+      "cycleLabel": "周期："
     }
   },
   "dataTable": {

@@ -87,7 +87,7 @@ function NotificationCard({
     <div
       key={notification.id}
       className={cn(
-        "group relative rounded-lg border p-3 transition-all duration-200 overflow-hidden",
+        "group relative rounded-lg border p-3 transition-[background-color,border-color,box-shadow,transform] duration-200 overflow-hidden",
         "hover:shadow-sm hover:scale-[1.01]",
         getNotificationCardClasses(notification.severity)
       )}
@@ -142,7 +142,12 @@ export function NotificationDrawerLayout({
   return (
     <Sheet open={state.open} onOpenChange={state.setOpen}>
       <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative group">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="relative group"
+          aria-label={state.t("title")}
+        >
           <Bell className="h-5 w-5" />
           {state.unreadCount > 0 ? (
             <Badge
@@ -160,7 +165,7 @@ export function NotificationDrawerLayout({
           <div className="flex items-center justify-between gap-2">
             <SheetTitle className="text-sm font-semibold">{state.t("title")}</SheetTitle>
             <div className="flex items-center gap-2">
-              <button
+              <button type="button"
                 onClick={state.handleMarkAll}
                 disabled={state.isMarkingAll || state.allNotifications.length === 0}
                 className="text-xs text-primary hover:text-primary/80 hover:underline underline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:no-underline transition-colors"
@@ -178,11 +183,11 @@ export function NotificationDrawerLayout({
 
         <div className="flex gap-1 px-3 py-1.5 border-b overflow-x-auto">
           {filterTabs.map((tab) => (
-            <button
+            <button type="button"
               key={tab.value}
               onClick={() => state.setActiveFilter(tab.value)}
               className={cn(
-                "inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium transition-all whitespace-nowrap",
+                "inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium transition-[background-color,color,box-shadow] whitespace-nowrap",
                 state.activeFilter === tab.value
                   ? "bg-primary text-primary-foreground shadow-sm"
                   : "bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground"

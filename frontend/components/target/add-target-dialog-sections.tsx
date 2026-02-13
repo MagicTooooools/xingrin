@@ -78,6 +78,8 @@ export function AddTargetInputSection({
           <Textarea
             ref={textareaRef}
             id="targets"
+            name="targets"
+            autoComplete="off"
             value={formTargets}
             onChange={(event) => onInputChange(event.target.value)}
             onScroll={onScroll}

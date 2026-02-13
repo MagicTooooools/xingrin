@@ -43,7 +43,7 @@ export function QuickScanTrigger({ t, trigger }: QuickScanTriggerProps) {
           <div className="absolute bottom-0 left-0 w-1 h-1 bg-highlight opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           <div className="absolute bottom-0 right-0 w-1 h-1 bg-highlight opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-          <span className="mr-2 text-xs font-mono text-highlight opacity-0 group-hover:opacity-100 absolute left-2 transition-all duration-300 -translate-x-2 group-hover:translate-x-0">{">"}</span>
+          <span className="mr-2 text-xs font-mono text-highlight opacity-0 group-hover:opacity-100 absolute left-2 transition-[opacity,transform] duration-300 -translate-x-2 group-hover:translate-x-0">{">"}</span>
           <div className="flex items-center transition-transform duration-300 group-hover:translate-x-2">
             <span className="font-medium">{t("title")}</span>
           </div>
@@ -121,13 +121,14 @@ export function QuickScanTargetStep({
           </div>
           <div className="flex-1 overflow-hidden">
             <Textarea
+              name="scanTargets"
+              autoComplete="off"
               value={targetInput}
               onChange={(event) => onTargetChange(event.target.value)}
               onScroll={onScroll}
               placeholder={t("targetPlaceholder")}
               className="font-mono h-full overflow-y-auto resize-none border-0 rounded-none focus-visible:ring-0 focus-visible:ring-offset-0 text-sm py-3 px-3"
               style={{ lineHeight: "21px" }}
-              autoFocus
             />
           </div>
         </div>

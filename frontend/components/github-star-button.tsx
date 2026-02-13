@@ -45,7 +45,7 @@ export function GithubStarButton({ className }: GithubStarButtonProps) {
       target="_blank"
       rel="noopener noreferrer"
       className={cn(
-        "group relative hidden sm:flex items-center h-9 bg-muted/50 text-foreground border border-border hover:border-[#00C8FF] transition-all overflow-hidden min-w-[120px]",
+        "group relative hidden sm:flex items-center h-9 bg-muted/50 text-foreground border border-border hover:border-[#00C8FF] transition-[background-color,border-color,color,box-shadow] overflow-hidden min-w-[120px]",
         className
       )}
     >

@@ -42,7 +42,7 @@ export function FingersFingerprintNameField({
   return (
     <div className="space-y-2">
       <Label htmlFor="name">{t("form.name")} *</Label>
-      <Input
+      <Input autoComplete="off"
         id="name"
         placeholder={t("form.namePlaceholder")}
         {...register("name", { required: t("form.nameRequired") })}
@@ -66,7 +66,7 @@ export function FingersFingerprintLinkField({
   return (
     <div className="space-y-2">
       <Label htmlFor="link">{t("form.link")}</Label>
-      <Input
+      <Input autoComplete="off"
         id="link"
         placeholder={t("form.linkPlaceholder")}
         {...register("link")}
@@ -89,7 +89,7 @@ export function FingersFingerprintRuleField({
   return (
     <div className="space-y-2">
       <Label htmlFor="rule">{t("form.rule")} *</Label>
-      <Textarea
+      <Textarea autoComplete="off"
         id="rule"
         placeholder={t("form.rulePlaceholder")}
         className="font-mono text-sm min-h-[120px]"
@@ -119,7 +119,7 @@ export function FingersFingerprintTagsFocus({
     <div className="grid grid-cols-2 gap-4">
       <div className="space-y-2">
         <Label htmlFor="tag">{t("form.tag")}</Label>
-        <Input
+        <Input autoComplete="off"
           id="tag"
           placeholder={t("form.tagPlaceholder")}
           {...register("tag")}
@@ -155,7 +155,7 @@ export function FingersFingerprintDefaultPort({
   return (
     <div className="space-y-2">
       <Label htmlFor="defaultPort">{t("form.defaultPort")}</Label>
-      <Input
+      <Input autoComplete="off"
         id="defaultPort"
         placeholder={t("form.defaultPortPlaceholder")}
         {...register("defaultPort")}
@@ -183,7 +183,7 @@ export function FingersFingerprintDialogFooter({
         {tCommon("cancel")}
       </Button>
       <Button type="submit" disabled={isSubmitting}>
-        {isSubmitting ? "..." : isEdit ? tCommon("save") : tCommon("create")}
+        {isSubmitting ? "…" : isEdit ? tCommon("save") : tCommon("create")}
       </Button>
     </DialogFooter>
   )

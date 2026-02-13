@@ -50,7 +50,7 @@ export default function DemoIndexPage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {demos.map((demo) => (
           <Link href={`/${demo.path}`} key={demo.path} className="block group h-full">
-            <Card className="h-full transition-all duration-300 hover:shadow-lg hover:-translate-y-1 border-muted hover:border-primary/50">
+            <Card className="h-full transition-[border-color,box-shadow,transform] duration-300 hover:shadow-lg hover:-translate-y-1 border-muted hover:border-primary/50">
               <CardHeader>
                 <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-4 ${demo.color}`}>
                   {demo.icon}

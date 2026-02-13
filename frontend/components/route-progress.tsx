@@ -126,7 +126,7 @@ export function RouteProgress() {
       {/* Progress bar */}
       <div
         className={cn(
-          "h-full bg-[var(--highlight)] transition-all duration-200 ease-out",
+          "h-full bg-[var(--highlight)] transition-[width] duration-200 ease-out",
           "shadow-[0_0_10px_var(--highlight)]"
         )}
         style={{ width: `${progress}%` }}
@@ -138,7 +138,7 @@ export function RouteProgress() {
           "absolute top-0 right-0 h-full w-24",
           "bg-gradient-to-r from-transparent to-[var(--highlight)]",
           "opacity-50 blur-sm",
-          "transition-all duration-200"
+          "transition-[left,transform] duration-200"
         )}
         style={{ 
           transform: `translateX(${progress < 100 ? '0' : '100%'})`,

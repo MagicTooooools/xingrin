@@ -404,7 +404,12 @@ function GravityStarsBackground({
       onTouchMove={(e) => handlePointerMove(e)}
       {...props}
     >
-      <canvas ref={canvasRef} className="block w-full h-full" />
+      <canvas
+        ref={canvasRef}
+        className="block w-full h-full"
+        aria-hidden="true"
+        role="presentation"
+      />
     </div>
   );
 }

@@ -42,8 +42,12 @@ export function TerminalLogin({
     inputRef.current?.focus()
   }, [step])
 
-  // Click anywhere to focus input
-  const handleContainerClick = () => {
+  // Focus input when pointer-down on non-interactive blank areas.
+  const handleContainerPointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
+    const target = event.target as HTMLElement
+    if (target.closest("button, a, input, textarea, select, [role='button']")) {
+      return
+    }
     inputRef.current?.focus()
   }
 
@@ -241,7 +245,7 @@ export function TerminalLogin({
   return (
     <div
       ref={containerRef}
-      onClick={handleContainerClick}
+      onPointerDown={handleContainerPointerDown}
       className={cn(
         "border-border bg-card/70 text-foreground backdrop-blur-sm z-0 w-full max-w-xl rounded-xl border cursor-text",
         className

@@ -93,6 +93,8 @@ export function BulkAddSubdomainsInput({
           <Textarea
             ref={textareaRef}
             id="subdomains"
+            name="subdomains"
+            autoComplete="off"
             value={inputText}
             onChange={(event) => onInputChange(event.target.value)}
             onScroll={onScroll}

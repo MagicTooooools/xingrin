@@ -131,7 +131,7 @@ export function GobyFingerprintView() {
         <p className="text-muted-foreground text-center mb-4">
           {error.message || tFingerprints("loadError")}
         </p>
-        <button
+        <button type="button"
           onClick={() => refetch()}
           className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
         >

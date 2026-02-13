@@ -39,9 +39,10 @@ export function NudgeReport({
               <p className="mt-1 text-xs text-muted-foreground">System Notification</p>
             </div>
           </div>
-          <button
+          <button type="button"
             onClick={onDismiss}
             className="text-muted-foreground hover:text-foreground"
+            aria-label="Dismiss notification"
           >
             <IconX className="size-4" />
           </button>

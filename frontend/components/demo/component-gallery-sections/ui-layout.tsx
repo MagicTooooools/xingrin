@@ -119,7 +119,7 @@ export function UiLayoutSection() {
 
         <DemoCard title="Command" description="命令面板">
           <Command>
-            <CommandInput placeholder="搜索指令..." />
+            <CommandInput placeholder="搜索指令…" />
             <CommandList>
               <CommandEmpty>无结果</CommandEmpty>
               <CommandGroup heading="导航">

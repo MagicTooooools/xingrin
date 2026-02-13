@@ -54,7 +54,7 @@ export function ColumnResizer<TData>({ header, className }: ColumnResizerProps<T
       {/* Visual indicator line: 2px wide, 80% height, only show on hover or drag */}
       <div 
         className={cn(
-          "w-0.5 h-4/5 rounded-full transition-all",
+          "w-0.5 h-4/5 rounded-full transition-[opacity,background-color]",
           header.column.getIsResizing() 
             ? "bg-primary opacity-100" 
             : "bg-primary/50 opacity-0 group-hover:opacity-100"

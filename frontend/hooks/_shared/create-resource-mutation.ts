@@ -125,13 +125,16 @@ export function useResourceMutation<TData, TVariables, TContext = unknown>(
       }
 
       if (options.invalidate) {
-        for (const descriptor of options.invalidate) {
-          const invalidateFilter =
-            typeof descriptor === 'function'
-              ? descriptor({ data, variables })
-              : descriptor
-          await queryClient.invalidateQueries(invalidateFilter)
-        }
+        const invalidateFilters = options.invalidate.map((descriptor) =>
+          typeof descriptor === 'function'
+            ? descriptor({ data, variables })
+            : descriptor
+        )
+        await Promise.all(
+          invalidateFilters.map((invalidateFilter) =>
+            queryClient.invalidateQueries(invalidateFilter)
+          )
+        )
       }
 
       await options.onSuccess?.({

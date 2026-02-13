@@ -141,7 +141,7 @@ export function ExpandableCell({
         {value}
       </div>
       {(isOverflowing || expanded) && (
-        <button
+        <button type="button"
           onClick={() => setExpanded(!expanded)}
           className="inline-flex items-center gap-0.5 text-xs text-primary hover:underline self-start"
         >
@@ -230,21 +230,34 @@ export function ExpandableBadgeList({
   return (
     <div className={cn("flex flex-wrap items-center gap-1", className)}>
       {displayItems.map((item) => (
-        <Badge
-          key={item.id}
-          variant={variant}
-          className={cn(
-            "text-xs",
-            onItemClick && "cursor-pointer hover:bg-accent"
-          )}
-          title={item.name}
-          onClick={onItemClick ? () => onItemClick(item) : undefined}
-        >
-          {item.name}
-        </Badge>
+        onItemClick ? (
+          <Badge
+            asChild
+            key={item.id}
+            variant={variant}
+            className="text-xs hover:bg-accent"
+            title={item.name}
+          >
+            <button
+              type="button"
+              onClick={() => onItemClick(item)}
+            >
+              {item.name}
+            </button>
+          </Badge>
+        ) : (
+          <Badge
+            key={item.id}
+            variant={variant}
+            className="text-xs"
+            title={item.name}
+          >
+            {item.name}
+          </Badge>
+        )
       ))}
       {hasMore && (
-        <button
+        <button type="button"
           onClick={() => setExpanded(!expanded)}
           className="inline-flex items-center gap-0.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
         >
@@ -353,7 +366,7 @@ export function ExpandableTagList({
         ))}
       </div>
       {(isOverflowing || expanded) && (
-        <button
+        <button type="button"
           onClick={() => setExpanded(!expanded)}
           className="inline-flex items-center gap-0.5 text-xs text-muted-foreground hover:text-foreground transition-colors self-start"
         >

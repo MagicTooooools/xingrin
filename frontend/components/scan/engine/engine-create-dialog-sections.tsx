@@ -41,11 +41,12 @@ export function EngineCreatePresetStep({
       <ScrollArea className="flex-1 px-6 py-4">
         <div className="grid grid-cols-2 gap-3">
           {presetEngines.map((preset) => (
-            <button
+            <button type="button"
               key={preset.id}
               onClick={() => onSelectPreset(preset)}
+              aria-label={preset.name}
               className={cn(
-                "text-left p-4 rounded-lg border-2 transition-all",
+                "text-left p-4 rounded-lg border-2 transition-[background-color,border-color,color,box-shadow]",
                 selectedPreset?.id === preset.id
                   ? "border-primary bg-primary/5"
                   : "border-border hover:border-primary/50 hover:bg-muted/50"
@@ -156,6 +157,8 @@ export function EngineCreateConfigStep({
             </Label>
             <Input
               id="engine-name"
+              name="engineName"
+              autoComplete="off"
               value={engineName}
               onChange={(event) => onEngineNameChange(event.target.value)}
               placeholder={t("engineNamePlaceholder")}

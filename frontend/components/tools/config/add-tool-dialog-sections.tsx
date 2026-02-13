@@ -69,12 +69,17 @@ function ToolCategorySelector({
             const isSelected = selectedCategories.includes(categoryName)
             return (
               <Badge
+                asChild
                 key={categoryName}
                 variant={isSelected ? "secondary" : "outline"}
-                className="cursor-pointer hover:bg-secondary/80 transition-colors"
-                onClick={() => onToggle(categoryName)}
+                className="hover:bg-secondary/80 transition-colors"
               >
-                {CategoryNameMap[categoryName] || categoryName}
+                <button
+                  type="button"
+                  onClick={() => onToggle(categoryName)}
+                >
+                  {CategoryNameMap[categoryName] || categoryName}
+                </button>
               </Badge>
             )
           })
@@ -120,6 +125,7 @@ export function AddToolBasicInfoSection({
                 placeholder={t("toolNamePlaceholder")}
                 disabled={isPending}
                 maxLength={255}
+                autoComplete="off"
                 {...field}
               />
             </FormControl>
@@ -141,6 +147,8 @@ export function AddToolBasicInfoSection({
                 placeholder={t("repoUrlPlaceholder")}
                 disabled={isPending}
                 maxLength={512}
+                autoComplete="url"
+                inputMode="url"
                 {...field}
               />
             </FormControl>
@@ -160,6 +168,7 @@ export function AddToolBasicInfoSection({
                 placeholder={t("versionPlaceholder")}
                 disabled={isPending}
                 maxLength={100}
+                autoComplete="off"
                 {...field}
               />
             </FormControl>
@@ -180,6 +189,7 @@ export function AddToolBasicInfoSection({
                 disabled={isPending}
                 rows={3}
                 maxLength={1000}
+                autoComplete="off"
                 {...field}
               />
             </FormControl>
@@ -228,6 +238,7 @@ export function AddToolCommandSection({
                 disabled={isPending}
                 rows={3}
                 className="font-mono text-sm"
+                autoComplete="off"
                 {...field}
               />
             </FormControl>
@@ -257,6 +268,7 @@ export function AddToolCommandSection({
                 disabled={isPending}
                 rows={2}
                 className="font-mono text-sm"
+                autoComplete="off"
                 {...field}
               />
             </FormControl>
@@ -288,6 +300,7 @@ export function AddToolCommandSection({
                 disabled={isPending}
                 maxLength={500}
                 className="font-mono text-sm"
+                autoComplete="off"
                 {...field}
               />
             </FormControl>

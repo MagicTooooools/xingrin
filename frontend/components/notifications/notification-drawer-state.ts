@@ -1,5 +1,5 @@
 import React from "react"
-import { useTranslations } from "next-intl"
+import { useLocale, useTranslations } from "next-intl"
 
 import { transformBackendNotification, useNotificationSSE } from "@/hooks/use-notification-sse"
 import { useMarkAllAsRead, useNotifications } from "@/hooks/use-notifications"
@@ -20,6 +20,8 @@ function getTimeGroup(dateStr?: string): "today" | "yesterday" | "earlier" {
 
 export function useNotificationDrawerState() {
   const t = useTranslations("notificationDrawer")
+  const locale = useLocale()
+  const tTime = useTranslations("common.time")
   const [open, setOpen] = React.useState(false)
   const [activeFilter, setActiveFilter] = React.useState<NotificationType | "all">("all")
 
@@ -27,15 +29,29 @@ export function useNotificationDrawerState() {
   const { data: notificationResponse, isLoading: isHistoryLoading } = useNotifications(queryParams)
   const { mutate: markAllAsRead, isPending: isMarkingAll } = useMarkAllAsRead()
 
-  const { notifications: sseNotifications, markNotificationsAsRead } = useNotificationSSE()
+  const transformOptions = React.useMemo(
+    () => ({
+      locale,
+      timeLabels: {
+        justNow: tTime("justNow"),
+        minutesAgo: (count: number) => tTime("minutesAgo", { count }),
+        hoursAgo: (count: number) => tTime("hoursAgo", { count }),
+      },
+    }),
+    [locale, tTime]
+  )
+
+  const { notifications: sseNotifications, markNotificationsAsRead } = useNotificationSSE(transformOptions)
 
   const [historyNotifications, setHistoryNotifications] = React.useState<Notification[]>([])
 
   React.useEffect(() => {
     if (!notificationResponse?.results) return
     const backendNotifications = notificationResponse.results ?? []
-    setHistoryNotifications(backendNotifications.map(transformBackendNotification))
-  }, [notificationResponse])
+    setHistoryNotifications(
+      backendNotifications.map((notification) => transformBackendNotification(notification, transformOptions))
+    )
+  }, [notificationResponse, transformOptions])
 
   const allNotifications = React.useMemo(() => {
     const seen = new Set<number>()

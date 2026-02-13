@@ -122,7 +122,7 @@ export function UiOverlaysSection() {
                 <DialogTitle>新建目标</DialogTitle>
                 <DialogDescription>快速添加一个新的资产目标。</DialogDescription>
               </DialogHeader>
-              <Input placeholder="example.com" />
+              <Input autoComplete="off" name="demoInput" placeholder="example.com" />
               <DialogFooter>
                 <Button onClick={() => setDialogOpen(false)}>保存</Button>
               </DialogFooter>
@@ -142,7 +142,7 @@ export function UiOverlaysSection() {
               </SheetHeader>
               <div className="mt-4 space-y-2">
                 <Label>策略名称</Label>
-                <Input placeholder="Default" />
+                <Input autoComplete="off" name="demoInput" placeholder="Default" />
               </div>
             </SheetContent>
           </Sheet>

@@ -62,6 +62,7 @@ export function AddOrganizationNameField<TFieldValues extends FieldValues>({
               placeholder={t("orgNamePlaceholder")}
               disabled={isSubmitting}
               maxLength={50}
+              autoComplete="off"
               {...field}
             />
           </FormControl>
@@ -101,6 +102,7 @@ export function AddOrganizationDescriptionField<TFieldValues extends FieldValues
               disabled={isSubmitting}
               rows={3}
               maxLength={200}
+              autoComplete="off"
               {...field}
             />
           </FormControl>
@@ -170,6 +172,7 @@ export function AddOrganizationTargetsField<TFieldValues extends FieldValues>({
                   onScroll={onScroll}
                   placeholder={t("targetsPlaceholder")}
                   disabled={isSubmitting}
+                  autoComplete="off"
                   className="font-mono h-full overflow-y-auto resize-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0 leading-[1.4] text-sm py-3"
                   style={{ lineHeight: "20px" }}
                 />

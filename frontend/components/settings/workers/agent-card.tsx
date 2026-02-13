@@ -125,7 +125,7 @@ export function AgentCard({
   return (
     <Card
       className={cn(
-        "transition-all duration-200 hover:shadow-md",
+        "transition-[background-color,border-color,box-shadow,opacity] duration-200 hover:shadow-md",
         agent.status === "online" && "border-[var(--success)]/20",
         agent.status === "offline" && "border-slate-300/50 opacity-75"
       )}
@@ -167,7 +167,7 @@ export function AgentCard({
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
+              <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" aria-label={t("actions.title")}>
                 <IconDotsVertical className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>

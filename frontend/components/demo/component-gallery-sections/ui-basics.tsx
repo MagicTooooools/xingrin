@@ -60,12 +60,12 @@ export function UiBasicsSection() {
         <DemoCard title="Input + Label" description="基础输入">
           <div className="space-y-2">
             <Label htmlFor="demo-input">资产名称</Label>
-            <Input id="demo-input" placeholder="example.com" />
+            <Input autoComplete="off" name="demoInput" id="demo-input" placeholder="example.com" />
           </div>
         </DemoCard>
 
         <DemoCard title="Textarea" description="多行输入">
-          <Textarea placeholder="输入说明..." rows={4} />
+          <Textarea autoComplete="off" name="demoTextarea" placeholder="输入说明…" rows={4} />
         </DemoCard>
 
         <DemoCard title="Checkbox" description="多选">

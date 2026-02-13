@@ -2,6 +2,7 @@
 
 import React from "react"
 import { ColumnDef } from "@tanstack/react-table"
+import Link from "next/link"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Button } from "@/components/ui/button"
 import {
@@ -86,12 +87,10 @@ interface CreateColumnsProps {
 const TargetNameCell = React.memo(function TargetNameCell({
   name,
   targetId,
-  navigate,
   t,
 }: {
   name: string
   targetId: number
-  navigate: (path: string) => void
   t: AllTargetsTranslations
 }) {
   const [copied, setCopied] = React.useState(false)
@@ -106,20 +105,16 @@ const TargetNameCell = React.memo(function TargetNameCell({
     }
   }, [name, t.tooltips.copied])
 
-  const handleNavigate = React.useCallback(() => {
-    navigate(`/target/${targetId}/details`)
-  }, [navigate, targetId])
-
   return (
     <div className="group flex items-start gap-1 flex-1 min-w-0">
       <Tooltip>
         <TooltipTrigger asChild>
-          <span
-            onClick={handleNavigate}
-            className="text-sm font-medium hover:text-primary hover:underline underline-offset-2 transition-colors cursor-pointer text-left break-all leading-relaxed whitespace-normal"
+          <Link
+            href={`/target/${targetId}/details`}
+            className="text-sm font-medium hover:text-primary hover:underline underline-offset-2 transition-colors text-left break-all leading-relaxed whitespace-normal"
           >
             {name}
-          </span>
+          </Link>
         </TooltipTrigger>
         <TooltipContent>{t.tooltips.targetDetails}</TooltipContent>
       </Tooltip>
@@ -133,6 +128,7 @@ const TargetNameCell = React.memo(function TargetNameCell({
                 copied ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
               }`}
               onClick={handleCopy}
+              aria-label={copied ? t.tooltips.copied : t.tooltips.clickToCopy}
             >
               {copied ? (
                 <Check className="h-3.5 w-3.5 text-green-600 dark:text-green-400" />
@@ -176,6 +172,7 @@ const TargetRowActions = React.memo(function TargetRowActions({
               size="icon"
               className="h-8 w-8"
               onClick={onView}
+              aria-label={t.tooltips.targetSummary}
             >
               <Eye className="h-4 w-4" />
             </Button>
@@ -194,6 +191,7 @@ const TargetRowActions = React.memo(function TargetRowActions({
               size="icon"
               className="h-8 w-8"
               onClick={onInitiateScan}
+              aria-label={t.tooltips.initiateScan}
             >
               <Play className="h-4 w-4" />
             </Button>
@@ -209,6 +207,7 @@ const TargetRowActions = React.memo(function TargetRowActions({
           <Button
             variant="ghost"
             className="h-8 w-8 p-0 data-[state=open]:bg-muted"
+            aria-label="More actions"
           >
             <MoreHorizontal className="h-4 w-4" />
           </Button>
@@ -281,7 +280,6 @@ export const createAllTargetsColumns = ({
       <TargetNameCell
         name={row.getValue("name") as string}
         targetId={row.original.id}
-        navigate={navigate}
         t={t}
       />
     ),

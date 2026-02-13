@@ -59,7 +59,7 @@ export function FingerPrintHubIdNameFields({
     <div className="grid grid-cols-2 gap-4">
       <div className="space-y-2">
         <Label htmlFor="fpId">{t("form.fpId")} *</Label>
-        <Input
+        <Input autoComplete="off"
           id="fpId"
           placeholder={t("form.fpIdPlaceholder")}
           {...register("fpId", { required: t("form.fpIdRequired") })}
@@ -71,7 +71,7 @@ export function FingerPrintHubIdNameFields({
 
       <div className="space-y-2">
         <Label htmlFor="name">{t("form.name")} *</Label>
-        <Input
+        <Input autoComplete="off"
           id="name"
           placeholder={t("form.namePlaceholder")}
           {...register("name", { required: t("form.nameRequired") })}
@@ -101,7 +101,7 @@ export function FingerPrintHubAuthorSeverityFields({
     <div className="grid grid-cols-2 gap-4">
       <div className="space-y-2">
         <Label htmlFor="author">{t("form.author")}</Label>
-        <Input
+        <Input autoComplete="off"
           id="author"
           placeholder={t("form.authorPlaceholder")}
           {...register("author")}
@@ -139,7 +139,7 @@ export function FingerPrintHubTagsField({
   return (
     <div className="space-y-2">
       <Label htmlFor="tags">{t("form.tags")}</Label>
-      <Input
+      <Input autoComplete="off"
         id="tags"
         placeholder={t("form.tagsPlaceholder")}
         {...register("tags")}
@@ -160,7 +160,7 @@ export function FingerPrintHubMetadataField({
   return (
     <div className="space-y-2">
       <Label htmlFor="metadata">{t("form.metadata")} *</Label>
-      <Textarea
+      <Textarea autoComplete="off"
         id="metadata"
         placeholder={t("form.metadataPlaceholder")}
         className="font-mono text-sm min-h-[120px]"
@@ -184,7 +184,7 @@ export function FingerPrintHubHttpField({
   return (
     <div className="space-y-2">
       <Label htmlFor="http">{t("form.http")} *</Label>
-      <Textarea
+      <Textarea autoComplete="off"
         id="http"
         placeholder={t("form.httpPlaceholder")}
         className="font-mono text-sm min-h-[150px]"
@@ -209,7 +209,7 @@ export function FingerPrintHubSourceFileField({
   return (
     <div className="space-y-2">
       <Label htmlFor="sourceFile">{t("form.sourceFile")}</Label>
-      <Input
+      <Input autoComplete="off"
         id="sourceFile"
         placeholder={t("form.sourceFilePlaceholder")}
         {...register("sourceFile")}
@@ -237,7 +237,7 @@ export function FingerPrintHubDialogFooter({
         {tCommon("cancel")}
       </Button>
       <Button type="submit" disabled={isSubmitting}>
-        {isSubmitting ? "..." : isEdit ? tCommon("save") : tCommon("create")}
+        {isSubmitting ? "…" : isEdit ? tCommon("save") : tCommon("create")}
       </Button>
     </DialogFooter>
   )

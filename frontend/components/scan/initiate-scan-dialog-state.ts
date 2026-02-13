@@ -182,8 +182,10 @@ export function useInitiateScanDialogState({
       toast.success(tToast("scanInitiated"), {
         description: response.message || tToast("scanInitiatedDesc", { count: scanCount }),
       })
-      await queryClient.invalidateQueries({ queryKey: ["scans"] })
-      await queryClient.invalidateQueries({ queryKey: ["scan-statistics"] })
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["scans"] }),
+        queryClient.invalidateQueries({ queryKey: ["scan-statistics"] }),
+      ])
       onSuccess?.()
       onOpenChange(false)
       resetDialogState()

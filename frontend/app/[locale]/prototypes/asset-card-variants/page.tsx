@@ -161,7 +161,7 @@ export default function AssetCardVariantsPage() {
               {assetCards.map((card) => (
                 <div
                   key={card.label}
-                  className="group relative bg-card p-4 hover:bg-accent/5 transition-all duration-300 cursor-pointer"
+                  className="group relative bg-card p-4 hover:bg-accent/5 transition-[color,background-color,border-color,opacity,transform,box-shadow] duration-300 cursor-pointer"
                 >
                   {/* Schematic Borders - 使用 border-border/40 减轻视觉重量 */}
                   <div className="absolute inset-0 border border-border/40 border-t-0 group-hover:border-primary/30 transition-colors" />
@@ -202,7 +202,7 @@ export default function AssetCardVariantsPage() {
               {assetCards.map((card) => (
                 <div
                   key={card.label}
-                  className="group relative bg-card p-4 overflow-hidden cursor-pointer hover:shadow-lg transition-all duration-300"
+                  className="group relative bg-card p-4 overflow-hidden cursor-pointer hover:shadow-lg transition-[color,background-color,border-color,opacity,transform,box-shadow] duration-300"
                 >
                   {/* Base Border */}
                   <div className="absolute inset-0 border border-border/40 border-t-0" />
@@ -214,8 +214,8 @@ export default function AssetCardVariantsPage() {
                   </div>
 
                   {/* Corners that glow on hover */}
-                  <div className="absolute top-0 right-0 h-2 w-2 border-r border-t border-primary/30 group-hover:border-primary group-hover:shadow-[0_0_8px_rgba(59,130,246,0.6)] transition-all duration-300" />
-                  <div className="absolute bottom-0 left-0 h-2 w-2 border-l border-b border-primary/30 group-hover:border-primary group-hover:shadow-[0_0_8px_rgba(59,130,246,0.6)] transition-all duration-300" />
+                  <div className="absolute top-0 right-0 h-2 w-2 border-r border-t border-primary/30 group-hover:border-primary group-hover:shadow-[0_0_8px_rgba(59,130,246,0.6)] transition-[color,background-color,border-color,opacity,transform,box-shadow] duration-300" />
+                  <div className="absolute bottom-0 left-0 h-2 w-2 border-l border-b border-primary/30 group-hover:border-primary group-hover:shadow-[0_0_8px_rgba(59,130,246,0.6)] transition-[color,background-color,border-color,opacity,transform,box-shadow] duration-300" />
                   
                   <div className="relative z-10">
                     <div className="flex justify-between items-start mb-2">
@@ -257,8 +257,8 @@ export default function AssetCardVariantsPage() {
                   <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,0,0,0.02)_1px,transparent_1px)] bg-[size:20px_20px] [mask-image:linear-gradient(to_bottom,white,transparent)]" />
 
                   {/* Dynamic Corners */}
-                  <div className="absolute top-0 left-0 h-3 w-3 border-l-2 border-t-2 border-border group-hover:border-primary group-hover:w-full group-hover:h-full transition-all duration-300 ease-out" />
-                  <div className="absolute bottom-0 right-0 h-3 w-3 border-r-2 border-b-2 border-border group-hover:border-primary group-hover:w-full group-hover:h-full transition-all duration-300 ease-out" />
+                  <div className="absolute top-0 left-0 h-3 w-3 border-l-2 border-t-2 border-border group-hover:border-primary group-hover:w-full group-hover:h-full transition-[color,background-color,border-color,opacity,transform,box-shadow] duration-300 ease-out" />
+                  <div className="absolute bottom-0 right-0 h-3 w-3 border-r-2 border-b-2 border-border group-hover:border-primary group-hover:w-full group-hover:h-full transition-[color,background-color,border-color,opacity,transform,box-shadow] duration-300 ease-out" />
                   
                   <div className="relative z-10 flex flex-col h-full justify-between">
                     <div className="flex justify-between items-start">
@@ -343,7 +343,7 @@ export default function AssetCardVariantsPage() {
               return (
                 <div
                   key={card.label}
-                  className="relative overflow-hidden bg-card rounded-lg border shadow-sm hover:shadow-md transition-all cursor-pointer group"
+                  className="relative overflow-hidden bg-card rounded-lg border shadow-sm hover:shadow-md transition-[color,background-color,border-color,opacity,transform,box-shadow] cursor-pointer group"
                 >
                   <div className={`absolute top-0 left-0 w-full h-1 ${statusColor} opacity-80`} />
                   
@@ -383,7 +383,7 @@ export default function AssetCardVariantsPage() {
             {assetCards.map((card) => (
               <div
                 key={card.label}
-                className="group relative bg-card rounded-lg border p-4 transition-all hover:border-primary/50"
+                className="group relative bg-card rounded-lg border p-4 transition-[color,background-color,border-color,opacity,transform,box-shadow] hover:border-primary/50"
               >
                 <div className="flex flex-col h-full justify-between gap-4">
                   <div className="flex items-center justify-between">
@@ -431,12 +431,12 @@ export default function AssetCardVariantsPage() {
                 className="relative bg-neutral-900 border border-neutral-800 p-4 overflow-hidden group hover:border-cyan-500/50 transition-colors"
               >
                 {/* Glow effect */}
-                <div className="absolute -top-10 -right-10 w-20 h-20 bg-cyan-500/10 blur-xl rounded-full group-hover:bg-cyan-500/20 transition-all" />
+                <div className="absolute -top-10 -right-10 w-20 h-20 bg-cyan-500/10 blur-xl rounded-full group-hover:bg-cyan-500/20 transition-[color,background-color,border-color,opacity,transform,box-shadow]" />
                 
                 <div className="relative z-10">
                   <div className="flex justify-between items-start mb-3">
                     <card.icon className="h-5 w-5 text-neutral-500 group-hover:text-cyan-400 transition-colors" />
-                    <div className="h-1.5 w-1.5 bg-neutral-700 rounded-full group-hover:bg-cyan-400 group-hover:shadow-[0_0_8px_rgba(34,211,238,0.8)] transition-all" />
+                    <div className="h-1.5 w-1.5 bg-neutral-700 rounded-full group-hover:bg-cyan-400 group-hover:shadow-[0_0_8px_rgba(34,211,238,0.8)] transition-[color,background-color,border-color,opacity,transform,box-shadow]" />
                   </div>
                   
                   <div className="text-3xl font-mono text-neutral-100 tabular-nums">

@@ -231,6 +231,8 @@ export function WaveGrid({
       ref={canvasRef}
       width={width}
       height={height}
+      aria-hidden="true"
+      role="presentation"
       className={cn("pointer-events-none", className)}
     />
   )

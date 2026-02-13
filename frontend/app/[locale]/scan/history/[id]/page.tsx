@@ -1,15 +1,12 @@
-"use client"
+import { redirect } from "next/navigation"
 
-import { useParams, useRouter } from "next/navigation"
-import { useEffect } from "react"
+type Props = {
+  params: Promise<{ locale: string; id: string }>
+}
 
-export default function ScanHistoryDetailPage() {
-  const { id } = useParams<{ id: string }>()
-  const router = useRouter()
-
-  useEffect(() => {
-    router.replace(`/scan/history/${id}/overview/`)
-  }, [id, router])
-
-  return null
+export default async function ScanHistoryDetailPage({
+  params,
+}: Props) {
+  const { locale, id } = await params
+  redirect(`/${locale}/scan/history/${id}/overview/`)
 }

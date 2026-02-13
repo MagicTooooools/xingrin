@@ -1,5 +1,4 @@
 import React from "react"
-import { useRouter } from "next/navigation"
 import { useLocale, useTranslations } from "next-intl"
 import { toast } from "sonner"
 
@@ -18,7 +17,6 @@ import type { ScanRecord } from "@/types/scan.types"
 import type { PaginationInfo } from "@/types/common.types"
 
 export function useDashboardDataTableState() {
-  const router = useRouter()
   const t = useTranslations()
   const locale = useLocale()
 
@@ -171,7 +169,6 @@ export function useDashboardDataTableState() {
     () =>
       createScanHistoryColumns({
         formatDate,
-        navigate: (path: string) => router.push(path),
         handleDelete,
         handleStop,
         handleViewProgress,
@@ -213,7 +210,7 @@ export function useDashboardDataTableState() {
           },
         },
       }),
-    [formatDate, router, handleViewProgress, handleDelete, handleStop, t]
+    [formatDate, handleViewProgress, handleDelete, handleStop, t]
   )
 
   const vulnPaginationInfo: PaginationInfo = buildPaginationInfo({

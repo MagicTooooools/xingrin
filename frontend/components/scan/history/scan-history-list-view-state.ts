@@ -1,5 +1,4 @@
 import React from "react"
-import { useRouter } from "next/navigation"
 import { useLocale, useTranslations } from "next-intl"
 
 import { createScanHistoryColumns } from "./scan-history-columns"
@@ -131,14 +130,6 @@ export function useScanHistoryListViewState({
     [locale]
   )
 
-  const router = useRouter()
-  const navigate = React.useCallback(
-    (path: string) => {
-      router.push(path)
-    },
-    [router]
-  )
-
   const handlePaginationChange = (newPagination: { pageIndex: number; pageSize: number }) => {
     setPagination(newPagination)
   }
@@ -147,7 +138,6 @@ export function useScanHistoryListViewState({
     () =>
       createScanHistoryColumns({
         formatDate,
-        navigate,
         handleDelete: actions.handleDeleteScan,
         handleStop: actions.handleStopScan,
         handleViewProgress: actions.handleViewProgress,
@@ -155,7 +145,7 @@ export function useScanHistoryListViewState({
         t: translations,
         hideTargetColumn,
       }),
-    [formatDate, navigate, translations, hideTargetColumn, actions]
+    [formatDate, translations, hideTargetColumn, actions]
   )
 
   return {

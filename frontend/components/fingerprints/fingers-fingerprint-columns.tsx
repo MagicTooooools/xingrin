@@ -36,7 +36,7 @@ function TagListCell({ tags }: { tags: string[] }) {
         ))}
       </div>
       {hasMore && (
-        <button
+        <button type="button"
           onClick={() => setExpanded(!expanded)}
           className="text-xs text-primary hover:underline self-start flex items-center gap-1"
         >
@@ -104,7 +104,7 @@ function RulesCell({ rules }: { rules: FingersRule[] }) {
         ))}
       </div>
       {hasMore && (
-        <button
+        <button type="button"
           onClick={() => setExpanded(!expanded)}
           className="text-xs text-primary hover:underline self-start inline-flex items-center gap-0.5"
         >

@@ -69,6 +69,8 @@ export function ScheduledScanBasicInfoStep({
         <Label htmlFor="name">{t("form.taskName")} *</Label>
         <Input
           id="name"
+          name="taskName"
+          autoComplete="off"
           placeholder={t("form.taskNamePlaceholder")}
           value={name}
           onChange={(event) => setName(event.target.value)}
@@ -79,7 +81,8 @@ export function ScheduledScanBasicInfoStep({
       <div className="space-y-3">
         <Label>{t("form.selectScanMode")}</Label>
         <div className="grid grid-cols-2 gap-4">
-          <div
+          <button
+            type="button"
             className={cn(
               "flex flex-col items-center gap-3 p-4 border-2 rounded-lg cursor-pointer transition-colors",
               selectionMode === "organization" ? "border-primary bg-primary/5" : "border-muted hover:border-muted-foreground/50"
@@ -88,6 +91,7 @@ export function ScheduledScanBasicInfoStep({
               setSelectionMode("organization")
               setSelectedTargetId(null)
             }}
+            aria-pressed={selectionMode === "organization"}
           >
             <IconBuilding className="h-8 w-8" />
             <div className="text-center">
@@ -95,8 +99,9 @@ export function ScheduledScanBasicInfoStep({
               <p className="text-xs text-muted-foreground">{t("form.organizationScanDesc")}</p>
             </div>
             {selectionMode === "organization" && <IconCheck className="h-5 w-5 text-primary" />}
-          </div>
-          <div
+          </button>
+          <button
+            type="button"
             className={cn(
               "flex flex-col items-center gap-3 p-4 border-2 rounded-lg cursor-pointer transition-colors",
               selectionMode === "target" ? "border-primary bg-primary/5" : "border-muted hover:border-muted-foreground/50"
@@ -105,6 +110,7 @@ export function ScheduledScanBasicInfoStep({
               setSelectionMode("target")
               setSelectedOrgId(null)
             }}
+            aria-pressed={selectionMode === "target"}
           >
             <IconTarget className="h-8 w-8" />
             <div className="text-center">
@@ -112,7 +118,7 @@ export function ScheduledScanBasicInfoStep({
               <p className="text-xs text-muted-foreground">{t("form.targetScanDesc")}</p>
             </div>
             {selectionMode === "target" && <IconCheck className="h-5 w-5 text-primary" />}
-          </div>
+          </button>
         </div>
         <p className="text-sm text-muted-foreground">
           {selectionMode === "organization" ? t("form.organizationScanHint") : t("form.targetScanHint")}
@@ -145,6 +151,8 @@ export function ScheduledScanPresetInfoStep({
         <Label htmlFor="name">{t("form.taskName")} *</Label>
         <Input
           id="name"
+          name="taskName"
+          autoComplete="off"
           placeholder={t("form.taskNamePlaceholder")}
           value={name}
           onChange={(event) => setName(event.target.value)}
@@ -215,6 +223,9 @@ export function ScheduledScanTargetSelectionStep({
           <Label>{t("form.selectOrganization")}</Label>
           <div className="flex items-center gap-2 mb-2">
             <Input
+              type="search"
+              name="organizationSearch"
+              autoComplete="off"
               placeholder={t("form.searchOrganization")}
               value={orgSearchInput}
               onChange={(event) => setOrgSearchInput(event.target.value)}
@@ -228,6 +239,7 @@ export function ScheduledScanTargetSelectionStep({
               className="h-9 w-9"
               onClick={handleOrgSearch}
               disabled={isOrgFetching}
+              aria-label="Search organizations"
             >
               {isOrgFetching ? <IconLoader2 className="h-4 w-4 animate-spin" /> : <IconSearch className="h-4 w-4" />}
             </Button>
@@ -261,7 +273,14 @@ export function ScheduledScanTargetSelectionStep({
               <p className="text-sm text-muted-foreground">{t("form.selectedOrganization")}</p>
               <Badge variant="secondary">
                 {organizations.find((org) => org.id === selectedOrgId)?.name}
-                <IconX className="h-3 w-3 ml-1 cursor-pointer" onClick={() => setSelectedOrgId(null)} />
+                <button
+                  type="button"
+                  className="ml-1 inline-flex items-center justify-center rounded-sm hover:bg-muted/60"
+                  onClick={() => setSelectedOrgId(null)}
+                  aria-label="Clear selected organization"
+                >
+                  <IconX className="h-3 w-3" />
+                </button>
               </Badge>
             </div>
           )}
@@ -271,6 +290,9 @@ export function ScheduledScanTargetSelectionStep({
           <Label>{t("form.selectTarget")}</Label>
           <div className="flex items-center gap-2 mb-2">
             <Input
+              type="search"
+              name="targetSearch"
+              autoComplete="off"
               placeholder={t("form.searchTarget")}
               value={targetSearchInput}
               onChange={(event) => setTargetSearchInput(event.target.value)}
@@ -284,6 +306,7 @@ export function ScheduledScanTargetSelectionStep({
               className="h-9 w-9"
               onClick={handleTargetSearch}
               disabled={isTargetFetching}
+              aria-label="Search targets"
             >
               {isTargetFetching ? <IconLoader2 className="h-4 w-4 animate-spin" /> : <IconSearch className="h-4 w-4" />}
             </Button>
@@ -319,7 +342,14 @@ export function ScheduledScanTargetSelectionStep({
               <p className="text-sm text-muted-foreground">{t("form.selectedTarget")}</p>
               <Badge variant="outline">
                 {targets.find((target) => target.id === selectedTargetId)?.name}
-                <IconX className="h-3 w-3 ml-1 cursor-pointer" onClick={() => setSelectedTargetId(null)} />
+                <button
+                  type="button"
+                  className="ml-1 inline-flex items-center justify-center rounded-sm hover:bg-muted/60"
+                  onClick={() => setSelectedTargetId(null)}
+                  aria-label="Clear selected target"
+                >
+                  <IconX className="h-3 w-3" />
+                </button>
               </Badge>
             </div>
           )}
@@ -413,6 +443,8 @@ export function ScheduledScanScheduleStep({
       <div className="space-y-2">
         <Label>{t("form.cronExpression")} *</Label>
         <Input
+          name="cronExpression"
+          autoComplete="off"
           placeholder={t("form.cronPlaceholder")}
           value={cronExpression}
           onChange={(event) => setCronExpression(event.target.value)}
@@ -425,12 +457,17 @@ export function ScheduledScanScheduleStep({
         <div className="flex flex-wrap gap-2">
           {cronPresets.map((preset) => (
             <Badge
+              asChild
               key={preset.value}
               variant={cronExpression === preset.value ? "default" : "outline"}
               className="cursor-pointer"
-              onClick={() => setCronExpression(preset.value)}
             >
-              {preset.label}
+              <button
+                type="button"
+                onClick={() => setCronExpression(preset.value)}
+              >
+                {preset.label}
+              </button>
             </Badge>
           ))}
         </div>

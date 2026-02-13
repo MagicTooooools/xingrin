@@ -49,7 +49,6 @@ export interface OrganizationTranslations {
 // Column creation function parameter types
 interface CreateColumnsProps {
   formatDate: (dateString: string) => string
-  navigate: (path: string) => void
   handleEdit: (org: Organization) => void
   handleDelete: (org: Organization) => void
   handleInitiateScan: (org: Organization) => void
@@ -109,7 +108,6 @@ function OrganizationRowActions({
  */
 export const createOrganizationColumns = ({
   formatDate,
-  navigate,
   handleEdit,
   handleDelete,
   handleInitiateScan,
@@ -231,12 +229,15 @@ export const createOrganizationColumns = ({
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
+                asChild
                 variant="ghost"
                 size="icon"
                 className="h-8 w-8"
-                onClick={() => navigate(`/organization/${row.original.id}`)}
+                aria-label={t.tooltips.organizationDetails}
               >
-                <Eye className="h-4 w-4" />
+                <Link href={`/organization/${row.original.id}`}>
+                  <Eye className="h-4 w-4" />
+                </Link>
               </Button>
             </TooltipTrigger>
             <TooltipContent side="top">
@@ -253,6 +254,7 @@ export const createOrganizationColumns = ({
                 size="icon"
                 className="h-8 w-8"
                 onClick={() => handleInitiateScan(row.original)}
+                aria-label={t.tooltips.initiateScan}
               >
                 <Play className="h-4 w-4" />
               </Button>

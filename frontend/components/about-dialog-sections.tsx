@@ -39,7 +39,7 @@ export function AboutDialogBranding({ t, logoSrc }: AboutDialogBrandingProps) {
     <div className="flex flex-col items-center py-4">
       <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 mb-3">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={logoSrc} alt="LunaFox Logo" className="h-12 w-12" />
+        <img src={logoSrc} alt="LunaFox Logo" className="h-12 w-12" width={48} height={48} />
       </div>
       <h2 className="text-xl font-semibold">{t("productName")}</h2>
       <p className="text-sm text-muted-foreground">{t("description")}</p>

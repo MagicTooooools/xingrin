@@ -49,14 +49,14 @@ export function NudgeTerminal({
 
         <div className="mt-4 flex justify-end gap-2 pl-6">
           {secondaryAction && (
-            <button
+            <button type="button"
               onClick={secondaryAction.onClick}
-              className="px-2 py-1 text-xs text-zinc-500 hover:text-zinc-300 hover:underline decoration-zinc-500 underline-offset-4 transition-all"
+              className="px-2 py-1 text-xs text-zinc-500 hover:text-zinc-300 hover:underline decoration-zinc-500 underline-offset-4 transition-colors"
             >
               ./{secondaryAction.label}
             </button>
           )}
-          <button
+          <button type="button"
             onClick={primaryAction.onClick}
             className="border border-green-500/30 bg-green-500/10 px-3 py-1 text-xs text-green-400 hover:bg-green-500/20 transition-colors"
           >
@@ -65,9 +65,10 @@ export function NudgeTerminal({
         </div>
       </div>
 
-      <button
+      <button type="button"
         onClick={onDismiss}
         className="absolute right-2 top-1.5 p-0.5 text-zinc-600 hover:text-zinc-400 opacity-0 hover:opacity-100"
+        aria-label="Dismiss notification"
       >
         <IconX className="size-3" />
       </button>

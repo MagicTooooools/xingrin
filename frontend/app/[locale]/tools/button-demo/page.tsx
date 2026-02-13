@@ -42,7 +42,7 @@ export default function ButtonDemoPage() {
                 className="
                   relative overflow-hidden group border-primary/20 
                   hover:border-primary hover:text-primary 
-                  transition-all duration-300
+                  transition-[background-color,border-color,color,opacity,box-shadow,transform,width,height,top] duration-300
                   bg-background/50 backdrop-blur-sm
                   min-w-[140px]
                 "
@@ -56,7 +56,7 @@ export default function ButtonDemoPage() {
                 " />
                 <Scan className="mr-2 h-4 w-4 transition-transform group-hover:scale-110 group-hover:rotate-90 duration-500" />
                 <span className="relative z-10">Quick Scan</span>
-                <div className="absolute bottom-0 left-0 h-[2px] w-0 bg-primary group-hover:w-full transition-all duration-300 ease-out" />
+                <div className="absolute bottom-0 left-0 h-[2px] w-0 bg-primary group-hover:w-full transition-[background-color,border-color,color,opacity,box-shadow,transform,width,height,top] duration-300 ease-out" />
               </Button>
 
               <Button 
@@ -103,10 +103,10 @@ export default function ButtonDemoPage() {
                   min-w-[140px]
                 "
               >
-                <span className="absolute top-0 left-0 w-[2px] h-0 bg-orange-500 transition-all duration-300 group-hover:h-full" />
-                <span className="absolute bottom-0 right-0 w-[2px] h-0 bg-orange-500 transition-all duration-300 group-hover:h-full" />
-                <span className="absolute top-0 right-0 w-0 h-[2px] bg-orange-500 transition-all duration-300 delay-100 group-hover:w-full" />
-                <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-orange-500 transition-all duration-300 delay-100 group-hover:w-full" />
+                <span className="absolute top-0 left-0 w-[2px] h-0 bg-orange-500 transition-[background-color,border-color,color,opacity,box-shadow,transform,width,height,top] duration-300 group-hover:h-full" />
+                <span className="absolute bottom-0 right-0 w-[2px] h-0 bg-orange-500 transition-[background-color,border-color,color,opacity,box-shadow,transform,width,height,top] duration-300 group-hover:h-full" />
+                <span className="absolute top-0 right-0 w-0 h-[2px] bg-orange-500 transition-[background-color,border-color,color,opacity,box-shadow,transform,width,height,top] duration-300 delay-100 group-hover:w-full" />
+                <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-orange-500 transition-[background-color,border-color,color,opacity,box-shadow,transform,width,height,top] duration-300 delay-100 group-hover:w-full" />
                 
                 <Terminal className="mr-2 h-4 w-4" />
                 Execute
@@ -126,7 +126,7 @@ export default function ButtonDemoPage() {
                 <div className="absolute bottom-0 left-0 w-1 h-1 bg-orange-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 <div className="absolute bottom-0 right-0 w-1 h-1 bg-orange-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 
-                <span className="mr-2 text-xs font-mono text-orange-500 opacity-0 group-hover:opacity-100 absolute left-2 transition-all duration-300 -translate-x-2 group-hover:translate-x-0">{">"}</span>
+                <span className="mr-2 text-xs font-mono text-orange-500 opacity-0 group-hover:opacity-100 absolute left-2 transition-[background-color,border-color,color,opacity,box-shadow,transform,width,height,top] duration-300 -translate-x-2 group-hover:translate-x-0">{">"}</span>
                 <span className="transition-transform duration-300 group-hover:translate-x-2">Compile</span>
               </Button>
             </div>
@@ -219,8 +219,8 @@ export default function ButtonDemoPage() {
                   px-3
                 "
               >
-                <span className="absolute inset-y-0 left-0 w-[2px] bg-destructive transition-all duration-300 group-hover:w-full opacity-10" />
-                <span className="absolute bottom-0 right-0 h-[2px] w-0 bg-destructive transition-all duration-300 group-hover:w-full" />
+                <span className="absolute inset-y-0 left-0 w-[2px] bg-destructive transition-[background-color,border-color,color,opacity,box-shadow,transform,width,height,top] duration-300 group-hover:w-full opacity-10" />
+                <span className="absolute bottom-0 right-0 h-[2px] w-0 bg-destructive transition-[background-color,border-color,color,opacity,box-shadow,transform,width,height,top] duration-300 group-hover:w-full" />
                 <span className="relative z-10 flex items-center gap-2">
                     <Loader2 className="h-4 w-4 animate-spin opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
                     <span className="inline-grid">
@@ -309,8 +309,8 @@ export default function ButtonDemoPage() {
                 "
               >
                 {/* Corner Markers */}
-                <span className="absolute top-0 left-0 w-2 h-2 border-l-2 border-t-2 border-red-500 transition-all duration-300 group-hover:w-full group-hover:h-full opacity-50 group-hover:opacity-100" />
-                <span className="absolute bottom-0 right-0 w-2 h-2 border-r-2 border-b-2 border-red-500 transition-all duration-300 group-hover:w-full group-hover:h-full opacity-50 group-hover:opacity-100" />
+                <span className="absolute top-0 left-0 w-2 h-2 border-l-2 border-t-2 border-red-500 transition-[background-color,border-color,color,opacity,box-shadow,transform,width,height,top] duration-300 group-hover:w-full group-hover:h-full opacity-50 group-hover:opacity-100" />
+                <span className="absolute bottom-0 right-0 w-2 h-2 border-r-2 border-b-2 border-red-500 transition-[background-color,border-color,color,opacity,box-shadow,transform,width,height,top] duration-300 group-hover:w-full group-hover:h-full opacity-50 group-hover:opacity-100" />
                 
                 {/* Crosshair (Center) */}
                 <span className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-20 pointer-events-none">
@@ -360,7 +360,7 @@ export default function ButtonDemoPage() {
                   relative group overflow-visible
                   bg-zinc-900 border border-zinc-800 text-violet-400
                   hover:border-violet-500/50 hover:text-violet-300 hover:shadow-[0_0_15px_rgba(139,92,246,0.3)]
-                  transition-all duration-300
+                  transition-[background-color,border-color,color,opacity,box-shadow,transform,width,height,top] duration-300
                   min-w-[140px]
                 "
               >
@@ -370,7 +370,7 @@ export default function ButtonDemoPage() {
                 </span>
                 
                 {/* Bottom Glow Bar */}
-                <div className="absolute -bottom-[1px] left-1/2 -translate-x-1/2 w-1/2 h-[2px] bg-violet-500 shadow-[0_0_10px_rgba(139,92,246,1)] opacity-0 group-hover:opacity-100 group-hover:w-full transition-all duration-300"></div>
+                <div className="absolute -bottom-[1px] left-1/2 -translate-x-1/2 w-1/2 h-[2px] bg-violet-500 shadow-[0_0_10px_rgba(139,92,246,1)] opacity-0 group-hover:opacity-100 group-hover:w-full transition-[background-color,border-color,color,opacity,box-shadow,transform,width,height,top] duration-300"></div>
               </Button>
             </div>
           </CardContent>
@@ -398,11 +398,14 @@ export default function ButtonDemoPage() {
               
               <div className="relative w-full max-w-sm group">
                 <Input 
-                  placeholder="SEARCH_QUERY..." 
+                  type="search"
+                  name="searchQueryDemo"
+                  autoComplete="off"
+                  placeholder="SEARCH_QUERY…"
                   className="
                     bg-background/50 border-primary/20 
                     focus-visible:ring-0 focus-visible:border-primary
-                    transition-all duration-300
+                    transition-[background-color,border-color,color,opacity,box-shadow,transform,width,height,top] duration-300
                     pl-10 font-mono text-sm
                   "
                 />
@@ -416,6 +419,9 @@ export default function ButtonDemoPage() {
               <div className="relative w-full max-w-sm group">
                 <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500 to-purple-600 rounded opacity-0 group-focus-within:opacity-30 blur transition duration-500"></div>
                 <Input 
+                  type="text"
+                  name="commandInputDemo"
+                  autoComplete="off"
                   placeholder="COMMAND_INPUT" 
                   className="
                     relative bg-background border-zinc-800

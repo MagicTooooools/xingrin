@@ -47,6 +47,8 @@ export function EditScheduledScanNameField({
         <Label htmlFor="edit-name">{t("form.taskName")} *</Label>
         <Input
           id="edit-name"
+          name="taskName"
+          autoComplete="off"
           placeholder={t("form.taskNamePlaceholder")}
           value={name}
           onChange={(event) => onNameChange(event.target.value)}
@@ -86,7 +88,7 @@ export function EditScheduledScanEngineSection({
               key={engine.id}
               htmlFor={`edit-engine-${engine.id}`}
               className={cn(
-                "flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all",
+                "flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-[background-color,border-color,box-shadow]",
                 engineIds.includes(engine.id)
                   ? "bg-primary/10 border border-primary/30"
                   : "hover:bg-muted/50 border border-transparent"
@@ -148,15 +150,20 @@ export function EditScheduledScanTargetSection({
           <div className="flex flex-wrap gap-2">
             {targets.map((target) => (
               <Badge
+                asChild
                 key={target.id}
                 variant={selectedTargetId === target.id ? "default" : "outline"}
                 className="cursor-pointer"
-                onClick={() => onSelectTarget(target.id)}
               >
-                {target.name}
-                {selectedTargetId === target.id && (
-                  <IconX className="h-3 w-3 ml-1" />
-                )}
+                <button
+                  type="button"
+                  onClick={() => onSelectTarget(target.id)}
+                >
+                  {target.name}
+                  {selectedTargetId === target.id && (
+                    <IconX className="h-3 w-3 ml-1" />
+                  )}
+                </button>
               </Badge>
             ))}
           </div>
@@ -191,6 +198,8 @@ export function EditScheduledScanCronSection({
       <div className="grid gap-2">
         <Label>{t("form.cronExpression")} *</Label>
         <Input
+          name="cronExpression"
+          autoComplete="off"
           placeholder={t("form.cronPlaceholder")}
           value={cronExpression}
           onChange={(event) => onCronChange(event.target.value)}
@@ -204,12 +213,17 @@ export function EditScheduledScanCronSection({
         <div className="flex flex-wrap gap-2">
           {cronPresets.map((preset) => (
             <Badge
+              asChild
               key={preset.value}
               variant={cronExpression === preset.value ? "default" : "outline"}
               className="cursor-pointer"
-              onClick={() => onPresetSelect(preset.value)}
             >
-              {preset.label}
+              <button
+                type="button"
+                onClick={() => onPresetSelect(preset.value)}
+              >
+                {preset.label}
+              </button>
             </Badge>
           ))}
         </div>

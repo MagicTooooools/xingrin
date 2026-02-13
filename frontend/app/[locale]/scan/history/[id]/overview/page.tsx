@@ -1,7 +1,11 @@
 "use client"
 
+import { lazyPage } from "@/components/common/lazy-page"
 import { useParams } from "next/navigation"
-import { ScanOverview } from "@/components/scan/history/scan-overview"
+
+const ScanOverview = lazyPage(
+  () => import("@/components/scan/history/scan-overview").then((m) => ({ default: m.ScanOverview }))
+)
 
 /**
  * Scan overview page

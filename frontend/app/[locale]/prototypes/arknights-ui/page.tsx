@@ -137,6 +137,7 @@ export default function ArknightsUiPrototypePage() {
                 key={id}
                 className="ark-nav"
                 type="button"
+                aria-label={`Open ${id}`}
               >
                 <Icon className="h-5 w-5" />
               </button>

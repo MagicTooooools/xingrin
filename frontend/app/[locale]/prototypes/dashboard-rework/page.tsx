@@ -276,10 +276,10 @@ export default function DashboardReworkPage() {
                 <div className="p-4 border-b border-[var(--ark-border)] bg-[var(--ark-panel-2)] flex justify-between items-center">
                   <h3 className="font-bold text-sm uppercase">Recent Activity</h3>
                   <div className="flex gap-2">
-                    <button className="p-1 hover:bg-white border border-transparent hover:border-[var(--ark-border)]">
+                    <button className="p-1 hover:bg-white border border-transparent hover:border-[var(--ark-border)]" aria-label="Search activity">
                       <Search className="h-4 w-4" />
                     </button>
-                    <button className="p-1 hover:bg-white border border-transparent hover:border-[var(--ark-border)]">
+                    <button className="p-1 hover:bg-white border border-transparent hover:border-[var(--ark-border)]" aria-label="Open settings">
                       <Settings className="h-4 w-4" />
                     </button>
                   </div>
@@ -395,7 +395,7 @@ export default function DashboardReworkPage() {
           background: var(--ark-panel);
           border: 1px solid var(--ark-border);
           position: relative;
-          transition: all 0.2s;
+          transition: color 0.2s, background-color 0.2s, border-color 0.2s, opacity 0.2s, transform 0.2s, box-shadow 0.2s;
         }
         
         .ark-card:hover {
@@ -410,7 +410,7 @@ export default function DashboardReworkPage() {
           gap: 12px;
           padding: 12px 16px;
           color: var(--ark-text-2);
-          transition: all 0.2s;
+          transition: color 0.2s, background-color 0.2s, border-color 0.2s, opacity 0.2s, transform 0.2s, box-shadow 0.2s;
           position: relative;
           border: 1px solid transparent;
         }

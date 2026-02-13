@@ -1,5 +1,6 @@
 'use client'
 
+import { usePathname } from 'next/navigation'
 import { useRoutePrefetch } from '@/hooks/use-route-prefetch'
 
 /**
@@ -8,6 +9,7 @@ import { useRoutePrefetch } from '@/hooks/use-route-prefetch'
  * This is an invisible component, only used to execute prefetch logic
  */
 export function RoutePrefetch() {
-  useRoutePrefetch()
+  const pathname = usePathname()
+  useRoutePrefetch(pathname)
   return null
 }

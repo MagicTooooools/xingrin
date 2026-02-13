@@ -31,7 +31,9 @@ export function SmartFilterInputField({
     <div className={cn("relative flex-1", className)}>
       <Input
         ref={inputRef}
-        type="text"
+        type="search"
+        name="smartQuery"
+        autoComplete="off"
         value={value}
         onChange={(event) => onChange(event.target.value)}
         onFocus={onFocus}

@@ -164,7 +164,7 @@ export function AgentCardCompact({
         : t("status.unknown")
 
   return (
-    <Card className="group flex flex-col rounded-lg border border-border bg-card text-card-foreground shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden gap-0 py-0">
+    <Card className="group flex flex-col rounded-lg border border-border bg-card text-card-foreground shadow-sm hover:shadow-md transition-[background-color,border-color,box-shadow,opacity] duration-200 overflow-hidden gap-0 py-0">
       <div className="flex items-center justify-between p-3 border-b border-border/50 bg-muted/20">
         <div className="min-w-0 flex flex-1 items-center gap-2.5">
           <StatusBadge status={agent.status} label={statusLabel} />
@@ -180,7 +180,12 @@ export function AgentCardCompact({
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-foreground shrink-0">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7 text-muted-foreground hover:text-foreground shrink-0"
+              aria-label={t("actions.title")}
+            >
               <IconDotsVertical className="w-4 h-4" />
             </Button>
           </DropdownMenuTrigger>

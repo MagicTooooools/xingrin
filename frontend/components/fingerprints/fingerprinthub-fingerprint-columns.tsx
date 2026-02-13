@@ -55,7 +55,7 @@ function TagListCell({ tags }: { tags: string }) {
         ))}
       </div>
       {hasMore && (
-        <button
+        <button type="button"
           onClick={() => setExpanded(!expanded)}
           className="text-xs text-primary hover:underline self-start flex items-center gap-1"
         >
@@ -105,7 +105,7 @@ function MetadataCell({ metadata }: { metadata?: FingerPrintHubMetadata | null }
         ))}
       </div>
       {hasMore && (
-        <button
+        <button type="button"
           onClick={() => setExpanded(!expanded)}
           className="text-xs text-primary hover:underline self-start inline-flex items-center gap-0.5"
         >
@@ -158,7 +158,7 @@ function HttpMatchersCell({ http }: { http?: FingerPrintHubHttpMatcher[] }) {
         ))}
       </div>
       {hasMore && (
-        <button
+        <button type="button"
           onClick={() => setExpanded(!expanded)}
           className="text-xs text-primary hover:underline self-start inline-flex items-center gap-0.5"
         >

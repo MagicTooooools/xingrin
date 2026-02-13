@@ -83,6 +83,8 @@ export function BulkAddUrlsInput({
           <Textarea
             ref={textareaRef}
             id="urls"
+            name="urls"
+            autoComplete="off"
             value={inputText}
             onChange={(event) => onInputChange(event.target.value)}
             onScroll={onScroll}

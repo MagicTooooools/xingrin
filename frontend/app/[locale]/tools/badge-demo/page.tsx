@@ -251,7 +251,7 @@ export default function BadgeDemoPage() {
               
               <div className="group flex items-center bg-secondary hover:bg-destructive/10 border border-border hover:border-destructive/30 rounded-full pl-3 pr-1 py-1 transition-colors duration-200 cursor-pointer">
                 <span className="text-xs font-medium text-foreground group-hover:text-destructive transition-colors mr-2">tag:vulnerability</span>
-                <div className="h-4 w-4 rounded-full bg-background flex items-center justify-center text-muted-foreground group-hover:bg-destructive group-hover:text-white transition-all">
+                <div className="h-4 w-4 rounded-full bg-background flex items-center justify-center text-muted-foreground group-hover:bg-destructive group-hover:text-white transition-[background-color,border-color,color,opacity,box-shadow,transform,width,height,top]">
                   <span className="text-[10px]">✕</span>
                 </div>
               </div>

@@ -73,7 +73,7 @@ export const ScanStatusBadge = ({
                              {Array.from({ length: segments }).map((_, i) => (
                                 <div 
                                     key={i}
-                                    className="flex-1 rounded-[1px] transition-all duration-300"
+                                    className="flex-1 rounded-[1px] transition-[background-color] duration-300"
                                     style={{ 
                                         backgroundColor: i < activeSegments ? color : `${color}20`, // Increased opacity for empty segments slightly for visibility on transparent bg
                                     }}
@@ -88,7 +88,7 @@ export const ScanStatusBadge = ({
 
     // --- Fallback / Previous Variant J (Compact Dual-Line) ---
     // Kept for backward compatibility if needed, though we primarily use F2 now
-    const baseClasses = "flex flex-col justify-center px-2 border-l-2 relative overflow-hidden transition-all hover:bg-muted/30"
+    const baseClasses = "flex flex-col justify-center px-2 border-l-2 relative overflow-hidden transition-colors hover:bg-muted/30"
     const sizeClasses = "h-9 w-32" 
     const borderStyle = { borderLeftColor: color }
     const roundedClass = variant === "sharp" ? "rounded-none" : "rounded-sm"
@@ -115,7 +115,7 @@ export const ScanStatusBadge = ({
             {status !== "completed" && status !== "pending" && status !== "cancelled" && (
                 <div className="h-1 w-full bg-foreground/5 mt-1.5 rounded-sm overflow-hidden relative z-10">
                      <div 
-                        className="h-full rounded-sm transition-all duration-500"
+                        className="h-full rounded-sm transition-[width] duration-500"
                         style={{ backgroundColor: color, width: `${displayProgress}%` }}
                     />
                 </div>
@@ -123,7 +123,7 @@ export const ScanStatusBadge = ({
              {variant === "sharp" && status === "running" && (
                  <div className="absolute bottom-0 left-0 h-[1px] w-full bg-foreground/10">
                     <div 
-                        className="h-full bg-current transition-all duration-500 animate-pulse"
+                        className="h-full bg-current transition-[width,background-color] duration-500 animate-pulse"
                          style={{ backgroundColor: color, width: `${displayProgress}%` }}
                     />
                  </div>

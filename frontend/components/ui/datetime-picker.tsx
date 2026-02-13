@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { useLocale } from "next-intl"
 import { ChevronDownIcon } from "@/components/icons"
 
 import { Button } from "@/components/ui/button"
@@ -28,11 +29,23 @@ export function DateTimePicker({
   placeholder = "Select date and time",
   minDate,
 }: DateTimePickerProps) {
+  const locale = useLocale()
   const [open, setOpen] = React.useState(false)
   const [date, setDate] = React.useState<Date | undefined>(value)
   const [time, setTime] = React.useState<string>(
     value ? `${String(value.getHours()).padStart(2, "0")}:${String(value.getMinutes()).padStart(2, "0")}` : "02:00"
   )
+
+  // Keep internal UI state in sync when parent-controlled value changes.
+  React.useEffect(() => {
+    if (!value) {
+      setDate(undefined)
+      return
+    }
+
+    setDate(value)
+    setTime(`${String(value.getHours()).padStart(2, "0")}:${String(value.getMinutes()).padStart(2, "0")}`)
+  }, [value])
 
   // Merge date and time
   const updateDateTime = React.useCallback((newDate: Date | undefined, newTime: string) => {
@@ -60,7 +73,7 @@ export function DateTimePicker({
 
   // Format display
   const displayDate = date
-    ? date.toLocaleDateString("zh-CN", {
+    ? date.toLocaleDateString(locale, {
         year: "numeric",
         month: "2-digit",
         day: "2-digit",
@@ -98,6 +111,8 @@ export function DateTimePicker({
         {/* Time selection */}
         <Input
           type="time"
+          name="executionTime"
+          autoComplete="off"
           value={time}
           onChange={handleTimeChange}
           className="w-28 bg-background appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"

@@ -229,7 +229,7 @@ const IconDemo = () => {
   return (
     <DemoShell title="Icon" description="Carbon 图标集合（支持搜索）">
       <div className="mb-4 max-w-md">
-        <Input placeholder="搜索图标..." value={query} onChange={(e) => setQuery(e.target.value)} />
+        <Input autoComplete="off" name="demoInput" placeholder="搜索图标…" value={query} onChange={(e) => setQuery(e.target.value)} />
       </div>
       <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         {items.map((name) => {
@@ -276,7 +276,7 @@ const InputDemo = () => (
   <DemoShell title="Input" description="基础输入">
     <div className="space-y-2 max-w-sm">
       <Label htmlFor="demo-input">资产名称</Label>
-      <Input id="demo-input" placeholder="example.com" />
+      <Input autoComplete="off" name="demoInput" id="demo-input" placeholder="example.com" />
     </div>
   </DemoShell>
 )
@@ -293,7 +293,7 @@ const LabelDemo = () => (
 const TextareaDemo = () => (
   <DemoShell title="Textarea" description="多行输入">
     <div className="max-w-md">
-      <Textarea placeholder="输入说明..." rows={5} />
+      <Textarea autoComplete="off" name="demoTextarea" placeholder="输入说明…" rows={5} />
     </div>
   </DemoShell>
 )
@@ -483,7 +483,7 @@ const DialogDemo = () => (
           <DialogTitle>新建目标</DialogTitle>
           <DialogDescription>快速添加一个新的资产目标。</DialogDescription>
         </DialogHeader>
-        <Input placeholder="example.com" />
+        <Input autoComplete="off" name="demoInput" placeholder="example.com" />
         <DialogFooter>
           <Button>保存</Button>
         </DialogFooter>
@@ -524,7 +524,7 @@ const SheetDemo = () => (
         </SheetHeader>
         <div className="mt-4 space-y-2">
           <Label>策略名称</Label>
-          <Input placeholder="Default" />
+          <Input autoComplete="off" name="demoInput" placeholder="Default" />
         </div>
       </SheetContent>
     </Sheet>
@@ -616,7 +616,7 @@ const CollapsibleDemo = () => (
 const CommandDemo = () => (
   <DemoShell title="Command" description="命令面板">
     <Command>
-      <CommandInput placeholder="搜索指令..." />
+      <CommandInput placeholder="搜索指令…" />
       <CommandList>
         <CommandEmpty>无结果</CommandEmpty>
         <CommandGroup heading="导航">
@@ -910,7 +910,7 @@ const FieldDemo = () => (
         <Field>
           <FieldLabel>目标域名</FieldLabel>
           <FieldContent>
-            <Input placeholder="example.com" />
+            <Input autoComplete="off" name="demoInput" placeholder="example.com" />
             <FieldDescription>支持多个域名</FieldDescription>
           </FieldContent>
         </Field>
@@ -932,7 +932,7 @@ const FormDemo = () => {
               <FormItem>
                 <FormLabel>名称</FormLabel>
                 <FormControl>
-                  <Input placeholder="输入名称" {...field} />
+                  <Input autoComplete="off" placeholder="输入名称" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -1226,7 +1226,7 @@ const SurfaceStyleLabDemo = () => (
               <DialogTitle>执行扫描</DialogTitle>
               <DialogDescription>选择扫描策略并确认。</DialogDescription>
             </DialogHeader>
-            <Input placeholder="example.com" />
+            <Input autoComplete="off" name="demoInput" placeholder="example.com" />
             <DialogFooter>
               <Button className="rounded-none">确认</Button>
             </DialogFooter>
@@ -1245,7 +1245,7 @@ const SurfaceStyleLabDemo = () => (
             </SheetHeader>
             <div className="mt-4 space-y-2">
               <Label>策略名称</Label>
-              <Input placeholder="Default" />
+              <Input autoComplete="off" name="demoInput" placeholder="Default" />
             </div>
           </SheetContent>
         </Sheet>
@@ -1375,7 +1375,7 @@ const InputStyleLabDemo = () => (
       <StyleCard title="Underline" description="工程表单风">
         <div className="space-y-2">
           <Label>目标域名</Label>
-          <Input
+          <Input autoComplete="off" name="demoInput"
             placeholder="example.com"
             className="rounded-none border-0 border-b border-border bg-transparent px-0 shadow-none focus-visible:border-foreground focus-visible:ring-0"
           />
@@ -1384,7 +1384,7 @@ const InputStyleLabDemo = () => (
       <StyleCard title="Panel" description="柔和面板">
         <div className="space-y-2">
           <Label>资产标签</Label>
-          <Input placeholder="production" className="bg-secondary/70 border-border/60 shadow-sm" />
+          <Input autoComplete="off" name="demoInput" placeholder="production" className="bg-secondary/70 border-border/60 shadow-sm" />
         </div>
       </StyleCard>
       <StyleCard title="Signal Edge" description="左侧强调条">
@@ -1392,14 +1392,14 @@ const InputStyleLabDemo = () => (
           <Label>扫描策略</Label>
           <div className="relative">
             <span className="pointer-events-none absolute inset-y-1 left-0 w-1 bg-[var(--highlight)]" />
-            <Input placeholder="Deep Scan" className="pl-4 border-border/70 bg-background" />
+            <Input autoComplete="off" name="demoInput" placeholder="Deep Scan" className="pl-4 border-border/70 bg-background" />
           </div>
         </div>
       </StyleCard>
       <StyleCard title="Terminal" description="等宽终端感">
         <div className="space-y-2">
           <Label>命令</Label>
-          <Input
+          <Input autoComplete="off" name="demoInput"
             placeholder="lunafox scan --deep"
             className="bg-foreground text-background placeholder:text-background/60 border-foreground/70 font-mono"
           />

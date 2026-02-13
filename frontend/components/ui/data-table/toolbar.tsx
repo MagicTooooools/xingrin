@@ -97,6 +97,9 @@ export function DataTableToolbar({
         ) : (
           <>
             <Input
+              type="search"
+              name="search"
+              autoComplete="off"
               placeholder={placeholder}
               value={localSearchValue}
               onChange={(e) => setLocalSearchValue(e.target.value)}

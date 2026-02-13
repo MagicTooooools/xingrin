@@ -4,8 +4,6 @@ import React from "react"
 import dynamic from "next/dynamic"
 import { usePathname } from "next/navigation"
 import { useLocale, useTranslations } from "next-intl"
-import { AppSidebar } from "@/components/app-sidebar"
-import { UnifiedHeader } from "@/components/unified-header"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import { LoadingState } from "@/components/loading-spinner"
 import { Suspense } from "react"
@@ -15,6 +13,16 @@ import { useRouter } from "next/navigation"
 const Toaster = dynamic(
   () => import("@/components/ui/sonner").then((mod) => mod.Toaster),
   { ssr: false }
+)
+
+const AppSidebar = dynamic(
+  () => import("@/components/app-sidebar").then((mod) => mod.AppSidebar),
+  { loading: () => null }
+)
+
+const UnifiedHeader = dynamic(
+  () => import("@/components/unified-header").then((mod) => mod.UnifiedHeader),
+  { loading: () => null }
 )
 
 // Public routes that don't require authentication (without locale prefix)
@@ -63,7 +71,7 @@ export function AuthLayout({ children }: AuthLayoutProps) {
     if (!isLoading && !auth?.authenticated && !isPublicRoute) {
       const normalized = "/login/"
       const loginPath = `/${locale}${normalized}`
-      router.push(loginPath)
+      router.replace(loginPath)
     }
   }, [auth, isLoading, isPublicRoute, router, locale])
 
@@ -77,8 +85,12 @@ export function AuthLayout({ children }: AuthLayoutProps) {
     )
   }
 
-  const showLoading = isLoading || !auth?.authenticated
-  const canRenderApp = !isLoading && !!auth?.authenticated
+  if (!isLoading && !auth?.authenticated) {
+    return <Toaster />
+  }
+
+  const showLoading = isLoading
+  const shouldRenderApp = isLoading || !!auth?.authenticated
 
   // Authenticated - show full layout with unified header
   // 布局结构：
@@ -90,8 +102,8 @@ export function AuthLayout({ children }: AuthLayoutProps) {
   // └──────────────────────┴──────────────────────────────────┘
   return (
     <>
-      <LoadingState active={showLoading} message="loading..." />
-      {canRenderApp ? (
+      <LoadingState active={showLoading} message="loading…" />
+      {shouldRenderApp ? (
         <SidebarProvider
           className="animate-app-fade-in !min-h-0 flex flex-col h-svh"
           style={

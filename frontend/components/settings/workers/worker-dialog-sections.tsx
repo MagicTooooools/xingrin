@@ -44,7 +44,7 @@ export function AgentConfigFormFields({ t, control }: AgentConfigFormFieldsProps
           <FormItem>
             <FormLabel>{t("config.maxTasks")}</FormLabel>
             <FormControl>
-              <Input type="number" min={1} max={20} {...field} />
+              <Input type="number" min={1} max={20} inputMode="numeric" autoComplete="off" step={1} {...field} />
             </FormControl>
             <FormDescription>{t("config.maxTasksDesc")}</FormDescription>
             <FormMessage />
@@ -59,7 +59,7 @@ export function AgentConfigFormFields({ t, control }: AgentConfigFormFieldsProps
             <FormItem>
               <FormLabel>{t("config.cpuThreshold")}</FormLabel>
               <FormControl>
-                <Input type="number" min={1} max={100} {...field} />
+                <Input type="number" min={1} max={100} inputMode="numeric" autoComplete="off" step={1} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -72,7 +72,7 @@ export function AgentConfigFormFields({ t, control }: AgentConfigFormFieldsProps
             <FormItem>
               <FormLabel>{t("config.memThreshold")}</FormLabel>
               <FormControl>
-                <Input type="number" min={1} max={100} {...field} />
+                <Input type="number" min={1} max={100} inputMode="numeric" autoComplete="off" step={1} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -85,7 +85,7 @@ export function AgentConfigFormFields({ t, control }: AgentConfigFormFieldsProps
             <FormItem>
               <FormLabel>{t("config.diskThreshold")}</FormLabel>
               <FormControl>
-                <Input type="number" min={1} max={100} {...field} />
+                <Input type="number" min={1} max={100} inputMode="numeric" autoComplete="off" step={1} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

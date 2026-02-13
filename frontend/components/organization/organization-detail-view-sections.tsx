@@ -44,7 +44,7 @@ export function OrganizationDetailViewErrorState({
       </div>
       <h3 className="text-lg font-semibold mb-2">{tCommon("status.loadFailed")}</h3>
       <p className="text-muted-foreground text-center mb-4">{error.message}</p>
-      <button
+      <button type="button"
         onClick={onRetry}
         className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
       >

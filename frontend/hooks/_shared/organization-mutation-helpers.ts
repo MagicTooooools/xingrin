@@ -47,6 +47,8 @@ export const rollbackOrganizationQueries = (
 export const invalidateOrganizationTargets = async (
   queryClient: QueryClient
 ): Promise<void> => {
-  await queryClient.invalidateQueries({ queryKey: ORGANIZATION_QUERY_KEY })
-  await queryClient.invalidateQueries({ queryKey: TARGET_QUERY_KEY })
+  await Promise.all([
+    queryClient.invalidateQueries({ queryKey: ORGANIZATION_QUERY_KEY }),
+    queryClient.invalidateQueries({ queryKey: TARGET_QUERY_KEY }),
+  ])
 }

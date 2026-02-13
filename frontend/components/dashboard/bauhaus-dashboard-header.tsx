@@ -1,19 +1,22 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { useLocale, useTranslations } from "next-intl"
 
 /**
  * Bauhaus 风格的 Dashboard Header
  * 仅在 Bauhaus 主题下显示，模仿 dashboard-demo 原型的视觉效果
  */
 export function BauhausDashboardHeader() {
+  const locale = useLocale()
+  const t = useTranslations("dashboard.bauhausHeader")
   const [currentTime, setCurrentTime] = useState<string>("")
 
   useEffect(() => {
     const updateTime = () => {
       const now = new Date()
       setCurrentTime(
-        now.toLocaleTimeString("en-US", {
+        now.toLocaleTimeString(locale, {
           hour12: false,
           hour: "2-digit",
           minute: "2-digit",
@@ -58,7 +61,7 @@ export function BauhausDashboardHeader() {
       observer.disconnect()
       stop()
     }
-  }, [])
+  }, [locale])
 
   return (
     <div className="hidden [[data-theme=bauhaus]_&]:block px-4 lg:px-6">
@@ -71,11 +74,11 @@ export function BauhausDashboardHeader() {
                 DASH-01
               </span>
               <p className="text-xs tracking-[0.2em] text-muted-foreground uppercase">
-                Operations Command
+                {t("operationsCommand")}
               </p>
             </div>
             <h1 className="text-2xl font-bold tracking-tight uppercase">
-              System Overview
+              {t("systemOverview")}
             </h1>
           </div>
 
@@ -83,10 +86,10 @@ export function BauhausDashboardHeader() {
           <div className="flex gap-2">
             <div className="px-3 py-1.5 flex items-center gap-2 text-xs font-mono bg-secondary border border-border">
               <span className="w-1.5 h-1.5 bg-[var(--success)] rounded-sm" />
-              NETWORK: ONLINE
+              {t("networkOnline")}
             </div>
             <div className="px-3 py-1.5 flex items-center gap-2 text-xs font-mono bg-secondary border border-border">
-              <span className="text-muted-foreground">CYCLE:</span>
+              <span className="text-muted-foreground">{t("cycleLabel")}</span>
               {currentTime}
             </div>
           </div>

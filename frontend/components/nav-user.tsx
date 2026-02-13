@@ -129,7 +129,7 @@ export function NavUser({
               disabled={isLoggingOut}
             >
               <IconLogout />
-              {isLoggingOut ? 'Logging out...' : 'Logout'}
+              {isLoggingOut ? 'Logging out…' : 'Logout'}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

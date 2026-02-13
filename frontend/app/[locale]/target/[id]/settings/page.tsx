@@ -1,7 +1,11 @@
 "use client"
 
+import { lazyPage } from "@/components/common/lazy-page"
 import { useParams } from "next/navigation"
-import { TargetSettings } from "@/components/target/target-settings"
+
+const TargetSettings = lazyPage(
+  () => import("@/components/target/target-settings").then((m) => ({ default: m.TargetSettings }))
+)
 
 /**
  * Target settings page

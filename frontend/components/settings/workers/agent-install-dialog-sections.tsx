@@ -68,7 +68,7 @@ export function AgentInstallTokenCard({
   onGenerate,
 }: AgentInstallTokenCardProps) {
   return (
-    <div className={cn("rounded-lg border p-3 transition-all", isTokenValid ? "bg-background" : "bg-muted/20")}>
+    <div className={cn("rounded-lg border p-3 transition-[background-color,border-color]", isTokenValid ? "bg-background" : "bg-muted/20")}>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-col gap-1.5">
           <div className="flex items-center gap-2 text-xs">
@@ -173,6 +173,10 @@ export function AgentInstallConfigPanel({
                 <span className="text-muted-foreground">{t("install.serverUrl")}</span>
               </div>
               <Input
+                type="url"
+                name="serverUrl"
+                autoComplete="url"
+                inputMode="url"
                 value={registerUrlInput}
                 onChange={(event) => {
                   setRegisterUrlInput(event.target.value)

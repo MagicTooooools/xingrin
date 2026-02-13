@@ -104,8 +104,8 @@ export function TargetOverviewContent({
             shrink-0 self-end
           "
         >
-          <span className="absolute inset-y-0 left-0 w-[2px] bg-destructive transition-all duration-300 group-hover:w-full opacity-10" />
-          <span className="absolute bottom-0 right-0 h-[2px] w-0 bg-destructive transition-all duration-300 group-hover:w-full" />
+          <span className="absolute inset-y-0 left-0 w-[2px] bg-destructive transition-[width,opacity] duration-300 group-hover:w-full opacity-10" />
+          <span className="absolute bottom-0 right-0 h-[2px] w-0 bg-destructive transition-[width] duration-300 group-hover:w-full" />
           <span className="relative z-10 flex items-center gap-2">
             <Loader2 className="h-4 w-4 animate-spin hidden group-hover:block" />
             <span className="group-hover:hidden">{state.t("initiateScan")}</span>
@@ -122,7 +122,7 @@ export function TargetOverviewContent({
             return (
               <Link key={card.title} href={card.href} className="block">
                 <div
-                  className="group relative p-4 hover:bg-accent/5 transition-all duration-300 cursor-pointer"
+                  className="group relative p-4 hover:bg-accent/5 transition-[background-color,border-color,box-shadow] duration-300 cursor-pointer"
                   style={{ background: "var(--card)" }}
                 >
                   <div className="absolute inset-0 border border-border/40 group-hover:border-primary/30 transition-colors" />

@@ -80,7 +80,7 @@ const CircularProgressVariant = ({ status, progress }: { status: ScanStatus, pro
             strokeDasharray={circumference}
             strokeDashoffset={offset}
             strokeLinecap="round"
-            className="transition-all duration-500"
+            className="transition-[color,background-color,border-color,opacity,transform,box-shadow] duration-500"
           />
         </svg>
         {/* Center Icon */}
@@ -114,7 +114,7 @@ const CompactPillVariant = ({ status, progress }: { status: ScanStatus, progress
     >
       {/* Background Fill */}
       <div 
-        className="absolute inset-0 opacity-20 transition-all duration-500"
+        className="absolute inset-0 opacity-20 transition-[color,background-color,border-color,opacity,transform,box-shadow] duration-500"
         style={{ 
           backgroundColor: color,
           width: `${status === "completed" ? 100 : progress}%` 
@@ -165,7 +165,7 @@ const SplitBadgeVariant = ({ status, progress }: { status: ScanStatus, progress:
             </div>
             {status === "running" && (
                 <div className="h-0.5 w-full bg-muted/50 rounded-full overflow-hidden">
-                    <div className="h-full bg-current transition-all duration-500" style={{ width: `${progress}%`, color }} />
+                    <div className="h-full bg-current transition-[color,background-color,border-color,opacity,transform,box-shadow] duration-500" style={{ width: `${progress}%`, color }} />
                 </div>
             )}
         </div>
@@ -190,7 +190,7 @@ const MinimalistVariant = ({ status, progress }: { status: ScanStatus, progress:
             </div>
             <div className="h-1 w-full bg-muted rounded-full overflow-hidden">
                  <div 
-                    className="h-full rounded-full transition-all duration-500"
+                    className="h-full rounded-full transition-[color,background-color,border-color,opacity,transform,box-shadow] duration-500"
                     style={{ backgroundColor: color, width: `${displayProgress}%` }}
                  />
             </div>
@@ -207,7 +207,7 @@ const IntegratedBlockVariant = ({ status, progress }: { status: ScanStatus, prog
         <div className="relative w-full h-10 rounded-md overflow-hidden group border border-transparent hover:border-border/50 transition-colors">
             {/* Background Progress Bar */}
              <div 
-                className="absolute inset-0 opacity-10 transition-all duration-500"
+                className="absolute inset-0 opacity-10 transition-[color,background-color,border-color,opacity,transform,box-shadow] duration-500"
                 style={{ 
                   backgroundColor: color,
                   width: `${status === "completed" ? 100 : progress}%` 
@@ -258,7 +258,7 @@ const SegmentedBarVariant = ({
                     {Array.from({ length: segments }).map((_, i) => (
                         <div 
                             key={i}
-                            className="flex-1 rounded-[1px] transition-all duration-300"
+                            className="flex-1 rounded-[1px] transition-[color,background-color,border-color,opacity,transform,box-shadow] duration-300"
                             style={{ 
                                 backgroundColor: i < activeSegments ? color : "transparent",
                                 opacity: i < activeSegments ? 1 : 0.15,
@@ -286,7 +286,7 @@ const SegmentedBarVariant = ({
                          {Array.from({ length: segments }).map((_, i) => (
                             <div 
                                 key={i}
-                                className="flex-1 rounded-[1px] transition-all duration-300"
+                                className="flex-1 rounded-[1px] transition-[color,background-color,border-color,opacity,transform,box-shadow] duration-300"
                                 style={{ 
                                     backgroundColor: i < activeSegments ? color : `${color}15`, // dim background for empty
                                 }}
@@ -319,7 +319,7 @@ const SegmentedBarVariant = ({
                          return (
                             <div 
                                 key={i}
-                                className="w-1 h-1 rounded-[1px] transition-all duration-300"
+                                className="w-1 h-1 rounded-[1px] transition-[color,background-color,border-color,opacity,transform,box-shadow] duration-300"
                                 style={{ 
                                     backgroundColor: i < activeDots ? color : `${color}20`,
                                 }}
@@ -351,7 +351,7 @@ const SegmentedBarVariant = ({
                         ))}
                      </div>
                      {/* The Progress Fill */}
-                     <div className="absolute bottom-0 left-0 h-1 bg-current z-10 transition-all duration-500 opacity-80" 
+                     <div className="absolute bottom-0 left-0 h-1 bg-current z-10 transition-[color,background-color,border-color,opacity,transform,box-shadow] duration-500 opacity-80" 
                           style={{ width: `${displayProgress}%`, color }} 
                      />
                      {/* Bottom Border */}
@@ -376,7 +376,7 @@ const BorderProgressVariant = ({ status, progress }: { status: ScanStatus, progr
             style={{ borderColor: `${color}40` }}
         >
             <div 
-                className="absolute bottom-0 left-0 h-[2px] transition-all duration-500"
+                className="absolute bottom-0 left-0 h-[2px] transition-[color,background-color,border-color,opacity,transform,box-shadow] duration-500"
                 style={{ backgroundColor: color, width: `${displayProgress}%` }}
             />
             
@@ -444,7 +444,7 @@ const NeonGlowVariant = ({ status, progress }: { status: ScanStatus, progress: n
             
             <div className="h-1.5 w-full bg-black/20 rounded-full overflow-hidden border border-white/5">
                 <div 
-                    className="h-full rounded-full transition-all duration-500 relative"
+                    className="h-full rounded-full transition-[color,background-color,border-color,opacity,transform,box-shadow] duration-500 relative"
                     style={{ 
                         backgroundColor: color, 
                         width: `${displayProgress}%`,
@@ -465,7 +465,7 @@ const CompactDualLineVariant = ({ status, progress, variant = "default" }: { sta
     const Icon = getStatusIcon(status)
     
     // Base styles
-    const baseClasses = "flex flex-col justify-center px-2 border-l-2 relative overflow-hidden transition-all hover:bg-muted/30"
+    const baseClasses = "flex flex-col justify-center px-2 border-l-2 relative overflow-hidden transition-[color,background-color,border-color,opacity,transform,box-shadow] hover:bg-muted/30"
     const sizeClasses = "h-9 w-32" // Slightly larger for better readability
     
     // Variant specifics
@@ -494,7 +494,7 @@ const CompactDualLineVariant = ({ status, progress, variant = "default" }: { sta
             {status !== "completed" && status !== "pending" && status !== "cancelled" && (
                 <div className="h-1 w-full bg-foreground/5 mt-1.5 rounded-sm overflow-hidden relative z-10">
                      <div 
-                        className="h-full rounded-sm transition-all duration-500"
+                        className="h-full rounded-sm transition-[color,background-color,border-color,opacity,transform,box-shadow] duration-500"
                         style={{ backgroundColor: color, width: `${displayProgress}%` }}
                     />
                 </div>
@@ -504,7 +504,7 @@ const CompactDualLineVariant = ({ status, progress, variant = "default" }: { sta
              {variant === "sharp" && status === "running" && (
                  <div className="absolute bottom-0 left-0 h-[1px] w-full bg-foreground/10">
                     <div 
-                        className="h-full bg-current transition-all duration-500 animate-pulse"
+                        className="h-full bg-current transition-[color,background-color,border-color,opacity,transform,box-shadow] duration-500 animate-pulse"
                          style={{ backgroundColor: color, width: `${displayProgress}%` }}
                     />
                  </div>

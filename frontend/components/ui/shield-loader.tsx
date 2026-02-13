@@ -37,6 +37,8 @@ function ShieldLoader({ size = "md", className }: ShieldLoaderProps) {
         src="/images/icon-256.png"
         alt=""
         aria-hidden="true"
+        width={256}
+        height={256}
       />
     </div>
   )

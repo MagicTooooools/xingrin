@@ -244,11 +244,11 @@ export function AssetTrendChart() {
              const isActive = activeTab === key
              
              return (
-                <button
+                <button type="button"
                    key={key}
                    onClick={() => setActiveTab(key)}
                    className={cn(
-                      "flex-1 pt-0.5 pb-1 px-2 flex flex-col items-center justify-end gap-0.5 transition-all relative group hover:bg-muted/50 h-10",
+                      "flex-1 pt-0.5 pb-1 px-2 flex flex-col items-center justify-end gap-0.5 transition-colors relative group hover:bg-muted/50 h-10",
                       isActive ? "bg-muted/30" : "bg-card"
                    )}
                 >

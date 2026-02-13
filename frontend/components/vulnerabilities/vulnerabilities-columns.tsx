@@ -104,21 +104,44 @@ export function createVulnerabilityColumns({
         const isPending = !isReviewed
 
         return (
-          <Badge
-            variant="outline"
-            className={`transition-all gap-1.5 ${onToggleReview ? "cursor-pointer hover:ring-2 hover:ring-offset-1" : "cursor-default"} ${isPending
-              ? "bg-blue-500/10 text-blue-600 border-blue-500/30 hover:ring-blue-500/30 dark:text-blue-400 dark:border-blue-400/30"
-              : "bg-muted/50 text-muted-foreground border-muted-foreground/20 hover:ring-muted-foreground/30"
-            }`}
-            onClick={() => onToggleReview?.(row.original)}
-          >
-            {isPending ? (
-              <Circle className="h-3 w-3" />
-            ) : (
-              <CheckCircle2 className="h-3 w-3" />
-            )}
-            {isPending ? t.tooltips.pending : t.tooltips.reviewed}
-          </Badge>
+          onToggleReview ? (
+            <Badge
+              asChild
+              variant="outline"
+              className={`transition-[background-color,border-color,color,box-shadow] gap-1.5 cursor-pointer hover:ring-2 hover:ring-offset-1 ${isPending
+                ? "bg-blue-500/10 text-blue-600 border-blue-500/30 hover:ring-blue-500/30 dark:text-blue-400 dark:border-blue-400/30"
+                : "bg-muted/50 text-muted-foreground border-muted-foreground/20 hover:ring-muted-foreground/30"
+              }`}
+            >
+              <button
+                type="button"
+                onClick={() => onToggleReview(row.original)}
+                aria-label={isPending ? t.tooltips.pending : t.tooltips.reviewed}
+              >
+                {isPending ? (
+                  <Circle className="h-3 w-3" />
+                ) : (
+                  <CheckCircle2 className="h-3 w-3" />
+                )}
+                {isPending ? t.tooltips.pending : t.tooltips.reviewed}
+              </button>
+            </Badge>
+          ) : (
+            <Badge
+              variant="outline"
+              className={`transition-[background-color,border-color,color,box-shadow] gap-1.5 cursor-default ${isPending
+                ? "bg-blue-500/10 text-blue-600 border-blue-500/30 dark:text-blue-400 dark:border-blue-400/30"
+                : "bg-muted/50 text-muted-foreground border-muted-foreground/20"
+              }`}
+            >
+              {isPending ? (
+                <Circle className="h-3 w-3" />
+              ) : (
+                <CheckCircle2 className="h-3 w-3" />
+              )}
+              {isPending ? t.tooltips.pending : t.tooltips.reviewed}
+            </Badge>
+          )
         )
       },
       enableSorting: false,
@@ -178,12 +201,14 @@ export function createVulnerabilityColumns({
         return (
           <Tooltip>
             <TooltipTrigger asChild>
-              <span 
-                className="font-medium cursor-pointer hover:text-primary hover:underline underline-offset-2 transition-colors"
+              <button
+                type="button"
+                className="font-medium text-left hover:text-primary hover:underline underline-offset-2 transition-colors"
                 onClick={() => handleViewDetail(vulnerability)}
+                aria-label={t.tooltips.vulnDetails}
               >
                 {vulnType}
-              </span>
+              </button>
             </TooltipTrigger>
             <TooltipContent>{t.tooltips.vulnDetails}</TooltipContent>
           </Tooltip>

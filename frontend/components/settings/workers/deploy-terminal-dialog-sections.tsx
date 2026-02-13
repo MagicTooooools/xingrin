@@ -35,7 +35,9 @@ export function DeployTerminalHeader({
       <div className="flex items-center gap-3">
         <div className="flex items-center gap-1.5">
           <button
+            type="button"
             onClick={onClose}
+            aria-label={tCommon("close")}
             className="w-3 h-3 rounded-full bg-[#ff5f56] hover:bg-[#ff5f56]/80 transition-colors"
             title={tCommon("close")}
           />
@@ -92,6 +94,7 @@ export function DeployTerminalActions({
       <div className="flex items-center gap-2">
         {!isConnected && (
           <button
+            type="button"
             onClick={onReconnect}
             className="inline-flex items-center px-3 py-1.5 text-sm rounded-md bg-[#32344a] text-[#a9b1d6] hover:bg-[#414868] transition-colors"
           >
@@ -103,6 +106,7 @@ export function DeployTerminalActions({
           <>
             {currentStatus === "pending" && (
               <button
+                type="button"
                 onClick={onDeploy}
                 className="inline-flex items-center px-3 py-1.5 text-sm rounded-md bg-[#7aa2f7] text-[#1a1b26] hover:bg-[#7aa2f7]/80 transition-colors"
               >
@@ -113,6 +117,7 @@ export function DeployTerminalActions({
 
             {currentStatus === "deploying" && (
               <button
+                type="button"
                 onClick={onAttach}
                 className="inline-flex items-center px-3 py-1.5 text-sm rounded-md bg-[#7aa2f7] text-[#1a1b26] hover:bg-[#7aa2f7]/80 transition-colors"
               >
@@ -123,6 +128,7 @@ export function DeployTerminalActions({
 
             {currentStatus === "updating" && (
               <button
+                type="button"
                 onClick={onAttach}
                 className="inline-flex items-center px-3 py-1.5 text-sm rounded-md bg-[#e0af68] text-[#1a1b26] hover:bg-[#e0af68]/80 transition-colors"
               >
@@ -133,6 +139,7 @@ export function DeployTerminalActions({
 
             {currentStatus === "outdated" && (
               <button
+                type="button"
                 onClick={onDeploy}
                 className="inline-flex items-center px-3 py-1.5 text-sm rounded-md bg-[#f7768e] text-[#1a1b26] hover:bg-[#f7768e]/80 transition-colors"
               >
@@ -144,6 +151,7 @@ export function DeployTerminalActions({
             {(currentStatus === "online" || currentStatus === "offline") && (
               <>
                 <button
+                  type="button"
                   onClick={onDeploy}
                   className="inline-flex items-center px-3 py-1.5 text-sm rounded-md bg-[#32344a] text-[#a9b1d6] hover:bg-[#414868] transition-colors"
                 >
@@ -151,6 +159,7 @@ export function DeployTerminalActions({
                   {tTerminal("redeploy")}
                 </button>
                 <button
+                  type="button"
                   onClick={onUninstall}
                   className="inline-flex items-center px-3 py-1.5 text-sm rounded-md bg-[#32344a] text-[#f7768e] hover:bg-[#414868] transition-colors"
                 >

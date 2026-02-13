@@ -1,7 +1,11 @@
 "use client"
 
+import { lazyPage } from "@/components/common/lazy-page"
 import { useParams } from "next/navigation"
-import { DirectoriesView } from "@/components/directories/directories-view"
+
+const DirectoriesView = lazyPage(
+  () => import("@/components/directories/directories-view").then((m) => ({ default: m.DirectoriesView }))
+)
 
 export default function TargetDirectoriesPage() {
   const { id } = useParams<{ id: string }>()

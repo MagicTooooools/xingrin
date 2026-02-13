@@ -15,31 +15,70 @@ const severityMap: Record<BackendNotificationLevel, NotificationSeverity> = {
   low: 'low',
 }
 
+interface NotificationTimeLabels {
+  justNow: string
+  minutesAgo: (count: number) => string
+  hoursAgo: (count: number) => string
+}
+
+export interface NotificationTransformOptions {
+  locale?: string
+  timeLabels?: NotificationTimeLabels
+}
+
+const isZhLocale = (locale?: string) => locale?.toLowerCase().startsWith('zh') ?? false
+
+const getFallbackTimeLabels = (locale?: string): NotificationTimeLabels => {
+  if (isZhLocale(locale)) {
+    return {
+      justNow: '刚刚',
+      minutesAgo: (count) => `${count} 分钟前`,
+      hoursAgo: (count) => `${count} 小时前`,
+    }
+  }
+  return {
+    justNow: 'Just now',
+    minutesAgo: (count) => `${count} minutes ago`,
+    hoursAgo: (count) => `${count} hours ago`,
+  }
+}
+
+const scanPattern = /(扫描|任务|\bscan\b|\btask\b)/i
+const vulnerabilityPattern = /(漏洞|\bvulnerability\b|\bcve(?:-\d{4}-\d+)?\b)/i
+const assetPattern = /(资产|\basset\b|\bsubdomain\b|\bdomain\b|\bip(?:\s+address)?\b|\bendpoint\b|\bwebsite\b)/i
+
 const inferNotificationType = (message: string, category?: string) => {
   // 优先使用后端返回的 category
   if (category === 'scan' || category === 'vulnerability' || category === 'asset' || category === 'system') {
     return category
   }
+
+  const normalizedMessage = message ?? ''
+
   // 后备：通过消息内容推断
-  if (message?.includes('扫描') || message?.includes('任务')) {
+  if (scanPattern.test(normalizedMessage)) {
     return 'scan' as const
   }
-  if (message?.includes('漏洞')) {
+  if (vulnerabilityPattern.test(normalizedMessage)) {
     return 'vulnerability' as const
+  }
+  if (assetPattern.test(normalizedMessage)) {
+    return 'asset' as const
   }
   return 'system' as const
 }
 
-const formatTimeAgo = (date: Date): string => {
+const formatTimeAgo = (date: Date, options?: NotificationTransformOptions): string => {
   const now = new Date()
-  const diffMs = now.getTime() - date.getTime()
+  const diffMs = Math.max(0, now.getTime() - date.getTime())
   const diffMins = Math.floor(diffMs / (1000 * 60))
   const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
+  const labels = options?.timeLabels ?? getFallbackTimeLabels(options?.locale)
 
-  if (diffMins < 1) return '刚刚'
-  if (diffMins < 60) return `${diffMins} 分钟前`
-  if (diffHours < 24) return `${diffHours} 小时前`
-  return date.toLocaleDateString()
+  if (diffMins < 1) return labels.justNow
+  if (diffMins < 60) return labels.minutesAgo(diffMins)
+  if (diffHours < 24) return labels.hoursAgo(diffHours)
+  return date.toLocaleDateString(options?.locale)
 }
 
 const isBackendNotification = (value: unknown): value is BackendNotification => {
@@ -48,7 +87,10 @@ const isBackendNotification = (value: unknown): value is BackendNotification => 
   return typeof record.id === 'number' && typeof record.title === 'string' && typeof record.message === 'string'
 }
 
-export const transformBackendNotification = (backendNotification: BackendNotification): Notification => {
+export const transformBackendNotification = (
+  backendNotification: BackendNotification,
+  options?: NotificationTransformOptions
+): Notification => {
   const createdAtRaw = backendNotification.createdAt ?? backendNotification.created_at
   const createdDate = createdAtRaw ? new Date(createdAtRaw) : new Date()
   const isRead = backendNotification.isRead ?? backendNotification.is_read
@@ -57,7 +99,7 @@ export const transformBackendNotification = (backendNotification: BackendNotific
     type: inferNotificationType(backendNotification.message, backendNotification.category),
     title: backendNotification.title,
     description: backendNotification.message,
-    time: formatTimeAgo(createdDate),
+    time: formatTimeAgo(createdDate, options),
     unread: isRead === true ? false : true,
     severity: severityMap[backendNotification.level] ?? undefined,
     createdAt: createdDate.toISOString(),
@@ -65,7 +107,7 @@ export const transformBackendNotification = (backendNotification: BackendNotific
   return notification
 }
 
-export function useNotificationSSE() {
+export function useNotificationSSE(transformOptions?: NotificationTransformOptions) {
   const [isConnected, setIsConnected] = useState(false)
   const [notifications, setNotifications] = useState<Notification[]>([])
   const wsRef = useRef<WebSocket | null>(null)
@@ -73,10 +115,34 @@ export function useNotificationSSE() {
   const reconnectTimerRef = useRef<NodeJS.Timeout | null>(null)
   const heartbeatTimerRef = useRef<NodeJS.Timeout | null>(null)
   const isConnectingRef = useRef(false)
+  const transformOptionsRef = useRef(transformOptions)
   const reconnectAttempts = useRef(0)
   const maxReconnectAttempts = 10
   const baseReconnectDelay = 1000 // 1秒
   const toastMessages = useToastMessages()
+
+  useEffect(() => {
+    transformOptionsRef.current = transformOptions
+  }, [transformOptions])
+
+  useEffect(() => {
+    setNotifications((prev) => {
+      let hasChanged = false
+      const updated = prev.map((notification) => {
+        if (!notification.createdAt) return notification
+        const createdDate = new Date(notification.createdAt)
+        if (Number.isNaN(createdDate.getTime())) return notification
+        const formattedTime = formatTimeAgo(createdDate, transformOptions)
+        if (formattedTime === notification.time) return notification
+        hasChanged = true
+        return {
+          ...notification,
+          time: formattedTime,
+        }
+      })
+      return hasChanged ? updated : prev
+    })
+  }, [transformOptions])
 
   const markNotificationsAsRead = useCallback((ids?: number[]) => {
     setNotifications(prev => prev.map(notification => {
@@ -184,7 +250,7 @@ export function useNotificationSSE() {
           // 处理通知消息
           if (messageType === 'notification') {
             if (isBackendNotification(data)) {
-              const notification = transformBackendNotification(data)
+              const notification = transformBackendNotification(data, transformOptionsRef.current)
               setNotifications(prev => {
                 const updated = [notification, ...prev.slice(0, 49)]
                 return updated
@@ -197,7 +263,7 @@ export function useNotificationSSE() {
 
           // 备用处理：直接检查通知字段
           if (isBackendNotification(data)) {
-            const notification = transformBackendNotification(data)
+            const notification = transformBackendNotification(data, transformOptionsRef.current)
 
             // 添加到通知列表
             setNotifications(prev => {

@@ -36,7 +36,7 @@ function KeywordListCell({ keywords }: { keywords: string[] }) {
         ))}
       </div>
       {hasMore && (
-        <button
+        <button type="button"
           onClick={() => setExpanded(!expanded)}
           className="text-xs text-primary hover:underline self-start flex items-center gap-1"
         >

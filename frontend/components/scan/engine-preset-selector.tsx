@@ -218,7 +218,7 @@ export function EnginePresetSelector({
                 disabled={disabled}
                 aria-pressed={isActive}
                 className={cn(
-                  "relative flex flex-col items-center p-3 rounded-lg border-2 text-center transition-all",
+                  "relative flex flex-col items-center p-3 rounded-lg border-2 text-center transition-[background-color,border-color,color,box-shadow]",
                   isActive
                     ? "border-primary bg-primary/5 shadow-sm"
                     : "border-border hover:border-primary/50 hover:bg-muted/30",
@@ -331,7 +331,7 @@ export function EnginePresetSelector({
                       key={engine.id}
                       htmlFor={`preset-engine-${engine.id}`}
                       className={cn(
-                        "flex items-center gap-2 px-3 py-1.5 rounded-md cursor-pointer transition-all border",
+                        "flex items-center gap-2 px-3 py-1.5 rounded-md cursor-pointer transition-[background-color,border-color,color,box-shadow] border",
                         isSelected
                           ? "bg-primary/10 border-primary/30"
                           : "hover:bg-muted/50 border-border",

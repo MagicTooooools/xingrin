@@ -95,6 +95,7 @@ export function LinkTargetInputSection<TFieldValues extends FieldValues>({
                   onScroll={onScroll}
                   placeholder={t("placeholder")}
                   disabled={isPending}
+                  autoComplete="off"
                   className="font-mono h-full overflow-y-auto resize-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0 leading-[1.4] text-sm py-3"
                   style={{ lineHeight: "20px" }}
                 />

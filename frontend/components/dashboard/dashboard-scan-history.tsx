@@ -1,7 +1,6 @@
 "use client"
 
 import * as React from "react"
-import { useRouter } from "next/navigation"
 import { useTranslations, useLocale } from "next-intl"
 import { ScanHistoryDataTable } from "@/components/scan/history/scan-history-data-table"
 import { createScanHistoryColumns } from "@/components/scan/history/scan-history-columns"
@@ -14,7 +13,6 @@ import type { ColumnDef } from "@tanstack/react-table"
 
 export function DashboardScanHistory() {
   const [pagination, setPagination] = React.useState({ pageIndex: 0, pageSize: 5 })
-  const router = useRouter()
   const locale = useLocale()
 
   // 国际化
@@ -69,15 +67,14 @@ export function DashboardScanHistory() {
   })
 
   const formatDate = React.useCallback((dateString: string) => new Date(dateString).toLocaleString(getDateLocale(locale), { hour12: false }), [locale])
-  const navigate = React.useCallback((path: string) => router.push(path), [router])
   const handleDelete = React.useCallback(() => {}, [])
   const handleStop = React.useCallback(() => {
     // 仪表盘列表暂时不提供停止逻辑，实现时可在此调用对应的停止扫描接口
   }, [])
 
   const columns = React.useMemo(
-    () => createScanHistoryColumns({ formatDate, navigate, handleDelete, handleStop, t: translations }) as ColumnDef<ScanRecord>[],
-    [formatDate, navigate, handleDelete, handleStop, translations]
+    () => createScanHistoryColumns({ formatDate, handleDelete, handleStop, t: translations }) as ColumnDef<ScanRecord>[],
+    [formatDate, handleDelete, handleStop, translations]
   )
 
   if (isLoading && !data) {

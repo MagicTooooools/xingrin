@@ -119,7 +119,9 @@ export function LogToolbar({
       <div className="relative flex-1 min-w-[280px] max-w-[500px]">
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
-          type="text"
+          type="search"
+          name="logsSearch"
+          autoComplete="off"
           placeholder={t("toolbar.searchPlaceholder")}
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}

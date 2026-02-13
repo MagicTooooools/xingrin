@@ -155,7 +155,7 @@ export function SearchResultCard({ result, onViewVulnerability }: SearchResultCa
               <div className="mt-3 flex flex-col gap-1">
                 <div
                   ref={containerRef}
-                  className="flex flex-wrap items-start gap-1 overflow-hidden transition-all duration-200"
+                  className="flex flex-wrap items-start gap-1 overflow-hidden transition-[max-height] duration-200"
                   style={{ maxHeight: techExpanded ? "none" : `${maxHeight}px` }}
                 >
                   {result.technologies.map((tech, index) => (
@@ -169,7 +169,7 @@ export function SearchResultCard({ result, onViewVulnerability }: SearchResultCa
                   ))}
                 </div>
                 {(isOverflowing || techExpanded) && (
-                  <button
+                  <button type="button"
                     onClick={() => setTechExpanded(!techExpanded)}
                     className="inline-flex items-center gap-0.5 text-xs text-muted-foreground hover:text-foreground transition-colors self-start"
                   >
@@ -196,20 +196,20 @@ export function SearchResultCard({ result, onViewVulnerability }: SearchResultCa
               <TabsList className="h-[28px] gap-4 rounded-none border-b bg-transparent px-4 pt-1">
                 <TabsTrigger 
                   value="header" 
-                  className="h-full rounded-none border-b-2 border-transparent border-x-0 border-t-0 bg-transparent px-1 text-sm shadow-none focus-visible:ring-0 focus-visible:outline-none data-[state=active]:border-b-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+                  className="h-full rounded-none border-b-2 border-transparent border-x-0 border-t-0 bg-transparent px-1 text-sm shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 data-[state=active]:border-b-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
                 >
                   Header
                 </TabsTrigger>
                 <TabsTrigger 
                   value="body" 
-                  className="h-full rounded-none border-b-2 border-transparent border-x-0 border-t-0 bg-transparent px-1 text-sm shadow-none focus-visible:ring-0 focus-visible:outline-none data-[state=active]:border-b-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+                  className="h-full rounded-none border-b-2 border-transparent border-x-0 border-t-0 bg-transparent px-1 text-sm shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 data-[state=active]:border-b-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
                 >
                   Body
                 </TabsTrigger>
                 {result.location && (
                   <TabsTrigger 
                     value="location" 
-                    className="h-full rounded-none border-b-2 border-transparent border-x-0 border-t-0 bg-transparent px-1 text-sm shadow-none focus-visible:ring-0 focus-visible:outline-none data-[state=active]:border-b-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+                    className="h-full rounded-none border-b-2 border-transparent border-x-0 border-t-0 bg-transparent px-1 text-sm shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 data-[state=active]:border-b-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
                   >
                     Location
                   </TabsTrigger>

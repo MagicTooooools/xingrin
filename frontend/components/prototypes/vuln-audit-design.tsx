@@ -149,7 +149,7 @@ export function VulnAuditDesign() {
       {/* 1. Audit Header */}
       <div className="h-14 border-b border-border bg-card flex items-center justify-between px-4 shrink-0 z-10">
         <div className="flex items-center gap-3">
-           <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}>
+           <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)} aria-label="Toggle sidebar">
               <IconDotsVertical className="size-4" />
            </Button>
            <div className="flex flex-col">
@@ -187,7 +187,7 @@ export function VulnAuditDesign() {
            <div className="p-3 border-b border-border">
               <div className="relative">
                  <IconSearch className="absolute left-2.5 top-2.5 size-3.5 text-muted-foreground" />
-                 <Input placeholder="Search vulnerabilities..." className="h-9 pl-8 text-xs bg-background" />
+                 <Input type="search" name="vulnerabilitySearch" autoComplete="off" placeholder="Search vulnerabilities…" className="h-9 pl-8 text-xs bg-background" />
               </div>
            </div>
 
@@ -199,7 +199,7 @@ export function VulnAuditDesign() {
                        key={item.id}
                        onClick={() => setSelectedId(item.id)}
                        className={cn(
-                          "flex flex-col gap-1.5 p-3 rounded-md text-left transition-all border border-transparent",
+                          "flex flex-col gap-1.5 p-3 rounded-md text-left transition-[color,background-color,border-color,opacity,transform,box-shadow] border border-transparent",
                           selectedId === item.id 
                              ? "bg-background shadow-sm border-border ring-1 ring-primary/20" 
                              : "hover:bg-muted/50 hover:border-border/50 text-muted-foreground",
@@ -251,7 +251,7 @@ export function VulnAuditDesign() {
                     <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/30 p-1.5 px-3 rounded-md border border-border/50 w-fit">
                        <IconWorld className="size-3.5" />
                        <span className="font-mono truncate max-w-md">{selectedItem.target}</span>
-                       <Button variant="ghost" size="icon" className="h-4 w-4 ml-2 hover:text-foreground">
+                       <Button variant="ghost" size="icon" className="h-4 w-4 ml-2 hover:text-foreground" aria-label="View request code">
                           <IconCode className="size-3" />
                        </Button>
                     </div>

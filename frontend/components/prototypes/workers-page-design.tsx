@@ -89,7 +89,7 @@ function MetricBar({ label, value, limit }: { label: string, value: number, limi
       </div>
       <div className="h-1.5 w-full bg-muted/50 rounded-full overflow-hidden">
         <div 
-          className={cn("h-full rounded-full transition-all", 
+          className={cn("h-full rounded-full transition-[color,background-color,border-color,opacity,transform,box-shadow]", 
             isCritical ? "bg-[var(--error)]" : isWarning ? "bg-[var(--warning)]" : "bg-[var(--success)]"
           )} 
           style={{ width: `${Math.min(100, value)}%` }} 
@@ -102,7 +102,7 @@ function MetricBar({ label, value, limit }: { label: string, value: number, limi
 // --- Card Component (Adaptive Console) ---
 function WorkerCard({ node }: { node: WorkerNode }) {
   return (
-    <div className="group flex flex-col rounded-lg border border-border bg-card text-card-foreground shadow-sm hover:shadow-md transition-all duration-200">
+    <div className="group flex flex-col rounded-lg border border-border bg-card text-card-foreground shadow-sm hover:shadow-md transition-[color,background-color,border-color,opacity,transform,box-shadow] duration-200">
       {/* Header */}
       <div className="flex items-center justify-between p-3 border-b border-border/50 bg-muted/20">
         <div className="flex items-center gap-3">
@@ -118,7 +118,7 @@ function WorkerCard({ node }: { node: WorkerNode }) {
         
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-foreground">
+            <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-foreground" aria-label="More actions">
               <IconDotsVertical className="w-4 h-4" />
             </Button>
           </DropdownMenuTrigger>
@@ -227,7 +227,10 @@ export function WorkersPageDesign() {
             <div className="relative w-full sm:w-96">
                <IconSearch className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                <Input 
-                  placeholder="Search by name, IP, or hostname..." 
+                  type="search"
+                  name="workerSearch"
+                  autoComplete="off"
+                  placeholder="Search by name, IP, or hostname…" 
                   className="pl-9 bg-background" 
                   value={search}
                   onChange={e => setSearch(e.target.value)}

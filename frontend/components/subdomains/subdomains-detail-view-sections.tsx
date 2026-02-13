@@ -19,7 +19,7 @@ export function SubdomainsDetailViewErrorState({ state }: { state: SubdomainsDet
       <p className="text-muted-foreground text-center mb-4">
         {state.error?.message || state.tSubdomains("loadError")}
       </p>
-      <button
+      <button type="button"
         onClick={() => state.refetch()}
         className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
       >

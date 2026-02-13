@@ -65,7 +65,7 @@ export function EholeFingerprintCmsField({
   return (
     <div className="space-y-2">
       <Label htmlFor="cms">{tColumns("cms")} *</Label>
-      <Input
+      <Input autoComplete="off"
         id="cms"
         placeholder={t("form.cmsPlaceholder")}
         {...register("cms", { required: t("form.cmsRequired") })}
@@ -147,7 +147,7 @@ export function EholeFingerprintKeywordField({
   return (
     <div className="space-y-2">
       <Label htmlFor="keyword">{tColumns("keyword")} *</Label>
-      <Input
+      <Input autoComplete="off"
         id="keyword"
         placeholder={t("form.keywordPlaceholder")}
         {...register("keyword", { required: t("form.keywordRequired") })}
@@ -178,7 +178,7 @@ export function EholeFingerprintTypeImportant({
     <div className="grid grid-cols-2 gap-4">
       <div className="space-y-2">
         <Label htmlFor="type">{tColumns("type") || "Type"}</Label>
-        <Input
+        <Input autoComplete="off"
           id="type"
           placeholder={t("form.typePlaceholder")}
           {...register("type")}
@@ -221,7 +221,7 @@ export function EholeFingerprintDialogFooter({
         {tCommon("cancel")}
       </Button>
       <Button type="submit" disabled={isSubmitting}>
-        {isSubmitting ? "..." : isEdit ? tCommon("save") : tCommon("create")}
+        {isSubmitting ? "…" : isEdit ? tCommon("save") : tCommon("create")}
       </Button>
     </DialogFooter>
   )

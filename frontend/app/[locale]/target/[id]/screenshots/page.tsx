@@ -1,7 +1,11 @@
 "use client"
 
+import { lazyPage } from "@/components/common/lazy-page"
 import { useParams } from "next/navigation"
-import { ScreenshotsGallery } from "@/components/screenshots/screenshots-gallery"
+
+const ScreenshotsGallery = lazyPage(
+  () => import("@/components/screenshots/screenshots-gallery").then((m) => ({ default: m.ScreenshotsGallery }))
+)
 
 export default function ScreenshotsPage() {
   const { id } = useParams<{ id: string }>()

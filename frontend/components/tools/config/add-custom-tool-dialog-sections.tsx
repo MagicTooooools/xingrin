@@ -52,6 +52,8 @@ export function AddCustomToolNameField({
       </Label>
       <Input
         id="name"
+        name="name"
+        autoComplete="off"
         placeholder={t("customToolNamePlaceholder")}
         value={value}
         onChange={(event) => onChange(event.target.value)}
@@ -80,6 +82,8 @@ export function AddCustomToolDescriptionField({
       <Label htmlFor="description">{t("toolDesc")}</Label>
       <Textarea
         id="description"
+        name="description"
+        autoComplete="off"
         placeholder={t("customToolDescPlaceholder")}
         value={value}
         onChange={(event) => onChange(event.target.value)}
@@ -110,6 +114,8 @@ export function AddCustomToolPathField({
       </Label>
       <Input
         id="directory"
+        name="directory"
+        autoComplete="off"
         placeholder={t("toolPathPlaceholder")}
         value={value}
         onChange={(event) => onChange(event.target.value)}
@@ -170,12 +176,17 @@ export function AddCustomToolCategoriesField({
             const isSelected = selectedCategories.includes(categoryName)
             return (
               <Badge
+                asChild
                 key={categoryName}
                 variant={isSelected ? "secondary" : "outline"}
-                className="cursor-pointer hover:bg-secondary/80 transition-colors"
-                onClick={() => onToggle(categoryName)}
+                className="hover:bg-secondary/80 transition-colors"
               >
-                {CategoryNameMap[categoryName] || categoryName}
+                <button
+                  type="button"
+                  onClick={() => onToggle(categoryName)}
+                >
+                  {CategoryNameMap[categoryName] || categoryName}
+                </button>
               </Badge>
             )
           })

@@ -107,6 +107,7 @@ export default async function LocaleLayout({
 
   // Load translation messages
   const messages = await getMessages()
+  const commonUiT = await getTranslations({ locale, namespace: 'common.ui' })
 
   const themeId = DEFAULT_COLOR_THEME_ID
 
@@ -117,12 +118,18 @@ export default async function LocaleLayout({
       suppressHydrationWarning
     >
       <body className={harmonyOS.className}>
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-background focus:px-3 focus:py-2 focus:text-sm focus:font-medium focus:text-foreground focus:shadow-md"
+        >
+          {commonUiT('skipToMainContent')}
+        </a>
         <ColorThemeInit />
-        <LayoutClientEnhancements />
         {/* ThemeProvider provides theme switching functionality */}
         <ThemeProvider>
           {/* NextIntlClientProvider provides internationalization context */}
           <NextIntlClientProvider messages={messages}>
+            <LayoutClientEnhancements />
             {/* QueryProvider provides React Query functionality */}
             <QueryProvider>
               {/* ErrorBoundary catches component errors and prevents app crashes */}

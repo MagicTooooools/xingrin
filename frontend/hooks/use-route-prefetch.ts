@@ -1,15 +1,9 @@
 import { useEffect, useCallback, useRef } from 'react'
-import { useLocale } from 'next-intl'
 import { useRouter } from '@/i18n/navigation'
 
-const BASE_CRITICAL_ROUTES = ['/dashboard/', '/organization/', '/target/'] as const
-const BASE_SECONDARY_ROUTES = ['/scan/history/', '/vulnerabilities/'] as const
-const BASE_LOW_PRIORITY_ROUTES = [
-  '/scan/scheduled/',
-  '/scan/engine/',
-  '/tools/',
-  '/settings/workers/',
-] as const
+const BASE_CRITICAL_ROUTES = ['/dashboard/'] as const
+const BASE_SECONDARY_ROUTES = ['/organization/', '/target/'] as const
+const BASE_LOW_PRIORITY_ROUTES = ['/scan/history/', '/vulnerabilities/'] as const
 
 const DETAIL_SUB_ROUTES = [
   'subdomain',
@@ -20,6 +14,35 @@ const DETAIL_SUB_ROUTES = [
   'ip-addresses',
 ] as const
 
+type NetworkInformation = {
+  saveData?: boolean
+  effectiveType?: string
+}
+
+type NavigatorWithConnection = Navigator & {
+  connection?: NetworkInformation
+}
+
+const getNetworkConnection = (): NetworkInformation | undefined => {
+  if (typeof navigator === 'undefined') return undefined
+  return (navigator as NavigatorWithConnection).connection
+}
+
+const canPrefetchSecondaryRoutes = (): boolean => {
+  const connection = getNetworkConnection()
+  if (!connection) return true
+  if (connection.saveData) return false
+  const effectiveType = connection.effectiveType
+  return effectiveType !== 'slow-2g' && effectiveType !== '2g'
+}
+
+const canPrefetchLowPriorityRoutes = (): boolean => {
+  const connection = getNetworkConnection()
+  if (!connection) return true
+  if (connection.saveData) return false
+  return connection.effectiveType === '4g'
+}
+
 /**
  * 路由预加载 Hook
  * 在页面加载完成后，后台预加载其他页面的 JS/CSS 资源
@@ -28,27 +51,22 @@ const DETAIL_SUB_ROUTES = [
  */
 export function useRoutePrefetch(currentPath?: string) {
   const router = useRouter()
-  const locale = useLocale()
   const prefetchedRoutesRef = useRef<Set<string>>(new Set())
 
-  const withLocale = useCallback((path: string) => {
-    if (path.startsWith(`/${locale}/`)) return path
-    const normalized = path.startsWith("/") ? path : `/${path}`
-    return `/${locale}${normalized}`
-  }, [locale])
-
   const prefetchOnce = useCallback((path: string) => {
-    const localizedPath = withLocale(path)
-    if (prefetchedRoutesRef.current.has(localizedPath)) return
-    prefetchedRoutesRef.current.add(localizedPath)
-    void router.prefetch(localizedPath)
-  }, [router, withLocale])
+    const normalizedPath = path.startsWith("/") ? path : `/${path}`
+    if (prefetchedRoutesRef.current.has(normalizedPath)) return
+    prefetchedRoutesRef.current.add(normalizedPath)
+    void router.prefetch(normalizedPath)
+  }, [router])
 
   useEffect(() => {
     const w = typeof window !== 'undefined'
       ? (window as Window & { __lunafoxRoutePrefetchDone?: boolean })
       : null
     const hasPrefetched = !!w?.__lunafoxRoutePrefetchDone
+    const allowSecondaryPrefetch = canPrefetchSecondaryRoutes()
+    const allowLowPriorityPrefetch = canPrefetchLowPriorityRoutes()
     const idleTaskIds: number[] = []
     const timeoutIds: Array<ReturnType<typeof setTimeout>> = []
 
@@ -61,12 +79,14 @@ export function useRoutePrefetch(currentPath?: string) {
     // 使用 requestIdleCallback 在浏览器空闲时预加载，不影响当前页面渲染
     const prefetchBaseRoutes = () => {
       prefetchBatch(BASE_CRITICAL_ROUTES)
+      if (!allowSecondaryPrefetch) return
 
       const scheduleSecondary = () => {
         prefetchBatch(BASE_SECONDARY_ROUTES)
       }
 
       const scheduleLowPriority = () => {
+        if (!allowLowPriorityPrefetch) return
         prefetchBatch(BASE_LOW_PRIORITY_ROUTES)
       }
 
@@ -79,11 +99,11 @@ export function useRoutePrefetch(currentPath?: string) {
       }
 
       scheduleSecondary()
-      timeoutIds.push(setTimeout(scheduleLowPriority, 1200))
+      timeoutIds.push(setTimeout(scheduleLowPriority, 2000))
     }
 
     const prefetchDynamicRoutes = () => {
-      if (!currentPath) return
+      if (!currentPath || !allowSecondaryPrefetch) return
       // 如果是目标详情页（如 /target/146），预加载子路由
       const targetIdMatch = currentPath.match(/\/target\/(\d+)$/)
       if (targetIdMatch) {
@@ -150,21 +170,14 @@ export function useRoutePrefetch(currentPath?: string) {
  */
 export function useSmartRoutePrefetch(currentPath: string) {
   const router = useRouter()
-  const locale = useLocale()
   const prefetchedRoutesRef = useRef<Set<string>>(new Set())
 
-  const withLocale = useCallback((path: string) => {
-    if (path.startsWith(`/${locale}/`)) return path
-    const normalized = path.startsWith("/") ? path : `/${path}`
-    return `/${locale}${normalized}`
-  }, [locale])
-
   const prefetchOnce = useCallback((path: string) => {
-    const localizedPath = withLocale(path)
-    if (prefetchedRoutesRef.current.has(localizedPath)) return
-    prefetchedRoutesRef.current.add(localizedPath)
-    void router.prefetch(localizedPath)
-  }, [router, withLocale])
+    const normalizedPath = path.startsWith("/") ? path : `/${path}`
+    if (prefetchedRoutesRef.current.has(normalizedPath)) return
+    prefetchedRoutesRef.current.add(normalizedPath)
+    void router.prefetch(normalizedPath)
+  }, [router])
 
   useEffect(() => {
     const timer = setTimeout(() => {

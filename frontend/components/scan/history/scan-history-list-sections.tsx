@@ -29,7 +29,7 @@ export function ScanHistoryListErrorState({
   return (
     <div className="flex flex-col items-center justify-center py-12">
       <p className="text-destructive mb-4">{state.tScan("history.loadFailed")}</p>
-      <button
+      <button type="button"
         onClick={() => {
           void state.refetch()
         }}

@@ -1,8 +1,12 @@
 "use client"
 
-import React from "react"
+import { lazyPage } from "@/components/common/lazy-page"
 import { useParams } from "next/navigation"
-import { IPAddressesView } from "@/components/ip-addresses/ip-addresses-view"
+
+const IPAddressesView = lazyPage(
+  () => import("@/components/ip-addresses/ip-addresses-view").then((m) => ({ default: m.IPAddressesView }))
+)
+
 export default function ScanHistoryIPsPage() {
   const { id } = useParams<{ id: string }>()
 

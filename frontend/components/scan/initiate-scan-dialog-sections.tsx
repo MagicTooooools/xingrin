@@ -142,7 +142,7 @@ export function InitiateScanEngineSelection({
                     onClick={() => onPresetSelect(preset.id, preset.configuration || "")}
                     disabled={isSubmitting}
                     className={cn(
-                      "flex flex-col items-start gap-2 rounded-lg border px-3 py-2 text-left transition-all",
+                      "flex flex-col items-start gap-2 rounded-lg border px-3 py-2 text-left transition-[background-color,border-color,color,box-shadow]",
                       isSelected
                         ? "border-primary/50 bg-primary/5"
                         : "border-border hover:border-primary/40 hover:bg-muted/30",
@@ -191,7 +191,7 @@ export function InitiateScanEngineSelection({
                     key={engine.id}
                     htmlFor={`initiate-engine-${engine.id}`}
                     className={cn(
-                      "flex items-center gap-3 rounded-lg border px-3 py-2 cursor-pointer transition-all",
+                      "flex items-center gap-3 rounded-lg border px-3 py-2 cursor-pointer transition-[background-color,border-color,color,box-shadow]",
                       isSelected
                         ? "border-primary/50 bg-primary/5"
                         : "border-border hover:border-primary/40 hover:bg-muted/30"

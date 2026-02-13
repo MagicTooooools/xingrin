@@ -1,7 +1,14 @@
 "use client"
 
 import React from "react"
-import { OrganizationDetailView } from "@/components/organization/organization-detail-view"
+import { lazyPage } from "@/components/common/lazy-page"
+
+const OrganizationDetailView = lazyPage(
+  () =>
+    import("@/components/organization/organization-detail-view").then((m) => ({
+      default: m.OrganizationDetailView,
+    }))
+)
 
 /**
  * Organization detail page

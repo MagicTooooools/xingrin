@@ -38,7 +38,7 @@ export function ScanProgressDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className={`${DIALOG_WIDTH} transition-all duration-200`}>
+      <DialogContent className={`${DIALOG_WIDTH} transition-[opacity,transform] duration-200`}>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <ScanStatusIcon status={data.status} />

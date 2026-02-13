@@ -45,7 +45,7 @@ export function WappalyzerFingerprintBasicFields({
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="name">{t("form.appNamePlaceholder").split("：")[0]} *</Label>
-          <Input
+          <Input autoComplete="off"
             id="name"
             placeholder={t("form.appNamePlaceholder")}
             {...register("name", { required: t("form.appNameRequired") })}
@@ -57,7 +57,7 @@ export function WappalyzerFingerprintBasicFields({
 
         <div className="space-y-2">
           <Label htmlFor="cats">{t("category")}</Label>
-          <Input
+          <Input autoComplete="off"
             id="cats"
             placeholder={t("form.catsPlaceholder")}
             {...register("cats")}
@@ -68,7 +68,7 @@ export function WappalyzerFingerprintBasicFields({
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="website">{tCommon("website")}</Label>
-          <Input
+          <Input autoComplete="off"
             id="website"
             placeholder="https://example.com"
             {...register("website")}
@@ -77,7 +77,7 @@ export function WappalyzerFingerprintBasicFields({
 
         <div className="space-y-2">
           <Label htmlFor="cpe">CPE</Label>
-          <Input
+          <Input autoComplete="off"
             id="cpe"
             placeholder="cpe:/a:vendor:product"
             {...register("cpe")}
@@ -87,7 +87,7 @@ export function WappalyzerFingerprintBasicFields({
 
       <div className="space-y-2">
         <Label htmlFor="description">{tCommon("description")}</Label>
-        <Textarea
+        <Textarea autoComplete="off"
           id="description"
           placeholder={t("form.descPlaceholder")}
           rows={2}
@@ -114,7 +114,7 @@ export function WappalyzerFingerprintDetectionFields({ t, register }: Wappalyzer
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="cookies">{t("form.cookies")}</Label>
-          <Textarea
+          <Textarea autoComplete="off"
             id="cookies"
             placeholder='{"name": "pattern"}'
             rows={2}
@@ -125,7 +125,7 @@ export function WappalyzerFingerprintDetectionFields({ t, register }: Wappalyzer
 
         <div className="space-y-2">
           <Label htmlFor="headers">{t("form.headers")}</Label>
-          <Textarea
+          <Textarea autoComplete="off"
             id="headers"
             placeholder='{"X-Powered-By": "pattern"}'
             rows={2}
@@ -138,7 +138,7 @@ export function WappalyzerFingerprintDetectionFields({ t, register }: Wappalyzer
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="scriptSrc">{t("form.scriptUrl")}</Label>
-          <Input
+          <Input autoComplete="off"
             id="scriptSrc"
             placeholder="pattern1, pattern2"
             className="font-mono text-xs"
@@ -148,7 +148,7 @@ export function WappalyzerFingerprintDetectionFields({ t, register }: Wappalyzer
 
         <div className="space-y-2">
           <Label htmlFor="js">{t("form.jsVariables")}</Label>
-          <Input
+          <Input autoComplete="off"
             id="js"
             placeholder="window.var1, window.var2"
             className="font-mono text-xs"
@@ -159,7 +159,7 @@ export function WappalyzerFingerprintDetectionFields({ t, register }: Wappalyzer
 
       <div className="space-y-2">
         <Label htmlFor="meta">{t("form.metaTags")} (JSON)</Label>
-        <Textarea
+        <Textarea autoComplete="off"
           id="meta"
           placeholder='{"generator": ["pattern"]}'
           rows={2}
@@ -171,7 +171,7 @@ export function WappalyzerFingerprintDetectionFields({ t, register }: Wappalyzer
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="html">{t("form.htmlContent")}</Label>
-          <Input
+          <Input autoComplete="off"
             id="html"
             placeholder="pattern1, pattern2"
             className="font-mono text-xs"
@@ -181,7 +181,7 @@ export function WappalyzerFingerprintDetectionFields({ t, register }: Wappalyzer
 
         <div className="space-y-2">
           <Label htmlFor="implies">{t("form.implies")}</Label>
-          <Input
+          <Input autoComplete="off"
             id="implies"
             placeholder="PHP, MySQL"
             {...register("implies")}

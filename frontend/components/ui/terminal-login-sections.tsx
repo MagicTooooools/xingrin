@@ -31,9 +31,9 @@ export function AuthBootLog({
   const authLines = React.useMemo<BootLine[]>(
     () => [
       { text: `> ${authenticatingLabel}`, className: "text-foreground/90" },
-      { text: "> initializing secure channel...", className: "text-muted-foreground" },
-      { text: "> validating credentials...", className: "text-muted-foreground" },
-      { text: "> checking session...", className: "text-foreground/90" },
+      { text: "> initializing secure channel…", className: "text-muted-foreground" },
+      { text: "> validating credentials…", className: "text-muted-foreground" },
+      { text: "> checking session…", className: "text-foreground/90" },
     ],
     [authenticatingLabel]
   )
@@ -83,7 +83,7 @@ export function AuthBootLog({
       <div className="mt-6">
         <div className="h-1.5 w-full rounded bg-foreground/10 overflow-hidden">
           <div
-            className="h-full bg-gradient-to-r from-primary/40 to-primary transition-all duration-300"
+            className="h-full bg-gradient-to-r from-primary/40 to-primary transition-[width] duration-300"
             style={{
               width: `${progress}%`,
               boxShadow:
@@ -174,20 +174,28 @@ export function TerminalMobilePanel({
           className="space-y-4"
         >
           <div>
-            <label className="text-primary text-xs mb-1 block">{t.usernamePrompt}</label>
+            <label htmlFor="terminal-mobile-username" className="text-primary text-xs mb-1 block">{t.usernamePrompt}</label>
             <input
+              id="terminal-mobile-username"
+              name="username"
               type="text"
+              aria-label={t.usernamePrompt}
               value={username}
               onChange={(event) => onUsernameChange(event.target.value)}
               disabled={isInputDisabled}
               className="w-full bg-background/60 border border-border rounded px-3 py-2 text-foreground outline-none focus:border-primary font-mono text-sm"
               autoComplete="username"
+              inputMode="text"
+              spellCheck={false}
             />
           </div>
           <div>
-            <label className="text-primary text-xs mb-1 block">{t.passwordPrompt}</label>
+            <label htmlFor="terminal-mobile-password" className="text-primary text-xs mb-1 block">{t.passwordPrompt}</label>
             <input
+              id="terminal-mobile-password"
+              name="password"
               type="password"
+              aria-label={t.passwordPrompt}
               value={password}
               onChange={(event) => onPasswordChange(event.target.value)}
               disabled={isInputDisabled}
@@ -279,7 +287,9 @@ export function TerminalDesktopPanel({
           <input
             ref={inputRef}
             className="absolute opacity-0 pointer-events-none"
-            autoFocus
+            name={step === "password" ? "password" : "username"}
+            aria-label={step === "password" ? t.passwordPrompt : t.usernamePrompt}
+            spellCheck={false}
             {...inputProps}
           />
         </div>

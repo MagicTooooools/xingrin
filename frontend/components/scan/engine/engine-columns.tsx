@@ -169,7 +169,7 @@ export const createEngineColumns = ({
       return (
         <Tooltip>
           <TooltipTrigger asChild>
-            <button
+            <button type="button"
               onClick={() => handleEdit(row.original)}
               className="max-w-[300px] truncate font-medium text-left hover:text-primary hover:underline underline-offset-2 cursor-pointer transition-colors"
             >

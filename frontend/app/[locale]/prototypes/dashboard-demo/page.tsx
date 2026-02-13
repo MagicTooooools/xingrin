@@ -154,7 +154,7 @@ export default function DashboardDemoPage() {
             {/* Stats Grid */}
             <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {stats.map((item) => (
-                <div key={item.label} className="ark-panel group relative overflow-hidden transition-all hover:-translate-y-1">
+                <div key={item.label} className="ark-panel group relative overflow-hidden transition-[color,background-color,border-color,opacity,transform,box-shadow] hover:-translate-y-1">
                   <div className="absolute top-0 left-0 p-2 text-[10px] font-mono text-[var(--ark-muted)] opacity-50">
                     {item.id} {"//"}
                   </div>
@@ -369,7 +369,7 @@ export default function DashboardDemoPage() {
           font-size: 13px;
           font-weight: 500;
           color: var(--ark-text-2);
-          transition: all 0.2s;
+          transition: color 0.2s, background-color 0.2s, border-color 0.2s, opacity 0.2s, transform 0.2s, box-shadow 0.2s;
           border-left: 2px solid transparent;
         }
 

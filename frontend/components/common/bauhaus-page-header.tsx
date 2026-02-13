@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { useLocale, useTranslations } from "next-intl"
 import type { LucideIcon } from "@/components/icons"
 import { cn } from "@/lib/utils"
 
@@ -39,17 +40,20 @@ export function BauhausPageHeader({
   showDescription = false,
   icon: Icon,
   showIcon = false,
-  statusText = "ACTIVE",
+  statusText,
   isOnline = true,
   className,
 }: BauhausPageHeaderProps) {
+  const locale = useLocale()
+  const tUi = useTranslations("common.ui")
+  const resolvedStatusText = statusText ?? tUi("activeStatus")
   const [currentTime, setCurrentTime] = useState<string>("")
 
   useEffect(() => {
     const updateTime = () => {
       const now = new Date()
       setCurrentTime(
-        now.toLocaleTimeString("en-US", {
+        now.toLocaleTimeString(locale, {
           hour12: false,
           hour: "2-digit",
           minute: "2-digit",
@@ -94,7 +98,7 @@ export function BauhausPageHeader({
       observer.disconnect()
       stop()
     }
-  }, [])
+  }, [locale])
 
   return (
     <div className={cn("hidden [[data-theme=bauhaus]_&]:block px-4 lg:px-6", className)}>
@@ -127,10 +131,10 @@ export function BauhausPageHeader({
                   isOnline ? "bg-[var(--success)]" : "bg-[var(--error)]"
                 }`}
               />
-              STATUS: {statusText}
+              {tUi("statusLabel")}: {resolvedStatusText}
             </div>
             <div className="px-3 py-1.5 flex items-center gap-2 text-xs font-mono bg-secondary border border-border">
-              <span className="text-muted-foreground">CYCLE:</span>
+              <span className="text-muted-foreground">{tUi("cycleLabel")}:</span>
               {currentTime}
             </div>
           </div>

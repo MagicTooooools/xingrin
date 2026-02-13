@@ -1,14 +1,16 @@
 import { redirect } from "next/navigation"
 
+type Props = {
+  params: Promise<{ locale: string; id: string }>
+}
+
 /**
  * Target detail default page
  * Automatically redirects to overview page
  */
-export default function TargetDetailPage({
+export default async function TargetDetailPage({
   params,
-}: {
-  params: { id: string }
-}) {
-  redirect(`/target/${params.id}/overview/`)
+}: Props) {
+  const { locale, id } = await params
+  redirect(`/${locale}/target/${id}/overview/`)
 }
-

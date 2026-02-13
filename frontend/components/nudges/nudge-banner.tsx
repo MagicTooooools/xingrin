@@ -40,9 +40,10 @@ export function NudgeGlass({
           </p>
         </div>
 
-        <button
+        <button type="button"
           onClick={onDismiss}
           className="shrink-0 -mt-1 -mr-1 rounded-md p-1.5 text-white/40 hover:bg-white/10 hover:text-white transition-colors"
+          aria-label="Dismiss notification"
         >
           <IconX className="size-4" />
         </button>

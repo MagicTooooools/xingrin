@@ -41,7 +41,7 @@ export function ARLFingerprintNameField({
   return (
     <div className="space-y-2">
       <Label htmlFor="name">{t("form.name")} *</Label>
-      <Input
+      <Input autoComplete="off"
         id="name"
         placeholder={t("form.arlNamePlaceholder")}
         {...register("name", { required: t("form.nameRequired") })}
@@ -67,7 +67,7 @@ export function ARLFingerprintRuleField({
   return (
     <div className="space-y-2">
       <Label htmlFor="rule">{t("form.arlRule")} *</Label>
-      <Textarea
+      <Textarea autoComplete="off"
         id="rule"
         placeholder={t("form.arlRulePlaceholder")}
         className="font-mono text-sm min-h-[120px]"
@@ -102,7 +102,7 @@ export function ARLFingerprintDialogFooter({
         {tCommon("cancel")}
       </Button>
       <Button type="submit" disabled={isSubmitting}>
-        {isSubmitting ? "..." : isEdit ? tCommon("save") : tCommon("create")}
+        {isSubmitting ? "…" : isEdit ? tCommon("save") : tCommon("create")}
       </Button>
     </DialogFooter>
   )

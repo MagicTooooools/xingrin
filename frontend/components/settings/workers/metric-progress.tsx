@@ -68,7 +68,7 @@ export function MetricProgress({
         )}
       >
         <div
-          className={cn("h-full transition-all duration-300", progressColor)}
+          className={cn("h-full transition-[width,background-color] duration-300", progressColor)}
           style={{ width: `${percentage}%` }}
         />
       </Progress>

@@ -201,7 +201,11 @@
     "ui": {
       "toggleSidebar": "Toggle Sidebar",
       "loading": "Loading",
-      "commandDialog": "Command Dialog"
+      "commandDialog": "Command Dialog",
+      "skipToMainContent": "Skip to main content",
+      "statusLabel": "STATUS",
+      "cycleLabel": "CYCLE",
+      "activeStatus": "ACTIVE"
     },
     "dropzone": {
       "uploadFile": "Upload file",
@@ -451,6 +455,12 @@
       "description": "Recently discovered security vulnerabilities",
       "viewAll": "View All",
       "noData": "No vulnerability data"
+    },
+    "bauhausHeader": {
+      "operationsCommand": "Operations Command",
+      "systemOverview": "System Overview",
+      "networkOnline": "NETWORK: ONLINE",
+      "cycleLabel": "CYCLE:"
     }
   },
   "dataTable": {

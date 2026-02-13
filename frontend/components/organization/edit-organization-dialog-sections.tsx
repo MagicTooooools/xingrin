@@ -62,6 +62,7 @@ export function EditOrganizationNameField<TFieldValues extends FieldValues>({
               placeholder={t("orgNamePlaceholder")}
               disabled={isSubmitting}
               maxLength={50}
+              autoComplete="off"
               {...field}
             />
           </FormControl>
@@ -101,6 +102,7 @@ export function EditOrganizationDescriptionField<TFieldValues extends FieldValue
               disabled={isSubmitting}
               rows={3}
               maxLength={200}
+              autoComplete="off"
               {...field}
             />
           </FormControl>

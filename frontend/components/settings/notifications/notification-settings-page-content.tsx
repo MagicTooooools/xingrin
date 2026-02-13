@@ -168,6 +168,9 @@ export default function NotificationSettingsPageContent() {
                           <FormLabel>{t("discord.webhookLabel")}</FormLabel>
                           <FormControl>
                             <Input 
+                              type="url"
+                              autoComplete="url"
+                              inputMode="url"
                               placeholder={t("discord.webhookPlaceholder")} 
                               {...field} 
                               disabled={isLoading || updateMutation.isPending} 
@@ -244,6 +247,9 @@ export default function NotificationSettingsPageContent() {
                           <FormLabel>{t("wecom.webhookLabel")}</FormLabel>
                           <FormControl>
                             <Input
+                              type="url"
+                              autoComplete="url"
+                              inputMode="url"
                               placeholder={t("wecom.webhookPlaceholder")}
                               {...field}
                               disabled={isLoading || updateMutation.isPending}

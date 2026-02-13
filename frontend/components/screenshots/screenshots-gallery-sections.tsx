@@ -90,13 +90,16 @@ export function ScreenshotsGalleryContent({
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-2">
           <Input
+            type="search"
+            name="screenshotSearch"
+            autoComplete="off"
             placeholder={state.t("filterPlaceholder")}
             value={state.searchInput}
             onChange={(e) => state.setSearchInput(e.target.value)}
             onKeyDown={state.handleKeyDown}
             className="w-64"
           />
-          <Button variant="outline" size="icon" onClick={state.handleSearch}>
+          <Button variant="outline" size="icon" onClick={state.handleSearch} aria-label="Search screenshots">
             <Search className="h-4 w-4" />
           </Button>
         </div>
@@ -122,33 +125,43 @@ export function ScreenshotsGalleryContent({
           <div
             key={screenshot.id}
             className={cn(
-              "group relative aspect-video rounded-lg overflow-hidden border bg-muted cursor-pointer transition-all",
+              "group relative aspect-video rounded-lg overflow-hidden border bg-muted transition-[background-color,border-color,box-shadow]",
               state.selectedIds.has(screenshot.id) ? "ring-2 ring-primary" : ""
             )}
           >
             {state.targetId ? (
-              <div
+              <button
+                type="button"
                 className="absolute top-2 left-2 z-10"
                 onClick={(e) => {
                   e.stopPropagation()
                   state.toggleSelect(screenshot.id)
                 }}
+                aria-label={`Select screenshot ${index + 1}`}
               >
                 <Checkbox
                   checked={state.selectedIds.has(screenshot.id)}
                   className="bg-background/80 backdrop-blur-sm"
                 />
-              </div>
+              </button>
             ) : null}
 
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={state.getImageUrl(screenshot)}
-              alt={screenshot.url}
-              className="w-full h-full object-cover transition-transform group-hover:scale-105"
+            <button
+              type="button"
               onClick={() => state.openLightbox(index)}
-              loading="lazy"
-            />
+              className="h-full w-full"
+              aria-label={`Open screenshot ${index + 1}`}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={state.getImageUrl(screenshot)}
+                alt={screenshot.url}
+                className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                loading="lazy"
+                width={1280}
+                height={720}
+              />
+            </button>
 
             <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-2">
               <div className="flex items-center gap-2">
@@ -178,6 +191,7 @@ export function ScreenshotsGalleryContent({
                 rel="noopener noreferrer"
                 onClick={(e) => e.stopPropagation()}
                 className="inline-flex items-center justify-center h-8 w-8 rounded-md bg-background/80 backdrop-blur-sm hover:bg-background"
+                aria-label="Open screenshot URL in new tab"
               >
                 <ExternalLink className="h-4 w-4" />
               </a>
@@ -202,6 +216,7 @@ export function ScreenshotsGalleryContent({
                 state.setPagination((prev) => ({ ...prev, pageIndex: Math.max(0, prev.pageIndex - 1) }))
               }
               disabled={state.pagination.pageIndex === 0}
+              aria-label="Previous page"
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
@@ -218,6 +233,7 @@ export function ScreenshotsGalleryContent({
                 }))
               }
               disabled={state.pagination.pageIndex >= state.maxPageIndex}
+              aria-label="Next page"
             >
               <ChevronRight className="h-4 w-4" />
             </Button>
@@ -243,24 +259,27 @@ export function ScreenshotsGalleryContent({
             <DialogTitle>{state.t("lightboxTitle")}</DialogTitle>
           </VisuallyHidden>
           <div className="relative w-full h-full flex items-center justify-center">
-            <button
+            <button type="button"
               onClick={() => state.setLightboxOpen(false)}
               className="absolute top-4 right-4 z-50 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+              aria-label="Close lightbox"
             >
               <X className="h-6 w-6 text-white" />
             </button>
 
             {state.screenshots.length > 1 ? (
               <>
-                <button
+                <button type="button"
                   onClick={state.prevImage}
                   className="absolute left-4 z-50 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+                  aria-label="Previous screenshot"
                 >
                   <ChevronLeft className="h-8 w-8 text-white" />
                 </button>
-                <button
+                <button type="button"
                   onClick={state.nextImage}
                   className="absolute right-4 z-50 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+                  aria-label="Next screenshot"
                 >
                   <ChevronRight className="h-8 w-8 text-white" />
                 </button>
@@ -274,6 +293,8 @@ export function ScreenshotsGalleryContent({
                   src={state.getImageUrl(lightboxScreenshot)}
                   alt={lightboxScreenshot.url}
                   className="max-w-full max-h-[70vh] object-contain"
+                  width={1920}
+                  height={1080}
                 />
                 <div className="text-white text-center">
                   <p className="text-sm opacity-80">

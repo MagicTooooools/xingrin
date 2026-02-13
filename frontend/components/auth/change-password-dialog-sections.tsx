@@ -45,18 +45,21 @@ export function ChangePasswordFormFields({
         <Label htmlFor="oldPassword">{t("currentPassword")}</Label>
         <Input
           id="oldPassword"
+          name="currentPassword"
           type="password"
+          autoComplete="current-password"
           value={oldPassword}
           onChange={(event) => onOldPasswordChange(event.target.value)}
           required
-          autoFocus
         />
       </div>
       <div className="grid gap-2">
         <Label htmlFor="newPassword">{t("newPassword")}</Label>
         <Input
           id="newPassword"
+          name="newPassword"
           type="password"
+          autoComplete="new-password"
           value={newPassword}
           onChange={(event) => onNewPasswordChange(event.target.value)}
           required
@@ -66,7 +69,9 @@ export function ChangePasswordFormFields({
         <Label htmlFor="confirmPassword">{t("confirmPassword")}</Label>
         <Input
           id="confirmPassword"
+          name="confirmPassword"
           type="password"
+          autoComplete="new-password"
           value={confirmPassword}
           onChange={(event) => onConfirmPasswordChange(event.target.value)}
           required

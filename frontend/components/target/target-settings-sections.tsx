@@ -99,6 +99,8 @@ export function TargetSettingsContent({
           </div>
 
           <Textarea
+            name="blacklistRules"
+            autoComplete="off"
             value={state.blacklistText}
             onChange={state.handleTextChange}
             placeholder={state.t("blacklist.placeholder")}

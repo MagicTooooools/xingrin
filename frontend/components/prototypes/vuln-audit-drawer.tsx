@@ -75,7 +75,7 @@ export function VulnAuditDrawer() {
   return (
     <div className="flex h-[calc(100vh-4rem)] bg-background border rounded-lg overflow-hidden shadow-sm relative">
       {/* Main Table (Full Width) */}
-      <div className={cn("flex-1 flex flex-col transition-all duration-300", selectedId ? "mr-[500px]" : "")}>
+      <div className={cn("flex-1 flex flex-col transition-[color,background-color,border-color,opacity,transform,box-shadow] duration-300", selectedId ? "mr-[500px]" : "")}>
         <div className="h-14 border-b border-border bg-card flex items-center justify-between px-4 shrink-0">
            <div className="flex items-center gap-3">
               <h2 className="font-bold">Vulnerability Audit</h2>
@@ -86,7 +86,7 @@ export function VulnAuditDrawer() {
            </div>
            <div className="w-64 relative">
               <IconSearch className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
-              <Input placeholder="Search vulnerabilities..." className="pl-9" />
+              <Input type="search" name="vulnerabilitySearch" autoComplete="off" placeholder="Search vulnerabilities…" className="pl-9" />
            </div>
         </div>
         
@@ -101,16 +101,17 @@ export function VulnAuditDrawer() {
                        <th className="px-4 py-3 w-24">Method</th>
                        <th className="px-4 py-3">Target</th>
                        <th className="px-4 py-3 w-32 text-right">Status</th>
-                       <th className="px-4 py-3 w-10"></th>
+                       <th className="px-4 py-3 w-10">
+                          <span className="sr-only">Open details</span>
+                       </th>
                     </tr>
                  </thead>
                  <tbody className="text-sm">
                     {items.map(item => (
                        <tr 
                           key={item.id} 
-                          onClick={() => setSelectedId(item.id)}
                           className={cn(
-                             "cursor-pointer border-b border-border/50 hover:bg-muted/50 transition-colors group",
+                             "border-b border-border/50 hover:bg-muted/50 transition-colors group",
                              selectedId === item.id ? "bg-muted/50" : ""
                           )}
                        >
@@ -132,7 +133,14 @@ export function VulnAuditDrawer() {
                              )}
                           </td>
                           <td className="px-4 py-3 text-center text-muted-foreground">
-                             <IconChevronRight className="size-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+                             <button
+                               type="button"
+                               onClick={() => setSelectedId(item.id)}
+                               aria-label={`Open details for ${item.title}`}
+                               className="inline-flex items-center justify-center rounded p-1 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                             >
+                               <IconChevronRight className="size-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+                             </button>
                           </td>
                        </tr>
                     ))}
@@ -158,7 +166,7 @@ export function VulnAuditDrawer() {
                      <span className="text-muted-foreground font-mono">{selectedItem.id}</span>
                      <span>Details</span>
                   </div>
-                  <Button variant="ghost" size="icon" onClick={() => setSelectedId(null)}>
+                  <Button variant="ghost" size="icon" onClick={() => setSelectedId(null)} aria-label="Close details panel">
                      <IconX className="size-4" />
                   </Button>
                </div>

@@ -56,12 +56,17 @@ export function SmartFilterInputMenu({
                 .filter((field) => !currentWord || field.key.startsWith(currentWord.toLowerCase()))
                 .map((field) => (
                   <Badge
+                    asChild
                     key={field.key}
                     variant="outline"
-                    className="text-xs font-mono cursor-pointer hover:bg-accent"
-                    onClick={() => onSelectSuggestion(`${field.key}="`)}
+                    className="text-xs font-mono hover:bg-accent"
                   >
-                    {field.key}
+                    <button
+                      type="button"
+                      onClick={() => onSelectSuggestion(`${field.key}="`)}
+                    >
+                      {field.key}
+                    </button>
                   </Badge>
                 ))}
             </div>

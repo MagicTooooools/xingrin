@@ -48,7 +48,7 @@ export function UnifiedHeader() {
       <div className="flex h-full w-(--sidebar-width) shrink-0 items-center px-4">
         <Link href="/" className="flex items-center gap-3">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={logoSrc} alt="Logo" className="size-7" />
+          <img src={logoSrc} alt="LunaFox Logo" className="size-7" width={28} height={28} />
           <div className="flex flex-col gap-0.5 leading-none">
             <div className="flex items-center gap-2">
               <span className="text-base font-semibold tracking-tight">

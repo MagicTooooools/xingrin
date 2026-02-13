@@ -130,7 +130,7 @@ export function ScanOverviewAssets({ t, assetCards }: ScanOverviewAssetsProps) {
         {assetCards.map((card) => (
           <Link key={card.title} href={card.href} className="block">
             <div
-              className="group relative p-4 hover:bg-accent/5 transition-all duration-300 cursor-pointer"
+              className="group relative p-4 hover:bg-accent/5 transition-[background-color,border-color,box-shadow] duration-300 cursor-pointer"
               style={{ background: "var(--card)" }}
             >
               <div className="absolute inset-0 border border-border/40 group-hover:border-primary/30 transition-colors" />

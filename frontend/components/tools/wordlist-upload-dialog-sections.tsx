@@ -75,6 +75,7 @@ export function WordlistUploadDropzone({
             size="icon"
             className="h-8 w-8 shrink-0"
             onClick={onRemoveFile}
+            aria-label={t("removeFile")}
           >
             <X className="h-4 w-4" />
           </Button>
@@ -92,7 +93,9 @@ export function WordlistUploadDropzone({
                 {t("selectFile")}
                 <input
                   type="file"
+                  name="wordlistFile"
                   accept=".txt"
+                  aria-label={t("selectFile")}
                   className="hidden"
                   onChange={onFileSelect}
                 />
@@ -133,6 +136,8 @@ export function WordlistUploadFields({
         </Label>
         <Input
           id="name"
+          name="name"
+          autoComplete="off"
           value={name}
           onChange={(event) => onNameChange(event.target.value)}
           placeholder={t("namePlaceholder")}
@@ -142,6 +147,8 @@ export function WordlistUploadFields({
         <Label htmlFor="description">{t("descLabel")}</Label>
         <Input
           id="description"
+          name="description"
+          autoComplete="off"
           value={description}
           onChange={(event) => onDescriptionChange(event.target.value)}
           placeholder={t("descPlaceholder")}

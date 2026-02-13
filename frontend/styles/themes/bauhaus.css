@@ -333,7 +333,7 @@
   font-size: 13px;
   font-weight: 500;
   color: var(--muted-foreground);
-  transition: all 0.15s ease;
+  transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
   margin: 0 !important;
   position: relative;
   overflow: hidden; /* 约束伪元素，避免覆盖子菜单 */

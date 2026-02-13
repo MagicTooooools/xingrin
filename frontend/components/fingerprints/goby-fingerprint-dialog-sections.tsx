@@ -77,7 +77,7 @@ export function GobyFingerprintBasicFields({
     <div className="grid grid-cols-2 gap-4">
       <div className="space-y-2">
         <Label htmlFor="name">{tColumns("name") || "Name"} *</Label>
-        <Input
+        <Input autoComplete="off"
           id="name"
           placeholder={t("form.namePlaceholder")}
           {...register("name", { required: t("form.nameRequired") })}
@@ -89,7 +89,7 @@ export function GobyFingerprintBasicFields({
 
       <div className="space-y-2">
         <Label htmlFor="logic">{tColumns("logic")} *</Label>
-        <Input
+        <Input autoComplete="off"
           id="logic"
           placeholder={t("form.logicPlaceholder")}
           {...register("logic", { required: t("form.logicRequired") })}
@@ -160,7 +160,7 @@ export function GobyFingerprintRulesSection({
               </Select>
             </div>
             <div className="flex-1">
-              <Input
+              <Input autoComplete="off"
                 {...register(`rule.${index}.feature` as const, { required: true })}
                 placeholder={t("form.featurePlaceholder")}
                 className="h-8"
@@ -209,7 +209,7 @@ export function GobyFingerprintDialogFooter({
         {tCommon("cancel")}
       </Button>
       <Button type="submit" disabled={isSubmitting}>
-        {isSubmitting ? "..." : isEdit ? tCommon("save") : tCommon("create")}
+        {isSubmitting ? "…" : isEdit ? tCommon("save") : tCommon("create")}
       </Button>
     </DialogFooter>
   )

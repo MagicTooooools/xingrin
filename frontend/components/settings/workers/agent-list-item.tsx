@@ -83,7 +83,7 @@ function MetricBar({ label, value, threshold, className }: MetricBarProps) {
       <span className="text-[10px] text-muted-foreground min-w-[32px]">{label}</span>
       <div className="relative h-1.5 w-16 bg-muted rounded-full overflow-hidden">
         <div
-          className={cn("h-full transition-all duration-300", progressColor)}
+          className={cn("h-full transition-[width,background-color] duration-300", progressColor)}
           style={{ width: `${percentage}%` }}
         />
       </div>
@@ -154,7 +154,7 @@ export function AgentListItem({
   return (
     <div
       className={cn(
-        "group relative rounded-lg border bg-card transition-all duration-200",
+        "group relative rounded-lg border bg-card transition-[background-color,border-color,box-shadow,opacity] duration-200",
         "hover:shadow-md hover:border-primary/20",
         agent.status === "online" && "border-[var(--success)]/20",
         agent.status === "offline" && "border-slate-300/50 opacity-75"
@@ -207,7 +207,7 @@ export function AgentListItem({
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0">
+              <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0" aria-label={t("actions.title")}>
                 <IconDotsVertical className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>

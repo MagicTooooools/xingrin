@@ -52,7 +52,7 @@ export function AuthGuard({ children }: AuthGuardProps) {
 
   // Show loading during authentication check
   if (isLoading) {
-    return <LoadingState message="loading..." />
+    return <LoadingState message="loading…" />
   }
 
   // Render public routes directly
@@ -62,7 +62,7 @@ export function AuthGuard({ children }: AuthGuardProps) {
 
   // Don't render content if not authenticated (waiting for redirect)
   if (!auth?.authenticated) {
-    return <LoadingState message="loading..." />
+    return <LoadingState message="loading…" />
   }
 
   // Render content if authenticated

@@ -1,5 +1,4 @@
 import React from "react"
-import { useRouter } from "next/navigation"
 import { useLocale, useTranslations } from "next-intl"
 
 import { createOrganizationColumns } from "./organization-columns"
@@ -124,19 +123,10 @@ export function useOrganizationListState() {
     setScheduleScanDialogOpen(true)
   }, [])
 
-  const router = useRouter()
-  const navigate = React.useCallback(
-    (path: string) => {
-      router.push(path)
-    },
-    [router]
-  )
-
   const columns = React.useMemo(
     () =>
       createOrganizationColumns({
         formatDate,
-        navigate,
         handleEdit,
         handleDelete,
         handleInitiateScan,
@@ -145,7 +135,6 @@ export function useOrganizationListState() {
       }),
     [
       formatDate,
-      navigate,
       handleEdit,
       handleDelete,
       handleInitiateScan,

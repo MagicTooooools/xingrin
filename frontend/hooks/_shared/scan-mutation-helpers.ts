@@ -27,8 +27,10 @@ export const invalidateScanQueries = async (
   queryClient: QueryClient,
   keys: ScanMutationInvalidationKeys
 ): Promise<void> => {
-  await queryClient.invalidateQueries({ queryKey: keys.all })
-  await queryClient.invalidateQueries({ queryKey: keys.statistics })
+  await Promise.all([
+    queryClient.invalidateQueries({ queryKey: keys.all }),
+    queryClient.invalidateQueries({ queryKey: keys.statistics }),
+  ])
 }
 
 export const handleScanMutationSuccess = async <TData>(
