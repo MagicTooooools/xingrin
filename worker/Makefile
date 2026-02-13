@@ -1,9 +1,10 @@
-.PHONY: help generate test test-metadata clean build
+.PHONY: help generate test test-metadata clean build check-naming
 
 # 默认目标
 help:
 	@echo "Available targets:"
 	@echo "  make generate       - Generate code from templates.yaml"
+	@echo "  make check-naming   - Check naming conventions"
 	@echo "  make test           - Run all tests"
 	@echo "  make test-metadata  - Run metadata consistency tests"
 	@echo "  make clean          - Clean generated files"
@@ -20,8 +21,14 @@ generate:
 	done
 	@echo "✓ Code generation completed"
 
+check-naming:
+	@echo "Checking naming conventions..."
+	@bash ./scripts/check-naming-conventions.sh
+
 # 运行所有测试
 test:
+	@echo "Running naming checks..."
+	@$(MAKE) check-naming
 	@echo "Running all tests..."
 	go test -v ./...
 

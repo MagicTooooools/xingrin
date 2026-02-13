@@ -1,46 +1,5 @@
 package workflow
 
-import (
-	"context"
-
-	"github.com/yyhuni/lunafox/worker/internal/server"
-)
-
-// Workflow defines the workflow interface
-type Workflow interface {
-	// Execute executes the workflow
-	Execute(params *Params) (*Output, error)
-	// Name returns the workflow name
-	Name() string
-	// SaveResults saves results to the server
-	SaveResults(ctx context.Context, client server.ServerClient, params *Params, output *Output) error
-}
-
-// Params defines workflow execution parameters
-type Params struct {
-	ScanID       int
-	TargetID     int
-	TargetName   string
-	TargetType   string
-	WorkDir      string
-	ScanConfig   map[string]any
-	Config       map[string]any
-	ServerClient server.ServerClient
-}
-
-// Output defines workflow output
-type Output struct {
-	Data    interface{}
-	Metrics *Metrics
-}
-
-// Metrics defines workflow execution metrics
-type Metrics struct {
-	ProcessedCount int
-	FailedCount    int
-	FailedTools    []string
-}
-
 // WorkflowNotes defines workflow-level notes by category.
 type WorkflowNotes struct {
 	Global []string `yaml:"global,omitempty" json:"global,omitempty"`
@@ -60,7 +19,7 @@ type DocMetadata struct {
 	ExampleHeader []string          `yaml:"example_header,omitempty" json:"exampleHeader,omitempty"`
 }
 
-// WorkflowMetadata defines workflow metadata structure
+// WorkflowMetadata defines workflow metadata structure.
 type WorkflowMetadata struct {
 	Name        string          `yaml:"name" json:"name"`
 	DisplayName string          `yaml:"display_name" json:"displayName"`
@@ -72,7 +31,7 @@ type WorkflowMetadata struct {
 	Stages      []StageMetadata `yaml:"stages" json:"stages"`
 }
 
-// StageMetadata defines stage metadata structure
+// StageMetadata defines stage metadata structure.
 type StageMetadata struct {
 	ID          string   `yaml:"id" json:"id"`
 	Name        string   `yaml:"name" json:"name"`
