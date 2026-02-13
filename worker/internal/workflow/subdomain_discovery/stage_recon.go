@@ -3,6 +3,7 @@ package subdomain_discovery
 import (
 	"fmt"
 	"path/filepath"
+	"sort"
 
 	"github.com/yyhuni/lunafox/worker/internal/activity"
 	"github.com/yyhuni/lunafox/worker/internal/pkg"
@@ -30,13 +31,31 @@ func (w *Workflow) runReconStage(ctx *workflowContext) stageResult {
 		return stageResult{}
 	}
 
-	for _, domain := range ctx.domains {
-		for _, toolName := range reconTools {
-			if !isToolEnabled(stageConfig, toolName) {
-				continue
-			}
+	enabledTools := make([]string, 0, len(toolsConfig))
+	enabledConfigs := make(map[string]map[string]any, len(toolsConfig))
+	for toolName, rawConfig := range toolsConfig {
+		toolConfig, ok := rawConfig.(map[string]any)
+		if !ok {
+			pkg.Logger.Warn("Invalid tool config type", zap.String("tool", toolName))
+			continue
+		}
+		enabled, _ := toolConfig["enabled"].(bool)
+		if !enabled {
+			continue
+		}
+		enabledTools = append(enabledTools, toolName)
+		enabledConfigs[toolName] = toolConfig
+	}
+	sort.Strings(enabledTools)
 
-			toolConfig, _ := toolsConfig[toolName].(map[string]any)
+	if len(enabledTools) == 0 {
+		pkg.Logger.Debug("No reconnaissance tools enabled")
+		return stageResult{}
+	}
+
+	for _, domain := range ctx.domains {
+		for _, toolName := range enabledTools {
+			toolConfig := enabledConfigs[toolName]
 			cmd := w.createReconCommand(ctx, domain, toolName, toolConfig)
 			if cmd != nil {
 				commands = append(commands, *cmd)
@@ -45,7 +64,7 @@ func (w *Workflow) runReconStage(ctx *workflowContext) stageResult {
 	}
 
 	if len(commands) == 0 {
-		pkg.Logger.Debug("No reconnaissance tools enabled")
+		pkg.Logger.Debug("No reconnaissance commands created")
 		return stageResult{}
 	}
 

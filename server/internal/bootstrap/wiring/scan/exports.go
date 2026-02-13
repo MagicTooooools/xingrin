@@ -23,7 +23,7 @@ func NewScanTaskCancellerAdapter(repo scanrepo.ScanTaskRepository) scanapp.ScanT
 	return newScanTaskCancellerAdapter(repo)
 }
 
-func NewScanTargetLookupAdapter(repo *catalogrepo.TargetRepository) scanapp.CreateTargetLookup {
+func NewScanTargetLookupAdapter(repo *catalogrepo.TargetRepository) scanapp.ScanCreateTargetLookup {
 	return newScanTargetLookupAdapter(repo)
 }
 
@@ -41,7 +41,7 @@ func NewScanApplicationService(
 	domainRepository scandomain.ScanRepository,
 	taskCanceller scanapp.ScanTaskCanceller,
 	notifier scanapp.TaskCancelNotifier,
-	targetLookup scanapp.CreateTargetLookup,
+	targetLookup scanapp.ScanCreateTargetLookup,
 ) *scanapp.ScanFacade {
 	return scanapp.NewScanFacade(queryStore, commandStore, domainRepository, taskCanceller, notifier, targetLookup)
 }

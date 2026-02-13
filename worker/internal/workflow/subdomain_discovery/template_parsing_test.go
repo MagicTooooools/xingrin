@@ -174,7 +174,7 @@ func buildAutoParamsForTemplate(t *testing.T, tmpl activity.CommandTemplate, cfg
 	return params
 }
 
-// TestLoadAllTemplates 验证所有工具模板都能成功加载
+// TestLoadAllTemplates verifies all tool templates can be loaded successfully
 func TestLoadAllTemplates(t *testing.T) {
 	require.NoError(t, pkg.InitLogger("error"))
 	defer pkg.Sync()
@@ -183,7 +183,7 @@ func TestLoadAllTemplates(t *testing.T) {
 	require.NoError(t, err, "Failed to load templates from templates.yaml")
 	require.NotEmpty(t, templates, "Templates should not be empty")
 
-	// 验证所有预期的工具都存在
+	// Verify all expected tools are present
 	expectedTools := []string{
 		toolSubfinder,
 		toolAssetfinder,
@@ -201,7 +201,7 @@ func TestLoadAllTemplates(t *testing.T) {
 	}
 }
 
-// TestGetTemplate 验证 getTemplate 函数能正确获取单个模板
+// TestGetTemplate verifies getTemplate can correctly load a single template
 func TestGetTemplate(t *testing.T) {
 	require.NoError(t, pkg.InitLogger("error"))
 	defer pkg.Sync()
@@ -235,22 +235,22 @@ func TestGetTemplate(t *testing.T) {
 	}
 }
 
-// TestSubfinderTemplateStructure 验证 subfinder 模板的结构
+// TestSubfinderTemplateStructure verifies subfinder template structure
 func TestSubfinderTemplateStructure(t *testing.T) {
 	require.NoError(t, pkg.InitLogger("error"))
 	defer pkg.Sync()
 	tmpl, err := getTemplate(toolSubfinder)
 	require.NoError(t, err)
 
-	// 验证 metadata
+	// Verify metadata
 	assert.Equal(t, "Subfinder", tmpl.Metadata.DisplayName)
 	assert.Equal(t, stageRecon, tmpl.Metadata.Stage)
 	assert.NotEmpty(t, tmpl.Metadata.Description)
 
-	// 验证 base command 包含必要的占位符（允许被 quote 等函数包裹）
+	// Verify base command contains required placeholders (allow wrapped by quote-like functions)
 	assertTemplateUsesVars(t, tmpl.BaseCommand, "Domain", "OutputFile")
 
-	// 验证 runtime_params
+	// Verify runtime_params
 	assert.NotEmpty(t, tmpl.RuntimeParams, "Subfinder should have runtime params")
 	hasTimeout := false
 	for _, param := range tmpl.RuntimeParams {
@@ -263,7 +263,7 @@ func TestSubfinderTemplateStructure(t *testing.T) {
 	}
 	assert.True(t, hasTimeout, "Subfinder should have timeout-runtime parameter")
 
-	// 验证 cli_params
+	// Verify cli_params
 	assert.NotEmpty(t, tmpl.CLIParams, "Subfinder should have CLI params")
 	hasThreads := false
 	for _, param := range tmpl.CLIParams {
@@ -276,27 +276,27 @@ func TestSubfinderTemplateStructure(t *testing.T) {
 	assert.True(t, hasThreads, "Subfinder should have threads-cli parameter")
 }
 
-// TestSubdomainBruteforceTemplateStructure 验证 subdomain-bruteforce 模板的结构
+// TestSubdomainBruteforceTemplateStructure verifies subdomain-bruteforce template structure
 func TestSubdomainBruteforceTemplateStructure(t *testing.T) {
 	require.NoError(t, pkg.InitLogger("error"))
 	defer pkg.Sync()
 	tmpl, err := getTemplate(toolSubdomainBruteforce)
 	require.NoError(t, err)
 
-	// 验证 metadata
+	// Verify metadata
 	assert.Equal(t, "Subdomain Bruteforce", tmpl.Metadata.DisplayName)
 	assert.Equal(t, stageBruteforce, tmpl.Metadata.Stage)
 
-	// 验证 internal_params
+	// Verify internal_params
 	assert.NotEmpty(t, tmpl.InternalParams, "Subdomain bruteforce should have internal params")
 	assert.Contains(t, tmpl.InternalParams, "subdomain-wordlist-base-path-runtime")
 	assert.Contains(t, tmpl.InternalParams, "resolvers-path-cli")
 
-	// 验证 base command（允许被 quote 等函数包裹）
+	// Verify base command (allow wrapped by quote-like functions)
 	assert.Contains(t, tmpl.BaseCommand, "puredns bruteforce")
 	assertTemplateUsesVars(t, tmpl.BaseCommand, "Wordlist", "Domain", "Resolvers", "OutputFile")
 
-	// 验证特定的 CLI 参数
+	// Verify specific CLI parameters
 	paramNames := []string{"threads-cli", "rate-limit-cli", "wildcard-tests-cli", "wildcard-batch-cli"}
 	for _, paramName := range paramNames {
 		found := false
@@ -310,24 +310,24 @@ func TestSubdomainBruteforceTemplateStructure(t *testing.T) {
 	}
 }
 
-// TestSubdomainPermutationResolveTemplateStructure 验证 subdomain-permutation-resolve 模板的结构
+// TestSubdomainPermutationResolveTemplateStructure verifies subdomain-permutation-resolve template structure
 func TestSubdomainPermutationResolveTemplateStructure(t *testing.T) {
 	require.NoError(t, pkg.InitLogger("error"))
 	defer pkg.Sync()
 	tmpl, err := getTemplate(toolSubdomainPermutationResolve)
 	require.NoError(t, err)
 
-	// 验证 metadata
+	// Verify metadata
 	assert.Equal(t, "Subdomain Permutation Resolve", tmpl.Metadata.DisplayName)
 	assert.Equal(t, stagePermutation, tmpl.Metadata.Stage)
 
-	// 验证 base command 包含管道操作（允许被 quote 等函数包裹）
+	// Verify base command includes pipe operations (allow wrapped by quote-like functions)
 	assert.Contains(t, tmpl.BaseCommand, "cat")
 	assert.Contains(t, tmpl.BaseCommand, "dnsgen")
 	assert.Contains(t, tmpl.BaseCommand, "puredns resolve")
 	assertTemplateUsesVars(t, tmpl.BaseCommand, "InputFile", "Resolvers", "OutputFile")
 
-	// 验证特定的 runtime 参数
+	// Verify specific runtime parameters
 	wildcardParams := []string{
 		"wildcard-sample-timeout-runtime",
 		"wildcard-sample-multiplier-runtime",
@@ -346,7 +346,7 @@ func TestSubdomainPermutationResolveTemplateStructure(t *testing.T) {
 	}
 }
 
-// TestCommandGeneration_Subfinder 测试 subfinder 命令生成
+// TestCommandGeneration_Subfinder tests subfinder command generation
 func TestCommandGeneration_Subfinder(t *testing.T) {
 	require.NoError(t, pkg.InitLogger("error"))
 	defer pkg.Sync()
@@ -355,7 +355,7 @@ func TestCommandGeneration_Subfinder(t *testing.T) {
 
 	builder := activity.NewCommandBuilder()
 
-	// 测试用例：基本参数
+	// Test case: basic parameters
 	params := map[string]any{
 		"Domain":         "example.com",
 		"OutputFile":     "/tmp/output.txt",
@@ -370,7 +370,7 @@ func TestCommandGeneration_Subfinder(t *testing.T) {
 	require.NoError(t, err)
 	assert.NotEmpty(t, cmd)
 
-	// 验证命令包含必要的部分
+	// Verify command contains required parts
 	assert.Contains(t, cmd, "subfinder")
 	assert.Contains(t, cmd, "-d example.com")
 	assert.Contains(t, cmd, "-all")
@@ -381,7 +381,7 @@ func TestCommandGeneration_Subfinder(t *testing.T) {
 	t.Logf("Generated command: %s", cmd)
 }
 
-// TestCommandGeneration_SubfinderWithProviderConfig 测试带 provider config 的 subfinder 命令
+// TestCommandGeneration_SubfinderWithProviderConfig tests subfinder command with provider config
 func TestCommandGeneration_SubfinderWithProviderConfig(t *testing.T) {
 	require.NoError(t, pkg.InitLogger("error"))
 	defer pkg.Sync()
@@ -403,13 +403,13 @@ func TestCommandGeneration_SubfinderWithProviderConfig(t *testing.T) {
 	cmd, err := builder.Build(tmpl, params, config)
 	require.NoError(t, err)
 
-	// 验证包含 provider config
+	// Verify provider config is included
 	assert.Contains(t, cmd, "-pc \"/etc/subfinder/config.yaml\"")
 
 	t.Logf("Generated command: %s", cmd)
 }
 
-// TestCommandGeneration_Assetfinder 测试 assetfinder 命令生成
+// TestCommandGeneration_Assetfinder tests assetfinder command generation
 func TestCommandGeneration_Assetfinder(t *testing.T) {
 	require.NoError(t, pkg.InitLogger("error"))
 	defer pkg.Sync()
@@ -437,7 +437,7 @@ func TestCommandGeneration_Assetfinder(t *testing.T) {
 	t.Logf("Generated command: %s", cmd)
 }
 
-// TestCommandGeneration_SubdomainBruteforce 测试 subdomain-bruteforce 命令生成
+// TestCommandGeneration_SubdomainBruteforce tests subdomain-bruteforce command generation
 func TestCommandGeneration_SubdomainBruteforce(t *testing.T) {
 	require.NoError(t, pkg.InitLogger("error"))
 	defer pkg.Sync()
@@ -477,7 +477,7 @@ func TestCommandGeneration_SubdomainBruteforce(t *testing.T) {
 	t.Logf("Generated command: %s", cmd)
 }
 
-// TestCommandGeneration_SubdomainResolve 测试 subdomain-resolve 命令生成
+// TestCommandGeneration_SubdomainResolve tests subdomain-resolve command generation
 func TestCommandGeneration_SubdomainResolve(t *testing.T) {
 	require.NoError(t, pkg.InitLogger("error"))
 	defer pkg.Sync()
@@ -510,7 +510,7 @@ func TestCommandGeneration_SubdomainResolve(t *testing.T) {
 	t.Logf("Generated command: %s", cmd)
 }
 
-// TestCommandGeneration_SubdomainPermutationResolve 测试 subdomain-permutation-resolve 命令生成
+// TestCommandGeneration_SubdomainPermutationResolve tests subdomain-permutation-resolve command generation
 func TestCommandGeneration_SubdomainPermutationResolve(t *testing.T) {
 	require.NoError(t, pkg.InitLogger("error"))
 	defer pkg.Sync()
@@ -538,7 +538,7 @@ func TestCommandGeneration_SubdomainPermutationResolve(t *testing.T) {
 	cmd, err := builder.Build(tmpl, params, config)
 	require.NoError(t, err)
 
-	// 验证管道命令结构
+	// Verify pipeline command structure
 	assert.Contains(t, cmd, "cat \"/tmp/input.txt\"")
 	assert.Contains(t, cmd, "dnsgen -")
 	assert.Contains(t, cmd, "puredns resolve")
@@ -552,7 +552,7 @@ func TestCommandGeneration_SubdomainPermutationResolve(t *testing.T) {
 	t.Logf("Generated command: %s", cmd)
 }
 
-// TestParameterValidation_MissingRequiredParam 测试缺少必填参数的情况
+// TestParameterValidation_MissingRequiredParam tests missing required parameters
 func TestParameterValidation_MissingRequiredParam(t *testing.T) {
 	require.NoError(t, pkg.InitLogger("error"))
 	defer pkg.Sync()
@@ -565,7 +565,7 @@ func TestParameterValidation_MissingRequiredParam(t *testing.T) {
 		"Domain":     "example.com",
 		"OutputFile": "/tmp/output.txt",
 	}
-	// 缺少必填的 timeout-runtime 参数
+	// Missing required timeout-runtime parameter
 	config := map[string]any{
 		"threads-cli": 10,
 	}
@@ -576,7 +576,7 @@ func TestParameterValidation_MissingRequiredParam(t *testing.T) {
 	assert.Contains(t, err.Error(), "timeout-runtime")
 }
 
-// TestParameterValidation_InvalidType 测试参数类型错误的情况
+// TestParameterValidation_InvalidType tests invalid parameter types
 func TestParameterValidation_InvalidType(t *testing.T) {
 	require.NoError(t, pkg.InitLogger("error"))
 	defer pkg.Sync()
@@ -589,7 +589,7 @@ func TestParameterValidation_InvalidType(t *testing.T) {
 		"Domain":     "example.com",
 		"OutputFile": "/tmp/output.txt",
 	}
-	// threads-cli 应该是 integer，但提供了 string
+	// threads-cli should be integer, but string is provided
 	config := map[string]any{
 		"timeout-runtime": 3600,
 		"threads-cli":     "invalid",
@@ -600,7 +600,7 @@ func TestParameterValidation_InvalidType(t *testing.T) {
 	assert.Contains(t, err.Error(), "expected integer")
 }
 
-// TestParameterValidation_OptionalParamOmitted 测试可选参数缺失的情况（应该成功）
+// TestParameterValidation_OptionalParamOmitted tests omitted optional parameters (should succeed)
 func TestParameterValidation_OptionalParamOmitted(t *testing.T) {
 	require.NoError(t, pkg.InitLogger("error"))
 	defer pkg.Sync()
@@ -613,7 +613,7 @@ func TestParameterValidation_OptionalParamOmitted(t *testing.T) {
 		"Domain":     "example.com",
 		"OutputFile": "/tmp/output.txt",
 	}
-	// assetfinder 只有 timeout-runtime 是必填的，没有其他必填的 CLI 参数
+	// For assetfinder, only timeout-runtime is required; no other CLI params are required
 	config := map[string]any{
 		"timeout-runtime": 3600,
 	}
@@ -623,20 +623,20 @@ func TestParameterValidation_OptionalParamOmitted(t *testing.T) {
 	assert.NotEmpty(t, cmd)
 }
 
-// TestInternalParams_SubdomainBruteforce 测试 internal_params 的正确性
+// TestInternalParams_SubdomainBruteforce tests correctness of internal_params
 func TestInternalParams_SubdomainBruteforce(t *testing.T) {
 	require.NoError(t, pkg.InitLogger("error"))
 	defer pkg.Sync()
 	tmpl, err := getTemplate(toolSubdomainBruteforce)
 	require.NoError(t, err)
 
-	// 验证 internal_params 存在且值正确
+	// Verify internal_params exist and values are correct
 	assert.NotEmpty(t, tmpl.InternalParams)
 	assert.Equal(t, "/opt/lunafox/wordlists", tmpl.InternalParams["subdomain-wordlist-base-path-runtime"])
 	assert.Equal(t, "/opt/lunafox/wordlists/resolvers.txt", tmpl.InternalParams["resolvers-path-cli"])
 }
 
-// TestInternalParams_SubdomainResolve 测试 subdomain-resolve 的 internal_params
+// TestInternalParams_SubdomainResolve tests internal_params for subdomain-resolve
 func TestInternalParams_SubdomainResolve(t *testing.T) {
 	require.NoError(t, pkg.InitLogger("error"))
 	defer pkg.Sync()
@@ -647,7 +647,7 @@ func TestInternalParams_SubdomainResolve(t *testing.T) {
 	assert.Equal(t, "/opt/lunafox/wordlists/resolvers.txt", tmpl.InternalParams["resolvers-path-cli"])
 }
 
-// TestAllToolsHaveRequiredMetadata 验证所有工具都有必需的 metadata 字段
+// TestAllToolsHaveRequiredMetadata verifies all tools have required metadata fields
 func TestAllToolsHaveRequiredMetadata(t *testing.T) {
 	require.NoError(t, pkg.InitLogger("error"))
 	defer pkg.Sync()
@@ -664,7 +664,7 @@ func TestAllToolsHaveRequiredMetadata(t *testing.T) {
 	}
 }
 
-// TestAllToolsHaveTimeoutParam 验证所有工具都有 timeout-runtime 参数
+// TestAllToolsHaveTimeoutParam verifies all tools include timeout-runtime parameter
 func TestAllToolsHaveTimeoutParam(t *testing.T) {
 	require.NoError(t, pkg.InitLogger("error"))
 	defer pkg.Sync()
@@ -688,7 +688,7 @@ func TestAllToolsHaveTimeoutParam(t *testing.T) {
 	}
 }
 
-// TestReconToolsHaveThreadsParam 验证所有 recon 工具都有 threads-cli 参数
+// TestReconToolsHaveThreadsParam verifies all recon tools include threads-cli parameter
 func TestReconToolsHaveThreadsParam(t *testing.T) {
 	require.NoError(t, pkg.InitLogger("error"))
 	defer pkg.Sync()
@@ -713,7 +713,7 @@ func TestReconToolsHaveThreadsParam(t *testing.T) {
 	}
 }
 
-// TestCommandTemplateQuoting 测试命令模板中的引号处理
+// TestCommandTemplateQuoting tests quoting behavior in command templates
 func TestCommandTemplateQuoting(t *testing.T) {
 	require.NoError(t, pkg.InitLogger("error"))
 	defer pkg.Sync()
@@ -760,7 +760,7 @@ func TestCommandTemplateQuoting(t *testing.T) {
 	}
 }
 
-// TestCommandGeneration_NoExtraSpaces 验证生成的命令没有多余的空格
+// TestCommandGeneration_NoExtraSpaces verifies generated commands contain no extra spaces
 func TestCommandGeneration_NoExtraSpaces(t *testing.T) {
 	require.NoError(t, pkg.InitLogger("error"))
 	defer pkg.Sync()
@@ -782,14 +782,14 @@ func TestCommandGeneration_NoExtraSpaces(t *testing.T) {
 	cmd, err := builder.Build(tmpl, params, config)
 	require.NoError(t, err)
 
-	// 验证没有连续的多个空格
+	// Verify no consecutive spaces exist
 	assert.NotContains(t, cmd, "  ", "Command should not contain double spaces")
 
-	// 验证命令前后没有空格
+	// Verify command has no leading/trailing spaces
 	assert.Equal(t, strings.TrimSpace(cmd), cmd, "Command should be trimmed")
 }
 
-// TestStageAssignment 验证每个工具都分配到了正确的 stage
+// TestStageAssignment verifies each tool is assigned to the correct stage
 func TestStageAssignment(t *testing.T) {
 	require.NoError(t, pkg.InitLogger("error"))
 	defer pkg.Sync()

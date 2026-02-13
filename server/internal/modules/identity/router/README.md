@@ -1,7 +1,7 @@
 # identity/router
 
 ## Structure
-- Public entry: `identity_module_routes.go` (`RegisterIdentityRoutes`)
+- Public entry: `routes.go` (`RegisterIdentityRoutes`)
 - Other files contain package-private sub-route registrars (`register*Routes`)
 
 ## Files

@@ -21,7 +21,7 @@ func (service *ScanLogService) ListByScanID(ctx context.Context, scanID int, que
 	_, err := service.scanLookup.GetScanLogRefByID(scanID)
 	if err != nil {
 		if dberrors.IsRecordNotFound(err) {
-			return nil, false, ErrScanLogScanNotFound
+			return nil, false, ErrScanNotFound
 		}
 		return nil, false, err
 	}
@@ -45,7 +45,7 @@ func (service *ScanLogService) BulkCreate(ctx context.Context, request *ScanLogB
 	_, err := service.scanLookup.GetScanLogRefByID(scanID)
 	if err != nil {
 		if dberrors.IsRecordNotFound(err) {
-			return 0, ErrScanLogScanNotFound
+			return 0, ErrScanNotFound
 		}
 		return 0, err
 	}

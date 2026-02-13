@@ -32,8 +32,8 @@ func (stub *workerSettingsStoreStub) GetInstance() (*catalogdomain.SubfinderProv
 	return stub.settings, nil
 }
 
-func TestWorkerServiceGetProviderConfigToolRequired(t *testing.T) {
-	service := NewWorkerService(&workerScanGuardStub{}, &workerSettingsStoreStub{})
+func TestWorkerProviderConfigServiceGetProviderConfigToolRequired(t *testing.T) {
+	service := NewWorkerProviderConfigService(&workerScanGuardStub{}, &workerSettingsStoreStub{})
 
 	_, err := service.GetProviderConfig(1, "  ")
 	if !errors.Is(err, ErrWorkerToolRequired) {
@@ -41,9 +41,9 @@ func TestWorkerServiceGetProviderConfigToolRequired(t *testing.T) {
 	}
 }
 
-func TestWorkerServiceGetProviderConfigScanGuardError(t *testing.T) {
+func TestWorkerProviderConfigServiceGetProviderConfigScanGuardError(t *testing.T) {
 	guard := &workerScanGuardStub{err: ErrWorkerScanNotFound}
-	service := NewWorkerService(guard, &workerSettingsStoreStub{})
+	service := NewWorkerProviderConfigService(guard, &workerSettingsStoreStub{})
 
 	_, err := service.GetProviderConfig(9, "subfinder")
 	if !errors.Is(err, ErrWorkerScanNotFound) {
@@ -54,8 +54,8 @@ func TestWorkerServiceGetProviderConfigScanGuardError(t *testing.T) {
 	}
 }
 
-func TestWorkerServiceGetProviderConfigSettingsNotFound(t *testing.T) {
-	service := NewWorkerService(&workerScanGuardStub{}, &workerSettingsStoreStub{err: ErrWorkerProviderSettingsNotFound})
+func TestWorkerProviderConfigServiceGetProviderConfigSettingsNotFound(t *testing.T) {
+	service := NewWorkerProviderConfigService(&workerScanGuardStub{}, &workerSettingsStoreStub{err: ErrWorkerProviderConfigSettingsNotFound})
 
 	config, err := service.GetProviderConfig(1, "subfinder")
 	if err != nil {
@@ -66,12 +66,12 @@ func TestWorkerServiceGetProviderConfigSettingsNotFound(t *testing.T) {
 	}
 }
 
-func TestWorkerServiceGetProviderConfigSubfinder(t *testing.T) {
+func TestWorkerProviderConfigServiceGetProviderConfigSubfinder(t *testing.T) {
 	guard := &workerScanGuardStub{}
-	settings := &catalogdomain.SubfinderProviderSettings{Providers: catalogdomain.ProviderConfigs{
+	settings := &catalogdomain.SubfinderProviderSettings{Providers: catalogdomain.SubfinderProviderConfigs{
 		"fofa": {Enabled: true, Email: "test@example.com", APIKey: "secret"},
 	}}
-	service := NewWorkerService(guard, &workerSettingsStoreStub{settings: settings})
+	service := NewWorkerProviderConfigService(guard, &workerSettingsStoreStub{settings: settings})
 
 	config, err := service.GetProviderConfig(7, "subfinder")
 	if err != nil {

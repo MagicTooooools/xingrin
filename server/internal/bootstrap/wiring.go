@@ -180,9 +180,9 @@ func buildDependencies(infra *infra, cfg *config.Config) *deps {
 	scanLogSvc := scanlogwiring.NewScanLogApplicationService(scanLogQueryStore, scanLogCommandStore, scanLogLookup)
 
 	// Worker module
-	workerScanGuard := workerwiring.NewWorkerScanGuardAdapter(scanRepo)
-	workerSettingsStore := workerwiring.NewWorkerProviderSettingsStoreAdapter(subfinderProviderSettingsRepo)
-	workerSvc := workerwiring.NewWorkerApplicationService(workerScanGuard, workerSettingsStore)
+	workerScanGuard := workerwiring.NewWorkerProviderConfigScanGuardAdapter(scanRepo)
+	workerSettingsStore := workerwiring.NewWorkerProviderConfigSettingsStoreAdapter(subfinderProviderSettingsRepo)
+	workerSvc := workerwiring.NewWorkerProviderConfigApplicationService(workerScanGuard, workerSettingsStore)
 	// Agent module services
 	agentClock := agentinfra.NewSystemClock()
 	agentTokenGenerator := agentinfra.NewCryptoTokenGenerator()

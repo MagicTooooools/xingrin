@@ -19,7 +19,7 @@ func (h *ScanHandler) Delete(c *gin.Context) {
 		return
 	}
 
-	deletedCount, deletedNames, err := h.service.Delete(id)
+	deletedCount, deletedNames, err := h.svc.Delete(id)
 	if err != nil {
 		if errors.Is(err, service.ErrScanNotFound) {
 			dto.NotFound(c, "Scan not found")
@@ -44,7 +44,7 @@ func (h *ScanHandler) BulkDelete(c *gin.Context) {
 		return
 	}
 
-	deletedCount, deletedNames, err := h.service.BulkDelete(req.IDs)
+	deletedCount, deletedNames, err := h.svc.BulkDelete(req.IDs)
 	if err != nil {
 		dto.InternalError(c, "Failed to bulk delete scans")
 		return
@@ -65,7 +65,7 @@ func (h *ScanHandler) HardDelete(c *gin.Context) {
 		return
 	}
 
-	err = h.service.HardDelete(id)
+	err = h.svc.HardDelete(id)
 	if err != nil {
 		if errors.Is(err, service.ErrScanNotFound) {
 			dto.NotFound(c, "Scan not found")
@@ -91,7 +91,7 @@ func (h *ScanHandler) Stop(c *gin.Context) {
 		return
 	}
 
-	revokedCount, err := h.service.Stop(id)
+	revokedCount, err := h.svc.Stop(id)
 	if err != nil {
 		if errors.Is(err, service.ErrScanNotFound) {
 			dto.NotFound(c, "Scan not found")
@@ -127,7 +127,7 @@ func (h *ScanHandler) Create(c *gin.Context) {
 			return
 		}
 
-		scan, err := h.service.CreateNormal(toScanCreateNormalInput(&req))
+		scan, err := h.svc.CreateNormal(toScanCreateNormalInput(&req))
 		if err != nil {
 			if errors.Is(err, service.ErrTargetNotFound) {
 				dto.NotFound(c, "Target not found")

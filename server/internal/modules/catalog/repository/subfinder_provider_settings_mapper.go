@@ -10,9 +10,9 @@ func subfinderProviderSettingsModelToDomain(settings *model.SubfinderProviderSet
 		return nil
 	}
 
-	providers := make(catalogdomain.ProviderConfigs, len(settings.Providers))
+	providers := make(catalogdomain.SubfinderProviderConfigs, len(settings.Providers))
 	for providerName, providerConfig := range settings.Providers {
-		providers[providerName] = catalogdomain.ProviderConfig{
+		providers[providerName] = catalogdomain.SubfinderProviderConfig{
 			Enabled:   providerConfig.Enabled,
 			Email:     providerConfig.Email,
 			APIKey:    providerConfig.APIKey,
@@ -32,9 +32,9 @@ func subfinderProviderSettingsDomainToModel(settings *catalogdomain.SubfinderPro
 		return nil
 	}
 
-	providers := make(model.ProviderConfigs, len(settings.Providers))
+	providers := make(model.SubfinderProviderConfigs, len(settings.Providers))
 	for providerName, providerConfig := range settings.Providers {
-		providers[providerName] = model.ProviderConfig{
+		providers[providerName] = model.SubfinderProviderConfig{
 			Enabled:   providerConfig.Enabled,
 			Email:     providerConfig.Email,
 			APIKey:    providerConfig.APIKey,

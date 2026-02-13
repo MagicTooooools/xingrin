@@ -1,4 +1,4 @@
-package infrastructure
+package application
 
 import (
 	"bufio"
@@ -10,13 +10,12 @@ import (
 	"strings"
 	"time"
 
-	catalogapp "github.com/yyhuni/lunafox/server/internal/modules/catalog/application"
 	catalogdomain "github.com/yyhuni/lunafox/server/internal/modules/catalog/domain"
 )
 
 const wordlistBinaryCheckSize = 8192
 
-var _ catalogapp.WordlistFileStore = (*LocalWordlistFileStore)(nil)
+var _ WordlistFileStore = (*LocalWordlistFileStore)(nil)
 
 type LocalWordlistFileStore struct{}
 
@@ -24,7 +23,7 @@ func NewLocalWordlistFileStore() *LocalWordlistFileStore {
 	return &LocalWordlistFileStore{}
 }
 
-func (store *LocalWordlistFileStore) Save(basePath, filename string, content io.Reader) (*catalogapp.WordlistFileMetadata, error) {
+func (store *LocalWordlistFileStore) Save(basePath, filename string, content io.Reader) (*WordlistFileMetadata, error) {
 	if err := os.MkdirAll(basePath, 0o755); err != nil {
 		return nil, err
 	}
@@ -57,7 +56,7 @@ func (store *LocalWordlistFileStore) Save(basePath, filename string, content io.
 		lineCount = 0
 	}
 
-	return &catalogapp.WordlistFileMetadata{
+	return &WordlistFileMetadata{
 		FilePath:  fullPath,
 		FileSize:  written,
 		LineCount: lineCount,
@@ -65,7 +64,7 @@ func (store *LocalWordlistFileStore) Save(basePath, filename string, content io.
 	}, nil
 }
 
-func (store *LocalWordlistFileStore) Write(path, content string) (*catalogapp.WordlistFileMetadata, error) {
+func (store *LocalWordlistFileStore) Write(path, content string) (*WordlistFileMetadata, error) {
 	if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
 		return nil, err
 	}
@@ -78,7 +77,7 @@ func (store *LocalWordlistFileStore) Write(path, content string) (*catalogapp.Wo
 	hasher := sha256.New()
 	_, _ = hasher.Write([]byte(content))
 
-	return &catalogapp.WordlistFileMetadata{
+	return &WordlistFileMetadata{
 		FilePath:  path,
 		FileSize:  fileInfo.Size(),
 		LineCount: catalogdomain.CountWordlistContentLines(content),
@@ -109,7 +108,7 @@ func (store *LocalWordlistFileStore) Exists(path string) bool {
 	return err == nil
 }
 
-func (store *LocalWordlistFileStore) RefreshMetadata(path string, knownSize int64, knownUpdatedAt time.Time) (*catalogapp.WordlistFileMetadata, bool, error) {
+func (store *LocalWordlistFileStore) RefreshMetadata(path string, knownSize int64, knownUpdatedAt time.Time) (*WordlistFileMetadata, bool, error) {
 	if path == "" {
 		return nil, false, nil
 	}
@@ -133,7 +132,7 @@ func (store *LocalWordlistFileStore) RefreshMetadata(path string, knownSize int6
 		lineCount = 0
 	}
 
-	return &catalogapp.WordlistFileMetadata{
+	return &WordlistFileMetadata{
 		FilePath:  path,
 		FileSize:  fileInfo.Size(),
 		LineCount: lineCount,

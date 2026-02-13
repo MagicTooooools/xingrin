@@ -87,7 +87,7 @@ func TestScanLogServiceScanNotFound(t *testing.T) {
 	service := NewScanLogService(queryCommandStore, queryCommandStore, &scanLookupStub{err: gorm.ErrRecordNotFound})
 
 	_, _, err := service.ListByScanID(context.Background(), 7, &ScanLogListQuery{AfterID: 0, Limit: 20})
-	if !errors.Is(err, ErrScanLogScanNotFound) {
-		t.Fatalf("expected ErrScanLogScanNotFound, got %v", err)
+	if !errors.Is(err, ErrScanNotFound) {
+		t.Fatalf("expected ErrScanNotFound, got %v", err)
 	}
 }

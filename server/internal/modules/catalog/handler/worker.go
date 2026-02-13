@@ -11,11 +11,11 @@ import (
 
 // WorkerHandler handles worker API endpoints
 type WorkerHandler struct {
-	svc *service.WorkerService
+	svc *service.WorkerProviderConfigService
 }
 
 // NewWorkerHandler creates a new worker handler
-func NewWorkerHandler(svc *service.WorkerService) *WorkerHandler {
+func NewWorkerHandler(svc *service.WorkerProviderConfigService) *WorkerHandler {
 	return &WorkerHandler{svc: svc}
 }
 

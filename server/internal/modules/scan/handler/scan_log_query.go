@@ -39,7 +39,7 @@ func (h *ScanLogHandler) List(c *gin.Context) {
 
 	logs, hasMore, err := h.svc.ListByScanID(c.Request.Context(), scanID, toScanLogQueryInput(&query))
 	if err != nil {
-		if errors.Is(err, service.ErrScanLogScanNotFound) || errors.Is(err, service.ErrScanNotFound) {
+		if errors.Is(err, service.ErrScanNotFound) {
 			dto.NotFound(c, "Scan not found")
 			return
 		}

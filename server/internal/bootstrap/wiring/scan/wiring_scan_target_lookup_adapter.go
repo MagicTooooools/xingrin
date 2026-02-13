@@ -14,7 +14,7 @@ func newScanTargetLookupAdapter(repo *catalogrepo.TargetRepository) *scanTargetL
 	return &scanTargetLookupAdapter{repo: repo}
 }
 
-func (adapter *scanTargetLookupAdapter) GetCreateTargetRefByID(id int) (*scanapp.TargetRef, error) {
+func (adapter *scanTargetLookupAdapter) GetTargetRefByID(id int) (*scanapp.TargetRef, error) {
 	target, err := adapter.repo.GetActiveByID(id)
 	if err != nil {
 		return nil, err

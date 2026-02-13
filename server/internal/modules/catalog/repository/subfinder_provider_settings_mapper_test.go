@@ -10,7 +10,7 @@ import (
 func TestSubfinderProviderSettingsModelToDomain(t *testing.T) {
 	settings := &model.SubfinderProviderSettings{
 		ID: 1,
-		Providers: model.ProviderConfigs{
+		Providers: model.SubfinderProviderConfigs{
 			"censys": {
 				Enabled:   true,
 				APIId:     "censys-id",
@@ -45,7 +45,7 @@ func TestSubfinderProviderSettingsModelToDomain(t *testing.T) {
 func TestSubfinderProviderSettingsDomainToModel(t *testing.T) {
 	settings := &catalogdomain.SubfinderProviderSettings{
 		ID: 1,
-		Providers: catalogdomain.ProviderConfigs{
+		Providers: catalogdomain.SubfinderProviderConfigs{
 			"censys": {
 				Enabled:   true,
 				APIID:     "censys-id",

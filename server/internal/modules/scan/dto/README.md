@@ -3,7 +3,7 @@
 scan 模块 DTO 规范：
 
 - `*_dto.go`：按资源拆分放置 scan/scan-log/task 相关 DTO。
-- `common_http.go`：仅作为薄适配层，重导出 `server/internal/modules/httpdto` 的共享 HTTP DTO 能力（绑定、分页、统一错误响应）。
+- `httpdto_adapter.go`：仅作为薄适配层，重导出 `server/internal/modules/httpdto` 的共享 HTTP DTO 能力（绑定、分页、统一错误响应）。
 
 约束：
 

@@ -19,7 +19,7 @@ func (adapter *workerSettingsStoreAdapter) GetInstance() (*catalogdomain.Subfind
 	settings, err := adapter.repo.GetInstance()
 	if err != nil {
 		if dberrors.IsRecordNotFound(err) {
-			return nil, catalogapp.ErrWorkerProviderSettingsNotFound
+			return nil, catalogapp.ErrWorkerProviderConfigSettingsNotFound
 		}
 		return nil, err
 	}

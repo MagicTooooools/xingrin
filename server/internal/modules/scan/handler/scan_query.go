@@ -11,12 +11,12 @@ import (
 
 // ScanHandler handles scan HTTP requests.
 type ScanHandler struct {
-	service *service.ScanFacade
+	svc *service.ScanFacade
 }
 
 // NewScanHandler creates a new scan handler.
-func NewScanHandler(service *service.ScanFacade) *ScanHandler {
-	return &ScanHandler{service: service}
+func NewScanHandler(svc *service.ScanFacade) *ScanHandler {
+	return &ScanHandler{svc: svc}
 }
 
 // List returns paginated scans.
@@ -27,7 +27,7 @@ func (h *ScanHandler) List(c *gin.Context) {
 		return
 	}
 
-	scans, total, err := h.service.List(toScanQueryInput(&query))
+	scans, total, err := h.svc.List(toScanQueryInput(&query))
 	if err != nil {
 		dto.InternalError(c, "Failed to list scans")
 		return
@@ -50,7 +50,7 @@ func (h *ScanHandler) GetByID(c *gin.Context) {
 		return
 	}
 
-	scan, err := h.service.GetByID(id)
+	scan, err := h.svc.GetByID(id)
 	if err != nil {
 		if errors.Is(err, service.ErrScanNotFound) {
 			dto.NotFound(c, "Scan not found")
@@ -66,7 +66,7 @@ func (h *ScanHandler) GetByID(c *gin.Context) {
 // Statistics returns scan statistics.
 // GET /api/scans/stats
 func (h *ScanHandler) Statistics(c *gin.Context) {
-	stats, err := h.service.GetStatistics()
+	stats, err := h.svc.GetStatistics()
 	if err != nil {
 		dto.InternalError(c, "Failed to get scan statistics")
 		return

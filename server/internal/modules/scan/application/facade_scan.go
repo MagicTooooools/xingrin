@@ -7,7 +7,6 @@ import (
 )
 
 var (
-	ErrScanNotFound           = errors.New("scan not found")
 	ErrScanTargetNotFound     = errors.New("scan target not found")
 	ErrScanCannotStop         = errors.New("scan cannot be stopped in current status")
 	ErrScanHardDeleteNotReady = errors.New("scan hard delete not implemented")
@@ -32,7 +31,7 @@ func NewScanFacade(
 	domainCommandStore scandomain.ScanRepository,
 	taskCanceller ScanTaskCanceller,
 	notifier TaskCancelNotifier,
-	targetLookup CreateTargetLookup,
+	targetLookup ScanCreateTargetLookup,
 ) *ScanFacade {
 	service := &ScanFacade{queryStore: queryStore, commandStore: scanCommandStore}
 
@@ -49,7 +48,7 @@ func NewScanFacade(
 
 		var lookupFn func(id int) (*TargetRef, error)
 		if targetLookup != nil {
-			lookupFn = targetLookup.GetCreateTargetRefByID
+			lookupFn = targetLookup.GetTargetRefByID
 		}
 		service.createService = NewScanCreateService(scanCommandStore, lookupFn)
 	}

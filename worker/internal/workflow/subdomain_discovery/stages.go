@@ -7,9 +7,6 @@ import (
 	"github.com/yyhuni/lunafox/worker/internal/server"
 )
 
-// reconTools lists all reconnaissance tools (references auto-generated constants)
-var reconTools = []string{toolSubfinder, toolSublist3r, toolAssetfinder}
-
 // workflowContext holds shared context for stage execution
 type workflowContext struct {
 	ctx                context.Context
