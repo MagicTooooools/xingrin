@@ -14,7 +14,11 @@ import (
 	"go.uber.org/zap"
 )
 
-const defaultMaxRuntime = 7 * 24 * time.Hour
+const (
+	defaultMaxRuntime    = 7 * 24 * time.Hour
+	dockerActionTimeout  = 10 * time.Second
+	dockerTailLogTimeout = 5 * time.Second
+)
 
 // Executor runs tasks inside worker containers.
 type Executor struct {
@@ -84,7 +88,12 @@ func (e *Executor) Start(ctx context.Context, tasks <-chan *domain.Task) {
 				e.clearCancelled(t.ID)
 				continue
 			}
-			go e.execute(ctx, t)
+
+			e.wg.Add(1)
+			go func(task *domain.Task) {
+				defer e.wg.Done()
+				e.execute(ctx, task)
+			}(t)
 		}
 	}
 }
@@ -123,8 +132,6 @@ func (e *Executor) reportStatus(ctx context.Context, taskID int, status, errorMe
 }
 
 func (e *Executor) execute(ctx context.Context, t *domain.Task) {
-	e.wg.Add(1)
-	defer e.wg.Done()
 	defer e.clearCancelled(t.ID)
 
 	if e.counter != nil {
@@ -164,7 +171,7 @@ func (e *Executor) execute(ctx context.Context, t *domain.Task) {
 		zap.String("containerId", containerID),
 	)
 	defer func() {
-		_ = e.docker.Remove(context.Background(), containerID)
+		e.removeContainer(containerID)
 	}()
 
 	e.trackCancel(t.ID, cancel)
@@ -212,7 +219,7 @@ func (e *Executor) execute(ctx context.Context, t *domain.Task) {
 		return
 	}
 
-	logs, _ := e.docker.TailLogs(context.Background(), containerID, 100)
+	logs, _ := e.tailLogs(containerID, 100)
 	message := logs
 	if message == "" {
 		message = fmt.Sprintf("container exited with code %d", exitCode)
@@ -229,7 +236,7 @@ func (e *Executor) execute(ctx context.Context, t *domain.Task) {
 }
 
 func (e *Executor) handleCancel(ctx context.Context, t *domain.Task, containerID string) {
-	_ = e.docker.Stop(context.Background(), containerID)
+	e.stopContainer(containerID)
 	logger.Log.Info("worker container cancelled",
 		zap.Int("taskId", t.ID),
 		zap.Int("scanId", t.ScanID),
@@ -239,7 +246,7 @@ func (e *Executor) handleCancel(ctx context.Context, t *domain.Task, containerID
 }
 
 func (e *Executor) handleTimeout(ctx context.Context, t *domain.Task, containerID string) {
-	_ = e.docker.Stop(context.Background(), containerID)
+	e.stopContainer(containerID)
 	logger.Log.Warn("worker container timed out",
 		zap.Int("taskId", t.ID),
 		zap.Int("scanId", t.ScanID),
@@ -272,6 +279,34 @@ func (e *Executor) clearCancelled(taskID int) {
 	e.cancelMu.Lock()
 	delete(e.cancelled, taskID)
 	e.cancelMu.Unlock()
+}
+
+func (e *Executor) stopContainer(containerID string) {
+	ctx, cancel := context.WithTimeout(context.Background(), dockerActionTimeout)
+	defer cancel()
+	if err := e.docker.Stop(ctx, containerID); err != nil {
+		logger.Log.Warn("failed to stop worker container",
+			zap.String("containerId", containerID),
+			zap.Error(err),
+		)
+	}
+}
+
+func (e *Executor) removeContainer(containerID string) {
+	ctx, cancel := context.WithTimeout(context.Background(), dockerActionTimeout)
+	defer cancel()
+	if err := e.docker.Remove(ctx, containerID); err != nil {
+		logger.Log.Warn("failed to remove worker container",
+			zap.String("containerId", containerID),
+			zap.Error(err),
+		)
+	}
+}
+
+func (e *Executor) tailLogs(containerID string, lines int) (string, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), dockerTailLogTimeout)
+	defer cancel()
+	return e.docker.TailLogs(ctx, containerID, lines)
 }
 
 // CancelAll requests cancellation for all running tasks.

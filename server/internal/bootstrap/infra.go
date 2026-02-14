@@ -76,6 +76,9 @@ func initInfra(cfg *config.Config, migrationsFS embed.FS) *infra {
 		defer cancel()
 		if err := redisClient.Ping(rcCtx).Err(); err != nil {
 			pkg.Warn("Failed to connect to Redis, continuing without Redis", zap.Error(err))
+			if closeErr := redisClient.Close(); closeErr != nil {
+				pkg.Warn("Failed to close Redis client after ping failure", zap.Error(closeErr))
+			}
 			redisClient = nil
 		} else {
 			pkg.Info("Redis connected", zap.String("addr", cfg.Redis.Addr()))

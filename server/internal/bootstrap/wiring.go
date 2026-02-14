@@ -78,70 +78,222 @@ type deps struct {
 	scanTaskRepo scanrepo.ScanTaskRepository
 }
 
+type repositoryBundle struct {
+	userRepo                      *identityrepo.UserRepository
+	orgRepo                       *identityrepo.OrganizationRepository
+	targetRepo                    *catalogrepo.TargetRepository
+	engineRepo                    *catalogrepo.EngineRepository
+	wordlistRepo                  *catalogrepo.WordlistRepository
+	websiteRepo                   *assetrepo.WebsiteRepository
+	subdomainRepo                 *assetrepo.SubdomainRepository
+	endpointRepo                  *assetrepo.EndpointRepository
+	directoryRepo                 *assetrepo.DirectoryRepository
+	hostPortRepo                  *assetrepo.HostPortRepository
+	screenshotRepo                *assetrepo.ScreenshotRepository
+	vulnerabilityRepo             securityrepo.VulnerabilityRepository
+	scanRepo                      *scanrepo.ScanRepository
+	scanLogRepo                   *scanrepo.ScanLogRepository
+	subfinderProviderSettingsRepo *catalogrepo.SubfinderProviderSettingsRepository
+	websiteSnapshotRepo           *snapshotrepo.WebsiteSnapshotRepository
+	subdomainSnapshotRepo         *snapshotrepo.SubdomainSnapshotRepository
+	endpointSnapshotRepo          *snapshotrepo.EndpointSnapshotRepository
+	directorySnapshotRepo         *snapshotrepo.DirectorySnapshotRepository
+	hostPortSnapshotRepo          *snapshotrepo.HostPortSnapshotRepository
+	screenshotSnapshotRepo        *snapshotrepo.ScreenshotSnapshotRepository
+	vulnerabilitySnapshotRepo     *snapshotrepo.VulnerabilitySnapshotRepository
+	agentRepo                     agentdomain.AgentRepository
+	registrationTokenRepo         agentdomain.RegistrationTokenRepository
+	scanTaskRepo                  scanrepo.ScanTaskRepository
+}
+
+type identityModuleHandlers struct {
+	authHandler *identityhandler.AuthHandler
+	userHandler *identityhandler.UserHandler
+	orgHandler  *identityhandler.OrganizationHandler
+}
+
+type catalogModuleHandlers struct {
+	targetHandler   *cataloghandler.TargetHandler
+	engineHandler   *cataloghandler.EngineHandler
+	wordlistHandler *cataloghandler.WordlistHandler
+}
+
+type assetModuleWiring struct {
+	websiteHandler    *websitehandler.WebsiteHandler
+	subdomainHandler  *subdomainhandler.SubdomainHandler
+	endpointHandler   *endpointhandler.EndpointHandler
+	directoryHandler  *directoryhandler.DirectoryHandler
+	hostPortHandler   *hostporthandler.HostPortHandler
+	screenshotHandler *screenshothandler.ScreenshotHandler
+
+	websiteSvc    *assetservice.WebsiteFacade
+	subdomainSvc  *assetservice.SubdomainFacade
+	endpointSvc   *assetservice.EndpointFacade
+	directorySvc  *assetservice.DirectoryFacade
+	hostPortSvc   *assetservice.HostPortFacade
+	screenshotSvc *assetservice.ScreenshotFacade
+}
+
+type securityModuleWiring struct {
+	vulnerabilityHandler *securityhandler.VulnerabilityHandler
+	vulnerabilitySvc     *securityservice.VulnerabilityFacade
+}
+
+type scanModuleWiring struct {
+	scanHandler     *scanhandler.ScanHandler
+	scanLogHandler  *scanhandler.ScanLogHandler
+	workerScanHdlr  *scanhandler.WorkerScanHandler
+	scanTaskRuntime agentservice.ScanTaskRuntimePort
+}
+
+type workerModuleHandlers struct {
+	workerHandler *cataloghandler.WorkerHandler
+}
+
+type agentModuleHandlers struct {
+	agentHandler     *agenthandler.AgentHandler
+	agentWSHandler   *agenthandler.AgentWebSocketHandler
+	agentTaskHandler *agenthandler.AgentTaskHandler
+}
+
+type snapshotModuleHandlers struct {
+	websiteSnapshotHandler       *snapshothandler.WebsiteSnapshotHandler
+	subdomainSnapshotHandler     *snapshothandler.SubdomainSnapshotHandler
+	endpointSnapshotHandler      *snapshothandler.EndpointSnapshotHandler
+	directorySnapshotHandler     *snapshothandler.DirectorySnapshotHandler
+	hostPortSnapshotHandler      *snapshothandler.HostPortSnapshotHandler
+	screenshotSnapshotHandler    *snapshothandler.ScreenshotSnapshotHandler
+	vulnerabilitySnapshotHandler *snapshothandler.VulnerabilitySnapshotHandler
+}
+
 func buildDependencies(infra *infra, cfg *config.Config) *deps {
+	repos := newRepositoryBundle(infra)
+
+	identity := wireIdentityModule(repos, infra)
+	catalog := wireCatalogModule(repos, cfg)
+	asset := wireAssetModule(repos)
+	security := wireSecurityModule(repos)
+	scan := wireScanModule(repos, infra)
+	worker := wireWorkerModule(repos)
+	agent := wireAgentModule(repos, infra, cfg, scan.scanTaskRuntime)
+	snapshot := wireSnapshotModule(repos, asset, security)
+	presetHandler := cataloghandler.NewPresetHandler(preset.NewService(infra.presetLoader))
+
+	return &deps{
+		healthHandler:        assethandler.NewHealthHandler(infra.db, infra.redisClient),
+		authHandler:          identity.authHandler,
+		userHandler:          identity.userHandler,
+		orgHandler:           identity.orgHandler,
+		targetHandler:        catalog.targetHandler,
+		engineHandler:        catalog.engineHandler,
+		wordlistHandler:      catalog.wordlistHandler,
+		websiteHandler:       asset.websiteHandler,
+		subdomainHandler:     asset.subdomainHandler,
+		endpointHandler:      asset.endpointHandler,
+		directoryHandler:     asset.directoryHandler,
+		hostPortHandler:      asset.hostPortHandler,
+		screenshotHandler:    asset.screenshotHandler,
+		vulnerabilityHandler: security.vulnerabilityHandler,
+		scanHandler:          scan.scanHandler,
+		scanLogHandler:       scan.scanLogHandler,
+		workerHandler:        worker.workerHandler,
+		workerScanHandler:    scan.workerScanHdlr,
+
+		agentHandler:     agent.agentHandler,
+		agentWSHandler:   agent.agentWSHandler,
+		agentTaskHandler: agent.agentTaskHandler,
+
+		websiteSnapshotHandler:       snapshot.websiteSnapshotHandler,
+		subdomainSnapshotHandler:     snapshot.subdomainSnapshotHandler,
+		endpointSnapshotHandler:      snapshot.endpointSnapshotHandler,
+		directorySnapshotHandler:     snapshot.directorySnapshotHandler,
+		hostPortSnapshotHandler:      snapshot.hostPortSnapshotHandler,
+		screenshotSnapshotHandler:    snapshot.screenshotSnapshotHandler,
+		vulnerabilitySnapshotHandler: snapshot.vulnerabilitySnapshotHandler,
+		presetHandler:                presetHandler,
+
+		agentRepo:    repos.agentRepo,
+		scanTaskRepo: repos.scanTaskRepo,
+	}
+}
+
+func newRepositoryBundle(infra *infra) *repositoryBundle {
 	db := infra.db
+	return &repositoryBundle{
+		userRepo:                      identityrepo.NewUserRepository(db),
+		orgRepo:                       identityrepo.NewOrganizationRepository(db),
+		targetRepo:                    catalogrepo.NewTargetRepository(db),
+		engineRepo:                    catalogrepo.NewEngineRepository(db),
+		wordlistRepo:                  catalogrepo.NewWordlistRepository(db),
+		websiteRepo:                   assetrepo.NewWebsiteRepository(db),
+		subdomainRepo:                 assetrepo.NewSubdomainRepository(db),
+		endpointRepo:                  assetrepo.NewEndpointRepository(db),
+		directoryRepo:                 assetrepo.NewDirectoryRepository(db),
+		hostPortRepo:                  assetrepo.NewHostPortRepository(db),
+		screenshotRepo:                assetrepo.NewScreenshotRepository(db),
+		vulnerabilityRepo:             securityrepo.NewVulnerabilityRepository(db),
+		scanRepo:                      scanrepo.NewScanRepository(db),
+		scanLogRepo:                   scanrepo.NewScanLogRepository(db),
+		subfinderProviderSettingsRepo: catalogrepo.NewSubfinderProviderSettingsRepository(db),
+		websiteSnapshotRepo:           snapshotrepo.NewWebsiteSnapshotRepository(db),
+		subdomainSnapshotRepo:         snapshotrepo.NewSubdomainSnapshotRepository(db),
+		endpointSnapshotRepo:          snapshotrepo.NewEndpointSnapshotRepository(db),
+		directorySnapshotRepo:         snapshotrepo.NewDirectorySnapshotRepository(db),
+		hostPortSnapshotRepo:          snapshotrepo.NewHostPortSnapshotRepository(db),
+		screenshotSnapshotRepo:        snapshotrepo.NewScreenshotSnapshotRepository(db),
+		vulnerabilitySnapshotRepo:     snapshotrepo.NewVulnerabilitySnapshotRepository(db),
+		agentRepo:                     agentrepo.NewAgentRepository(db),
+		registrationTokenRepo:         agentrepo.NewRegistrationTokenRepository(db),
+		scanTaskRepo:                  scanrepo.NewScanTaskRepository(db),
+	}
+}
 
-	// Base repositories
-	userRepo := identityrepo.NewUserRepository(db)
-	orgRepo := identityrepo.NewOrganizationRepository(db)
-	targetRepo := catalogrepo.NewTargetRepository(db)
-	engineRepo := catalogrepo.NewEngineRepository(db)
-	wordlistRepo := catalogrepo.NewWordlistRepository(db)
-	websiteRepo := assetrepo.NewWebsiteRepository(db)
-	subdomainRepo := assetrepo.NewSubdomainRepository(db)
-	endpointRepo := assetrepo.NewEndpointRepository(db)
-	directoryRepo := assetrepo.NewDirectoryRepository(db)
-	hostPortRepo := assetrepo.NewHostPortRepository(db)
-	screenshotRepo := assetrepo.NewScreenshotRepository(db)
-	vulnerabilityRepo := securityrepo.NewVulnerabilityRepository(db)
-	scanRepo := scanrepo.NewScanRepository(db)
-	scanLogRepo := scanrepo.NewScanLogRepository(db)
-	subfinderProviderSettingsRepo := catalogrepo.NewSubfinderProviderSettingsRepository(db)
-	websiteSnapshotRepo := snapshotrepo.NewWebsiteSnapshotRepository(db)
-	subdomainSnapshotRepo := snapshotrepo.NewSubdomainSnapshotRepository(db)
-	endpointSnapshotRepo := snapshotrepo.NewEndpointSnapshotRepository(db)
-	directorySnapshotRepo := snapshotrepo.NewDirectorySnapshotRepository(db)
-	hostPortSnapshotRepo := snapshotrepo.NewHostPortSnapshotRepository(db)
-	screenshotSnapshotRepo := snapshotrepo.NewScreenshotSnapshotRepository(db)
-	vulnerabilitySnapshotRepo := snapshotrepo.NewVulnerabilitySnapshotRepository(db)
-
-	// Agent-specific repositories
-	agentRepo := agentrepo.NewAgentRepository(db)
-	registrationTokenRepo := agentrepo.NewRegistrationTokenRepository(db)
-	scanTaskRepo := scanrepo.NewScanTaskRepository(db)
-
-	// Identity module: stores and services
-	identityUserQueryStore := identitywiring.NewIdentityUserQueryStoreAdapter(userRepo)
-	identityUserCommandStore := identitywiring.NewIdentityUserCommandStoreAdapter(userRepo)
-	identityOrgQueryStore := identitywiring.NewIdentityOrganizationQueryStoreAdapter(orgRepo)
-	identityOrgCommandStore := identitywiring.NewIdentityOrganizationCommandStoreAdapter(orgRepo)
-	identityAuthUserStore := identitywiring.NewIdentityAuthUserStoreAdapter(userRepo)
+func wireIdentityModule(repos *repositoryBundle, infra *infra) identityModuleHandlers {
+	identityUserQueryStore := identitywiring.NewIdentityUserQueryStoreAdapter(repos.userRepo)
+	identityUserCommandStore := identitywiring.NewIdentityUserCommandStoreAdapter(repos.userRepo)
+	identityOrgQueryStore := identitywiring.NewIdentityOrganizationQueryStoreAdapter(repos.orgRepo)
+	identityOrgCommandStore := identitywiring.NewIdentityOrganizationCommandStoreAdapter(repos.orgRepo)
+	identityAuthUserStore := identitywiring.NewIdentityAuthUserStoreAdapter(repos.userRepo)
 
 	userSvc := identityservice.NewUserFacade(identityUserQueryStore, identityUserCommandStore)
 	orgSvc := identityservice.NewOrganizationFacade(identityOrgQueryStore, identityOrgCommandStore)
 	authSvc := identityservice.NewAuthFacade(identityAuthUserStore, infra.jwtManager)
 
-	// Catalog module: stores and services
-	catalogTargetQueryStore := catalogwiring.NewCatalogTargetQueryStoreAdapter(targetRepo)
-	catalogTargetCommandStore := catalogwiring.NewCatalogTargetCommandStoreAdapter(targetRepo)
-	catalogEngineQueryStore := catalogwiring.NewCatalogEngineQueryStoreAdapter(engineRepo)
-	catalogEngineCommandStore := catalogwiring.NewCatalogEngineCommandStoreAdapter(engineRepo)
-	catalogWordlistQueryStore := catalogwiring.NewCatalogWordlistQueryStoreAdapter(wordlistRepo)
-	catalogWordlistCommandStore := catalogwiring.NewCatalogWordlistCommandStoreAdapter(wordlistRepo)
-	catalogOrganizationTargetBindingStore := catalogwiring.NewCatalogOrganizationTargetBindingStoreAdapter(orgRepo)
+	return identityModuleHandlers{
+		authHandler: identityhandler.NewAuthHandler(authSvc),
+		userHandler: identityhandler.NewUserHandler(userSvc),
+		orgHandler:  identityhandler.NewOrganizationHandler(orgSvc),
+	}
+}
+
+func wireCatalogModule(repos *repositoryBundle, cfg *config.Config) catalogModuleHandlers {
+	catalogTargetQueryStore := catalogwiring.NewCatalogTargetQueryStoreAdapter(repos.targetRepo)
+	catalogTargetCommandStore := catalogwiring.NewCatalogTargetCommandStoreAdapter(repos.targetRepo)
+	catalogEngineQueryStore := catalogwiring.NewCatalogEngineQueryStoreAdapter(repos.engineRepo)
+	catalogEngineCommandStore := catalogwiring.NewCatalogEngineCommandStoreAdapter(repos.engineRepo)
+	catalogWordlistQueryStore := catalogwiring.NewCatalogWordlistQueryStoreAdapter(repos.wordlistRepo)
+	catalogWordlistCommandStore := catalogwiring.NewCatalogWordlistCommandStoreAdapter(repos.wordlistRepo)
+	catalogOrganizationTargetBindingStore := catalogwiring.NewCatalogOrganizationTargetBindingStoreAdapter(repos.orgRepo)
 
 	targetSvc := catalogservice.NewTargetFacade(catalogTargetQueryStore, catalogTargetCommandStore, catalogOrganizationTargetBindingStore)
 	engineSvc := catalogservice.NewEngineFacade(catalogEngineQueryStore, catalogEngineCommandStore)
 	wordlistSvc := catalogservice.NewWordlistFacade(catalogWordlistQueryStore, catalogWordlistCommandStore, cfg.Storage.WordlistsBasePath)
 
-	// Asset module: stores and services
-	assetTargetLookup := assetwiring.NewAssetTargetLookupAdapter(targetRepo)
-	assetWebsiteStore := assetwiring.NewAssetWebsiteStoreAdapter(websiteRepo)
-	assetSubdomainStore := assetwiring.NewAssetSubdomainStoreAdapter(subdomainRepo)
-	assetEndpointStore := assetwiring.NewAssetEndpointStoreAdapter(endpointRepo)
-	assetDirectoryStore := assetwiring.NewAssetDirectoryStoreAdapter(directoryRepo)
-	assetHostPortStore := assetwiring.NewAssetHostPortStoreAdapter(hostPortRepo)
-	assetScreenshotStore := assetwiring.NewAssetScreenshotStoreAdapter(screenshotRepo)
+	return catalogModuleHandlers{
+		targetHandler:   cataloghandler.NewTargetHandler(targetSvc),
+		engineHandler:   cataloghandler.NewEngineHandler(engineSvc),
+		wordlistHandler: cataloghandler.NewWordlistHandler(wordlistSvc),
+	}
+}
+
+func wireAssetModule(repos *repositoryBundle) assetModuleWiring {
+	assetTargetLookup := assetwiring.NewAssetTargetLookupAdapter(repos.targetRepo)
+	assetWebsiteStore := assetwiring.NewAssetWebsiteStoreAdapter(repos.websiteRepo)
+	assetSubdomainStore := assetwiring.NewAssetSubdomainStoreAdapter(repos.subdomainRepo)
+	assetEndpointStore := assetwiring.NewAssetEndpointStoreAdapter(repos.endpointRepo)
+	assetDirectoryStore := assetwiring.NewAssetDirectoryStoreAdapter(repos.directoryRepo)
+	assetHostPortStore := assetwiring.NewAssetHostPortStoreAdapter(repos.hostPortRepo)
+	assetScreenshotStore := assetwiring.NewAssetScreenshotStoreAdapter(repos.screenshotRepo)
 
 	websiteSvc := assetservice.NewWebsiteFacade(assetWebsiteStore, assetTargetLookup)
 	subdomainSvc := assetservice.NewSubdomainFacade(assetSubdomainStore, assetTargetLookup)
@@ -150,23 +302,44 @@ func buildDependencies(infra *infra, cfg *config.Config) *deps {
 	hostPortSvc := assetservice.NewHostPortFacade(assetHostPortStore, assetTargetLookup)
 	screenshotSvc := assetservice.NewScreenshotFacade(assetScreenshotStore, assetTargetLookup)
 
-	// Security module
-	securityVulnerabilityStore := securitywiring.NewSecurityVulnerabilityStoreAdapter(vulnerabilityRepo)
-	securityTargetLookup := securitywiring.NewSecurityTargetLookupAdapter(targetRepo)
+	return assetModuleWiring{
+		websiteHandler:    websitehandler.NewWebsiteHandler(websiteSvc),
+		subdomainHandler:  subdomainhandler.NewSubdomainHandler(subdomainSvc),
+		endpointHandler:   endpointhandler.NewEndpointHandler(endpointSvc),
+		directoryHandler:  directoryhandler.NewDirectoryHandler(directorySvc),
+		hostPortHandler:   hostporthandler.NewHostPortHandler(hostPortSvc),
+		screenshotHandler: screenshothandler.NewScreenshotHandler(screenshotSvc),
+		websiteSvc:        websiteSvc,
+		subdomainSvc:      subdomainSvc,
+		endpointSvc:       endpointSvc,
+		directorySvc:      directorySvc,
+		hostPortSvc:       hostPortSvc,
+		screenshotSvc:     screenshotSvc,
+	}
+}
+
+func wireSecurityModule(repos *repositoryBundle) securityModuleWiring {
+	securityVulnerabilityStore := securitywiring.NewSecurityVulnerabilityStoreAdapter(repos.vulnerabilityRepo)
+	securityTargetLookup := securitywiring.NewSecurityTargetLookupAdapter(repos.targetRepo)
 	vulnerabilitySvc := securityservice.NewVulnerabilityFacade(securityVulnerabilityStore, securityTargetLookup)
 
-	// Scan and scan-log modules
-	scanQueryStore := scanwiring.NewScanQueryStoreAdapter(scanRepo)
-	scanCommandStore := scanwiring.NewScanCommandStoreAdapter(scanRepo)
-	scanDomainRepository := scanwiring.NewScanDomainRepositoryAdapter(scanRepo)
-	scanTaskStore := scanwiring.NewScanTaskStoreAdapter(scanTaskRepo)
-	scanTaskRuntimeStore := scanwiring.NewScanTaskRuntimeStoreAdapter(scanRepo)
-	scanLogQueryStore := scanlogwiring.NewScanLogQueryStoreAdapter(scanLogRepo)
-	scanLogCommandStore := scanlogwiring.NewScanLogCommandStoreAdapter(scanLogRepo)
+	return securityModuleWiring{
+		vulnerabilityHandler: securityhandler.NewVulnerabilityHandler(vulnerabilitySvc),
+		vulnerabilitySvc:     vulnerabilitySvc,
+	}
+}
 
-	scanTaskCanceller := scanwiring.NewScanTaskCancellerAdapter(scanTaskRepo)
-	scanTargetLookup := scanwiring.NewScanTargetLookupAdapter(targetRepo)
-	scanLogLookup := scanlogwiring.NewScanLogScanLookupAdapter(scanRepo)
+func wireScanModule(repos *repositoryBundle, infra *infra) scanModuleWiring {
+	scanQueryStore := scanwiring.NewScanQueryStoreAdapter(repos.scanRepo)
+	scanCommandStore := scanwiring.NewScanCommandStoreAdapter(repos.scanRepo)
+	scanDomainRepository := scanwiring.NewScanDomainRepositoryAdapter(repos.scanRepo)
+	scanTaskStore := scanwiring.NewScanTaskStoreAdapter(repos.scanTaskRepo)
+	scanTaskRuntimeStore := scanwiring.NewScanTaskRuntimeStoreAdapter(repos.scanRepo)
+	scanLogQueryStore := scanlogwiring.NewScanLogQueryStoreAdapter(repos.scanLogRepo)
+	scanLogCommandStore := scanlogwiring.NewScanLogCommandStoreAdapter(repos.scanLogRepo)
+	scanTaskCanceller := scanwiring.NewScanTaskCancellerAdapter(repos.scanTaskRepo)
+	scanTargetLookup := scanwiring.NewScanTargetLookupAdapter(repos.targetRepo)
+	scanLogLookup := scanlogwiring.NewScanLogScanLookupAdapter(repos.scanRepo)
 
 	scanSvc := scanwiring.NewScanApplicationService(
 		scanQueryStore,
@@ -179,76 +352,43 @@ func buildDependencies(infra *infra, cfg *config.Config) *deps {
 	scanTaskSvc := scanwiring.NewScanTaskApplicationService(scanTaskStore, scanTaskRuntimeStore)
 	scanLogSvc := scanlogwiring.NewScanLogApplicationService(scanLogQueryStore, scanLogCommandStore, scanLogLookup)
 
-	// Worker module
-	workerScanGuard := workerwiring.NewWorkerProviderConfigScanGuardAdapter(scanRepo)
-	workerSettingsStore := workerwiring.NewWorkerProviderConfigSettingsStoreAdapter(subfinderProviderSettingsRepo)
+	return scanModuleWiring{
+		scanHandler:     scanhandler.NewScanHandler(scanSvc),
+		scanLogHandler:  scanhandler.NewScanLogHandler(scanLogSvc),
+		workerScanHdlr:  scanhandler.NewWorkerScanHandler(scanSvc),
+		scanTaskRuntime: scanTaskSvc,
+	}
+}
+
+func wireWorkerModule(repos *repositoryBundle) workerModuleHandlers {
+	workerScanGuard := workerwiring.NewWorkerProviderConfigScanGuardAdapter(repos.scanRepo)
+	workerSettingsStore := workerwiring.NewWorkerProviderConfigSettingsStoreAdapter(repos.subfinderProviderSettingsRepo)
 	workerSvc := workerwiring.NewWorkerProviderConfigApplicationService(workerScanGuard, workerSettingsStore)
-	// Agent module services
+	return workerModuleHandlers{
+		workerHandler: cataloghandler.NewWorkerHandler(workerSvc),
+	}
+}
+
+func wireAgentModule(
+	repos *repositoryBundle,
+	infra *infra,
+	cfg *config.Config,
+	scanTaskRuntime agentservice.ScanTaskRuntimePort,
+) agentModuleHandlers {
 	agentClock := agentinfra.NewSystemClock()
 	agentTokenGenerator := agentinfra.NewCryptoTokenGenerator()
-	agentSvc := agentservice.NewAgentFacade(agentRepo, registrationTokenRepo, agentClock, agentTokenGenerator)
-	agentRuntimeSvc := agentservice.NewAgentRuntimeService(agentRepo, infra.heartbeatCache, ws.NewAgentMessagePublisher(infra.wsHub), agentClock, infra.serverVersion, infra.agentImage)
-	agentTaskSvc := agentservice.NewAgentTaskService(scanTaskSvc)
+	agentSvc := agentservice.NewAgentFacade(repos.agentRepo, repos.registrationTokenRepo, agentClock, agentTokenGenerator)
+	agentRuntimeSvc := agentservice.NewAgentRuntimeService(
+		repos.agentRepo,
+		infra.heartbeatCache,
+		ws.NewAgentMessagePublisher(infra.wsHub),
+		agentClock,
+		infra.serverVersion,
+		infra.agentImage,
+	)
+	agentTaskSvc := agentservice.NewAgentTaskService(scanTaskRuntime)
 
-	// Snapshot module: lookup, stores, sync adapters, and services
-	snapshotScanLookup := snapshotwiring.NewSnapshotScanRefLookupAdapter(scanRepo)
-
-	websiteSnapshotQueryStore := snapshotwiring.NewSnapshotWebsiteQueryStoreAdapter(websiteSnapshotRepo)
-	subdomainSnapshotQueryStore := snapshotwiring.NewSnapshotSubdomainQueryStoreAdapter(subdomainSnapshotRepo)
-	endpointSnapshotQueryStore := snapshotwiring.NewSnapshotEndpointQueryStoreAdapter(endpointSnapshotRepo)
-	directorySnapshotQueryStore := snapshotwiring.NewSnapshotDirectoryQueryStoreAdapter(directorySnapshotRepo)
-	hostPortSnapshotQueryStore := snapshotwiring.NewSnapshotHostPortQueryStoreAdapter(hostPortSnapshotRepo)
-	screenshotSnapshotQueryStore := snapshotwiring.NewSnapshotScreenshotQueryStoreAdapter(screenshotSnapshotRepo)
-	vulnerabilitySnapshotQueryStore := snapshotwiring.NewSnapshotVulnerabilityQueryStoreAdapter(vulnerabilitySnapshotRepo)
-
-	websiteSnapshotCommandStore := snapshotwiring.NewSnapshotWebsiteCommandStoreAdapter(websiteSnapshotRepo)
-	subdomainSnapshotCommandStore := snapshotwiring.NewSnapshotSubdomainCommandStoreAdapter(subdomainSnapshotRepo)
-	endpointSnapshotCommandStore := snapshotwiring.NewSnapshotEndpointCommandStoreAdapter(endpointSnapshotRepo)
-	directorySnapshotCommandStore := snapshotwiring.NewSnapshotDirectoryCommandStoreAdapter(directorySnapshotRepo)
-	hostPortSnapshotCommandStore := snapshotwiring.NewSnapshotHostPortCommandStoreAdapter(hostPortSnapshotRepo)
-	screenshotSnapshotCommandStore := snapshotwiring.NewSnapshotScreenshotCommandStoreAdapter(screenshotSnapshotRepo)
-	vulnerabilitySnapshotCommandStore := snapshotwiring.NewSnapshotVulnerabilityCommandStoreAdapter(vulnerabilitySnapshotRepo)
-
-	websiteAssetSync := snapshotwiring.NewSnapshotWebsiteAssetSyncAdapter(websiteSvc)
-	subdomainAssetSync := snapshotwiring.NewSnapshotSubdomainAssetSyncAdapter(subdomainSvc)
-	endpointAssetSync := snapshotwiring.NewSnapshotEndpointAssetSyncAdapter(endpointSvc)
-	directoryAssetSync := snapshotwiring.NewSnapshotDirectoryAssetSyncAdapter(directorySvc)
-	hostPortAssetSync := snapshotwiring.NewSnapshotHostPortAssetSyncAdapter(hostPortSvc)
-	screenshotAssetSync := snapshotwiring.NewSnapshotScreenshotAssetSyncAdapter(screenshotSvc)
-	vulnerabilityAssetSync := snapshotwiring.NewSnapshotVulnerabilityAssetSyncAdapter(vulnerabilitySvc)
-	vulnerabilityRawOutputCodec := snapshotwiring.NewSnapshotVulnerabilityRawOutputCodec()
-
-	websiteSnapshotSvc := snapshotwiring.NewSnapshotWebsiteApplicationService(websiteSnapshotQueryStore, websiteSnapshotCommandStore, snapshotScanLookup, websiteAssetSync)
-	subdomainSnapshotSvc := snapshotwiring.NewSnapshotSubdomainApplicationService(subdomainSnapshotQueryStore, subdomainSnapshotCommandStore, snapshotScanLookup, subdomainAssetSync)
-	endpointSnapshotSvc := snapshotwiring.NewSnapshotEndpointApplicationService(endpointSnapshotQueryStore, endpointSnapshotCommandStore, snapshotScanLookup, endpointAssetSync)
-	directorySnapshotSvc := snapshotwiring.NewSnapshotDirectoryApplicationService(directorySnapshotQueryStore, directorySnapshotCommandStore, snapshotScanLookup, directoryAssetSync)
-	hostPortSnapshotSvc := snapshotwiring.NewSnapshotHostPortApplicationService(hostPortSnapshotQueryStore, hostPortSnapshotCommandStore, snapshotScanLookup, hostPortAssetSync)
-	screenshotSnapshotSvc := snapshotwiring.NewSnapshotScreenshotApplicationService(screenshotSnapshotQueryStore, screenshotSnapshotCommandStore, snapshotScanLookup, screenshotAssetSync)
-	vulnerabilitySnapshotSvc := snapshotwiring.NewSnapshotVulnerabilityApplicationService(vulnerabilitySnapshotQueryStore, vulnerabilitySnapshotCommandStore, snapshotScanLookup, vulnerabilityAssetSync, vulnerabilityRawOutputCodec)
-	// Preset module
-	presetSvc := preset.NewService(infra.presetLoader)
-
-	// HTTP handlers and exposed dependencies
-	return &deps{
-		healthHandler:        assethandler.NewHealthHandler(db, infra.redisClient),
-		authHandler:          identityhandler.NewAuthHandler(authSvc),
-		userHandler:          identityhandler.NewUserHandler(userSvc),
-		orgHandler:           identityhandler.NewOrganizationHandler(orgSvc),
-		targetHandler:        cataloghandler.NewTargetHandler(targetSvc),
-		engineHandler:        cataloghandler.NewEngineHandler(engineSvc),
-		wordlistHandler:      cataloghandler.NewWordlistHandler(wordlistSvc),
-		websiteHandler:       websitehandler.NewWebsiteHandler(websiteSvc),
-		subdomainHandler:     subdomainhandler.NewSubdomainHandler(subdomainSvc),
-		endpointHandler:      endpointhandler.NewEndpointHandler(endpointSvc),
-		directoryHandler:     directoryhandler.NewDirectoryHandler(directorySvc),
-		hostPortHandler:      hostporthandler.NewHostPortHandler(hostPortSvc),
-		screenshotHandler:    screenshothandler.NewScreenshotHandler(screenshotSvc),
-		vulnerabilityHandler: securityhandler.NewVulnerabilityHandler(vulnerabilitySvc),
-		scanHandler:          scanhandler.NewScanHandler(scanSvc),
-		scanLogHandler:       scanhandler.NewScanLogHandler(scanLogSvc),
-		workerHandler:        cataloghandler.NewWorkerHandler(workerSvc),
-		workerScanHandler:    scanhandler.NewWorkerScanHandler(scanSvc),
-
+	return agentModuleHandlers{
 		agentHandler: agenthandler.NewAgentHandler(
 			agentSvc,
 			agentRuntimeSvc,
@@ -258,12 +398,52 @@ func buildDependencies(infra *infra, cfg *config.Config) *deps {
 			cfg.Worker.Token,
 			infra.heartbeatCache,
 		),
-		agentWSHandler: agenthandler.NewAgentWebSocketHandler(
-			infra.wsHub,
-			agentRuntimeSvc,
-		),
+		agentWSHandler:   agenthandler.NewAgentWebSocketHandler(infra.wsHub, agentRuntimeSvc),
 		agentTaskHandler: agenthandler.NewAgentTaskHandler(agentTaskSvc),
+	}
+}
 
+func wireSnapshotModule(
+	repos *repositoryBundle,
+	asset assetModuleWiring,
+	security securityModuleWiring,
+) snapshotModuleHandlers {
+	snapshotScanLookup := snapshotwiring.NewSnapshotScanRefLookupAdapter(repos.scanRepo)
+
+	websiteSnapshotQueryStore := snapshotwiring.NewSnapshotWebsiteQueryStoreAdapter(repos.websiteSnapshotRepo)
+	subdomainSnapshotQueryStore := snapshotwiring.NewSnapshotSubdomainQueryStoreAdapter(repos.subdomainSnapshotRepo)
+	endpointSnapshotQueryStore := snapshotwiring.NewSnapshotEndpointQueryStoreAdapter(repos.endpointSnapshotRepo)
+	directorySnapshotQueryStore := snapshotwiring.NewSnapshotDirectoryQueryStoreAdapter(repos.directorySnapshotRepo)
+	hostPortSnapshotQueryStore := snapshotwiring.NewSnapshotHostPortQueryStoreAdapter(repos.hostPortSnapshotRepo)
+	screenshotSnapshotQueryStore := snapshotwiring.NewSnapshotScreenshotQueryStoreAdapter(repos.screenshotSnapshotRepo)
+	vulnerabilitySnapshotQueryStore := snapshotwiring.NewSnapshotVulnerabilityQueryStoreAdapter(repos.vulnerabilitySnapshotRepo)
+
+	websiteSnapshotCommandStore := snapshotwiring.NewSnapshotWebsiteCommandStoreAdapter(repos.websiteSnapshotRepo)
+	subdomainSnapshotCommandStore := snapshotwiring.NewSnapshotSubdomainCommandStoreAdapter(repos.subdomainSnapshotRepo)
+	endpointSnapshotCommandStore := snapshotwiring.NewSnapshotEndpointCommandStoreAdapter(repos.endpointSnapshotRepo)
+	directorySnapshotCommandStore := snapshotwiring.NewSnapshotDirectoryCommandStoreAdapter(repos.directorySnapshotRepo)
+	hostPortSnapshotCommandStore := snapshotwiring.NewSnapshotHostPortCommandStoreAdapter(repos.hostPortSnapshotRepo)
+	screenshotSnapshotCommandStore := snapshotwiring.NewSnapshotScreenshotCommandStoreAdapter(repos.screenshotSnapshotRepo)
+	vulnerabilitySnapshotCommandStore := snapshotwiring.NewSnapshotVulnerabilityCommandStoreAdapter(repos.vulnerabilitySnapshotRepo)
+
+	websiteAssetSync := snapshotwiring.NewSnapshotWebsiteAssetSyncAdapter(asset.websiteSvc)
+	subdomainAssetSync := snapshotwiring.NewSnapshotSubdomainAssetSyncAdapter(asset.subdomainSvc)
+	endpointAssetSync := snapshotwiring.NewSnapshotEndpointAssetSyncAdapter(asset.endpointSvc)
+	directoryAssetSync := snapshotwiring.NewSnapshotDirectoryAssetSyncAdapter(asset.directorySvc)
+	hostPortAssetSync := snapshotwiring.NewSnapshotHostPortAssetSyncAdapter(asset.hostPortSvc)
+	screenshotAssetSync := snapshotwiring.NewSnapshotScreenshotAssetSyncAdapter(asset.screenshotSvc)
+	vulnerabilityAssetSync := snapshotwiring.NewSnapshotVulnerabilityAssetSyncAdapter(security.vulnerabilitySvc)
+	vulnerabilityRawOutputCodec := snapshotwiring.NewSnapshotVulnerabilityRawOutputCodec()
+
+	websiteSnapshotSvc := snapshotwiring.NewSnapshotWebsiteApplicationService(websiteSnapshotQueryStore, websiteSnapshotCommandStore, snapshotScanLookup, websiteAssetSync)
+	subdomainSnapshotSvc := snapshotwiring.NewSnapshotSubdomainApplicationService(subdomainSnapshotQueryStore, subdomainSnapshotCommandStore, snapshotScanLookup, subdomainAssetSync)
+	endpointSnapshotSvc := snapshotwiring.NewSnapshotEndpointApplicationService(endpointSnapshotQueryStore, endpointSnapshotCommandStore, snapshotScanLookup, endpointAssetSync)
+	directorySnapshotSvc := snapshotwiring.NewSnapshotDirectoryApplicationService(directorySnapshotQueryStore, directorySnapshotCommandStore, snapshotScanLookup, directoryAssetSync)
+	hostPortSnapshotSvc := snapshotwiring.NewSnapshotHostPortApplicationService(hostPortSnapshotQueryStore, hostPortSnapshotCommandStore, snapshotScanLookup, hostPortAssetSync)
+	screenshotSnapshotSvc := snapshotwiring.NewSnapshotScreenshotApplicationService(screenshotSnapshotQueryStore, screenshotSnapshotCommandStore, snapshotScanLookup, screenshotAssetSync)
+	vulnerabilitySnapshotSvc := snapshotwiring.NewSnapshotVulnerabilityApplicationService(vulnerabilitySnapshotQueryStore, vulnerabilitySnapshotCommandStore, snapshotScanLookup, vulnerabilityAssetSync, vulnerabilityRawOutputCodec)
+
+	return snapshotModuleHandlers{
 		websiteSnapshotHandler:       snapshothandler.NewWebsiteSnapshotHandler(websiteSnapshotSvc),
 		subdomainSnapshotHandler:     snapshothandler.NewSubdomainSnapshotHandler(subdomainSnapshotSvc),
 		endpointSnapshotHandler:      snapshothandler.NewEndpointSnapshotHandler(endpointSnapshotSvc),
@@ -271,9 +451,5 @@ func buildDependencies(infra *infra, cfg *config.Config) *deps {
 		hostPortSnapshotHandler:      snapshothandler.NewHostPortSnapshotHandler(hostPortSnapshotSvc),
 		screenshotSnapshotHandler:    snapshothandler.NewScreenshotSnapshotHandler(screenshotSnapshotSvc),
 		vulnerabilitySnapshotHandler: snapshothandler.NewVulnerabilitySnapshotHandler(vulnerabilitySnapshotSvc),
-		presetHandler:                cataloghandler.NewPresetHandler(presetSvc),
-
-		agentRepo:    agentRepo,
-		scanTaskRepo: scanTaskRepo,
 	}
 }

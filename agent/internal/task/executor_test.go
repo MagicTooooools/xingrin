@@ -13,6 +13,49 @@ type fakeReporter struct {
 	msg    string
 }
 
+type fakeDockerRunner struct {
+	startWorkerFn func(ctx context.Context, t *domain.Task, serverURL, serverToken, agentVersion string) (string, error)
+	waitFn        func(ctx context.Context, containerID string) (int64, error)
+	stopFn        func(ctx context.Context, containerID string) error
+	removeFn      func(ctx context.Context, containerID string) error
+	tailLogsFn    func(ctx context.Context, containerID string, lines int) (string, error)
+}
+
+func (fake *fakeDockerRunner) StartWorker(ctx context.Context, t *domain.Task, serverURL, serverToken, agentVersion string) (string, error) {
+	if fake.startWorkerFn == nil {
+		return "container-1", nil
+	}
+	return fake.startWorkerFn(ctx, t, serverURL, serverToken, agentVersion)
+}
+
+func (fake *fakeDockerRunner) Wait(ctx context.Context, containerID string) (int64, error) {
+	if fake.waitFn == nil {
+		return 0, nil
+	}
+	return fake.waitFn(ctx, containerID)
+}
+
+func (fake *fakeDockerRunner) Stop(ctx context.Context, containerID string) error {
+	if fake.stopFn == nil {
+		return nil
+	}
+	return fake.stopFn(ctx, containerID)
+}
+
+func (fake *fakeDockerRunner) Remove(ctx context.Context, containerID string) error {
+	if fake.removeFn == nil {
+		return nil
+	}
+	return fake.removeFn(ctx, containerID)
+}
+
+func (fake *fakeDockerRunner) TailLogs(ctx context.Context, containerID string, lines int) (string, error) {
+	if fake.tailLogsFn == nil {
+		return "", nil
+	}
+	return fake.tailLogsFn(ctx, containerID, lines)
+}
+
 func (f *fakeReporter) UpdateStatus(ctx context.Context, taskID int, status, errorMessage string) error {
 	f.status = status
 	f.msg = errorMessage
@@ -103,5 +146,63 @@ func TestExecutorShutdownTimeout(t *testing.T) {
 
 	if err := exec.Shutdown(ctx); err == nil {
 		t.Fatalf("expected timeout error")
+	}
+}
+
+func TestExecutorFailurePathUsesTimeoutContexts(t *testing.T) {
+	reporter := &fakeReporter{}
+	tailLogsHasDeadline := false
+	removeHasDeadline := false
+
+	fakeDocker := &fakeDockerRunner{
+		startWorkerFn: func(ctx context.Context, t *domain.Task, serverURL, serverToken, agentVersion string) (string, error) {
+			return "container-1", nil
+		},
+		waitFn: func(ctx context.Context, containerID string) (int64, error) {
+			return 1, nil
+		},
+		tailLogsFn: func(ctx context.Context, containerID string, lines int) (string, error) {
+			_, tailLogsHasDeadline = ctx.Deadline()
+			return "tool failed", nil
+		},
+		removeFn: func(ctx context.Context, containerID string) error {
+			_, removeHasDeadline = ctx.Deadline()
+			return nil
+		},
+	}
+
+	exec := NewExecutor(fakeDocker, reporter, nil, "https://server", "token", "v1")
+	exec.execute(context.Background(), &domain.Task{ID: 10, ScanID: 20})
+
+	if reporter.status != "failed" {
+		t.Fatalf("expected failed status, got %s", reporter.status)
+	}
+	if !tailLogsHasDeadline {
+		t.Fatalf("expected tail logs context to have deadline")
+	}
+	if !removeHasDeadline {
+		t.Fatalf("expected remove context to have deadline")
+	}
+}
+
+func TestExecutorHandleTimeoutUsesDeadlineOnStop(t *testing.T) {
+	reporter := &fakeReporter{}
+	stopHasDeadline := false
+
+	fakeDocker := &fakeDockerRunner{
+		stopFn: func(ctx context.Context, containerID string) error {
+			_, stopHasDeadline = ctx.Deadline()
+			return nil
+		},
+	}
+
+	exec := NewExecutor(fakeDocker, reporter, nil, "https://server", "token", "v1")
+	exec.handleTimeout(context.Background(), &domain.Task{ID: 1, ScanID: 2}, "container-1")
+
+	if !stopHasDeadline {
+		t.Fatalf("expected stop context to have deadline")
+	}
+	if reporter.status != "failed" {
+		t.Fatalf("expected failed status, got %s", reporter.status)
 	}
 }
