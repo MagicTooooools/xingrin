@@ -97,6 +97,10 @@ func (h *WordlistHandler) UpdateContent(c *gin.Context) {
 			dto.NotFound(c, "Wordlist file not found")
 			return
 		}
+		if errors.Is(err, service.ErrLineTooLong) {
+			dto.BadRequest(c, "Wordlist contains lines longer than 64KB")
+			return
+		}
 		dto.InternalError(c, "Failed to update wordlist content")
 		return
 	}

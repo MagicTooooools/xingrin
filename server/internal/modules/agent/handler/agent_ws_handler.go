@@ -96,3 +96,15 @@ func (h *AgentWebSocketHandler) writePump(client *ws.Client) {
 		}
 	}
 }
+
+func contextAgent(c *gin.Context) (*agentdomain.Agent, bool) {
+	agentVal, ok := c.Get("agent")
+	if !ok {
+		return nil, false
+	}
+	agent, ok := agentVal.(*agentdomain.Agent)
+	if !ok || agent == nil {
+		return nil, false
+	}
+	return agent, true
+}

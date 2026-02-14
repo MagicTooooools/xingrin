@@ -1,10 +1,12 @@
 package handler
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"net/http"
 	"strings"
+	"text/template"
 
 	"github.com/gin-gonic/gin"
 	agentapp "github.com/yyhuni/lunafox/server/internal/modules/agent/application"
@@ -112,4 +114,12 @@ func (h *AgentHandler) InstallScript(c *gin.Context) {
 
 	c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=%q", "install.sh"))
 	c.Data(http.StatusOK, "text/plain; charset=utf-8", []byte(script))
+}
+
+func renderInstallScript(tpl *template.Template, data installTemplateData) (string, error) {
+	var buf bytes.Buffer
+	if err := tpl.Execute(&buf, data); err != nil {
+		return "", err
+	}
+	return buf.String(), nil
 }

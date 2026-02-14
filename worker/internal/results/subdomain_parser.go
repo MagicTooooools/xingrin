@@ -2,6 +2,8 @@ package results
 
 import (
 	"bufio"
+	"context"
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -17,7 +19,8 @@ type Subdomain struct {
 
 // ParseSubdomains streams and deduplicates subdomains from multiple files.
 // Deduplication is case-insensitive; first occurrence is preserved.
-func ParseSubdomains(filePaths []string) (<-chan Subdomain, <-chan error) {
+// Parsing stops early when ctx is cancelled.
+func ParseSubdomains(ctx context.Context, filePaths []string) (<-chan Subdomain, <-chan error) {
 	out := make(chan Subdomain, 1000)
 	errCh := make(chan error, 1)
 	seen := make(map[string]struct{}, 500000)
@@ -34,7 +37,16 @@ func ParseSubdomains(filePaths []string) (<-chan Subdomain, <-chan error) {
 		}()
 
 		for _, path := range filePaths {
-			if err := streamSubdomainFile(path, seen, out); err != nil {
+			select {
+			case <-ctx.Done():
+				return
+			default:
+			}
+
+			if err := streamSubdomainFile(ctx, path, seen, out); err != nil {
+				if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
+					return
+				}
 				pkg.Logger.Error("Error streaming subdomain file", zap.String("path", path), zap.Error(err))
 				errCh <- err
 				return
@@ -46,7 +58,7 @@ func ParseSubdomains(filePaths []string) (<-chan Subdomain, <-chan error) {
 }
 
 // streamSubdomainFile reads a single file and sends unique subdomains to the channel.
-func streamSubdomainFile(filePath string, seen map[string]struct{}, out chan<- Subdomain) error {
+func streamSubdomainFile(ctx context.Context, filePath string, seen map[string]struct{}, out chan<- Subdomain) error {
 	file, err := os.Open(filePath)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -58,6 +70,12 @@ func streamSubdomainFile(filePath string, seen map[string]struct{}, out chan<- S
 
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		default:
+		}
+
 		line := strings.TrimSpace(scanner.Text())
 		if line == "" {
 			continue
@@ -66,7 +84,11 @@ func streamSubdomainFile(filePath string, seen map[string]struct{}, out chan<- S
 		lower := strings.ToLower(line)
 		if _, exists := seen[lower]; !exists {
 			seen[lower] = struct{}{}
-			out <- Subdomain{Name: line}
+			select {
+			case out <- Subdomain{Name: line}:
+			case <-ctx.Done():
+				return ctx.Err()
+			}
 		}
 	}
 

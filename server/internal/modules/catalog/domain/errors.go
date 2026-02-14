@@ -20,6 +20,7 @@ var (
 	ErrWordlistNameInvalid     = errors.New("wordlist name contains invalid characters")
 	ErrWordlistFileNotFound    = errors.New("wordlist file not found")
 	ErrWordlistInvalidFileType = errors.New("file appears to be binary, only text files are allowed")
+	ErrWordlistLineTooLong     = errors.New("wordlist line exceeds maximum length (64KB)")
 
 	ErrWorkerScanNotFound = errors.New("scan not found")
 	ErrWorkerToolRequired = errors.New("tool parameter required for provider_config")

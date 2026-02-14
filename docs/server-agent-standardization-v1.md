@@ -41,7 +41,7 @@ server/internal/modules/agent/
 │   ├── registration_token_command.go
 │   └── persistence/agent.go
 ├── handler/
-│   ├── agent_http_helpers.go
+│   ├── agent_request_handler.go
 │   ├── agent_handler.go
 │   ├── agent_registration_handler.go
 │   ├── agent_query_handler.go

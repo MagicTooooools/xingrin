@@ -98,21 +98,20 @@ func (w *Workflow) SaveResults(ctx context.Context, client server.ServerClient, 
 	}
 
 	// Stream and deduplicate from files
-	subdomainCh, errCh := results.ParseSubdomains(files)
+	parseCtx, parseCancel := context.WithCancel(ctx)
+	defer parseCancel()
+	subdomainCh, errCh := results.ParseSubdomains(parseCtx, files)
 
 	// Send subdomains in batches
 	items, batches, err := results.WriteSubdomains(ctx, client, params.ScanID, params.TargetID, subdomainCh)
 	if err != nil {
+		parseCancel()
 		return err
 	}
 
 	// Check for streaming errors
-	select {
-	case err := <-errCh:
-		if err != nil {
-			return fmt.Errorf("error streaming results: %w", err)
-		}
-	default:
+	if err, ok := <-errCh; ok && err != nil {
+		return fmt.Errorf("error streaming results: %w", err)
 	}
 
 	// Update metrics

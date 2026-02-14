@@ -5,13 +5,16 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"runtime"
+	"strconv"
 	"strings"
 	"testing"
+	"time"
 
-	"github.com/yyhuni/lunafox/worker/internal/server"
-	"github.com/yyhuni/lunafox/worker/internal/workflow"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/yyhuni/lunafox/worker/internal/server"
+	"github.com/yyhuni/lunafox/worker/internal/workflow"
 )
 
 type providerClient struct {
@@ -52,6 +55,21 @@ func (c *capturePostClient) PostBatch(ctx context.Context, scanID, targetID int,
 	c.calls++
 	c.items = append(c.items, items...)
 	return c.err
+}
+
+func countGoroutinesWithStackFragment(fragment string) int {
+	size := 1 << 20
+	for {
+		buf := make([]byte, size)
+		n := runtime.Stack(buf, true)
+		if n < len(buf) {
+			return strings.Count(string(buf[:n]), fragment)
+		}
+		size *= 2
+		if size > 1<<26 {
+			return strings.Count(string(buf[:n]), fragment)
+		}
+	}
 }
 
 func validScanConfig() map[string]any {
@@ -280,6 +298,40 @@ func TestSaveResultsWriteSubdomainsError(t *testing.T) {
 
 	err := w.SaveResults(context.Background(), client, params, output)
 	require.Error(t, err)
+}
+
+func TestSaveResultsWriteSubdomainsErrorCancelsParser(t *testing.T) {
+	withNopLogger(t)
+	w := New(t.TempDir())
+
+	// Clean baseline: no leftover parser goroutine from other tests.
+	require.Eventually(t, func() bool {
+		return countGoroutinesWithStackFragment("worker/internal/results.ParseSubdomains.func1") == 0
+	}, time.Second, 20*time.Millisecond)
+
+	dir := t.TempDir()
+	file := filepath.Join(dir, "many.txt")
+	var b strings.Builder
+	for i := 0; i < 20000; i++ {
+		b.WriteString("sub")
+		b.WriteString(strconv.Itoa(i))
+		b.WriteString(".example.com\n")
+	}
+	require.NoError(t, os.WriteFile(file, []byte(b.String()), 0644))
+
+	client := &capturePostClient{err: errors.New("post failed")}
+	output := &workflow.Output{
+		Data:    []string{file},
+		Metrics: &workflow.Metrics{},
+	}
+	params := &workflow.Params{ScanID: 1, TargetID: 2}
+
+	err := w.SaveResults(context.Background(), client, params, output)
+	require.Error(t, err)
+
+	require.Eventually(t, func() bool {
+		return countGoroutinesWithStackFragment("worker/internal/results.ParseSubdomains.func1") == 0
+	}, 2*time.Second, 20*time.Millisecond)
 }
 
 func TestSaveResultsParseError(t *testing.T) {

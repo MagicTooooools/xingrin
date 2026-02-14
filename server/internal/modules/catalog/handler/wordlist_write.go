@@ -49,6 +49,10 @@ func (h *WordlistHandler) Create(c *gin.Context) {
 			dto.BadRequest(c, "File appears to be binary, only text files are allowed")
 			return
 		}
+		if errors.Is(err, service.ErrLineTooLong) {
+			dto.BadRequest(c, "Wordlist contains lines longer than 64KB")
+			return
+		}
 		dto.InternalError(c, "Failed to create wordlist")
 		return
 	}

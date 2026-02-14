@@ -3,6 +3,7 @@ package handler
 import (
 	"errors"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	agentapp "github.com/yyhuni/lunafox/server/internal/modules/agent/application"
@@ -90,4 +91,16 @@ func (h *AgentHandler) GetAgent(c *gin.Context) {
 	}
 
 	dto.Success(c, toAgentOutput(agent, heartbeat))
+}
+
+func includesHeartbeat(include string) bool {
+	if include == "" {
+		return false
+	}
+	for _, part := range strings.Split(include, ",") {
+		if strings.EqualFold(strings.TrimSpace(part), "heartbeat") {
+			return true
+		}
+	}
+	return false
 }

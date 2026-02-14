@@ -31,6 +31,9 @@ func (service *WordlistFacade) UpdateContent(id int, content string) (*Wordlist,
 		if errors.Is(err, ErrFileNotFound) {
 			return nil, ErrFileNotFound
 		}
+		if errors.Is(err, ErrLineTooLong) {
+			return nil, ErrLineTooLong
+		}
 		if dberrors.IsRecordNotFound(err) {
 			return nil, ErrWordlistNotFound
 		}

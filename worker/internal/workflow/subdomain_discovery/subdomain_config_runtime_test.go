@@ -1,9 +1,6 @@
 package subdomain_discovery
 
 import (
-	"os"
-	"path/filepath"
-	"regexp"
 	"testing"
 	"time"
 
@@ -104,30 +101,4 @@ func TestGetStringValue(t *testing.T) {
 	assert.Equal(t, "default", getStringValue(nil, "key", "default"))
 	assert.Equal(t, "default", getStringValue(map[string]any{"key": ""}, "key", "default"))
 	assert.Equal(t, "value", getStringValue(map[string]any{"key": "value"}, "key", "default"))
-}
-
-func TestCountFileLines(t *testing.T) {
-	dir := t.TempDir()
-	path := filepath.Join(dir, "lines.txt")
-	require.NoError(t, os.WriteFile(path, []byte("a\n\nb\n"), 0644))
-	assert.Equal(t, 2, countFileLines(path))
-
-	assert.Equal(t, 0, countFileLines(filepath.Join(dir, "missing.txt")))
-}
-
-func TestSanitizeFilename(t *testing.T) {
-	got := sanitizeFilename(`a/b c:d`)
-	re := regexp.MustCompile(`[<>:"/\\|?*\s]`)
-	assert.False(t, re.MatchString(got))
-	assert.NotEmpty(t, got)
-}
-
-func TestNormalizeToolConfigUnknownTool(t *testing.T) {
-	_, err := normalizeToolConfig("missing_tool", map[string]any{})
-	assert.Error(t, err)
-}
-
-func TestBuildCommandUnknownTool(t *testing.T) {
-	_, err := buildCommand("missing_tool", map[string]any{}, map[string]any{})
-	assert.Error(t, err)
 }

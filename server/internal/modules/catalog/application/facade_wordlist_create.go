@@ -25,6 +25,9 @@ func (service *WordlistFacade) Create(name, description, filename string, fileCo
 		if errors.Is(err, ErrInvalidFileType) {
 			return nil, ErrInvalidFileType
 		}
+		if errors.Is(err, ErrLineTooLong) {
+			return nil, ErrLineTooLong
+		}
 		return nil, err
 	}
 

@@ -1,7 +1,6 @@
 package application
 
 import (
-	"bufio"
 	"crypto/sha256"
 	"encoding/hex"
 	"io"
@@ -14,6 +13,9 @@ import (
 )
 
 const wordlistBinaryCheckSize = 8192
+
+// Max bytes per logical line (excluding newline separators).
+const wordlistMaxLineBytes = 64 * 1024
 
 var _ WordlistFileStore = (*LocalWordlistFileStore)(nil)
 
@@ -53,7 +55,8 @@ func (store *LocalWordlistFileStore) Save(basePath, filename string, content io.
 
 	lineCount, err := countWordlistLines(fullPath)
 	if err != nil {
-		lineCount = 0
+		_ = os.Remove(fullPath)
+		return nil, err
 	}
 
 	return &WordlistFileMetadata{
@@ -65,6 +68,11 @@ func (store *LocalWordlistFileStore) Save(basePath, filename string, content io.
 }
 
 func (store *LocalWordlistFileStore) Write(path, content string) (*WordlistFileMetadata, error) {
+	lineCount, err := countWordlistLinesFromReader(strings.NewReader(content))
+	if err != nil {
+		return nil, err
+	}
+
 	if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
 		return nil, err
 	}
@@ -80,7 +88,7 @@ func (store *LocalWordlistFileStore) Write(path, content string) (*WordlistFileM
 	return &WordlistFileMetadata{
 		FilePath:  path,
 		FileSize:  fileInfo.Size(),
-		LineCount: catalogdomain.CountWordlistContentLines(content),
+		LineCount: lineCount,
 		FileHash:  hex.EncodeToString(hasher.Sum(nil)),
 	}, nil
 }
@@ -129,7 +137,7 @@ func (store *LocalWordlistFileStore) RefreshMetadata(path string, knownSize int6
 
 	lineCount, err := countWordlistLines(path)
 	if err != nil {
-		lineCount = 0
+		return nil, false, err
 	}
 
 	return &WordlistFileMetadata{
@@ -159,13 +167,83 @@ func countWordlistLines(filePath string) (int, error) {
 	}
 	defer func() { _ = file.Close() }()
 
-	scanner := bufio.NewScanner(file)
-	count := 0
-	for scanner.Scan() {
-		count++
+	return countWordlistLinesFromReader(file)
+}
+
+func countWordlistLinesFromReader(reader io.Reader) (int, error) {
+	buffer := make([]byte, 32*1024)
+	lineCount := 0
+	hasContent := false
+	lastByteWasNewline := false
+	currentLineBytes := 0
+	pendingCR := false
+
+	for {
+		n, readErr := reader.Read(buffer)
+		if n > 0 {
+			chunk := buffer[:n]
+			hasContent = true
+			for _, b := range chunk {
+				if pendingCR {
+					// Treat CRLF as a single newline separator and don't count CR as line content.
+					if b == '\n' {
+						lineCount++
+						currentLineBytes = 0
+						lastByteWasNewline = true
+						pendingCR = false
+						continue
+					}
+
+					// Standalone CR counts as line content when not followed by LF.
+					currentLineBytes++
+					if currentLineBytes > wordlistMaxLineBytes {
+						return 0, catalogdomain.ErrWordlistLineTooLong
+					}
+					pendingCR = false
+				}
+
+				if b == '\r' {
+					pendingCR = true
+					lastByteWasNewline = false
+					continue
+				}
+
+				if b == '\n' {
+					lineCount++
+					currentLineBytes = 0
+					lastByteWasNewline = true
+					continue
+				}
+				currentLineBytes++
+				lastByteWasNewline = false
+				if currentLineBytes > wordlistMaxLineBytes {
+					return 0, catalogdomain.ErrWordlistLineTooLong
+				}
+			}
+		}
+
+		if readErr == io.EOF {
+			break
+		}
+		if readErr != nil {
+			return 0, readErr
+		}
 	}
 
-	return count, scanner.Err()
+	// Trailing standalone CR should be treated as content.
+	if pendingCR {
+		currentLineBytes++
+		if currentLineBytes > wordlistMaxLineBytes {
+			return 0, catalogdomain.ErrWordlistLineTooLong
+		}
+		lastByteWasNewline = false
+	}
+
+	if hasContent && !lastByteWasNewline {
+		lineCount++
+	}
+
+	return lineCount, nil
 }
 
 func isWordlistBinaryFile(path string) bool {

@@ -1,38 +1,14 @@
 package subdomain_discovery
 
 import (
-	"bufio"
 	"encoding/json"
 	"fmt"
-	"os"
-	"regexp"
 	"strings"
 	"sync"
 	"time"
 
-	"github.com/yyhuni/lunafox/worker/internal/activity"
 	"github.com/santhosh-tekuri/jsonschema/v5"
 )
-
-// normalizeToolConfig maps external config_schema.key values to internal parameter names.
-func normalizeToolConfig(toolName string, config map[string]any) (map[string]any, error) {
-	tmpl, err := getTemplate(toolName)
-	if err != nil {
-		return nil, err
-	}
-	return activity.MapConfigKeys(tmpl, config)
-}
-
-// buildCommand gets the template and builds the command string.
-// config must be normalized (internal parameter names).
-func buildCommand(toolName string, params map[string]any, config map[string]any) (string, error) {
-	tmpl, err := getTemplate(toolName)
-	if err != nil {
-		return "", err
-	}
-	builder := activity.NewCommandBuilder()
-	return builder.Build(tmpl, params, config)
-}
 
 var (
 	schemaOnce sync.Once
@@ -95,7 +71,7 @@ func validateExplicitConfig(config map[string]any) error {
 	return nil
 }
 
-// isStageEnabled checks if a stage is enabled in the config
+// isStageEnabled checks if a stage is enabled in the config.
 func isStageEnabled(config map[string]any, stageName string) bool {
 	stageConfig, ok := config[stageName].(map[string]any)
 	if !ok {
@@ -105,7 +81,7 @@ func isStageEnabled(config map[string]any, stageName string) bool {
 	return ok && enabled
 }
 
-// isToolEnabled checks if a specific tool is enabled within a stage
+// isToolEnabled checks if a specific tool is enabled within a stage.
 func isToolEnabled(stageConfig map[string]any, toolName string) bool {
 	toolsConfig, ok := stageConfig["tools"].(map[string]any)
 	if !ok {
@@ -119,7 +95,7 @@ func isToolEnabled(stageConfig map[string]any, toolName string) bool {
 	return ok && enabled
 }
 
-// getConfigPath retrieves a nested config section by path
+// getConfigPath retrieves a nested config section by path.
 func getConfigPath(config map[string]any, path string) map[string]any {
 	if config == nil {
 		return nil
@@ -136,7 +112,7 @@ func getConfigPath(config map[string]any, path string) map[string]any {
 	return current
 }
 
-// getTimeout extracts timeout from tool config
+// getTimeout extracts timeout from tool config.
 // Requires an explicit timeout value.
 func getTimeout(toolConfig map[string]any) (time.Duration, error) {
 	seconds, err := getIntValue(toolConfig, "timeout-runtime")
@@ -186,25 +162,7 @@ func getIntValue(config map[string]any, key string) (int, error) {
 	}
 }
 
-// countFileLines counts non-empty lines in a file
-func countFileLines(filePath string) int {
-	file, err := os.Open(filePath)
-	if err != nil {
-		return 0
-	}
-	defer func() { _ = file.Close() }()
-
-	count := 0
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		if strings.TrimSpace(scanner.Text()) != "" {
-			count++
-		}
-	}
-	return count
-}
-
-// getStringValue extracts a string value from config with a default
+// getStringValue extracts a string value from config with a default.
 func getStringValue(config map[string]any, key, defaultValue string) string {
 	if config == nil {
 		return defaultValue
@@ -213,11 +171,4 @@ func getStringValue(config map[string]any, key, defaultValue string) string {
 		return value
 	}
 	return defaultValue
-}
-
-// sanitizeFilename removes or replaces characters that are invalid in filenames
-func sanitizeFilename(name string) string {
-	// Replace common problematic characters
-	re := regexp.MustCompile(`[<>:"/\\|?*\s]`)
-	return re.ReplaceAllString(name, "_")
 }

@@ -20,4 +20,5 @@ var (
 	ErrInvalidName      = catalogdomain.ErrWordlistNameInvalid
 	ErrFileNotFound     = catalogdomain.ErrWordlistFileNotFound
 	ErrInvalidFileType  = catalogdomain.ErrWordlistInvalidFileType
+	ErrLineTooLong      = catalogdomain.ErrWordlistLineTooLong
 )

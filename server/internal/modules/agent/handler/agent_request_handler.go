@@ -1,26 +1,11 @@
 package handler
 
 import (
-	"bytes"
 	"fmt"
 	"strings"
-	"text/template"
 
 	"github.com/gin-gonic/gin"
-	agentdomain "github.com/yyhuni/lunafox/server/internal/modules/agent/domain"
 )
-
-func includesHeartbeat(include string) bool {
-	if include == "" {
-		return false
-	}
-	for _, part := range strings.Split(include, ",") {
-		if strings.EqualFold(strings.TrimSpace(part), "heartbeat") {
-			return true
-		}
-	}
-	return false
-}
 
 func inferServerURL(c *gin.Context) string {
 	proto := c.GetHeader("X-Forwarded-Proto")
@@ -68,24 +53,4 @@ func getForwardedIP(c *gin.Context) string {
 		return realIP
 	}
 	return c.ClientIP()
-}
-
-func renderInstallScript(tpl *template.Template, data installTemplateData) (string, error) {
-	var buf bytes.Buffer
-	if err := tpl.Execute(&buf, data); err != nil {
-		return "", err
-	}
-	return buf.String(), nil
-}
-
-func contextAgent(c *gin.Context) (*agentdomain.Agent, bool) {
-	agentVal, ok := c.Get("agent")
-	if !ok {
-		return nil, false
-	}
-	agent, ok := agentVal.(*agentdomain.Agent)
-	if !ok || agent == nil {
-		return nil, false
-	}
-	return agent, true
 }
