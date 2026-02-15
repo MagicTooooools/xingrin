@@ -183,7 +183,7 @@ func (u *Updater) startNewContainer(ctx context.Context, image, version string) 
 	hostConfig := &container.HostConfig{
 		Binds: []string{
 			"/var/run/docker.sock:/var/run/docker.sock",
-			"/opt/lunafox:/opt/lunafox",
+			"lunafox_data:/opt/lunafox",
 		},
 		RestartPolicy: container.RestartPolicy{Name: "unless-stopped"},
 		OomScoreAdj:   -500,

@@ -52,7 +52,7 @@ services:
       redis:
         condition: service_healthy
     volumes:
-      - /opt/lunafox:/opt/lunafox
+      - lunafox_data:/opt/lunafox
       - /var/run/docker.sock:/var/run/docker.sock
       - ../server:/workspace/server
       - go-mod-cache:/go/pkg/mod
@@ -95,7 +95,7 @@ services:
     build:
       context: ..
       dockerfile: docker/nginx/Dockerfile
-    image: yyhuni/lunafox-nginx:${IMAGE_TAG:-dev}
+    image: ${IMAGE_REGISTRY:-docker.io}/${IMAGE_NAMESPACE:-yyhuni}/lunafox-nginx:${IMAGE_TAG:-dev}
     restart: "on-failure:3"
     depends_on:
       server:
@@ -103,23 +103,16 @@ services:
       frontend:
         condition: service_healthy
     ports:
-      - "8083:8083"
+      - "${PUBLIC_PORT:-8083}:8083"
     volumes:
-      - ./nginx/ssl:/etc/nginx/ssl:ro
-
-  # Worker: build image for task execution (not run in dev by default).
-  worker:
-    build:
-      context: ../worker
-      dockerfile: Dockerfile
-    image: yyhuni/lunafox-worker:${IMAGE_TAG:-dev}
-    restart: "no"
-    volumes:
-      - /opt/lunafox:/opt/lunafox
-    command: echo "Worker image built for development"
+      - lunafox_ssl:/etc/nginx/ssl:ro
 
 volumes:
   postgres_data:
+  lunafox_data:
+    name: lunafox_data
+  lunafox_ssl:
+    name: lunafox_ssl
   go-mod-cache:
   go-build-cache:
   frontend_node_modules:

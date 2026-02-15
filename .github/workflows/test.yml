@@ -71,3 +71,17 @@ jobs:
       - name: Run agent tests
         working-directory: agent
         run: make test
+
+      - name: Run installer tests
+        working-directory: tools/installer
+        run: go test ./...
+
+      - name: Check installer cross-compile
+        run: ./scripts/installer/build.sh
+
+      - name: Verify installer binaries are up-to-date
+        run: |
+          git diff --exit-code -- resources/installer || {
+            echo "Installer binaries are stale. Run ./scripts/installer/build.sh and commit resources/installer updates."
+            exit 1
+          }

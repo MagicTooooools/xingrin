@@ -13,6 +13,7 @@ import (
 )
 
 const workerImagePrefix = "yyhuni/lunafox-worker:"
+const sharedDataVolumeBind = "lunafox_data:/opt/lunafox"
 
 // StartWorker starts a worker container for a task and returns the container ID.
 func (c *Client) StartWorker(ctx context.Context, t *domain.Task, serverURL, serverToken, agentVersion string) (string, error) {
@@ -36,7 +37,7 @@ func (c *Client) StartWorker(ctx context.Context, t *domain.Task, serverURL, ser
 	}
 
 	hostConfig := &container.HostConfig{
-		Binds:       []string{"/opt/lunafox:/opt/lunafox"},
+		Binds:       []string{sharedDataVolumeBind},
 		AutoRemove:  false,
 		OomScoreAdj: 500,
 	}

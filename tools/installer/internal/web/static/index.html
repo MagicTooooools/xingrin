@@ -1,0 +1,770 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>LunaFox 安装向导</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg-primary: #0F172A;
+      --bg-secondary: #1E293B;
+      --bg-tertiary: #334155;
+      --text-primary: #F8FAFC;
+      --text-secondary: #CBD5E1;
+      --text-muted: #94A3B8;
+      --accent-green: #22C55E;
+      --accent-blue: #3B82F6;
+      --border: #334155;
+      --error: #EF4444;
+      --success: #22C55E;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .wizard-container {
+      max-width: 700px;
+      width: 100%;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 40px;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+    }
+
+    .wizard-header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .wizard-title {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: var(--text-primary);
+    }
+
+    .wizard-subtitle {
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    /* Progress Steps */
+    .progress-steps {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 40px;
+      position: relative;
+    }
+
+    .progress-steps::before {
+      content: '';
+      position: absolute;
+      top: 20px;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--bg-tertiary);
+      z-index: 0;
+    }
+
+    .progress-line {
+      position: absolute;
+      top: 20px;
+      left: 0;
+      height: 2px;
+      background: var(--accent-green);
+      transition: width 0.3s ease;
+      z-index: 1;
+    }
+
+    .step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      z-index: 2;
+      flex: 1;
+    }
+
+    .step-circle {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--bg-tertiary);
+      border: 2px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--text-muted);
+      transition: all 0.3s ease;
+      margin-bottom: 8px;
+    }
+
+    .step.active .step-circle {
+      background: var(--accent-green);
+      border-color: var(--accent-green);
+      color: var(--bg-primary);
+    }
+
+    .step.completed .step-circle {
+      background: var(--accent-green);
+      border-color: var(--accent-green);
+      color: var(--bg-primary);
+    }
+
+    .step-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-align: center;
+      transition: color 0.3s ease;
+    }
+
+    .step.active .step-label {
+      color: var(--text-primary);
+      font-weight: 500;
+    }
+
+    /* Step Content */
+    .step-content {
+      display: none;
+    }
+
+    .step-content.active {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .step-content h2 {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: var(--text-primary);
+    }
+
+    .step-content p {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+    }
+
+    /* Form Elements */
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+
+    label .required {
+      color: var(--error);
+      margin-left: 4px;
+    }
+
+    label .optional {
+      color: var(--text-muted);
+      font-weight: 400;
+      font-size: 12px;
+      margin-left: 4px;
+    }
+
+    input, select {
+      width: 100%;
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 14px;
+      color: var(--text-primary);
+      font-family: inherit;
+      transition: all 0.2s ease;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--accent-green);
+      box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+    }
+
+    input::placeholder {
+      color: var(--text-muted);
+    }
+
+    input.error, select.error {
+      border-color: var(--error);
+    }
+
+    .error-message {
+      color: var(--error);
+      font-size: 12px;
+      margin-top: 6px;
+      display: none;
+    }
+
+    .error-message.show {
+      display: block;
+    }
+
+    .info-box {
+      background: rgba(59, 130, 246, 0.1);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-bottom: 20px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    .warning-box {
+      background: rgba(245, 158, 11, 0.1);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-bottom: 20px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    .checkbox-group {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+      accent-color: var(--accent-green);
+    }
+
+    /* Buttons */
+    .wizard-actions {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 32px;
+      gap: 12px;
+    }
+
+    .btn {
+      padding: 12px 24px;
+      font-size: 14px;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: inherit;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background: var(--accent-green);
+      color: var(--bg-primary);
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: #16A34A;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+    }
+
+    .btn-secondary {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background: #475569;
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn:focus-visible {
+      outline: 2px solid var(--accent-green);
+      outline-offset: 2px;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(15, 23, 42, 0.3);
+      border-top-color: var(--bg-primary);
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Status Badge */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      margin-top: 16px;
+    }
+
+    .status-badge.idle {
+      background: var(--bg-tertiary);
+      color: var(--text-secondary);
+    }
+
+    .status-badge.running {
+      background: rgba(59, 130, 246, 0.2);
+      color: var(--accent-blue);
+    }
+
+    .status-badge.success {
+      background: rgba(34, 197, 94, 0.2);
+      color: var(--accent-green);
+    }
+
+    .status-badge.failed {
+      background: rgba(239, 68, 68, 0.2);
+      color: var(--error);
+    }
+
+    /* Logs */
+    .logs-container {
+      margin-top: 24px;
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      max-height: 400px;
+      overflow: auto;
+      font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+      font-size: 12px;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .logs-container::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .logs-container::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .logs-container::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 4px;
+    }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      .wizard-container {
+        padding: 24px;
+      }
+
+      .wizard-title {
+        font-size: 24px;
+      }
+
+      .progress-steps {
+        margin-bottom: 32px;
+      }
+
+      .step-label {
+        font-size: 10px;
+      }
+
+      .step-circle {
+        width: 36px;
+        height: 36px;
+        font-size: 12px;
+      }
+
+      .wizard-actions {
+        flex-direction: column-reverse;
+      }
+
+      .btn {
+        width: 100%;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="wizard-container">
+    <!-- Header -->
+    <div class="wizard-header">
+      <h1 class="wizard-title">LunaFox 安装向导</h1>
+      <p class="wizard-subtitle">默认只需公网主机和端口，可选开启 goproxy.cn</p>
+    </div>
+
+    <div class="step-content active" id="quickInstall">
+      <h2 id="step1Title">安装配置</h2>
+      <p id="step1Desc">默认只需填写公网主机和端口</p>
+
+      <div class="warning-box" id="modeWarning">
+        <strong>生产模式要求：</strong><br>
+        • 必须配置公网主机（域名或 IP）<br>
+        • 默认使用 HTTPS，端口可自定义（默认 8083）<br>
+        • 将用于 Agent 注册与回连
+      </div>
+
+      <div class="form-group" id="publicHostGroup">
+        <label for="publicHost">公网主机（IP / 域名）<span class="required" id="publicHostRequired">*</span><span class="optional">（生产模式必填，开发模式可留空）</span></label>
+        <input
+          id="publicHost"
+          type="text"
+          inputmode="url"
+          value="{{ .DefaultPublicHost }}"
+          placeholder="example.com 或 1.2.3.4（不带 https:// 和端口）"
+          aria-label="公网主机"
+          aria-required="false"
+        />
+        <div class="error-message" id="publicHostError" role="alert" aria-live="polite"></div>
+      </div>
+
+      <div class="form-group" id="publicPortGroup">
+        <label for="publicPort">公网端口<span class="required">*</span></label>
+        <input
+          id="publicPort"
+          type="text"
+          inputmode="numeric"
+          value="{{ .DefaultPublicPort }}"
+          placeholder="8083"
+          aria-label="公网端口"
+        />
+        <div class="error-message" id="publicPortError" role="alert" aria-live="polite"></div>
+      </div>
+
+      <div class="info-box">
+        <strong>说明：</strong><br>
+        • Agent 相关参数使用系统默认值，不再需要手动填写<br>
+        • 开发模式固定使用本地镜像（跳过远端 pull）<br>
+        • 可选开启 <strong>goproxy.cn</strong> 加速 Go 依赖下载
+      </div>
+
+      <div class="checkbox-group" style="margin-bottom: 20px;">
+        <label class="checkbox-label">
+          <input type="checkbox" id="useGoProxyCN" />
+          <span>使用国内 Go 代理 (goproxy.cn)</span>
+        </label>
+      </div>
+
+      <div class="info-box" id="configSummary"></div>
+
+      <div class="wizard-actions">
+        <div></div>
+        <button class="btn btn-primary" id="startBtn" onclick="startInstall()">
+          <span id="btnText">开始安装</span>
+        </button>
+      </div>
+
+      <div id="installStatus" style="display: none;">
+        <div class="status-badge idle" id="status" role="status" aria-live="polite">idle</div>
+        <div class="logs-container" id="logs" role="log" aria-live="polite" aria-atomic="false"></div>
+      </div>
+    </div>
+  </div>
+  <script>
+    let pollTimer = null;
+    const INSTALL_MODE = "{{ .InstallMode }}";
+    const IS_PROD = INSTALL_MODE === "prod";
+
+    function $(id) {
+      return document.getElementById(id);
+    }
+
+    function clearErrors() {
+      [
+        "publicHost",
+        "publicPort"
+      ].forEach((id) => {
+        const input = $(id);
+        const error = $(`${id}Error`);
+        if (input) input.removeAttribute("aria-invalid");
+        if (error) error.textContent = "";
+      });
+    }
+
+    function setError(id, message) {
+      const input = $(id);
+      const error = $(`${id}Error`);
+      if (input) input.setAttribute("aria-invalid", "true");
+      if (error) error.textContent = message;
+    }
+
+    function applyModeDefaults() {
+      if (IS_PROD) {
+        $("step1Title").textContent = "生产安装配置";
+        $("step1Desc").textContent = "当前为生产模式，请填写公网主机和端口";
+        $("modeWarning").style.display = "block";
+        $("publicHostRequired").textContent = "*";
+        $("publicHost").setAttribute("aria-required", "true");
+        return;
+      }
+
+      $("step1Title").textContent = "开发安装配置";
+      $("step1Desc").textContent = "当前为开发模式，可留空公网主机（默认 https://localhost:<公网端口>）";
+      $("modeWarning").style.display = "none";
+      $("publicHostRequired").textContent = "";
+      $("publicHost").setAttribute("aria-required", "false");
+    }
+
+    function isLikelyIPv4(value) {
+      const parts = value.split(".");
+      if (parts.length !== 4) return false;
+      return parts.every((part) => /^\d+$/.test(part) && part.length > 0);
+    }
+
+    function isValidIPv4(value) {
+      const parts = value.split(".");
+      if (parts.length !== 4) return false;
+      return parts.every((part) => {
+        if (!/^\d+$/.test(part)) return false;
+        const n = Number(part);
+        return n >= 0 && n <= 255;
+      });
+    }
+
+    function isValidIPv6(value) {
+      if (!/^[0-9a-fA-F:]+$/.test(value)) return false;
+      if ((value.match(/:/g) || []).length < 2) return false;
+      if (value.includes(":::")) return false;
+      if ((value.match(/::/g) || []).length > 1) return false;
+      const parts = value.split(":");
+      return parts.every((part) => part.length <= 4);
+    }
+
+    function isValidDomain(value) {
+      if (!value || value.length > 253) return false;
+      if (value.startsWith(".") || value.endsWith(".")) return false;
+      const labels = value.split(".");
+      return labels.every((label) => {
+        if (!label || label.length > 63) return false;
+        if (label.startsWith("-") || label.endsWith("-")) return false;
+        return /^[A-Za-z0-9-]+$/.test(label);
+      });
+    }
+
+    function isValidHost(value) {
+      const raw = value.trim();
+      if (!raw) return false;
+      if (/\s/.test(raw)) return false;
+      if (raw.includes("://")) return false;
+      if (/[/?#]/.test(raw)) return false;
+
+      if (raw.startsWith("[") !== raw.endsWith("]")) return false;
+      const host = raw.startsWith("[") && raw.endsWith("]")
+        ? raw.slice(1, -1)
+        : raw;
+      if (!host) return false;
+      if (raw.startsWith("[") && raw.endsWith("]") && !host.includes(":")) return false;
+
+      if (host.includes(":")) {
+        const singleColonWithoutBrackets = !raw.startsWith("[") && !raw.endsWith("]") && host.split(":").length === 2;
+        if (singleColonWithoutBrackets) return false;
+        return isValidIPv6(host);
+      }
+
+      if (isValidIPv4(host)) return true;
+      if (isLikelyIPv4(host)) return false;
+      return isValidDomain(host);
+    }
+
+    function isValidPort(value) {
+      if (!/^\d+$/.test(value)) return false;
+      const n = Number(value);
+      return n >= 1 && n <= 65535;
+    }
+
+    function validateForm() {
+      clearErrors();
+      const publicHost = $("publicHost").value.trim();
+      const publicPort = $("publicPort").value.trim();
+
+      if (IS_PROD && !publicHost) {
+        setError("publicHost", "生产模式必须填写公网主机（IP 或域名）");
+        return false;
+      }
+      if (publicHost && !isValidHost(publicHost)) {
+        setError("publicHost", "公网主机格式不合法（只填 IP/域名，不要带协议或端口）");
+        return false;
+      }
+      if (!isValidPort(publicPort)) {
+        setError("publicPort", "公网端口必须是 1-65535");
+        return false;
+      }
+      return true;
+    }
+
+    function collectPayload() {
+      return {
+        publicHost: $("publicHost").value.trim(),
+        publicPort: $("publicPort").value.trim(),
+        useGoProxyCN: $("useGoProxyCN").checked
+      };
+    }
+
+    function escapeHTML(value) {
+      return value
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll("\"", "&quot;")
+        .replaceAll("'", "&#39;");
+    }
+
+    function refreshSummary() {
+      const payload = collectPayload();
+      const inferredPublicUrl = payload.publicHost
+        ? `https://${payload.publicHost}:${payload.publicPort}`
+        : `(默认 https://localhost:${payload.publicPort})`;
+      $("configSummary").innerHTML = `
+        <strong>运行模式:</strong> ${escapeHTML(INSTALL_MODE)}（由启动参数决定）<br>
+        <strong>公网主机:</strong> ${escapeHTML(payload.publicHost || "(空)")}<br>
+        <strong>公网端口:</strong> ${escapeHTML(payload.publicPort)}<br>
+        <strong>PUBLIC_URL:</strong> ${escapeHTML(inferredPublicUrl)}<br>
+        <strong>goproxy.cn:</strong> ${payload.useGoProxyCN ? "true" : "false"}
+      `;
+    }
+
+    function setStatus(kind, text) {
+      const status = $("status");
+      status.className = `status-badge ${kind}`;
+      status.textContent = text;
+    }
+
+    async function pollState() {
+      try {
+        const resp = await fetch("/api/state", { cache: "no-store" });
+        if (!resp.ok) return;
+        const state = await resp.json();
+        $("logs").textContent = state.logs || "";
+        $("logs").scrollTop = $("logs").scrollHeight;
+
+        if (state.running) {
+          setStatus("running", "running");
+          return;
+        }
+
+        if (state.success) {
+          setStatus("success", "success");
+        } else {
+          setStatus("failed", "failed");
+        }
+        if (pollTimer) {
+          clearInterval(pollTimer);
+          pollTimer = null;
+        }
+        $("btnText").textContent = "开始安装";
+        $("startBtn").disabled = false;
+      } catch (_) {
+        // ignore transient polling errors
+      }
+    }
+
+    async function startInstall() {
+      if (!validateForm()) return;
+      const payload = collectPayload();
+
+      $("installStatus").style.display = "block";
+      $("startBtn").disabled = true;
+      $("btnText").textContent = "安装中...";
+      setStatus("running", "running");
+      $("logs").textContent = "";
+
+      try {
+        const resp = await fetch("/api/start", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        if (!resp.ok) {
+          const text = await resp.text();
+          setStatus("failed", "failed");
+          $("logs").textContent = text || "启动安装失败";
+          $("startBtn").disabled = false;
+          $("btnText").textContent = "开始安装";
+          return;
+        }
+        if (pollTimer) clearInterval(pollTimer);
+        pollTimer = setInterval(pollState, 1500);
+        await pollState();
+      } catch (err) {
+        setStatus("failed", "failed");
+        $("logs").textContent = String(err);
+        $("startBtn").disabled = false;
+        $("btnText").textContent = "开始安装";
+      }
+    }
+
+    window.startInstall = startInstall;
+
+    applyModeDefaults();
+    refreshSummary();
+    [
+      "publicHost",
+      "publicPort",
+      "useGoProxyCN"
+    ].forEach((id) => {
+      const element = $(id);
+      if (!element) return;
+      const eventName = element.type === "checkbox" ? "change" : "input";
+      element.addEventListener(eventName, refreshSummary);
+    });
+  </script>
+</body>
+</html>

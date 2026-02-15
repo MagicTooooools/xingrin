@@ -392,9 +392,9 @@ func wireAgentModule(
 		agentHandler: agenthandler.NewAgentHandler(
 			agentSvc,
 			agentRuntimeSvc,
-			cfg.PublicURL,
 			infra.serverVersion,
 			infra.agentImage,
+			infra.workerImage,
 			cfg.Worker.Token,
 			infra.heartbeatCache,
 		),

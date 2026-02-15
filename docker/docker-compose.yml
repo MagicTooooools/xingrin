@@ -33,7 +33,7 @@ services:
       retries: 5
 
   server:
-    image: yyhuni/lunafox-server:${IMAGE_TAG:?IMAGE_TAG is required}
+    image: ${IMAGE_REGISTRY:-docker.io}/${IMAGE_NAMESPACE:-yyhuni}/lunafox-server:${IMAGE_TAG:?IMAGE_TAG is required}
     restart: always
     env_file:
       - .env
@@ -44,7 +44,7 @@ services:
       redis:
         condition: service_healthy
     volumes:
-      - /opt/lunafox:/opt/lunafox
+      - lunafox_data:/opt/lunafox
       - /var/run/docker.sock:/var/run/docker.sock
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
@@ -54,7 +54,7 @@ services:
       start_period: 60s
 
   frontend:
-    image: yyhuni/lunafox-frontend:${IMAGE_TAG:?IMAGE_TAG is required}
+    image: ${IMAGE_REGISTRY:-docker.io}/${IMAGE_NAMESPACE:-yyhuni}/lunafox-frontend:${IMAGE_TAG:?IMAGE_TAG is required}
     restart: always
     depends_on:
       server:
@@ -67,7 +67,7 @@ services:
       start_period: 20s
 
   nginx:
-    image: yyhuni/lunafox-nginx:${IMAGE_TAG:?IMAGE_TAG is required}
+    image: ${IMAGE_REGISTRY:-docker.io}/${IMAGE_NAMESPACE:-yyhuni}/lunafox-nginx:${IMAGE_TAG:?IMAGE_TAG is required}
     restart: always
     depends_on:
       server:
@@ -75,12 +75,16 @@ services:
       frontend:
         condition: service_healthy
     ports:
-      - "8083:8083"
+      - "${PUBLIC_PORT:-8083}:8083"
     volumes:
-      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - lunafox_ssl:/etc/nginx/ssl:ro
 
 volumes:
   postgres_data:
+  lunafox_data:
+    name: lunafox_data
+  lunafox_ssl:
+    name: lunafox_ssl
 
 networks:
   default:

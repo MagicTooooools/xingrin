@@ -14,6 +14,7 @@ import (
 	"github.com/yyhuni/lunafox/server/internal/config"
 	"github.com/yyhuni/lunafox/server/internal/database"
 	"github.com/yyhuni/lunafox/server/internal/pkg"
+	"github.com/yyhuni/lunafox/server/internal/pkg/imagecfg"
 	pkgvalidator "github.com/yyhuni/lunafox/server/internal/pkg/validator"
 	"github.com/yyhuni/lunafox/server/internal/preset"
 	ws "github.com/yyhuni/lunafox/server/internal/websocket"
@@ -30,6 +31,7 @@ type infra struct {
 	presetLoader   *preset.Loader
 	serverVersion  string
 	agentImage     string
+	workerImage    string
 }
 
 func initInfra(cfg *config.Config, migrationsFS embed.FS) *infra {
@@ -37,7 +39,8 @@ func initInfra(cfg *config.Config, migrationsFS embed.FS) *infra {
 	if serverVersion == "" {
 		pkg.Fatal("IMAGE_TAG environment variable is required")
 	}
-	agentImage := "yyhuni/lunafox-agent"
+	agentImage := resolveAgentImage()
+	workerImage := resolveWorkerImage(agentImage)
 
 	if err := pkgvalidator.Init(); err != nil {
 		pkg.Fatal("Failed to initialize validator", zap.Error(err))
@@ -111,5 +114,20 @@ func initInfra(cfg *config.Config, migrationsFS embed.FS) *infra {
 		presetLoader:   presetLoader,
 		serverVersion:  serverVersion,
 		agentImage:     agentImage,
+		workerImage:    workerImage,
 	}
+}
+
+func resolveAgentImage() string {
+	if image := strings.TrimSpace(os.Getenv("AGENT_IMAGE")); image != "" {
+		return image
+	}
+	return imagecfg.BuildAgentImage(os.Getenv("IMAGE_REGISTRY"), os.Getenv("IMAGE_NAMESPACE"))
+}
+
+func resolveWorkerImage(agentImage string) string {
+	if image := strings.TrimSpace(os.Getenv("WORKER_IMAGE")); image != "" {
+		return image
+	}
+	return imagecfg.FallbackWorkerImage(agentImage)
 }
