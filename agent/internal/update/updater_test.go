@@ -23,7 +23,7 @@ func TestWithJitterRange(t *testing.T) {
 
 func TestUpdateOnceDockerUnavailable(t *testing.T) {
 	updater := &Updater{}
-	payload := domain.UpdateRequiredPayload{Version: "v1.0.0", Image: "yyhuni/lunafox-agent"}
+	payload := domain.UpdateRequiredPayload{Version: "v1.0.0", ImageRef: "yyhuni/lunafox-agent:v1.0.0"}
 
 	err := updater.updateOnce(payload)
 	if err == nil {
@@ -31,5 +31,27 @@ func TestUpdateOnceDockerUnavailable(t *testing.T) {
 	}
 	if !strings.Contains(err.Error(), "docker client unavailable") {
 		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
+func TestResolveWorkerImageRef(t *testing.T) {
+	t.Setenv("WORKER_IMAGE_REF", "")
+	if _, err := resolveWorkerImageRef(); err == nil {
+		t.Fatalf("expected missing WORKER_IMAGE_REF error")
+	}
+
+	t.Setenv("WORKER_IMAGE_REF", "ghcr.io/acme/lunafox-worker:v9")
+	if got, err := resolveWorkerImageRef(); err != nil || got != "ghcr.io/acme/lunafox-worker:v9" {
+		t.Fatalf("expected raw worker image ref passthrough, got %s, err: %v", got, err)
+	}
+
+	t.Setenv("WORKER_IMAGE_REF", "ghcr.io/acme/lunafox-worker")
+	if _, err := resolveWorkerImageRef(); err == nil {
+		t.Fatalf("expected error for worker image ref without tag or digest")
+	}
+
+	t.Setenv("WORKER_IMAGE_REF", "ghcr.io/acme/lunafox-worker@sha256:abc")
+	if got, err := resolveWorkerImageRef(); err != nil || got != "ghcr.io/acme/lunafox-worker@sha256:abc" {
+		t.Fatalf("expected digest worker image ref passthrough, got %s, err: %v", got, err)
 	}
 }

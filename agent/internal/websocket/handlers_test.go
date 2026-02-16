@@ -49,13 +49,22 @@ func TestHandlersConfigUpdate(t *testing.T) {
 
 func TestHandlersUpdateRequired(t *testing.T) {
 	h := NewHandler()
-	var version string
-	h.OnUpdateRequired(func(payload protocol.UpdateRequiredPayload) { version = payload.Version })
+	var (
+		version  string
+		imageRef string
+	)
+	h.OnUpdateRequired(func(payload protocol.UpdateRequiredPayload) {
+		version = payload.Version
+		imageRef = payload.ImageRef
+	})
 
-	message := fmt.Sprintf(`{"type":"%s","payload":{"version":"v1.0.1","image":"yyhuni/lunafox-agent"},"timestamp":"2026-01-01T00:00:00Z"}`, protocol.MessageTypeUpdateRequired)
+	message := fmt.Sprintf(`{"type":"%s","payload":{"version":"v1.0.1","imageRef":"yyhuni/lunafox-agent@sha256:abc"},"timestamp":"2026-01-01T00:00:00Z"}`, protocol.MessageTypeUpdateRequired)
 	h.Handle([]byte(message))
 	if version != "v1.0.1" {
 		t.Fatalf("expected version")
+	}
+	if imageRef != "yyhuni/lunafox-agent@sha256:abc" {
+		t.Fatalf("expected imageRef")
 	}
 }
 
@@ -75,9 +84,9 @@ func TestHandlersUpdateRequiredMissingFields(t *testing.T) {
 	called := 0
 	h.OnUpdateRequired(func(payload protocol.UpdateRequiredPayload) { called++ })
 
-	message := fmt.Sprintf(`{"type":"%s","payload":{"version":"","image":"yyhuni/lunafox-agent"}}`, protocol.MessageTypeUpdateRequired)
+	message := fmt.Sprintf(`{"type":"%s","payload":{"version":"","imageRef":"yyhuni/lunafox-agent@sha256:abc"}}`, protocol.MessageTypeUpdateRequired)
 	h.Handle([]byte(message))
-	message = fmt.Sprintf(`{"type":"%s","payload":{"version":"v1.2.3","image":""}}`, protocol.MessageTypeUpdateRequired)
+	message = fmt.Sprintf(`{"type":"%s","payload":{"version":"v1.2.3","imageRef":""}}`, protocol.MessageTypeUpdateRequired)
 	h.Handle([]byte(message))
 	if called != 0 {
 		t.Fatalf("expected no callbacks for invalid payload")

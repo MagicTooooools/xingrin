@@ -31,7 +31,7 @@ func newBaseOptions(t *testing.T, mode string) cli.Options {
 func TestBuildOptionsProdRequiresPublicHost(t *testing.T) {
 	server := NewServer(newBaseOptions(t, cli.ModeProd), nil, io.Discard, io.Discard)
 
-	_, err := server.buildOptions(startRequest{})
+	_, err := buildInstallOptions(server.baseOptions, startRequest{})
 	if err == nil {
 		t.Fatalf("expected error when prod without public host")
 	}
@@ -40,7 +40,7 @@ func TestBuildOptionsProdRequiresPublicHost(t *testing.T) {
 func TestBuildOptionsAlwaysProd(t *testing.T) {
 	server := NewServer(newBaseOptions(t, cli.ModeProd), nil, io.Discard, io.Discard)
 
-	opts, err := server.buildOptions(startRequest{
+	opts, err := buildInstallOptions(server.baseOptions, startRequest{
 		PublicHost: "prod.example.com",
 		PublicPort: "8083",
 	})
@@ -61,7 +61,7 @@ func TestBuildOptionsAlwaysProd(t *testing.T) {
 func TestBuildOptionsProdOverridesAndGoProxy(t *testing.T) {
 	server := NewServer(newBaseOptions(t, cli.ModeProd), nil, io.Discard, io.Discard)
 
-	opts, err := server.buildOptions(startRequest{
+	opts, err := buildInstallOptions(server.baseOptions, startRequest{
 		PublicHost:   "prod.example.com",
 		PublicPort:   "8443",
 		UseGoProxyCN: true,
@@ -96,7 +96,7 @@ func TestBuildOptionsProdOverridesAndGoProxy(t *testing.T) {
 func TestBuildOptionsDevAllowsEmptyPublicURL(t *testing.T) {
 	server := NewServer(newBaseOptions(t, cli.ModeDev), nil, io.Discard, io.Discard)
 
-	opts, err := server.buildOptions(startRequest{})
+	opts, err := buildInstallOptions(server.baseOptions, startRequest{})
 	if err != nil {
 		t.Fatalf("build options: %v", err)
 	}
@@ -117,7 +117,7 @@ func TestBuildOptionsDevAllowsEmptyPublicURL(t *testing.T) {
 func TestBuildOptionsDevAllowsPortOverrideWithoutHost(t *testing.T) {
 	server := NewServer(newBaseOptions(t, cli.ModeDev), nil, io.Discard, io.Discard)
 
-	opts, err := server.buildOptions(startRequest{
+	opts, err := buildInstallOptions(server.baseOptions, startRequest{
 		PublicPort: "18443",
 	})
 	if err != nil {
@@ -134,7 +134,7 @@ func TestBuildOptionsDevAllowsPortOverrideWithoutHost(t *testing.T) {
 func TestBuildOptionsProdInvalidPublicPort(t *testing.T) {
 	server := NewServer(newBaseOptions(t, cli.ModeProd), nil, io.Discard, io.Discard)
 
-	_, err := server.buildOptions(startRequest{
+	_, err := buildInstallOptions(server.baseOptions, startRequest{
 		PublicHost: "prod.example.com",
 		PublicPort: "70000",
 	})
@@ -146,7 +146,7 @@ func TestBuildOptionsProdInvalidPublicPort(t *testing.T) {
 func TestBuildOptionsRejectsHostWithScheme(t *testing.T) {
 	server := NewServer(newBaseOptions(t, cli.ModeProd), nil, io.Discard, io.Discard)
 
-	_, err := server.buildOptions(startRequest{
+	_, err := buildInstallOptions(server.baseOptions, startRequest{
 		PublicHost: "https://prod.example.com",
 		PublicPort: "8083",
 	})
@@ -161,7 +161,7 @@ func TestBuildOptionsRejectsHostWithScheme(t *testing.T) {
 func TestBuildOptionsRejectsHostWithPort(t *testing.T) {
 	server := NewServer(newBaseOptions(t, cli.ModeProd), nil, io.Discard, io.Discard)
 
-	_, err := server.buildOptions(startRequest{
+	_, err := buildInstallOptions(server.baseOptions, startRequest{
 		PublicHost: "prod.example.com:8443",
 		PublicPort: "8083",
 	})
@@ -189,7 +189,7 @@ func TestBuildOptionsAcceptsValidHostForms(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			opts, err := server.buildOptions(startRequest{
+			opts, err := buildInstallOptions(server.baseOptions, startRequest{
 				PublicHost: tc.publicHost,
 				PublicPort: "8083",
 			})
@@ -220,7 +220,7 @@ func TestBuildOptionsRejectsInvalidHostForms(t *testing.T) {
 
 	for _, publicHost := range cases {
 		t.Run(publicHost, func(t *testing.T) {
-			_, err := server.buildOptions(startRequest{
+			_, err := buildInstallOptions(server.baseOptions, startRequest{
 				PublicHost: publicHost,
 				PublicPort: "8083",
 			})
@@ -237,7 +237,7 @@ func TestBuildOptionsRejectsInvalidHostForms(t *testing.T) {
 func TestRenderIndexHTMLUsesTemplateDefaults(t *testing.T) {
 	server := NewServer(newBaseOptions(t, cli.ModeProd), nil, io.Discard, io.Discard)
 
-	htmlBytes, err := server.renderIndexHTML()
+	htmlBytes, err := renderIndexHTML(server.baseOptions)
 	if err != nil {
 		t.Fatalf("render index html: %v", err)
 	}
@@ -252,17 +252,23 @@ func TestRenderIndexHTMLUsesTemplateDefaults(t *testing.T) {
 	if !strings.Contains(html, `const INSTALL_MODE = "prod";`) {
 		t.Fatalf("install mode not rendered: %s", html)
 	}
+	if strings.Contains(html, `id="useGoProxyCN"`) {
+		t.Fatalf("prod mode should not render goproxy controls")
+	}
 }
 
 func TestRenderIndexHTMLUsesDevMode(t *testing.T) {
 	server := NewServer(newBaseOptions(t, cli.ModeDev), nil, io.Discard, io.Discard)
 
-	htmlBytes, err := server.renderIndexHTML()
+	htmlBytes, err := renderIndexHTML(server.baseOptions)
 	if err != nil {
 		t.Fatalf("render index html: %v", err)
 	}
 
 	if !strings.Contains(string(htmlBytes), `const INSTALL_MODE = "dev";`) {
 		t.Fatalf("dev mode not rendered")
+	}
+	if !strings.Contains(string(htmlBytes), `id="useGoProxyCN"`) {
+		t.Fatalf("dev mode should render goproxy controls")
 	}
 }
