@@ -60,14 +60,14 @@ export function VulnSeverityChart() {
     { severity: "low", count: vulnData?.low ?? 0, fill: SEVERITY_COLORS.low },
     { severity: "info", count: vulnData?.info ?? 0, fill: SEVERITY_COLORS.info },
   ], [vulnData])
-  // 饼图只显示有数据的
+  // The pie chart only shows those with data
   const chartData = allData.filter(item => item.count > 0)
 
   const total = allData.reduce((sum, item) => sum + item.count, 0)
 
   return (
     <Card className="flex flex-col h-[300px] overflow-hidden [[data-theme=bauhaus]_&]:pt-0 [[data-theme=bauhaus]_&]:gap-0">
-      {/* Bauhaus 风格 Kicker 标题 */}
+      {/* Bauhaus Style Kicker Title */}
       <div className="bauhaus-kicker hidden [[data-theme=bauhaus]_&]:flex">
         <IconShield className="size-4" />
         <span>SEVERITY MIX</span>

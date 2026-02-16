@@ -15,8 +15,8 @@ type UseStepActions = {
 type SetStepCallbackType = (step: number | ((step: number) => number)) => void
 
 /**
- * 步骤导航 Hook
- * @param maxStep 最大步骤数
+ * Step Navigation Hook
+ * @param maxStep maximum number of steps
  * @returns [currentStep, actions]
  */
 export function useStep(maxStep: number): [number, UseStepActions] {

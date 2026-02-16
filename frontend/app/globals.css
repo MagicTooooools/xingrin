@@ -41,7 +41,7 @@
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
   
-  /* 语义状态色映射 */
+  /* Semantic state color mapping */
   --color-highlight: var(--highlight);
   --color-success: var(--success);
   --color-warning: var(--warning);
@@ -94,7 +94,7 @@
 
   body {
     @apply bg-background text-foreground;
-    /* 禁止页面级滚动，滚动交给主内容容器 */
+    /* Disable page-level scrolling and leave scrolling to the main content container */
     overflow: hidden;
     letter-spacing: var(--tracking-normal);
   }
@@ -104,7 +104,7 @@
     border-radius: 9999px;
   }
 
-  /* 全局滚动条样式 - Webkit 浏览器 (Chrome, Safari, Edge) */
+  /* Global scrollbar styles - Webkit browsers (Chrome, Safari, Edge) */
   ::-webkit-scrollbar {
     width: 10px;
     height: 10px;
@@ -128,13 +128,13 @@
     background-clip: padding-box;
   }
 
-  /* Firefox 滚动条样式 */
+  /* Firefox scroll bar styles */
   * {
     scrollbar-width: thin;
     scrollbar-color: oklch(0.708 0 0 / 0.3) transparent;
   }
 
-  /* 隐藏滚动条但保持可滚动 */
+  /* Hide scrollbars but keep them scrollable */
   .scrollbar-hide {
     -ms-overflow-style: none;
     /* IE and Edge */
@@ -147,7 +147,7 @@
     /* Chrome, Safari and Opera */
   }
 
-  /* 性能优化：长列表渲染优化 - content-visibility */
+  /* Performance Optimization: Long List Rendering Optimization - content-visibility */
   .tree-node-item {
     content-visibility: auto;
     contain-intrinsic-size: 0 36px;
@@ -155,7 +155,7 @@
 
 }
 
-/* 登录页背景 - 使用主题色适配亮暗模式 */
+/* Login page background - use theme colors to adapt to light and dark modes */
 .login-bg {
   position: relative;
   background-color: var(--background);
@@ -180,7 +180,7 @@
   z-index: 1;
 }
 
-/* 终端光标闪烁动画 */
+/* Terminal cursor flashing animation */
 @keyframes blink {
   0%, 50% {
     opacity: 1;
@@ -194,7 +194,7 @@
   animation: blink 1s step-end infinite;
 }
 
-/* 打字动画 - AuthBootLog */
+/* Typing animation - AuthBootLog */
 @keyframes typing {
   from {
     max-width: 0;
@@ -217,7 +217,7 @@
   animation: typing 0.5s ease-out forwards;
 }
 
-/* 通知铃铛摇晃动画 */
+/* Notification bell shaking animation */
 @keyframes wiggle {
   0%, 100% {
     transform: rotate(0deg);
@@ -239,7 +239,7 @@
   }
 }
 
-/* 进度条条纹动画 */
+/* progress bar stripe animation */
 @keyframes progress-stripes {
   from {
     background-position: 1rem 0;
@@ -264,7 +264,7 @@
   animation: progress-stripes 1s linear infinite;
 }
 
-/* 闪电闪烁动画 - 快速扫描按钮 */
+/* Lightning Flash Animation - Quick Scan Button */
 @keyframes flash {
   0%, 90%, 100% {
     opacity: 1;
@@ -283,7 +283,7 @@
   }
 }
 
-/* 按钮整体发光动画 */
+/* Button overall glow animation */
 @keyframes glow {
   0%, 85%, 100% {
     box-shadow: 0 0 0 transparent;
@@ -300,7 +300,7 @@
   animation: glow 3s ease-in-out infinite;
 }
 
-/* 边框流光动画 */
+/* Border streamer animation */
 @keyframes border-flow {
   0% {
     transform: translateX(-100%) rotate(0deg);
@@ -314,7 +314,7 @@
   animation: border-flow 2s linear infinite;
 }
 
-/* 全局淡入动画 - 纯 CSS 实现，避免 hydration mismatch */
+/* Global fade-in animation - pure CSS implementation to avoid hydration mismatch */
 @keyframes app-fade-in {
   from {
     opacity: 0.85;
@@ -332,7 +332,7 @@
   animation: app-fade-in 280ms ease-out both;
 }
 
-/* 登录页 - Glitch Reveal（全屏开场） - 增强版赛博朋克风格 */
+/* Landing Page - Glitch Reveal (Full Screen Opening) - Enhanced Cyberpunk Style */
 @keyframes lunafox-splash-jitter {
   0%,
   100% {

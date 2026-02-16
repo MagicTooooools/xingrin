@@ -9,7 +9,7 @@ import type {
 } from '@/types/fingerprint.types'
 import type { PaginatedResponse } from '@/types/api-response.types'
 
-// ==================== EHole 指纹数据（真实数据示例）====================
+// ==================== EHole fingerprint data (real data example) ====================
 export const mockEholeFingerprints: EholeFingerprint[] = [
   {
     id: 1,
@@ -93,7 +93,7 @@ export const mockEholeFingerprints: EholeFingerprint[] = [
   },
 ]
 
-// ==================== Goby 指纹数据（真实数据示例）====================
+// ==================== Goby fingerprint data (real data example) ====================
 export const mockGobyFingerprints: GobyFingerprint[] = [
   {
     id: 1,
@@ -156,7 +156,7 @@ export const mockGobyFingerprints: GobyFingerprint[] = [
   },
 ]
 
-// ==================== Wappalyzer 指纹数据（真实数据示例）====================
+// ==================== Wappalyzer fingerprint data (real data example) ====================
 export const mockWappalyzerFingerprints: WappalyzerFingerprint[] = [
   {
     id: 1,
@@ -240,7 +240,7 @@ export const mockWappalyzerFingerprints: WappalyzerFingerprint[] = [
   },
 ]
 
-// ==================== Fingers 指纹数据（真实数据示例）====================
+// ==================== Fingers fingerprint data (real data example) ====================
 export const mockFingersFingerprints: FingersFingerprint[] = [
   {
     id: 1,
@@ -323,7 +323,7 @@ export const mockFingersFingerprints: FingersFingerprint[] = [
   },
 ]
 
-// ==================== FingerPrintHub 指纹数据（真实数据示例）====================
+// ==================== FingerPrintHub fingerprint data (real data example) ====================
 export const mockFingerPrintHubFingerprints: FingerPrintHubFingerprint[] = [
   {
     id: 1,
@@ -405,7 +405,7 @@ export const mockFingerPrintHubFingerprints: FingerPrintHubFingerprint[] = [
   },
 ]
 
-// ==================== ARL 指纹数据（真实数据示例）====================
+// ==================== ARL fingerprint data (real data example) ====================
 export const mockARLFingerprints: ARLFingerprint[] = [
   {
     id: 1,
@@ -445,7 +445,7 @@ export const mockARLFingerprints: ARLFingerprint[] = [
   },
 ]
 
-// ==================== 统计数据 ====================
+// ==================== Statistics ====================
 export const mockFingerprintStats: FingerprintStats = {
   ehole: 1892,
   goby: 4567,
@@ -455,7 +455,7 @@ export const mockFingerprintStats: FingerprintStats = {
   arl: 1234,
 }
 
-// ==================== 查询函数 ====================
+// ==================== Query function ====================
 export function getMockEholeFingerprints(params?: {
   page?: number
   pageSize?: number

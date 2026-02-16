@@ -9,7 +9,7 @@ import {
 } from "@/hooks/nudge-rules"
 import { useNudgeToast, type NudgeToastVariant } from "@/hooks/use-nudge-toast"
 
-// 存储 Key
+// Store Key
 const KEY_LAST_NUDGE = "lunafox:last-nudge" // { [ruleId]: timestamp }
 const SESSION_START = "lunafox:session-start"
 
@@ -40,12 +40,12 @@ export function useNudgeGuardian() {
   }, [])
 
   React.useEffect(() => {
-    // 1. 初始化会话时间
+    // 1. Initialize session time
     if (!sessionStorage.getItem(SESSION_START)) {
       sessionStorage.setItem(SESSION_START, String(Date.now()))
     }
 
-    // 检查逻辑
+    // check logic
     const checkRules = () => {
       const now = new Date()
       const hour = now.getHours()
@@ -53,7 +53,7 @@ export function useNudgeGuardian() {
       const sessionStart = Number(sessionStorage.getItem(SESSION_START) || Date.now())
       const sessionDurationMinutes = (Date.now() - sessionStart) / 1000 / 60
 
-      // 获取上次触发记录
+      // Get the last trigger record
       let lastNudges: Record<string, number> = {}
       try {
         lastNudges = JSON.parse(localStorage.getItem(KEY_LAST_NUDGE) || "{}")
@@ -61,7 +61,7 @@ export function useNudgeGuardian() {
         lastNudges = {}
       }
 
-      // 辅助：检查冷却时间
+      // Auxiliary: Check cooldown time
       const isCoolingDown = (id: GuardianRuleId, cooldownHours: number) => {
         const last = lastNudges[id] || 0
         return Date.now() - last < cooldownHours * 60 * 60 * 1000
@@ -80,7 +80,7 @@ export function useNudgeGuardian() {
         const content = rule.variants[Math.floor(Math.random() * rule.variants.length)]
         if (!content) continue
 
-        // 记录触发时间
+        // Record trigger time
         lastNudges[rule.id] = Date.now()
         localStorage.setItem(KEY_LAST_NUDGE, JSON.stringify(lastNudges))
 
@@ -88,10 +88,10 @@ export function useNudgeGuardian() {
       }
     }
 
-    // 启动定时器：每分钟检查一次
+    // Start timer: Check every minute
     const timer = setInterval(checkRules, 60 * 1000)
 
-    // 首次加载延迟 3 秒检查一次
+    // First load delay check once every 3 seconds
     const initialTimer = setTimeout(checkRules, 3000)
 
     return () => {

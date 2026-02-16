@@ -2,8 +2,6 @@ module github.com/yyhuni/lunafox/server
 
 go 1.26.0
 
-toolchain go1.26.0
-
 require (
 	github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2
 	github.com/gin-gonic/gin v1.11.0
@@ -14,9 +12,11 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.3.0
 	github.com/golang-migrate/migrate/v4 v4.19.1
 	github.com/google/uuid v1.6.0
+	github.com/gorilla/websocket v1.5.3
 	github.com/jackc/pgx/v5 v5.5.4
 	github.com/leanovate/gopter v0.2.11
 	github.com/lib/pq v1.10.9
+	github.com/santhosh-tekuri/jsonschema/v5 v5.3.1
 	github.com/shopspring/decimal v1.4.0
 	github.com/spf13/viper v1.18.2
 	go.uber.org/zap v1.26.0
@@ -41,7 +41,6 @@ require (
 	github.com/go-sql-driver/mysql v1.7.0 // indirect
 	github.com/goccy/go-json v0.10.5 // indirect
 	github.com/goccy/go-yaml v1.18.0 // indirect
-	github.com/gorilla/websocket v1.5.3 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20221227161230-091c0ba34f0a // indirect
@@ -61,7 +60,6 @@ require (
 	github.com/quic-go/quic-go v0.55.0 // indirect
 	github.com/sagikazarmark/locafero v0.4.0 // indirect
 	github.com/sagikazarmark/slog-shim v0.1.0 // indirect
-	github.com/santhosh-tekuri/jsonschema/v5 v5.3.1 // indirect
 	github.com/sourcegraph/conc v0.3.0 // indirect
 	github.com/spf13/afero v1.11.0 // indirect
 	github.com/spf13/cast v1.6.0 // indirect

@@ -48,12 +48,12 @@ function isPublicPath(pathname: string): boolean {
  * Authentication layout component
  * Decides whether to show sidebar based on login status and route
  * 
- * 新布局结构：
+ * New layout structure:
  * ┌─────────────────────────────────────────────────────────┐
- * │  Logo区域 (固定宽度)  │  顶栏内容 (搜索/通知/语言等)     │
+ * │ Logo area (fixed width) │ Top bar content (search/notification/language, etc.) │
  * ├──────────────────────┼──────────────────────────────────┤
- * │  侧边栏菜单          │  主内容区域                       │
- * │  (无Logo)            │                                  │
+ * │Sidebar menu │Main content area │
+ * │ (No Logo) │ │
  * └──────────────────────┴──────────────────────────────────┘
  */
 export function AuthLayout({ children }: AuthLayoutProps) {
@@ -109,12 +109,12 @@ export function AuthLayout({ children }: AuthLayoutProps) {
   const shouldRenderApp = isLoading || !!auth?.authenticated
 
   // Authenticated - show full layout with unified header
-  // 布局结构：
+  // Layout structure:
   // ┌─────────────────────────────────────────────────────────┐
-  // │  Logo区域 (固定宽度)  │  顶栏内容 (搜索/通知/语言等)     │
+  // │ Logo area (fixed width) │ Top bar content (search/notification/language, etc.) │
   // ├──────────────────────┼──────────────────────────────────┤
-  // │  侧边栏菜单          │  主内容区域                       │
-  // │  (无Logo)            │                                  │
+  // │Sidebar menu │Main content area │
+  // │ (No Logo) │ │
   // └──────────────────────┴──────────────────────────────────┘
   return (
     <>
@@ -129,10 +129,10 @@ export function AuthLayout({ children }: AuthLayoutProps) {
             } as React.CSSProperties
           }
         >
-          {/* 统一顶栏 - 横跨整个页面，包含 Logo */}
+          {/* Unified top bar - spans the entire page, including logo */}
           <UnifiedHeader />
           
-          {/* 下方内容区：侧边栏 + 主内容 */}
+          {/* Lower content area: sidebar + main content */}
           <div className="flex flex-1 min-h-0">
             <AppSidebar />
             <SidebarInset className="flex min-h-0 flex-col flex-1">

@@ -1,7 +1,7 @@
-// 资产类型
+// Asset type
 export type AssetType = 'website' | 'endpoint'
 
-// Website 搜索结果类型
+// Website search result type
 export interface WebsiteSearchResult {
   id: number
   url: string
@@ -21,7 +21,7 @@ export interface WebsiteSearchResult {
   vulnerabilities: Vulnerability[]
 }
 
-// Endpoint 搜索结果类型
+// Endpoint search result type
 export interface EndpointSearchResult {
 	id: number
 	url: string
@@ -40,7 +40,7 @@ export interface EndpointSearchResult {
 	targetId: number
 }
 
-// 通用搜索结果类型（兼容旧代码）
+// Universal search result type (compatible with legacy code)
 export type SearchResult = WebsiteSearchResult | EndpointSearchResult
 
 export interface Vulnerability {
@@ -51,10 +51,10 @@ export interface Vulnerability {
   url?: string
 }
 
-// 搜索状态
+// search status
 export type SearchState = 'initial' | 'searching' | 'results'
 
-// 搜索响应类型
+// Search response type
 export interface SearchResponse {
   results: SearchResult[]
   total: number
@@ -64,26 +64,26 @@ export interface SearchResponse {
   assetType: AssetType
 }
 
-// 搜索操作符类型
+// Search operator type
 export type SearchOperator = '=' | '==' | '!='
 
-// 单个搜索条件
+// single search criteria
 export interface SearchCondition {
   field: string
   operator: SearchOperator
   value: string
 }
 
-// 搜索表达式（支持 AND/OR 组合）
+// Search expression (supports AND/OR combinations)
 export interface SearchExpression {
-  conditions: SearchCondition[]  // 同一组内的条件用 AND 连接
-  orGroups?: SearchExpression[]  // 多组之间用 OR 连接
+  conditions: SearchCondition[]  // Conditions within the same group are connected with AND
+  orGroups?: SearchExpression[]  // Use OR to connect multiple groups
 }
 
-// 发送给后端的搜索参数
+// Search parameters sent to the backend
 export interface SearchParams {
-  q?: string  // 完整的搜索表达式字符串
-  asset_type?: AssetType  // 资产类型
+  q?: string  // Complete search expression string
+  asset_type?: AssetType  // Asset type
   page?: number
   pageSize?: number
 }

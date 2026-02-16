@@ -2,27 +2,27 @@ import { api } from "@/lib/api-client"
 import type { SearchParams, SearchResponse, AssetType } from "@/types/search.types"
 
 /**
- * 资产搜索 API 服务
+ * Asset search API service
  * 
- * 搜索语法：
- * - field="value"     模糊匹配（ILIKE %value%）
- * - field=="value"    精确匹配
- * - field!="value"    不等于
- * - &&                AND 连接
- * - ||                OR 连接
+ * Search syntax:
+ * - field="value" fuzzy matching (ILIKE %value%)
+ * - field=="value" exact match
+ * - field!="value" not equal
+ * - && AND operator
+ * - || OR operator
  * 
- * 支持的资产类型：
- * - website: 站点（默认）
- * - endpoint: 端点
+ * Supported asset types:
+ * - website: website (default)
+ * - endpoint: endpoint
  * 
- * 示例：
+ * Example:
  * - host="api" && tech="nginx"
  * - tech="vue" || tech="react"
  * - status=="200" && host!="test"
  */
 export class SearchService {
   /**
-   * 搜索资产
+   * Search assets
    * GET /api/assets/search/
    */
   static async search(params: SearchParams): Promise<SearchResponse> {
@@ -40,18 +40,18 @@ export class SearchService {
   }
 
   /**
-   * 导出搜索结果为 CSV
+   * Export search results to CSV
    * GET /api/assets/search/export/
    * 
-   * 使用浏览器原生下载，支持显示下载进度
+   * Use the browser's native download flow so progress remains visible.
    */
   static async exportCSV(query: string, assetType: AssetType): Promise<void> {
     const queryParams = new URLSearchParams()
     queryParams.append('q', query)
     queryParams.append('asset_type', assetType)
     
-    // 直接打开下载链接，使用浏览器原生下载管理器
-    // 这样可以显示下载进度，且不会阻塞页面
+    // Open the download link directly and use the browser's native download manager
+    // This will show download progress without blocking the page
     const downloadUrl = `/api/assets/search/export/?${queryParams.toString()}`
     window.open(downloadUrl, '_blank')
   }

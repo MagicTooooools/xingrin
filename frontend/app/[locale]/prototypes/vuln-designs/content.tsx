@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { IconShield, IconAlertTriangle, IconActivity, IconServer, IconRadar, IconDashboard, IconCode } from "@/components/icons"
 import { cn } from "@/lib/utils"
 
-// 模拟数据
+// Mock data
 const MOCK_DATA = [
   { severity: "critical", count: 12, fill: "#ef4444", label: "CRITICAL" }, // Red
   { severity: "high", count: 45, fill: "#f97316", label: "HIGH" },     // Orange
@@ -17,7 +17,7 @@ const MOCK_DATA = [
 
 const TOTAL_COUNT = MOCK_DATA.reduce((acc, cur) => acc + cur.count, 0)
 
-// --- Demo 1: Radial Hazard (同心圆警告仪) ---
+// --- Demo 1: Radial Hazard (Concentric Circle Warning Device) ---
 function RadialHazard() {
   // Transform data for RadialBar: needs to be sorted and have background fill
   const radialData = [...MOCK_DATA].reverse().map(d => ({
@@ -73,7 +73,7 @@ function RadialHazard() {
   )
 }
 
-// --- Demo 2: Threat DNA (威胁基因谱 - Stacked Bar) ---
+// --- Demo 2: Threat DNA (Threat Gene Profile - Stacked Bar) ---
 function ThreatDNA() {
   return (
     <Card className="flex flex-col h-[300px] overflow-hidden border-2 border-border [[data-theme=bauhaus]_&]:gap-0">
@@ -140,7 +140,7 @@ function ThreatDNA() {
   )
 }
 
-// --- Demo 3: Impact Matrix (点阵/华夫图) ---
+// --- Demo 3: Impact Matrix (lattice/waffle) ---
 function ImpactMatrix() {
   // Generate 100 dots representing percentages
   const dots = useMemo(() => {
@@ -213,7 +213,7 @@ function ImpactMatrix() {
   )
 }
 
-// --- Demo 4: Structural Pillar (结构柱) ---
+// --- Demo 4: Structural Pillar ---
 function StructuralPillar() {
   const maxCount = Math.max(...MOCK_DATA.map(d => d.count))
   
@@ -257,7 +257,7 @@ function StructuralPillar() {
   )
 }
 
-// --- Demo 5: Frequency Bars (频谱图) ---
+// --- Demo 5: Frequency Bars (Spectrum) ---
 function FrequencyBars() {
   return (
     <Card className="flex flex-col h-[300px] overflow-hidden border-2 border-border [[data-theme=bauhaus]_&]:gap-0">
@@ -299,7 +299,7 @@ function FrequencyBars() {
   )
 }
 
-// --- Demo 6: Polar Sector (极坐标扇区) ---
+// --- Demo 6: Polar Sector ---
 function PolarSector() {
   const data = MOCK_DATA.map(d => ({ name: d.label, value: d.count, fill: d.fill }))
   
@@ -360,7 +360,7 @@ function PolarSector() {
   )
 }
 
-// --- Demo 7: Mondrian Blocks (蒙德里安板块) ---
+// --- Demo 7: Mondrian Blocks ---
 function MondrianBlocks() {
    // Use a simple grid layout to simulate mondrian
    // Total area = 100%. We split it based on proportions roughly.
@@ -405,7 +405,7 @@ function MondrianBlocks() {
    )
 }
 
-// --- Demo 8: Barcode Strip (条形码带) ---
+// --- Demo 8: Barcode Strip (barcode strip) ---
 function BarcodeStrip() {
    // Generate a random-looking strip based on data
    // We flatten the data into an array of "items"
@@ -449,7 +449,7 @@ function BarcodeStrip() {
    )
 }
 
-// --- Demo 9: Hex Hive (六边形蜂巢) ---
+// --- Demo 9: Hex Hive ---
 function HexHive() {
   // Simulate a hex grid using offset rows
   // This is a simplified visual representation using CSS
@@ -504,7 +504,7 @@ function HexHive() {
   )
 }
 
-// --- Demo 10: Circuit Path (电路路径) ---
+// --- Demo 10: Circuit Path ---
 function CircuitPath() {
    return (
     <Card className="flex flex-col h-[300px] overflow-hidden border-2 border-border [[data-theme=bauhaus]_&]:gap-0">
@@ -546,7 +546,7 @@ function CircuitPath() {
    )
 }
 
-// --- Demo 11: Tape Reel (磁带卷轴) ---
+// --- Demo 11: Tape Reel ---
 function TapeReel() {
    return (
     <Card className="flex flex-col h-[300px] overflow-hidden border-2 border-border [[data-theme=bauhaus]_&]:gap-0">
@@ -592,7 +592,7 @@ function TapeReel() {
    )
 }
 
-// --- Demo 12: Target Scope (瞄准镜) ---
+// --- Demo 12: Target Scope ---
 function TargetScope() {
    const critical = MOCK_DATA[0]
    
@@ -639,7 +639,7 @@ function TargetScope() {
    )
 }
 
-// --- Demo 13: Data Stack (数据堆栈) ---
+// --- Demo 13: Data Stack ---
 function DataStack() {
    return (
     <Card className="flex flex-col h-[300px] overflow-hidden border-2 border-border [[data-theme=bauhaus]_&]:gap-0">
@@ -687,7 +687,7 @@ function DataStack() {
    )
 }
 
-// --- Demo 14: YoRHa Protocol (尼尔风格) ---
+// --- Demo 14: YoRHa Protocol (NieR style) ---
 function YorhaProtocol() {
    // Nier palette: #dad4bb (bg), #4e4b42 (text), #cec7b3 (darker bg)
    return (
@@ -743,7 +743,7 @@ function YorhaProtocol() {
    )
 }
 
-// --- Demo 15: Rhodes Access (明日方舟风格) ---
+// --- Demo 15: Rhodes Access (Arknights style) ---
 function RhodesAccess() {
    return (
     <Card className="flex flex-col h-[300px] overflow-hidden border-0 relative bg-[#1a1a1a] text-white">
@@ -798,7 +798,7 @@ function RhodesAccess() {
    )
 }
 
-// --- Demo 16: Hazard Plate (重工业风格) ---
+// --- Demo 16: Hazard Plate (Heavy Industrial Style) ---
 function HazardPlate() {
    return (
     <Card className="flex flex-col h-[300px] overflow-hidden border-4 border-black bg-[#EAB308] text-black rounded-none">
@@ -847,7 +847,7 @@ function HazardPlate() {
    )
 }
 
-// --- Demo 17: Mecha Cockpit (机甲驾驶舱) ---
+// --- Demo 17: Mecha Cockpit (Mecha Cockpit) ---
 function MechaCockpit() {
    return (
     <Card className="flex flex-col h-[300px] overflow-hidden border border-cyan-500/50 bg-[#050a10] text-cyan-400 relative">
@@ -897,7 +897,7 @@ function MechaCockpit() {
    )
 }
 
-// --- Demo 18: Glitch Console (故障终端) ---
+// --- Demo 18: Glitch Console (Glitch Terminal) ---
 function GlitchConsole() {
    return (
     <Card className="flex flex-col h-[300px] overflow-hidden border-2 border-red-600 bg-black text-red-500 relative group">

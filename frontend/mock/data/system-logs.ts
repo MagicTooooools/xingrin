@@ -90,7 +90,7 @@ export function getMockSystemLogs(params?: {
     content = mockSystemLogContent
   }
 
-  // 模拟行数限制
+  // Simulation row limit
   const contentLines = content.split('\n')
   const limitedContent = contentLines.slice(-lines).join('\n')
 

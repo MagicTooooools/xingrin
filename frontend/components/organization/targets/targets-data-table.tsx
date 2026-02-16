@@ -37,8 +37,8 @@ interface TargetsDataTableProps {
 }
 
 /**
- * 目标数据表格组件 (organization 版本)
- * 使用 UnifiedDataTable 统一组件
+ * Target data table component (organization version)
+ * Unify components using UnifiedDataTable
  */
 export function TargetsDataTable({
   data = [],

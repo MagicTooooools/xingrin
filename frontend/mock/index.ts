@@ -1,7 +1,7 @@
 /**
- * Mock 数据统一导出
+ * Unified export of Mock data
  * 
- * 使用方式：
+ * How to use:
  * import { USE_MOCK, mockData } from '@/mock'
  * 
  * if (USE_MOCK) {

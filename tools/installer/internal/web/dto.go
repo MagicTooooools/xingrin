@@ -21,4 +21,24 @@ type indexTemplateData struct {
 	InstallMode       string
 	DefaultPublicHost string
 	DefaultPublicPort string
+	ShowGoProxy       bool
+}
+
+type networkCandidate struct {
+	Interface string `json:"interface"`
+	IP        string `json:"ip"`
+	Label     string `json:"label"`
+}
+
+type networkCandidatesResponse struct {
+	SourceHost    string             `json:"sourceHost,omitempty"`
+	SuggestedHost string             `json:"suggestedHost,omitempty"`
+	Candidates    []networkCandidate `json:"candidates"`
+}
+
+type networkReachabilityResponse struct {
+	OK        bool   `json:"ok"`
+	Level     string `json:"level"`
+	Message   string `json:"message"`
+	PublicURL string `json:"publicURL,omitempty"`
 }

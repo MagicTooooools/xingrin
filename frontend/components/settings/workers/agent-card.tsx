@@ -101,7 +101,7 @@ export function AgentCard({
 
   const heartbeat = agent.heartbeat
 
-  // 检查是否有指标超过阈值
+  // Check if any metric exceeds the threshold
   const hasWarnings = useMemo(() => {
     if (!heartbeat) return false
     return (
@@ -111,7 +111,7 @@ export function AgentCard({
     )
   }, [heartbeat, agent])
 
-  // 计算最后心跳时间差（秒）
+  // Calculate last heartbeat time difference (seconds)
   const lastHeartbeatSeconds = useMemo(() => {
     if (!agent.lastHeartbeat) return null
     const now = Date.now()
@@ -119,7 +119,7 @@ export function AgentCard({
     return Math.floor((now - lastHeartbeat) / 1000)
   }, [agent.lastHeartbeat])
 
-  // 判断心跳是否过期（超过30秒）
+  // Determine whether the heartbeat has expired (more than 30 seconds)
   const isHeartbeatStale = lastHeartbeatSeconds !== null && lastHeartbeatSeconds > 30
 
   return (
@@ -188,7 +188,7 @@ export function AgentCard({
       </CardHeader>
 
       <CardContent className="space-y-3">
-        {/* 基本信息 - 始终显示 */}
+        {/* Basic information - always shown */}
         <div className="grid grid-cols-2 gap-2 text-xs">
           <div className="rounded-lg border bg-muted/40 p-2.5">
             <p className="text-muted-foreground mb-1">{t("metrics.lastHeartbeat")}</p>
@@ -207,7 +207,7 @@ export function AgentCard({
           </div>
         </div>
 
-        {/* 可折叠的详细信息 */}
+        {/* Collapsible details */}
         {heartbeat && (
           <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
             <CollapsibleTrigger asChild>
@@ -226,7 +226,7 @@ export function AgentCard({
             </CollapsibleTrigger>
 
             <CollapsibleContent className="space-y-3 pt-3">
-              {/* 系统指标 - 带进度条和阈值警告 */}
+              {/* System Metrics - with progress bar and threshold warnings */}
               <div className="space-y-2.5 rounded-lg border bg-muted/20 p-3">
                 <p className="text-xs font-medium text-muted-foreground mb-2">
                   {t("card.systemMetrics")}
@@ -248,7 +248,7 @@ export function AgentCard({
                 />
               </div>
 
-              {/* 任务和运行时间 */}
+              {/* Tasks and run times */}
               <div className="grid grid-cols-2 gap-2 text-xs">
                 <div className="rounded-lg border bg-muted/30 p-2.5">
                   <p className="text-muted-foreground mb-1">{t("metrics.tasks")}</p>
@@ -265,7 +265,7 @@ export function AgentCard({
                 </div>
               </div>
 
-              {/* 配置信息 */}
+              {/* Configuration information */}
               <div className="rounded-lg border bg-muted/20 p-3">
                 <p className="text-xs font-medium text-muted-foreground mb-2">
                   {t("card.configuration")}
@@ -286,7 +286,7 @@ export function AgentCard({
                 </div>
               </div>
 
-              {/* 最后更新时间 */}
+              {/* Last updated */}
               {heartbeat.updatedAt && (
                 <div className="text-[10px] text-muted-foreground text-center pt-1">
                   {t("metrics.updatedAt", { value: formatRelativeTime(heartbeat.updatedAt) })}
@@ -296,7 +296,7 @@ export function AgentCard({
           </Collapsible>
         )}
 
-        {/* 无心跳数据时的提示 */}
+        {/* Prompt when there is no heartbeat data */}
         {!heartbeat && (
           <div className="rounded-lg border border-dashed bg-muted/20 p-4 text-center">
             <p className="text-xs text-muted-foreground">

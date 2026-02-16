@@ -20,7 +20,7 @@ export function useRunningScans(page = 1, pageSize = 10) {
 }
 
 /**
- * 获取目标的扫描历史
+ * Get the scan history of a target
  */
 export function useTargetScans(targetId: number, pageSize = 5) {
   return useQuery({
@@ -39,7 +39,7 @@ export function useScan(id: number) {
 }
 
 /**
- * 获取扫描统计数据
+ * Get scan statistics
  */
 export function useScanStatistics() {
   return useQuery({

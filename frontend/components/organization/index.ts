@@ -1,5 +1,5 @@
 /**
- * Organization Components - 统一导出
+ * Organization Components - Unified Export
  */
 export { OrganizationList } from './organization-list'
 export { OrganizationDataTable } from './organization-data-table'

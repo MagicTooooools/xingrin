@@ -413,7 +413,7 @@ port_scan:
   {
     id: 3,
     name: '旧版配置',
-    isValid: false,  // 模拟配置不兼容的情况
+    isValid: false,  // Simulate configuration incompatibility
     configuration: `# 旧版配置 - 格式已过期
 stages:
   - name: vulnerability_scan

@@ -11,21 +11,23 @@ import (
 
 // AgentHandler handles registration and admin APIs for agents.
 type AgentHandler struct {
-	facade         *agentapp.AgentFacade
-	runtimeService *agentapp.AgentRuntimeService
-	publicURL      string
-	serverVersion  string
-	agentImage     string
-	workerToken    string
-	heartbeatCache cache.HeartbeatCache
+	facade               *agentapp.AgentFacade
+	runtimeService       *agentapp.AgentRuntimeService
+	serverVersion        string
+	agentImageRef        string
+	workerImageRef       string
+	sharedDataVolumeBind string
+	workerToken          string
+	heartbeatCache       cache.HeartbeatCache
 }
 
 type installTemplateData struct {
-	Token        string
-	ServerURL    string
-	AgentImage   string
-	AgentVersion string
-	WorkerToken  string
+	Token                string
+	AgentImageRef        string
+	WorkerImageRef       string
+	SharedDataVolumeBind string
+	AgentVersion         string
+	WorkerToken          string
 }
 
 var agentInstallSHTemplate = template.Must(template.New("agent_install.sh").Parse(agentinstall.AgentInstallScript))
@@ -34,16 +36,17 @@ var agentInstallSHTemplate = template.Must(template.New("agent_install.sh").Pars
 func NewAgentHandler(
 	facade *agentapp.AgentFacade,
 	runtimeService *agentapp.AgentRuntimeService,
-	publicURL, serverVersion, agentImage, workerToken string,
+	serverVersion, agentImageRef, workerImageRef, sharedDataVolumeBind, workerToken string,
 	heartbeatCache cache.HeartbeatCache,
 ) *AgentHandler {
 	return &AgentHandler{
-		facade:         facade,
-		runtimeService: runtimeService,
-		publicURL:      strings.TrimSpace(publicURL),
-		serverVersion:  strings.TrimSpace(serverVersion),
-		agentImage:     strings.TrimSpace(agentImage),
-		workerToken:    strings.TrimSpace(workerToken),
-		heartbeatCache: heartbeatCache,
+		facade:               facade,
+		runtimeService:       runtimeService,
+		serverVersion:        strings.TrimSpace(serverVersion),
+		agentImageRef:        strings.TrimSpace(agentImageRef),
+		workerImageRef:       strings.TrimSpace(workerImageRef),
+		sharedDataVolumeBind: strings.TrimSpace(sharedDataVolumeBind),
+		workerToken:          strings.TrimSpace(workerToken),
+		heartbeatCache:       heartbeatCache,
 	}
 }

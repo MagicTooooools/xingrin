@@ -11,8 +11,8 @@ interface ScanLogListProps {
 }
 
 /**
- * 扫描日志列表组件
- * 复用 AnsiLogViewer 组件
+ * Scan log list component
+ * Reuse the AnsiLogViewer component
  */
 export function ScanLogList({ logs, loading }: ScanLogListProps) {
   const state = useScanLogListState({ logs })

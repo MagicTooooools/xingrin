@@ -1,10 +1,10 @@
 /**
- * 扫描日志轮询 Hook
+ * Scan log polling hook
  * 
- * 功能：
- * - 初始加载获取全部日志
- * - 增量轮询获取新日志（3s 间隔）
- * - 扫描结束后停止轮询
+ * Function:
+ * - Initial load to get all logs
+ * - Incremental polling to obtain new logs (3s interval)
+ * - Stop polling after scanning is complete
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react'
@@ -13,8 +13,8 @@ import { getScanLogs, type ScanLog } from '@/services/scan.service'
 interface UseScanLogsOptions {
   scanId: number
   enabled?: boolean
-  pollingInterval?: number  // 默认 3000ms
-  maxLogs?: number  // 默认 5000，<=0 表示不限制
+  pollingInterval?: number  // Default 3000ms
+  maxLogs?: number  // Default is 5000, <=0 means no limit
 }
 
 interface UseScanLogsReturn {
@@ -59,7 +59,7 @@ export function useScanLogs({
       
       if (newLogs.length > 0) {
         if (incremental) {
-          // 按 ID 去重，防止 React Strict Mode 或竞态条件导致的重复
+          // Deduplication by ID to prevent duplication caused by React Strict Mode or race conditions
           setLogs(prev => {
             const existingIds = new Set(prev.map(l => l.id))
             const uniqueNewLogs = newLogs.filter(l => !existingIds.has(l.id))
@@ -79,11 +79,11 @@ export function useScanLogs({
     }
   }, [scanId, enabled, clampLogs])
   
-  // 初始加载
+  // initial load
   useEffect(() => {
     isMounted.current = true
     if (enabled) {
-      // 重置状态
+      // reset state
       setLogs([])
       lastLogIDRef.current = null
       fetchLogs(false)
@@ -93,14 +93,14 @@ export function useScanLogs({
     }
   }, [scanId, enabled, fetchLogs])
   
-  // 轮询
+  // polling
   useEffect(() => {
     if (!enabled) return
-    // pollingInterval <= 0 表示禁用轮询（避免 setInterval(0) 导致高频请求/卡顿）
+    // pollingInterval <= 0 means disabling polling (to avoid high-frequency requests/stuck caused by setInterval(0))
     if (!pollingInterval || pollingInterval <= 0) return
 
     const interval = setInterval(() => {
-      fetchLogs(true) // 增量查询
+      fetchLogs(true) // incremental query
     }, pollingInterval)
 
     return () => clearInterval(interval)
@@ -112,7 +112,7 @@ export function useScanLogs({
     fetchLogs(false)
   }, [fetchLogs])
 
-  // 当 maxLogs 变化时，主动裁剪缓存，避免长时间运行的内存占用增长
+  // When maxLogs changes, proactively trim the cache to avoid long-running memory usage growth.
   useEffect(() => {
     if (!maxLogs || maxLogs <= 0) return
     setLogs(prev => (prev.length > maxLogs ? prev.slice(-maxLogs) : prev))

@@ -57,7 +57,7 @@ const StatCard = memo(function StatCard({
   loading?: boolean
   index?: number
 }) {
-  // 格式化序号为两位数 (01, 02, 03, 04)
+  // Format serial number as two digits (01, 02, 03, 04)
   const formattedIndex = index !== undefined ? String(index).padStart(2, '0') : undefined
   
   return (
@@ -108,7 +108,7 @@ export function DashboardStatCards() {
 
   return (
     <div className="flex flex-col gap-2 px-4 lg:px-6">
-      {/* Bauhaus 主题下使用 1x4 横排布局，其他主题使用响应式网格 */}
+      {/* The Bauhaus theme uses a 1x4 horizontal layout, and other themes use a responsive grid. */}
       <div className="grid grid-cols-1 gap-4 @xl/main:grid-cols-2 @5xl/main:grid-cols-4 bauhaus-stats-row">
         <StatCard
           title={t("assetsFound")}

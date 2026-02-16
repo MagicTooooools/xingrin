@@ -1,14 +1,14 @@
 // Common API response types
 //
-// 新响应格式：
-// - 成功响应：直接返回数据 T（无包装）
-// - 分页响应：{ results: T[], total, page, pageSize, totalPages }
-// - 错误响应：{ error: { code, message?, details? } }
+// New response format:
+// - Successful response: Return data T directly (without packaging)
+// - Pagination response: { results: T[], total, page, pageSize, totalPages }
+// - Error response: { error: { code, message?, details? } }
 //
-// 注意：旧的 { code, state, message, data } 格式已废弃
+// NOTE: The old { code, state, message, data } format is obsolete
 
 /**
- * 错误响应类型
+ * Error response type
  */
 export interface ApiErrorResponse {
   error: {
@@ -19,8 +19,8 @@ export interface ApiErrorResponse {
 }
 
 /**
- * 旧版 API 响应类型（已废弃，仅保留以向后兼容）
- * @deprecated 请直接使用数据类型 T，后端不再使用此包装格式
+ * Legacy API response types (deprecated, retained only for backward compatibility)
+ * @deprecated Please use data type T directly, the backend no longer uses this packaging format
  */
 export interface LegacyApiResponse<T = unknown> {
   code: string;          // HTTP status code, e.g. "200", "400", "500"

@@ -1,5 +1,5 @@
 /**
- * Worker 节点管理 Hooks
+ * Worker node management Hooks
  */
 
 import { useQuery } from '@tanstack/react-query'
@@ -41,7 +41,7 @@ function useWorkerMutation<TData, TVariables>({
 }
 
 /**
- * 获取 Worker 列表
+ * Get Worker list
  */
 export function useWorkers(page = 1, pageSize = 10) {
   return useQuery({
@@ -51,7 +51,7 @@ export function useWorkers(page = 1, pageSize = 10) {
 }
 
 /**
- * 获取单个 Worker 详情
+ * Get individual Worker details
  */
 export function useWorker(id: number) {
   return useQuery({
@@ -62,7 +62,7 @@ export function useWorker(id: number) {
 }
 
 /**
- * 创建 Worker
+ * Create Worker
  */
 export function useCreateWorker() {
   return useWorkerMutation({
@@ -74,7 +74,7 @@ export function useCreateWorker() {
 }
 
 /**
- * 更新 Worker
+ * Update Worker
  */
 export function useUpdateWorker() {
   return useWorkerMutation({
@@ -90,7 +90,7 @@ export function useUpdateWorker() {
 }
 
 /**
- * 删除 Worker
+ * Delete Worker
  */
 export function useDeleteWorker() {
   return useWorkerMutation({
@@ -107,7 +107,7 @@ export function useDeleteWorker() {
 }
 
 /**
- * 部署 Worker
+ * Deploy Worker
  */
 export function useDeployWorker() {
   return useWorkerMutation({
@@ -122,7 +122,7 @@ export function useDeployWorker() {
 }
 
 /**
- * 重启 Worker
+ * Restart Worker
  */
 export function useRestartWorker() {
   return useWorkerMutation({
@@ -137,7 +137,7 @@ export function useRestartWorker() {
 }
 
 /**
- * 停止 Worker
+ * Stop Worker
  */
 export function useStopWorker() {
   return useWorkerMutation({

@@ -10,7 +10,7 @@ export default function Page() {
   return (
     // Content area containing cards, charts and data tables
     <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-      {/* Bauhaus 风格 Dashboard Header - 仅在 Bauhaus 主题下显示 */}
+      {/* Bauhaus-style dashboard header, shown only in the Bauhaus theme */}
       <BauhausDashboardHeader />
 
       <DashboardLazySections />

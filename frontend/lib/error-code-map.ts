@@ -1,22 +1,22 @@
 /**
- * 错误码到 i18n 键的映射
+ * Mapping of error codes to i18n keys
  * 
- * 采用简化方案（参考 Stripe、GitHub 等大厂做法）：
- * - 只映射通用错误码（5-10 个）
- * - 未知错误码使用 errors.unknown
- * - 错误码与后端 ErrorCodes 类保持一致
+ * Adopt a simplified solution (refer to the practices of major manufacturers such as Stripe and GitHub):
+ * - Only map common error codes (5-10)
+ * - For unknown error codes use errors.unknown
+ * - Error codes are consistent with the backend ErrorCodes class
  * 
- * 后端错误码定义: backend/apps/common/error_codes.py
+ * Backend error code definition: backend/apps/common/error_codes.py
  */
 
 /**
- * 错误码到 i18n 键的映射表
+ * Error code to i18n key mapping table
  * 
- * 键: 后端返回的错误码（大写字母和下划线）
- * 值: 前端 i18n 键（在 messages/en.json 和 messages/zh.json 中定义）
+ * Key: Error code returned by the backend (capital letters and underscores)
+ * Value: frontend i18n key (defined in messages/en.json and messages/zh.json)
  */
 export const ERROR_CODE_MAP: Record<string, string> = {
-  // 通用错误码（8 个，与后端 ErrorCodes 类一致）
+  // Common error codes (8, consistent with the backend ErrorCodes class)
   VALIDATION_ERROR: 'errors.validation',
   NOT_FOUND: 'errors.notFound',
   PERMISSION_DENIED: 'errors.permissionDenied',
@@ -28,42 +28,42 @@ export const ERROR_CODE_MAP: Record<string, string> = {
 };
 
 /**
- * 默认错误 i18n 键
- * 用于未知错误码的回退
+ * Default error i18n key
+ * Fallback for unknown error codes
  */
 export const DEFAULT_ERROR_KEY = 'errors.unknown';
 
 /**
- * 获取错误码对应的 i18n 键
+ * Get the i18n key corresponding to the error code
  * 
- * @param code - 后端返回的错误码
- * @returns 对应的 i18n 键，未知错误码返回 'errors.unknown'
+ * @param code - the error code returned by the backend
+ * @returns corresponding i18n key, unknown error code returns 'errors.unknown'
  * 
  * @example
  * const errorKey = getErrorI18nKey('NOT_FOUND');
- * // 返回: 'errors.notFound'
+ * // Return: 'errors.notFound'
  * 
  * const unknownKey = getErrorI18nKey('SOME_UNKNOWN_ERROR');
- * // 返回: 'errors.unknown'
+ * // Return: 'errors.unknown'
  */
 export function getErrorI18nKey(code: string): string {
   return ERROR_CODE_MAP[code] ?? DEFAULT_ERROR_KEY;
 }
 
 /**
- * 检查错误码是否已知
+ * Check if the error code is known
  * 
- * @param code - 后端返回的错误码
- * @returns 如果错误码在映射表中返回 true
+ * @param code - the error code returned by the backend
+ * @returns true if the error code is in the mapping table
  */
 export function isKnownErrorCode(code: string): boolean {
   return code in ERROR_CODE_MAP;
 }
 
 /**
- * 获取所有已知的错误码列表
+ * Get a list of all known error codes
  * 
- * @returns 错误码数组
+ * @returns error code array
  */
 export function getAllErrorCodes(): string[] {
   return Object.keys(ERROR_CODE_MAP);

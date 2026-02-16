@@ -17,19 +17,19 @@ import {
   Zap,
 } from "@/components/icons"
 
-// 终末地/明日方舟风格主题变量
+// Terminus/Arknights style theme variables
 const themeVars = {
-  "--ark-bg": "#F2F3F5", // 浅灰背景，更有质感
+  "--ark-bg": "#F2F3F5", // Light gray background, more texture
   "--ark-bg-2": "#FFFFFF",
   "--ark-panel": "#FFFFFF",
-  "--ark-panel-2": "#F8F9FB", // 稍微深一点的面板背景
+  "--ark-panel-2": "#F8F9FB", // Slightly darker panel background
   "--ark-border": "#DCDFE6",
-  "--ark-border-strong": "#181A1F", // 强烈的深色边框
-  "--ark-text": "#181A1F", // 深黑文字
-  "--ark-text-2": "#6B7280", // 次级文字
-  "--ark-accent": "#181A1F", // 强调色使用深黑
+  "--ark-border-strong": "#181A1F", // strong dark border
+  "--ark-text": "#181A1F", // dark black text
+  "--ark-text-2": "#6B7280", // secondary text
+  "--ark-accent": "#181A1F", // Use dark black as an accent color
   "--ark-accent-light": "rgba(24, 26, 31, 0.05)",
-  "--ark-highlight": "#FF4C24", // 橙红色作为点缀（类似终末地Logo色）
+  "--ark-highlight": "#FF4C24", // Orange-red as embellishment (similar to the terminal logo color)
   "--font-mono": "\"IBM Plex Mono\", \"JetBrains Mono\", monospace",
   "--font-sans": "\"HarmonyOS Sans SC\", \"Inter\", sans-serif",
 } as CSSProperties
@@ -68,16 +68,16 @@ const lineSeries = [12, 24, 18, 36, 30, 44, 38, 52]
 export default function DashboardReworkPage() {
   return (
     <main className="relative min-h-screen bg-[var(--ark-bg)] text-[var(--ark-text)] font-sans" style={themeVars}>
-      {/* 背景网格装饰 */}
+      {/* Background grid decoration */}
       <div className="pointer-events-none absolute inset-0 ark-grid" aria-hidden />
       
-      {/* 顶部装饰条 */}
+      {/* Top decorative strip */}
       <div className="fixed top-0 left-0 right-0 h-1 bg-[var(--ark-border-strong)] z-50" />
       
       <div className="relative mx-auto w-full max-w-[1600px] p-6 lg:p-10">
         <div className="grid gap-8 lg:grid-cols-[260px_1fr]">
           
-          {/* 侧边栏 */}
+          {/* Sidebar */}
           <aside className="flex flex-col gap-6 lg:sticky lg:top-10 h-fit">
             <div className="ark-panel p-6 flex flex-col gap-4">
               <div className="flex items-center gap-3 border-b-2 border-[var(--ark-border-strong)] pb-4">
@@ -119,10 +119,10 @@ export default function DashboardReworkPage() {
             </div>
           </aside>
 
-          {/* 主内容区 */}
+          {/* Main content area */}
           <div className="flex flex-col gap-6">
             
-            {/* 顶部 Header */}
+            {/* Top Header */}
             <header className="ark-panel p-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
               <div className="space-y-2">
                 <div className="flex items-center gap-2 text-[var(--ark-text-2)]">
@@ -143,7 +143,7 @@ export default function DashboardReworkPage() {
               </div>
             </header>
 
-            {/* 统计卡片 */}
+            {/* Statistics card */}
             <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
               {stats.map((item) => (
                 <div key={item.label} className="ark-card p-5 group">
@@ -163,15 +163,15 @@ export default function DashboardReworkPage() {
                   }`}>
                     {item.delta}
                   </div>
-                  {/* 装饰角标 */}
+                  {/* Decorative corner mark */}
                   <div className="absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-[var(--ark-border-strong)] opacity-20" />
                 </div>
               ))}
             </section>
 
-            {/* 图表区域 */}
+            {/* Chart area */}
             <section className="grid gap-6 lg:grid-cols-[1.6fr_1fr]">
-              {/* 折线图 */}
+              {/* Line chart */}
               <div className="ark-panel p-6 relative">
                 <div className="flex justify-between items-center mb-6 border-b border-[var(--ark-border)] pb-4">
                   <div>
@@ -184,14 +184,14 @@ export default function DashboardReworkPage() {
                 </div>
                 
                 <div className="h-[200px] w-full relative border border-[var(--ark-border)] bg-[var(--ark-panel-2)] p-4">
-                  {/* 网格背景 */}
+                  {/* Grid background */}
                   <div className="absolute inset-0 grid grid-cols-6 grid-rows-4 pointer-events-none">
                     {Array.from({ length: 24 }).map((_, i) => (
                       <div key={i} className="border-r border-b border-[var(--ark-border)] opacity-30" />
                     ))}
                   </div>
                   
-                  {/* SVG 图表 */}
+                  {/* SVG chart */}
                   <svg viewBox="0 0 400 140" className="h-full w-full relative z-10 overflow-visible">
                     <defs>
                       <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
@@ -207,7 +207,7 @@ export default function DashboardReworkPage() {
                         .join(" ")}
                       vectorEffect="non-scaling-stroke"
                     />
-                    {/* 数据点 */}
+                    {/* data points */}
                     {lineSeries.map((value, index) => (
                       <circle 
                         key={index}
@@ -229,7 +229,7 @@ export default function DashboardReworkPage() {
                 </div>
               </div>
 
-              {/* 柱状图 */}
+              {/* Bar chart */}
               <div className="ark-panel p-6">
                 <div className="flex justify-between items-center mb-6 border-b border-[var(--ark-border)] pb-4">
                   <h3 className="font-bold text-sm uppercase flex items-center gap-2">
@@ -246,7 +246,7 @@ export default function DashboardReworkPage() {
                         className="w-full bg-[var(--ark-accent)] opacity-80 group-hover:opacity-100 transition-opacity relative"
                         style={{ height: `${value}%` }}
                       >
-                        {/* 顶部高亮线 */}
+                        {/* Top highlight line */}
                         <div className="absolute top-0 left-0 right-0 h-[2px] bg-[var(--ark-highlight)] opacity-0 group-hover:opacity-100" />
                       </div>
                       <span className="text-[10px] font-mono text-center text-[var(--ark-text-2)]">0{index + 1}</span>
@@ -269,9 +269,9 @@ export default function DashboardReworkPage() {
               </div>
             </section>
 
-            {/* 底部区域 */}
+            {/* Bottom area */}
             <section className="grid gap-6 lg:grid-cols-[1.6fr_1fr]">
-              {/* 表格 */}
+              {/* sheet */}
               <div className="ark-panel p-0 overflow-hidden">
                 <div className="p-4 border-b border-[var(--ark-border)] bg-[var(--ark-panel-2)] flex justify-between items-center">
                   <h3 className="font-bold text-sm uppercase">Recent Activity</h3>
@@ -315,7 +315,7 @@ export default function DashboardReworkPage() {
                 </div>
               </div>
 
-              {/* 时间线/状态 */}
+              {/* Timeline/Status */}
               <div className="ark-panel p-6 flex flex-col h-full">
                 <div className="flex justify-between items-center mb-6">
                   <h3 className="font-bold text-sm uppercase">Cycle Timing</h3>
@@ -325,7 +325,7 @@ export default function DashboardReworkPage() {
                 <div className="flex-1 relative pl-4 space-y-8 before:absolute before:left-0 before:top-2 before:bottom-2 before:w-[2px] before:bg-[var(--ark-border)]">
                   {timeline.map((item, index) => (
                     <div key={item.label} className="relative pl-6">
-                      {/* 时间轴点 */}
+                      {/* Timeline point */}
                       <div className={`absolute left-[-5px] top-1.5 w-2.5 h-2.5 border-2 border-[var(--ark-bg)] outline outline-1 outline-[var(--ark-border-strong)] ${
                         index === 2 ? 'bg-[var(--ark-highlight)]' : 'bg-[var(--ark-accent)]'
                       }`} />
@@ -374,7 +374,7 @@ export default function DashboardReworkPage() {
           position: relative;
         }
         
-        /* 顶部加粗边框装饰 */
+        /* Top bold border decoration */
         .ark-panel::before {
           content: "";
           position: absolute;

@@ -54,7 +54,7 @@ export default function AssetCardVariantsPage() {
         <p className="text-muted-foreground">同一组数据的多种卡片视觉风格</p>
       </div>
 
-      {/* 方案 A */}
+      {/* Plan A */}
       <div className="border rounded-xl overflow-hidden shadow-sm bg-background">
         <SectionHeader
           title="方案 A：Bauhaus Index"
@@ -86,7 +86,7 @@ export default function AssetCardVariantsPage() {
         </div>
       </div>
 
-      {/* 方案 B */}
+      {/* Plan B */}
       <div className="border rounded-xl overflow-hidden shadow-sm bg-background">
         <SectionHeader
           title="方案 B：Rail Tag"
@@ -114,7 +114,7 @@ export default function AssetCardVariantsPage() {
         </div>
       </div>
 
-      {/* 方案 C */}
+      {/* Plan C */}
       <div className="border rounded-xl overflow-hidden shadow-sm bg-background">
         <SectionHeader
           title="方案 C：Split Panel"
@@ -146,7 +146,7 @@ export default function AssetCardVariantsPage() {
         </div>
       </div>
 
-      {/* 方案 D 系列 - Tech Schematic Variations */}
+      {/* Scheme D Series - Tech Schematic Variations */}
       <div className="space-y-6">
         <h2 className="text-xl font-bold">方案 D 扩展系列：Tech Schematic (技术图纸风格)</h2>
 
@@ -163,7 +163,7 @@ export default function AssetCardVariantsPage() {
                   key={card.label}
                   className="group relative bg-card p-4 hover:bg-accent/5 transition-[color,background-color,border-color,opacity,transform,box-shadow] duration-300 cursor-pointer"
                 >
-                  {/* Schematic Borders - 使用 border-border/40 减轻视觉重量 */}
+                  {/* Schematic Borders - Use border-border/40 to reduce visual weight */}
                   <div className="absolute inset-0 border border-border/40 border-t-0 group-hover:border-primary/30 transition-colors" />
                   
                   {/* Corners */}
@@ -326,7 +326,7 @@ export default function AssetCardVariantsPage() {
         </div>
       </div>
 
-      {/* 方案 E: Status Indicator */}
+      {/* Solution E: Status Indicator */}
       <div className="border rounded-xl overflow-hidden shadow-sm bg-background">
         <SectionHeader
           title="方案 E：Status Context"
@@ -372,7 +372,7 @@ export default function AssetCardVariantsPage() {
         </div>
       </div>
 
-      {/* 方案 F: Hover Actions */}
+      {/* Solution F: Hover Actions */}
       <div className="border rounded-xl overflow-hidden shadow-sm bg-background">
         <SectionHeader
           title="方案 F：Hover Actions"
@@ -417,7 +417,7 @@ export default function AssetCardVariantsPage() {
         </div>
       </div>
 
-      {/* 方案 G: Cyber HUD */}
+      {/* Solution G: Cyber ​​HUD */}
       <div className="border rounded-xl overflow-hidden shadow-sm bg-black text-white">
         <SectionHeader
           title="方案 G：Cyber HUD (Dark Mode Exclusive)"

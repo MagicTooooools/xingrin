@@ -17,7 +17,7 @@ export const mockAssetStatistics: AssetStatistics = {
   totalAssets: 21638,
   runningScans: 3,
   updatedAt: new Date().toISOString(),
-  // 变化值
+  // change value
   changeTargets: 12,
   changeSubdomains: 234,
   changeIps: 45,
@@ -25,7 +25,7 @@ export const mockAssetStatistics: AssetStatistics = {
   changeWebsites: 89,
   changeVulns: -5,
   changeAssets: 942,
-  // 漏洞严重程度分布
+  // Vulnerability severity distribution
   vulnBySeverity: {
     critical: 3,
     high: 12,
@@ -35,7 +35,7 @@ export const mockAssetStatistics: AssetStatistics = {
   },
 }
 
-// 生成过去 N 天的历史数据
+// Generate historical data for the past N days
 function generateHistoryData(days: number): StatisticsHistoryItem[] {
   const data: StatisticsHistoryItem[] = []
   const now = new Date()
@@ -44,7 +44,7 @@ function generateHistoryData(days: number): StatisticsHistoryItem[] {
     const date = new Date(now)
     date.setDate(date.getDate() - i)
     
-    // 模拟逐渐增长的趋势
+    // Simulate a gradual growth trend
     const factor = 1 + (days - i) * 0.02
     
     data.push({

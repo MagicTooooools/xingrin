@@ -47,20 +47,20 @@ function endpointAllInvalidates() {
   return [{ queryKey: endpointKeys.all }]
 }
 
-// 获取单个 Endpoint 详情
+// Get individual Endpoint details
 export function useEndpoint(id: number) {
   return useQuery({
     queryKey: endpointKeys.detail(id),
     queryFn: () => EndpointService.getEndpointById(id),
     select: (response) => {
-      // RESTful 标准：直接返回数据
+      // REST-style response: return data directly.
       return response as Endpoint
     },
     enabled: !!id,
   })
 }
 
-// 获取 Endpoint 列表
+// Get endpoint list
 export function useEndpoints(params?: GetEndpointsRequest) {
   const defaultParams: GetEndpointsRequest = {
     page: 1,
@@ -72,13 +72,13 @@ export function useEndpoints(params?: GetEndpointsRequest) {
     queryKey: endpointKeys.list(defaultParams),
     queryFn: () => EndpointService.getEndpoints(defaultParams),
     select: (response) => {
-      // RESTful 标准：直接返回数据
+      // REST-style response: return data directly.
       return response as GetEndpointsResponse
     },
   })
 }
 
-// 根据目标ID获取 Endpoint 列表（使用专用路由）
+// Get a list of Endpoints based on target ID (using private routing)
 export function useEndpointsByTarget(targetId: number, params?: Omit<GetEndpointsRequest, 'targetId'>, filter?: string) {
   const defaultParams: GetEndpointsRequest = {
     page: 1,
@@ -90,7 +90,7 @@ export function useEndpointsByTarget(targetId: number, params?: Omit<GetEndpoint
     queryKey: [...endpointKeys.byTarget(targetId, defaultParams), filter],
     queryFn: () => EndpointService.getEndpointsByTargetId(targetId, defaultParams, filter),
     select: (response) => {
-      // RESTful 标准：直接返回数据
+      // REST-style response: return data directly.
       return response as GetEndpointsResponse
     },
     enabled: !!targetId,
@@ -98,7 +98,7 @@ export function useEndpointsByTarget(targetId: number, params?: Omit<GetEndpoint
   })
 }
 
-// 根据扫描ID获取 Endpoint 列表（历史快照）
+// Get Endpoint list based on scan ID (historical snapshot)
 export function useScanEndpoints(scanId: number, params?: Omit<GetEndpointsRequest, 'targetId'>, options?: { enabled?: boolean }, filter?: string) {
   const defaultParams: GetEndpointsRequest = {
     page: 1,
@@ -111,7 +111,7 @@ export function useScanEndpoints(scanId: number, params?: Omit<GetEndpointsReque
     queryFn: () => EndpointService.getEndpointsByScanId(scanId, defaultParams, filter),
     enabled: options?.enabled !== undefined ? options.enabled : !!scanId,
     select: (response: EndpointPageResponse) => {
-      // 后端使用通用分页格式：results/total/page/pageSize/totalPages
+      // Backend uses shared pagination fields: results/total/page/pageSize/totalPages.
       return {
         endpoints: response.results || [],
         pagination: normalizePagination(response, defaultParams.page, defaultParams.pageSize),
@@ -121,7 +121,7 @@ export function useScanEndpoints(scanId: number, params?: Omit<GetEndpointsReque
   })
 }
 
-// 创建 Endpoint（完全自动化）
+// Create Endpoint (fully automated)
 export function useCreateEndpoint() {
   return useResourceMutation({
     mutationFn: (data: {
@@ -149,7 +149,7 @@ export function useCreateEndpoint() {
   })
 }
 
-// 删除单个 Endpoint
+// Delete a single Endpoint
 export function useDeleteEndpoint() {
   return useResourceMutation({
     mutationFn: (id: number) => EndpointService.deleteEndpoint(id),
@@ -166,7 +166,7 @@ export function useDeleteEndpoint() {
   })
 }
 
-// 批量删除 Endpoint
+// Deleting Endpoints in Batch
 export function useBatchDeleteEndpoints() {
   return useResourceMutation({
     mutationFn: (data: BatchDeleteEndpointsRequest) => EndpointService.batchDeleteEndpoints(data),
@@ -185,7 +185,7 @@ export function useBatchDeleteEndpoints() {
   })
 }
 
-// 批量创建端点（绑定到目标）
+// Create endpoints in batches (bind to targets)
 export function useBulkCreateEndpoints() {
   return useResourceMutation({
     mutationFn: (data: { targetId: number; urls: string[] }) =>

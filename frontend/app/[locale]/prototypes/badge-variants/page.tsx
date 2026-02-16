@@ -22,7 +22,7 @@ export default function BadgeVariantsPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
         
-        {/* 方案 A: 极简工业 (当前) */}
+        {/* Option A: Minimalist Industry (current) */}
         <div className="space-y-4">
           <div className="border-b pb-2">
             <h3 className="font-medium">方案 A：极简工业 (当前)</h3>
@@ -40,7 +40,7 @@ export default function BadgeVariantsPage() {
           </div>
         </div>
 
-        {/* 方案 B: 胶囊实心 */}
+        {/* Option B: solid capsule */}
         <div className="space-y-4">
           <div className="border-b pb-2">
             <h3 className="font-medium">方案 B：胶囊实心</h3>
@@ -58,7 +58,7 @@ export default function BadgeVariantsPage() {
           </div>
         </div>
 
-        {/* 方案 C: 点缀圆点 */}
+        {/* Option C: Dotted with dots */}
         <div className="space-y-4">
           <div className="border-b pb-2">
             <h3 className="font-medium">方案 C：点缀圆点</h3>
@@ -76,7 +76,7 @@ export default function BadgeVariantsPage() {
           </div>
         </div>
 
-        {/* 方案 D: 科技描边 */}
+        {/* Option D: Technological Stroke */}
         <div className="space-y-4">
           <div className="border-b pb-2">
             <h3 className="font-medium">方案 D：科技描边</h3>
@@ -94,7 +94,7 @@ export default function BadgeVariantsPage() {
           </div>
         </div>
 
-        {/* 方案 E: 微型卡片 */}
+        {/* Option E: Microcard */}
         <div className="space-y-4">
           <div className="border-b pb-2">
             <h3 className="font-medium">方案 E：微型卡片</h3>
@@ -112,7 +112,7 @@ export default function BadgeVariantsPage() {
           </div>
         </div>
 
-        {/* 方案 F: 色块拼接 (Bauhaus 风格) */}
+        {/* Option F: Color-block splice (Bauhaus-style) */}
         <div className="space-y-4">
           <div className="border-b pb-2">
             <h3 className="font-medium">方案 F：色块拼接 (Bauhaus)</h3>
@@ -130,7 +130,7 @@ export default function BadgeVariantsPage() {
           </div>
         </div>
 
-        {/* 方案 G: 粗下划线 */}
+        {/* Solution G: thick underline */}
         <div className="space-y-4">
           <div className="border-b pb-2">
             <h3 className="font-medium">方案 G：粗下划线</h3>
@@ -148,7 +148,7 @@ export default function BadgeVariantsPage() {
           </div>
         </div>
 
-        {/* 方案 H: 工业铭牌 (黑白) */}
+        {/* Scheme H: Industrial nameplate (black and white) */}
         <div className="space-y-4">
           <div className="border-b pb-2">
             <h3 className="font-medium">方案 H：工业铭牌</h3>
@@ -171,7 +171,7 @@ export default function BadgeVariantsPage() {
   )
 }
 
-// 辅助函数
+// Helper function
 const getColor = (type: BadgeType) => {
   switch (type) {
     case 'info': return 'text-sky-600 bg-sky-50 border-sky-200';
@@ -222,7 +222,7 @@ const getBorderColor = (type: BadgeType) => {
   }
 }
 
-// 方案组件
+// Scenario components
 function BadgeA({ label, value, type }: BadgeProps) {
   const colors = getColor(type);
   return (
@@ -271,7 +271,7 @@ function BadgeE({ label, value, type }: BadgeProps) {
   const dotColor = getDotColor(type);
   return (
     <span className="inline-flex items-center rounded border border-zinc-200 bg-white shadow-sm px-2 py-0.5 text-[10px] overflow-hidden relative pl-2.5">
-       {/* 左侧色条 */}
+       {/* Left color bar */}
       <span className={`absolute left-0 top-0 bottom-0 w-1 ${dotColor}`}></span>
       <span className="font-mono font-bold text-zinc-800 mr-1.5">{value}</span>
       <span className="text-zinc-500 font-medium tracking-wide uppercase text-[9px]">{label}</span>
@@ -282,7 +282,7 @@ function BadgeE({ label, value, type }: BadgeProps) {
 function BadgeF({ label, value, type }: BadgeProps) {
   const solidBg = getSolidBg(type);
   
-  // 对于 F，我们需要边框颜色与实心背景匹配
+  // For F, we need the border color to match the solid background
   let borderClass = "border-zinc-200";
   if (type === 'info') borderClass = "border-sky-600";
   if (type === 'success') borderClass = "border-emerald-600";

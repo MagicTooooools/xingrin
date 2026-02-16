@@ -5,18 +5,18 @@ import { systemLogService } from "@/services/system-log.service"
 import { useToastMessages } from "@/lib/toast-helpers"
 
 /**
- * 获取日志文件列表
+ * Get a list of log files
  */
 export function useLogFiles() {
   return useQuery({
     queryKey: ["system", "logs", "files"],
     queryFn: () => systemLogService.getLogFiles(),
-    staleTime: 30 * 1000, // 30秒内不重新请求
+    staleTime: 30 * 1000, // Avoid refetching within 30 seconds.
   })
 }
 
 /**
- * 获取日志内容
+ * Get log content
  */
 export function useSystemLogs(options?: {
   file?: string

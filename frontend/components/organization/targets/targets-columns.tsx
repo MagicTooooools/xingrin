@@ -17,7 +17,7 @@ import { DataTableColumnHeader } from "@/components/ui/data-table/column-header"
 import type { Target } from "@/types/target.types"
 import { toast } from "sonner"
 
-// 翻译类型定义
+// Translation type definition
 export interface OrgTargetsTranslations {
   columns: {
     targetName: string
@@ -48,7 +48,7 @@ interface CreateColumnsProps {
 }
 
 /**
- * 目标行操作组件
+ * target row operation component
  */
 function TargetRowActions({
   onView,
@@ -103,7 +103,7 @@ function TargetRowActions({
 }
 
 /**
- * 目标名称单元格组件
+ * target name cell component
  */
 function TargetNameCell({ 
   name, 
@@ -165,7 +165,7 @@ function TargetNameCell({
 }
 
 /**
- * 创建目标表格列定义
+ * Create target table column definitions
  */
 export const createTargetColumns = ({
   formatDate,

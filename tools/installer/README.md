@@ -29,8 +29,8 @@ LunaFox 安装器以 Go 实现，默认通过 Web 页面引导安装。
 `install.sh` 流程：
 1. 读取 `stable` 通道（或你传入的 `--version`/`--channel`）。
 2. 从远程 release 拉取对应平台安装器二进制。
-3. 校验安装器 SHA256，并读取 `AGENT_IMAGE_REF`/`WORKER_IMAGE_REF`（digest）。
-4. 将镜像 ref 透传给 installer，启动本地 Web 安装页。
+3. 校验安装器 SHA256，并读取 `AGENT_IMAGE_REFS`/`WORKER_IMAGE_REFS`（digest 候选列表）。
+4. installer 按连通性探测优先级 + `docker pull` 成功结果选择可用源，启动本地 Web 安装页。
 
 常用示例：
 
@@ -48,7 +48,8 @@ LunaFox 安装器以 Go 实现，默认通过 Web 页面引导安装。
 - `install.sh` 不支持 `--` 参数透传。
 - `goproxy` 通过 Web 页面勾选项配置，不通过 `install.sh` 参数透传。
 - 下载源策略：`--source auto` 时按 `GitHub -> Gitee` 顺序重试。
-- 发布通道清单当前 schema 为 `SCHEMA_VERSION=2`，并强制 `AGENT_IMAGE_REF`/`WORKER_IMAGE_REF` 使用 digest。
+- 发布通道清单当前 schema 为 `SCHEMA_VERSION=2`，并强制 `AGENT_IMAGE_REFS`/`WORKER_IMAGE_REFS` 使用 digest 列表。
+- `SCHEMA_VERSION=2` 下不再接受旧单值键 `AGENT_IMAGE_REF`/`WORKER_IMAGE_REF`。
 
 ## 本地调试入口（源码运行）
 

@@ -5,14 +5,14 @@ import { Button } from "@/components/ui/button"
 import { Settings, Search } from "@/components/icons"
 
 /**
- * Demo C：对接式界面
- * 设计理念：Header 底边框与表格顶边框合为一条线，形成无缝对接
- * 关键 CSS：Header border-b-2，表格 border-t-0，紧贴无间隙
+ * Demo C: docking interface
+ * Design concept: The bottom border of the Header and the top border of the table are combined into one line to form a seamless connection.
+ * Key CSS: Header border-b-2, table border-t-0, snug without gaps
  */
 export default function DemoPageC() {
   return (
     <div className="flex flex-col h-full">
-      {/* 说明区域 */}
+      {/* Description area */}
       <div className="p-6 border-b bg-muted/30">
         <h1 className="text-xl font-bold">方案 C：对接式界面</h1>
         <p className="text-sm text-muted-foreground mt-1">
@@ -20,10 +20,10 @@ export default function DemoPageC() {
         </p>
       </div>
 
-      {/* 核心 Demo 区域 */}
+      {/* Core Demo area */}
       <div className="flex-1 p-6 flex flex-col min-h-0">
         
-        {/* Header 区域 - 底部粗边框，作为分割线 */}
+        {/* Header area - thick border at the bottom as a dividing line */}
         <div className="flex items-end justify-between border-b-2 border-primary pb-3 shrink-0 px-2">
           <div className="flex flex-col">
             <span className="text-[10px] font-mono text-muted-foreground mb-1 uppercase tracking-wider">
@@ -37,7 +37,7 @@ export default function DemoPageC() {
             </div>
           </div>
           
-          {/* Tab 风格的按钮 - 贴底对齐，制造对接效果 */}
+          {/* Tab-style buttons - aligned to the bottom to create a docking effect */}
           <div className="flex gap-0.5 translate-y-[2px]">
              <Button 
                variant="secondary" 
@@ -56,7 +56,7 @@ export default function DemoPageC() {
           </div>
         </div>
         
-        {/* 表格区域 - 移除顶部边框，紧贴 Header */}
+        {/* Table area - remove top border and stick to Header */}
         <div className="flex-1 overflow-auto border-x-2 border-b-2 border-primary bg-card">
           <AllTargetsDetailView
             className="space-y-0 px-2 pb-2"

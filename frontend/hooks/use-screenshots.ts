@@ -13,7 +13,7 @@ export const screenshotKeys = {
     [...screenshotKeyBase.all, 'scan', scanId, params] as const,
 }
 
-// 获取目标的截图列表
+// Get a list of screenshots of the target
 export function useTargetScreenshots(
   targetId: number,
   params: { page: number; pageSize: number; filter?: string },
@@ -27,7 +27,7 @@ export function useTargetScreenshots(
   })
 }
 
-// 获取扫描的截图快照列表
+// Get a list of scanned screenshots
 export function useScanScreenshots(
   scanId: number,
   params: { page: number; pageSize: number; filter?: string },

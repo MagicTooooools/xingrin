@@ -105,7 +105,7 @@ function transformVulnerabilityResponse(
   return { vulnerabilities, pagination }
 }
 
-/** 获取所有漏洞 */
+/** Get all vulnerabilities */
 export function useAllVulnerabilities(
   params?: GetVulnerabilitiesParams,
   options?: { enabled?: boolean },

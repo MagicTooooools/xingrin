@@ -1,6 +1,6 @@
 import type { IPAddress, GetIPAddressesResponse } from '@/types/ip-address.types'
 
-// 使用函数生成IP地址
+// Use function to generate IP address
 const ip = (a: number, b: number, c: number, d: number) => `${a}.${b}.${c}.${d}`
 
 export const mockIPAddresses: IPAddress[] = [

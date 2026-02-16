@@ -31,7 +31,7 @@ export const scheduledScanKeys = createResourceKeys("scheduled-scans", {
 })
 
 /**
- * 获取定时扫描列表
+ * Get scheduled scan list
  */
 export function useScheduledScans(params: {
   page?: number
@@ -48,7 +48,7 @@ export function useScheduledScans(params: {
 }
 
 /**
- * 获取定时扫描详情
+ * Get scheduled scan details
  */
 export function useScheduledScan(id: number) {
   return useQuery({
@@ -59,7 +59,7 @@ export function useScheduledScan(id: number) {
 }
 
 /**
- * 创建定时扫描
+ * Create a scheduled scan
  */
 export function useCreateScheduledScan() {
   return useResourceMutation({
@@ -69,7 +69,7 @@ export function useCreateScheduledScan() {
       handleScheduledScanMutationSuccess({
         response,
         onSuccess: () => {
-          // 使用 i18n 消息显示成功提示
+          // Show success prompt using i18n message
           toast.success('toast.scheduledScan.create.success')
         },
       })
@@ -79,7 +79,7 @@ export function useCreateScheduledScan() {
 }
 
 /**
- * 更新定时扫描
+ * Update scheduled scan
  */
 export function useUpdateScheduledScan() {
   return useResourceMutation({
@@ -93,7 +93,7 @@ export function useUpdateScheduledScan() {
       handleScheduledScanMutationSuccess({
         response,
         onSuccess: () => {
-          // 使用 i18n 消息显示成功提示
+          // Show success prompt using i18n message
           toast.success('toast.scheduledScan.update.success')
         },
       })
@@ -103,7 +103,7 @@ export function useUpdateScheduledScan() {
 }
 
 /**
- * 删除定时扫描
+ * Delete scheduled scan
  */
 export function useDeleteScheduledScan() {
   return useResourceMutation({
@@ -113,7 +113,7 @@ export function useDeleteScheduledScan() {
       handleScheduledScanMutationSuccess({
         response,
         onSuccess: () => {
-          // 使用 i18n 消息显示成功提示
+          // Show success prompt using i18n message
           toast.success('toast.scheduledScan.delete.success')
         },
       })
@@ -123,8 +123,8 @@ export function useDeleteScheduledScan() {
 }
 
 /**
- * 切换定时扫描启用状态
- * 使用乐观更新，避免重新获取数据导致列表重新排序
+ * Switch scheduled scan enable status
+ * Use optimistic updates to avoid re-fetching data causing the list to be reordered
  */
 export function useToggleScheduledScan() {
   return useResourceMutation({
@@ -132,13 +132,13 @@ export function useToggleScheduledScan() {
       toggleScheduledScan(id, isEnabled),
     onMutate: async ({ id, isEnabled }, context) => {
       const { queryClient } = context
-      // 取消正在进行的查询
+      // Cancel an ongoing query
       await queryClient.cancelQueries({ queryKey: scheduledScanKeys.all })
 
-      // 获取当前缓存的所有 scheduled-scans 查询
+      // Get all currently cached scheduled-scans queries
       const previousQueries = queryClient.getQueriesData({ queryKey: scheduledScanKeys.all })
 
-      // 乐观更新所有匹配的查询缓存
+      // Optimistically updates all matching query caches
       queryClient.setQueriesData(
         { queryKey: scheduledScanKeys.all },
         (old: GetScheduledScansResponse | undefined) => {
@@ -152,14 +152,14 @@ export function useToggleScheduledScan() {
         }
       )
 
-      // 返回上下文用于回滚
+      // Return context for rollback
       return { previousQueries }
     },
     onSuccess: ({ data: response, variables: { isEnabled }, toast }) => {
       handleScheduledScanMutationSuccess({
         response,
         onSuccess: () => {
-          // 使用 i18n 消息显示成功提示
+          // Show success prompt using i18n message
           if (isEnabled) {
             toast.success('toast.scheduledScan.toggle.enabled')
           } else {
@@ -167,10 +167,10 @@ export function useToggleScheduledScan() {
           }
         },
       })
-      // 不调用 invalidateQueries，保持当前排序
+      // Do not call invalidateQueries, keep the current sorting
     },
     onError: ({ error, context, toast, queryClient }) => {
-      // 回滚到之前的状态
+      // Roll back to previous state
       if (context?.previousQueries) {
         context.previousQueries.forEach(([queryKey, data]) => {
           queryClient.setQueryData(queryKey, data)

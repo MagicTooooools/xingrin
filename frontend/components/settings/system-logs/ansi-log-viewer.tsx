@@ -11,7 +11,7 @@ interface AnsiLogViewerProps {
   logLevel?: LogLevel
 }
 
-// 日志级别颜色配置
+// Log level color configuration
 const LOG_LEVEL_COLORS: Record<string, string> = {
   DEBUG: "#4ec9b0",    // cyan
   INFO: "#6a9955",     // green
@@ -21,11 +21,11 @@ const LOG_LEVEL_COLORS: Record<string, string> = {
   CRITICAL: "#f44747", // red (bold handled separately)
 }
 
-// 创建 ANSI 转换器实例
+// Create an ANSI converter instance
 const ansiConverter = new AnsiToHtml({
   fg: "#d4d4d4",
   bg: "#1e1e1e",
-  newline: false,  // 我们自己处理换行
+  newline: false,  // We handle line breaks ourselves
   escapeXML: true,
   colors: {
     0: "#1e1e1e",   // black
@@ -47,17 +47,17 @@ const ansiConverter = new AnsiToHtml({
   },
 })
 
-// 检测内容是否包含 ANSI 颜色码
+// Detect whether content contains ANSI color codes
 function hasAnsiCodes(text: string): boolean {
-  // ANSI 转义序列通常以 ESC[ 开头（\x1b[ 或 \u001b[）
+  // ANSI escape sequences usually start with ESC[ (\x1b[ or \u001b[)
   return /\x1b\[|\u001b\[/.test(text)
 }
 
-// 解析纯文本日志内容，为日志级别添加颜色
+// Parse plain text log content and add color to log level
 function colorizeLogContent(content: string): string {
-  // 匹配日志格式:
-  // 1) 系统日志: [2026-01-10 09:51:52] [INFO] [apps.scan.xxx:123] ...
-  // 2) 扫描日志: [09:50:37] [INFO] [subdomain_discovery] ...
+  // Match log format:
+  // 1) System log: [2026-01-10 09:51:52] [INFO] [apps.scan.xxx:123] ...
+  // 2) Scan log: [09:50:37] [INFO] [subdomain_discovery] ...
   const logLineRegex = /^(\[(?:\d{4}-\d{2}-\d{2} )?\d{2}:\d{2}:\d{2}\]) (\[(DEBUG|INFO|WARNING|WARN|ERROR|CRITICAL)\]) (.*)$/i
   
   return content
@@ -69,35 +69,35 @@ function colorizeLogContent(content: string): string {
         const [, timestamp, levelBracket, level, rest] = match
         const levelUpper = level.toUpperCase()
         const color = LOG_LEVEL_COLORS[levelUpper] || "#d4d4d4"
-        // ansiConverter.toHtml 已经处理了 HTML 转义
+        // ansiConverter.toHtml already handles HTML escaping
         const escapedTimestamp = ansiConverter.toHtml(timestamp)
         const escapedLevelBracket = ansiConverter.toHtml(levelBracket)
         const escapedRest = ansiConverter.toHtml(rest)
         
-        // 时间戳灰色，日志级别带颜色，其余默认色
+        // The timestamp is gray, the log level is colored, and the rest are in default colors.
         return `<span style="color:#808080">${escapedTimestamp}</span> <span style="color:${color};font-weight:${levelUpper === "CRITICAL" ? "bold" : "normal"}">${escapedLevelBracket}</span> ${escapedRest}`
       }
       
-      // 非标准格式的行，也进行 HTML 转义
+      // Non-standard lines are also HTML-escaped.
       return ansiConverter.toHtml(line)
     })
     .join("\n")
 }
 
-// 高亮搜索关键词
+// Highlight search keywords
 function highlightSearch(html: string, query: string): string {
   if (!query.trim()) return html
 
-  // `ansi-to-html` 在 `escapeXML: true` 时，会把非 ASCII 字符（如中文）转成实体：
-  // 例如 "中文" => "&#x4E2D;&#x6587;"。
-  // 因此这里需要用同样的转义规则来生成可匹配的搜索串。
+  // `ansi-to-html` will convert non-ASCII characters (such as Chinese) into entities when `escapeXML: true` is set:
+  // For example, a non-ASCII word can become an entity sequence like "&#x4E2D;&#x6587;".
+  // Therefore, the same escaping rules need to be used here to generate a matching search string.
   const escapedQueryForHtml = ansiConverter.toHtml(query)
 
-  // 转义正则特殊字符
+  // Escape regular special characters
   const escapedQuery = escapedQueryForHtml.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
   const regex = new RegExp(`(${escapedQuery})`, "giu")
 
-  // 在标签外的文本中高亮关键词
+  // Highlight keywords in text outside tags
   return html.replace(/(<[^>]+>)|([^<]+)/g, (match, tag, text) => {
     if (tag) return tag
     if (text) {
@@ -110,32 +110,32 @@ function highlightSearch(html: string, query: string): string {
   })
 }
 
-// 多种日志格式的级别提取正则
+// Log-level extraction patterns for multiple log formats.
 const LOG_LEVEL_PATTERNS = [
-  // 标准格式: [2026-01-07 12:00:00] [INFO]
+  // Standard format: [2026-01-07 12:00:00] [INFO]
   /^\[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\] \[(DEBUG|INFO|WARNING|WARN|ERROR|CRITICAL)\]/i,
-  // 扫描日志格式: [09:50:37] [INFO] [stage]
+  // Scan log format: [09:50:37] [INFO] [stage]
   /^\[\d{2}:\d{2}:\d{2}\] \[(DEBUG|INFO|WARNING|WARN|ERROR|CRITICAL)\]/i,
-  // Prefect 格式: 12:01:50.419 | WARNING | prefect
+  // Prefect format: 12:01:50.419 | WARNING | prefect
   /^[\d:.]+\s+\|\s+(DEBUG|INFO|WARNING|WARN|ERROR|CRITICAL)\s+\|/i,
-  // 简单格式: [INFO] message 或 INFO: message
+  // Simple format: [INFO] message or INFO: message
   /^(?:\[)?(DEBUG|INFO|WARNING|WARN|ERROR|CRITICAL)(?:\])?[:\s]/i,
-  // Python logging 格式: INFO - message
+  // Python logging format: INFO - message
   /^(DEBUG|INFO|WARNING|WARN|ERROR|CRITICAL)\s+-\s+/i,
 ]
 
-// 新日志条目起始模式（无级别但表示新条目开始）
+// New-entry patterns (no level, but mark the start of a new entry).
 const NEW_ENTRY_PATTERNS = [
-  /^\[\d+\/\d+\]/, // [1/4], [2/4] 等步骤标记
-  /^\[CONFIG\]/i, // [CONFIG] 配置信息
-  /^\[诊断\]/, // [诊断] 诊断信息
-  /^={10,}$/, // ============ 分隔线
-  /^\[\d{4}-\d{2}-\d{2}/, // 时间戳开头 [2026-01-07...
-  /^\d{2}:\d{2}:\d{2}/, // 时间开头 12:01:50...
-  /^\/[\w/]+\.py:\d+:/, // Python 文件路径 /path/file.py:123:
+  /^\[\d+\/\d+\]/, // [1/4], [2/4], etc. step markers
+  /^\[CONFIG\]/i, // [CONFIG] metadata line
+  /^\[诊断\]/, // Diagnostics label line
+  /^={10,}$/, // ============ separator line
+  /^\[\d{4}-\d{2}-\d{2}/, // Timestamp prefix, e.g. [2026-01-07...
+  /^\d{2}:\d{2}:\d{2}/, // Time prefix, e.g. 12:01:50...
+  /^\/[\w/]+\.py:\d+:/, // Python path prefix, e.g. /path/file.py:123:
 ]
 
-// 从行中提取日志级别
+// Extract log level from a line.
 function extractLogLevel(line: string): string | null {
   for (const pattern of LOG_LEVEL_PATTERNS) {
     const match = line.match(pattern)
@@ -146,12 +146,12 @@ function extractLogLevel(line: string): string | null {
   return null
 }
 
-// 检测是否是新日志条目的起始（无级别）
+// Check whether the line starts a new log entry (without a level).
 function isNewEntryStart(line: string): boolean {
   return NEW_ENTRY_PATTERNS.some((pattern) => pattern.test(line))
 }
 
-// 级别标准化
+// Normalize level labels.
 function normalizeLevel(l: string): string {
   const upper = l.toUpperCase()
   if (upper === "WARNING") return "WARN"
@@ -159,28 +159,28 @@ function normalizeLevel(l: string): string {
   return upper
 }
 
-// 根据级别筛选日志行
-// 支持多行日志：非标准格式的行会跟随前一个标准日志行的级别
+// Filter log lines by level.
+// For multi-line logs, non-standard lines inherit the previous standard line's level.
 function filterByLevel(content: string, level: LogLevel): string {
   if (level === "all") return content
   
   const targetLevel = normalizeLevel(level)
   const lines = content.split("\n")
   const result: string[] = []
-  // 默认隐藏，直到遇到第一个匹配目标级别的日志行
+  // Hidden by default until a line matching the target level is encountered.
   let currentBlockVisible = false
   
   for (const line of lines) {
     const extractedLevel = extractLogLevel(line)
     if (extractedLevel) {
-      // 这是一个新的日志条目，精确匹配级别
+      // This is a new log entry; evaluate visibility by exact level match.
       const lineLevel = normalizeLevel(extractedLevel)
       currentBlockVisible = lineLevel === targetLevel
     } else if (isNewEntryStart(line)) {
-      // 无级别但是新条目开始，隐藏
+      // New entry without explicit level; hide by default.
       currentBlockVisible = false
     }
-    // 非标准行跟随前一个日志条目的可见性
+    // Non-standard lines follow the previous entry's visibility.
     if (currentBlockVisible) {
       result.push(line)
     }
@@ -191,43 +191,43 @@ function filterByLevel(content: string, level: LogLevel): string {
 
 export function AnsiLogViewer({ content, className, searchQuery = "", logLevel = "all" }: AnsiLogViewerProps) {
   const containerRef = useRef<HTMLPreElement>(null)
-  const isAtBottomRef = useRef(true)  // 跟踪用户是否在底部
+  const isAtBottomRef = useRef(true)  // Track whether the user is near the bottom.
   const deferredQuery = useDeferredValue(searchQuery)
 
-  // 解析日志并添加颜色
-  // 支持两种模式：ANSI 颜色码和纯文本日志级别解析
+  // Parse logs and apply colors.
+  // Supports two modes: ANSI color codes and plain-text level parsing.
   const baseHtml = useMemo(() => {
     if (!content) return ""
     
-    // 先按级别筛选
+    // Apply level filtering first.
     const filteredContent = filterByLevel(content, logLevel)
     
     let result: string
-    // 如果包含 ANSI 颜色码，直接转换
+    // If ANSI escape codes exist, convert directly.
     if (hasAnsiCodes(filteredContent)) {
       result = ansiConverter.toHtml(filteredContent)
     } else {
-      // 否则解析日志级别添加颜色
+      // Otherwise, parse log levels and apply color styles.
       result = colorizeLogContent(filteredContent)
     }
     
     return result
   }, [content, logLevel])
 
-  // 应用搜索高亮（使用延迟的 query 以避免输入卡顿）
+  // Apply search highlighting (deferred query avoids typing lag).
   const htmlContent = useMemo(
     () => highlightSearch(baseHtml, deferredQuery),
     [baseHtml, deferredQuery]
   )
 
-  // 监听滚动事件，检测用户是否在底部
+  // Track scroll position and detect whether the user is near the bottom.
   useEffect(() => {
     const container = containerRef.current
     if (!container) return
     
     const handleScroll = () => {
       const { scrollTop, scrollHeight, clientHeight } = container
-      // 允许 30px 的容差，认为在底部附近
+      // Treat within 30px as near-bottom.
       isAtBottomRef.current = scrollHeight - scrollTop - clientHeight < 30
     }
     
@@ -235,7 +235,7 @@ export function AnsiLogViewer({ content, className, searchQuery = "", logLevel =
     return () => container.removeEventListener('scroll', handleScroll)
   }, [])
 
-  // 只有用户在底部时才自动滚动
+  // Auto-scroll only when the user is already near the bottom.
   useEffect(() => {
     if (containerRef.current && isAtBottomRef.current) {
       containerRef.current.scrollTop = containerRef.current.scrollHeight

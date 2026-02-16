@@ -13,7 +13,7 @@ export default function SidebarVariantsPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         
-        {/* 方案 A: 经典几何 */}
+        {/* Option A: Classical Geometry */}
         <div className="border rounded-xl overflow-hidden shadow-sm bg-background">
           <div className="bg-muted/50 p-3 border-b text-center font-medium">
             方案 A：经典几何 (推荐)
@@ -22,21 +22,21 @@ export default function SidebarVariantsPage() {
             </div>
           </div>
           <div className="p-4 bg-zinc-50/50 min-h-[300px]">
-            {/* 模拟侧边栏 */}
+            {/* Simulate sidebar */}
             <div className="w-64 bg-white border rounded-lg shadow-sm overflow-hidden mx-auto">
               <div className="p-2 space-y-1">
                 <MenuButton icon={IconRadar} label="扫描管理" active />
                 
                 <div className="pl-0 space-y-1 mt-1">
-                   {/* 模拟展开的子菜单 */}
+                   {/* Simulate expanded submenu */}
                   <div className="flex items-center gap-2 px-2 py-1.5 text-sm text-muted-foreground hover:bg-zinc-100 rounded-md ml-4 border-l-2 border-transparent">
                     <span>扫描概览</span>
                   </div>
                   
-                  {/* 选中项 - 方案 A */}
+                  {/* Selected Item - Option A */}
                   <div className="flex items-center gap-2 px-2 py-1.5 text-sm font-medium bg-zinc-100 text-foreground ml-0 pl-[26px] border-l-[4px] border-[#FF4C00] relative">
                     <span>扫描历史</span>
-                    {/* 无右侧圆点 */}
+                    {/* No right dot */}
                   </div>
 
                   <div className="flex items-center gap-2 px-2 py-1.5 text-sm text-muted-foreground hover:bg-zinc-100 rounded-md ml-4 border-l-2 border-transparent">
@@ -51,7 +51,7 @@ export default function SidebarVariantsPage() {
           </div>
         </div>
 
-        {/* 方案 B: 前置方点 */}
+        {/* Option B: Front square point */}
         <div className="border rounded-xl overflow-hidden shadow-sm bg-background">
           <div className="bg-muted/50 p-3 border-b text-center font-medium">
             方案 B：前置方点
@@ -69,7 +69,7 @@ export default function SidebarVariantsPage() {
                     <span>扫描概览</span>
                   </div>
                   
-                  {/* 选中项 - 方案 B */}
+                  {/* Selected Item - Option B */}
                   <div className="flex items-center gap-2 px-2 py-1.5 text-sm font-medium bg-zinc-100 text-foreground ml-4 rounded-md">
                     <div className="w-1.5 h-1.5 bg-[#FF4C00] shrink-0" />
                     <span>扫描历史</span>
@@ -87,7 +87,7 @@ export default function SidebarVariantsPage() {
           </div>
         </div>
 
-        {/* 方案 C: 高亮色块 */}
+        {/* Option C: Highlight Color Block */}
         <div className="border rounded-xl overflow-hidden shadow-sm bg-background">
           <div className="bg-muted/50 p-3 border-b text-center font-medium">
             方案 C：高亮色块
@@ -105,7 +105,7 @@ export default function SidebarVariantsPage() {
                     <span>扫描概览</span>
                   </div>
                   
-                  {/* 选中项 - 方案 C */}
+                  {/* Selected Item - Option C */}
                   <div className="flex items-center gap-2 px-2 py-1.5 text-sm font-medium bg-zinc-800 text-white ml-4 rounded-md shadow-sm">
                     <span>扫描历史</span>
                   </div>
@@ -122,7 +122,7 @@ export default function SidebarVariantsPage() {
           </div>
         </div>
 
-        {/* 方案 D: 右侧指示条 */}
+        {/* Option D: Right indicator bar */}
         <div className="border rounded-xl overflow-hidden shadow-sm bg-background">
           <div className="bg-muted/50 p-3 border-b text-center font-medium">
             方案 D：右侧指示条
@@ -140,7 +140,7 @@ export default function SidebarVariantsPage() {
                     <span>扫描概览</span>
                   </div>
                   
-                  {/* 选中项 - 方案 D */}
+                  {/* Selected Item - Option D */}
                   <div className="flex items-center justify-between px-2 py-1.5 text-sm font-medium bg-zinc-50 text-foreground ml-4 rounded-md relative overflow-hidden">
                     <span>扫描历史</span>
                     <div className="absolute right-0 top-0 bottom-0 w-1 bg-[#FF4C00]"></div>
@@ -158,7 +158,7 @@ export default function SidebarVariantsPage() {
           </div>
         </div>
 
-        {/* 方案 E: 文字变色 */}
+        {/* Option E: Text discoloration */}
         <div className="border rounded-xl overflow-hidden shadow-sm bg-background">
           <div className="bg-muted/50 p-3 border-b text-center font-medium">
             方案 E：文字变色
@@ -176,7 +176,7 @@ export default function SidebarVariantsPage() {
                     <span>扫描概览</span>
                   </div>
                   
-                  {/* 选中项 - 方案 E */}
+                  {/* Selected Item - Option E */}
                   <div className="flex items-center gap-2 px-2 py-1.5 text-sm font-semibold text-[#FF4C00] ml-4 rounded-md">
                     <span>扫描历史</span>
                   </div>
@@ -193,7 +193,7 @@ export default function SidebarVariantsPage() {
           </div>
         </div>
 
-        {/* 方案 F: 橙色胶囊 */}
+        {/* Option F: Orange Capsules */}
         <div className="border rounded-xl overflow-hidden shadow-sm bg-background">
           <div className="bg-muted/50 p-3 border-b text-center font-medium">
             方案 F：橙色胶囊
@@ -211,7 +211,7 @@ export default function SidebarVariantsPage() {
                     <span>扫描概览</span>
                   </div>
                   
-                  {/* 选中项 - 方案 F */}
+                  {/* Selected Item - Option F */}
                   <div className="flex items-center gap-2 px-2 py-1.5 text-sm font-medium bg-[#FF4C00] text-white ml-4 rounded-full shadow-sm">
                     <span>扫描历史</span>
                   </div>
@@ -228,7 +228,7 @@ export default function SidebarVariantsPage() {
           </div>
         </div>
 
-        {/* 方案 G: 树形连接线 */}
+        {/* Option G: Tree connection line */}
         <div className="border rounded-xl overflow-hidden shadow-sm bg-background">
           <div className="bg-muted/50 p-3 border-b text-center font-medium">
             方案 G: 树形连接线
@@ -241,18 +241,18 @@ export default function SidebarVariantsPage() {
               <div className="p-2 space-y-1">
                 <MenuButton icon={IconRadar} label="扫描管理" active />
                 
-                {/* 树形结构容器 */}
+                {/* tree structure container */}
                 <div className="relative ml-4 pl-3 space-y-1 mt-1">
-                  {/* 垂直连接线 */}
+                  {/* vertical connection line */}
                   <div className="absolute left-0 top-0 bottom-2 w-px bg-zinc-200"></div>
 
                   <div className="relative flex items-center gap-2 px-2 py-1.5 text-sm text-muted-foreground hover:bg-zinc-100 rounded-md">
-                     {/* 水平连接线 */}
+                     {/* horizontal connecting line */}
                     <div className="absolute left-[-12px] top-1/2 w-3 h-px bg-zinc-200"></div>
                     <span>扫描概览</span>
                   </div>
                   
-                  {/* 选中项 - 方案 G */}
+                  {/* Selected Item - Option G */}
                   <div className="relative flex items-center gap-2 px-2 py-1.5 text-sm font-medium text-[#FF4C00] bg-zinc-50 rounded-md">
                     <div className="absolute left-[-12px] top-1/2 w-3 h-px bg-zinc-200"></div>
                     <div className="w-1.5 h-1.5 rounded-full bg-[#FF4C00] mr-1"></div>
@@ -272,7 +272,7 @@ export default function SidebarVariantsPage() {
           </div>
         </div>
 
-        {/* 方案 H: 时间轴节点 */}
+        {/* Option H: Timeline Node */}
         <div className="border rounded-xl overflow-hidden shadow-sm bg-background">
           <div className="bg-muted/50 p-3 border-b text-center font-medium">
             方案 H: 时间轴节点
@@ -286,18 +286,18 @@ export default function SidebarVariantsPage() {
                 <MenuButton icon={IconRadar} label="扫描管理" active />
                 
                 <div className="relative ml-5 space-y-4 mt-2 mb-2">
-                  {/* 贯穿线 */}
+                  {/* through line */}
                   <div className="absolute left-0 top-0 bottom-0 w-px bg-zinc-200 transform -translate-x-1/2"></div>
 
                   <div className="relative flex items-center gap-2 pl-4 text-sm text-muted-foreground">
-                    {/* 未选中节点 */}
+                    {/* Node is not selected */}
                     <div className="absolute left-0 top-1/2 w-1.5 h-1.5 bg-zinc-300 rounded-full transform -translate-x-1/2 -translate-y-1/2 border border-white ring-2 ring-white"></div>
                     <span>扫描概览</span>
                   </div>
                   
-                  {/* 选中项 - 方案 H */}
+                  {/* Selected Item - Option H */}
                   <div className="relative flex items-center gap-2 pl-4 text-sm font-semibold text-foreground">
-                    {/* 选中节点 */}
+                    {/* Select node */}
                     <div className="absolute left-0 top-1/2 w-2.5 h-2.5 bg-[#FF4C00] rounded-full transform -translate-x-1/2 -translate-y-1/2 ring-4 ring-zinc-50"></div>
                     <span>扫描历史</span>
                   </div>
@@ -315,7 +315,7 @@ export default function SidebarVariantsPage() {
           </div>
         </div>
 
-        {/* 方案 I: 幽灵缩进线 */}
+        {/* Option I: Ghost indentation lines */}
         <div className="border rounded-xl overflow-hidden shadow-sm bg-background">
           <div className="bg-muted/50 p-3 border-b text-center font-medium">
             方案 I: 幽灵缩进线
@@ -333,7 +333,7 @@ export default function SidebarVariantsPage() {
                     <span>扫描概览</span>
                   </div>
                   
-                  {/* 选中项 - 方案 I */}
+                  {/* Selected Items - Option I */}
                   <div className="flex items-center gap-2 px-2 py-1.5 text-sm font-medium text-foreground ml-4 border-l border-[#FF4C00] pl-3 bg-zinc-50/50">
                     <span>扫描历史</span>
                   </div>
@@ -350,7 +350,7 @@ export default function SidebarVariantsPage() {
           </div>
         </div>
 
-        {/* 方案 J: 块级连接线 */}
+        {/* Option J: Block Level Cables */}
         <div className="border rounded-xl overflow-hidden shadow-sm bg-background">
           <div className="bg-muted/50 p-3 border-b text-center font-medium">
             方案 J: 块级连接线
@@ -364,16 +364,16 @@ export default function SidebarVariantsPage() {
                 <MenuButton icon={IconRadar} label="扫描管理" active />
                 
                 <div className="relative ml-2 space-y-0.5 mt-1">
-                  {/* 粗灰线背景 */}
+                  {/* thick gray line background */}
                   <div className="absolute left-2 top-0 bottom-2 w-0.5 bg-zinc-100"></div>
 
                   <div className="relative flex items-center gap-2 px-2 py-1.5 text-sm text-muted-foreground hover:bg-zinc-100 rounded-md ml-4">
                     <span>扫描概览</span>
                   </div>
                   
-                  {/* 选中项 - 方案 J */}
+                  {/* Selected Item - Option J */}
                   <div className="relative flex items-center gap-2 px-2 py-1.5 text-sm font-medium bg-zinc-100 text-foreground ml-4 rounded-md">
-                     {/* 选中时左侧覆盖一条橙色线 */}
+                     {/* When selected, an orange line covers the left side */}
                     <div className="absolute left-[-10px] top-1/2 -translate-y-1/2 h-full w-0.5 bg-[#FF4C00]"></div>
                     <span>扫描历史</span>
                   </div>
@@ -390,7 +390,7 @@ export default function SidebarVariantsPage() {
           </div>
         </div>
 
-        {/* 方案 K: 滑动背景动画 */}
+        {/* Solution K: Sliding background animation */}
         <div className="border rounded-xl overflow-hidden shadow-sm bg-background">
           <div className="bg-muted/50 p-3 border-b text-center font-medium">
             方案 K: 滑动背景动画
@@ -409,7 +409,7 @@ export default function SidebarVariantsPage() {
                     <span className="relative transition-transform duration-300 group-hover:translate-x-1">扫描概览</span>
                   </div>
                   
-                  {/* 选中项 - 方案 K */}
+                  {/* Selected Item - Option K */}
                   <div className="group relative flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-foreground overflow-hidden rounded-md cursor-pointer">
                     <div className="absolute inset-0 bg-zinc-100 border-l-2 border-[#FF4C00]"></div>
                     <span className="relative translate-x-1">扫描历史</span>
@@ -428,7 +428,7 @@ export default function SidebarVariantsPage() {
           </div>
         </div>
 
-        {/* 方案 L: 霓虹辉光 (Glow) */}
+        {/* Plan L: Neon Glow (Glow) */}
         <div className="border rounded-xl overflow-hidden shadow-sm bg-background">
           <div className="bg-muted/50 p-3 border-b text-center font-medium">
             方案 L: 霓虹辉光
@@ -437,7 +437,7 @@ export default function SidebarVariantsPage() {
             </div>
           </div>
           <div className="p-4 bg-zinc-900 min-h-[300px]">
-             {/* 深色模式下效果更好 */}
+             {/* Works better in dark mode */}
              <div className="w-64 bg-zinc-950 border border-zinc-800 rounded-lg shadow-sm overflow-hidden mx-auto text-zinc-400">
               <div className="p-2 space-y-1">
                 <div className="flex items-center gap-2 px-2 py-2 text-sm rounded-md bg-zinc-900 text-zinc-100">
@@ -450,11 +450,11 @@ export default function SidebarVariantsPage() {
                     <span>扫描概览</span>
                   </div>
                   
-                  {/* 选中项 - 方案 L */}
+                  {/* Selected Item - Option L */}
                   <div className="relative flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-white rounded-r-md cursor-pointer">
-                    {/* 发光条 */}
+                    {/* Luminous strip */}
                     <div className="absolute left-0 top-1 bottom-1 w-0.5 bg-[#FF4C00] shadow-[0_0_8px_rgba(255,76,0,0.8)] rounded-full"></div>
-                    {/* 背景光晕 */}
+                    {/* background glow */}
                     <div className="absolute inset-0 bg-gradient-to-r from-[#FF4C00]/10 to-transparent opacity-50"></div>
                     <span className="relative">扫描历史</span>
                   </div>
@@ -477,7 +477,7 @@ export default function SidebarVariantsPage() {
           </div>
         </div>
 
-        {/* 方案 M: 脉冲圆点 */}
+        {/* Plan M: Pulse Dots */}
         <div className="border rounded-xl overflow-hidden shadow-sm bg-background">
           <div className="bg-muted/50 p-3 border-b text-center font-medium">
             方案 M: 脉冲圆点
@@ -498,11 +498,11 @@ export default function SidebarVariantsPage() {
                     <span>扫描概览</span>
                   </div>
                   
-                  {/* 选中项 - 方案 M */}
+                  {/* Selected Item - Option M */}
                   <div className="relative flex items-center gap-2 px-2 py-1.5 text-sm font-medium text-foreground bg-zinc-50 rounded-md cursor-pointer">
                     <div className="absolute left-[-12px] top-1/2 w-3 h-px bg-[#FF4C00]"></div>
                     
-                    {/* 脉冲圆点结构 */}
+                    {/* pulse dot structure */}
                     <div className="relative flex items-center justify-center w-2 h-2 mr-1">
                       <span className="absolute inline-flex h-full w-full rounded-full bg-[#FF4C00] opacity-75 animate-ping"></span>
                       <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-[#FF4C00]"></span>
@@ -524,7 +524,7 @@ export default function SidebarVariantsPage() {
           </div>
         </div>
 
-        {/* 方案 N: K(滑动) + J(粗线) 融合 */}
+        {/* Plan N: K(sliding) + J(thick line) fusion */}
         <div className="border rounded-xl overflow-hidden shadow-sm bg-background">
           <div className="bg-muted/50 p-3 border-b text-center font-medium">
             方案 N: 滑动块级线 (K+J)
@@ -538,20 +538,20 @@ export default function SidebarVariantsPage() {
                 <MenuButton icon={IconRadar} label="扫描管理" active />
                 
                 <div className="relative ml-2 space-y-0.5 mt-1">
-                  {/* J的背景线 */}
+                  {/* J's background line */}
                   <div className="absolute left-2 top-0 bottom-2 w-0.5 bg-zinc-100"></div>
 
                   <div className="group relative flex items-center gap-2 px-2 py-1.5 text-sm text-muted-foreground overflow-hidden rounded-md ml-4 cursor-pointer">
-                    {/* K的滑动背景 */}
+                    {/* K's sliding background */}
                     <div className="absolute inset-0 bg-zinc-100 -translate-x-full group-hover:translate-x-0 transition-transform duration-300 ease-out"></div>
                     <span className="relative transition-transform duration-300 group-hover:translate-x-1">扫描概览</span>
                   </div>
                   
-                  {/* 选中项 - 方案 N */}
+                  {/* Selected Item - Option N */}
                   <div className="group relative flex items-center gap-2 px-2 py-1.5 text-sm font-medium text-foreground overflow-hidden rounded-md ml-4 cursor-pointer">
-                    {/* 背景常驻 */}
+                    {/* Persistent background */}
                     <div className="absolute inset-0 bg-zinc-100"></div>
-                    {/* J的橙色粗线 */}
+                    {/* thick orange line of J */}
                     <div className="absolute left-[-10px] top-1/2 -translate-y-1/2 h-full w-0.5 bg-[#FF4C00]"></div>
                     <span className="relative translate-x-1">扫描历史</span>
                   </div>
@@ -569,7 +569,7 @@ export default function SidebarVariantsPage() {
           </div>
         </div>
 
-        {/* 方案 O: K(滑动) + M(脉冲) 融合 */}
+        {/* Scheme O: K(sliding) + M(pulse) fusion */}
         <div className="border rounded-xl overflow-hidden shadow-sm bg-background">
           <div className="bg-muted/50 p-3 border-b text-center font-medium">
             方案 O: 滑动脉冲 (K+M)
@@ -583,23 +583,23 @@ export default function SidebarVariantsPage() {
                 <MenuButton icon={IconRadar} label="扫描管理" active />
                 
                 <div className="relative ml-4 pl-3 space-y-1 mt-1">
-                   {/* M的细线 */}
+                   {/* Thin line of M */}
                   <div className="absolute left-0 top-0 bottom-2 w-px bg-zinc-200"></div>
 
                   <div className="group relative flex items-center gap-2 px-2 py-1.5 text-sm text-muted-foreground overflow-hidden rounded-md cursor-pointer">
-                    {/* M的横线 */}
+                    {/* M's horizontal line */}
                     <div className="absolute left-[-12px] top-1/2 w-3 h-px bg-zinc-200 z-10"></div>
-                    {/* K的滑动背景 */}
+                    {/* K's sliding background */}
                     <div className="absolute inset-0 bg-zinc-100 -translate-x-full group-hover:translate-x-0 transition-transform duration-300 ease-out"></div>
                     <span className="relative transition-transform duration-300 group-hover:translate-x-1">扫描概览</span>
                   </div>
                   
-                  {/* 选中项 - 方案 O */}
+                  {/* Selected Item - Option O */}
                   <div className="group relative flex items-center gap-2 px-2 py-1.5 text-sm font-medium text-foreground overflow-hidden rounded-md cursor-pointer">
                     <div className="absolute inset-0 bg-zinc-50"></div>
                     <div className="absolute left-[-12px] top-1/2 w-3 h-px bg-[#FF4C00] z-10"></div>
                     
-                    {/* M的脉冲圆点 */}
+                    {/* M pulse dot */}
                     <div className="relative flex items-center justify-center w-2 h-2 mr-1 z-10">
                       <span className="absolute inline-flex h-full w-full rounded-full bg-[#FF4C00] opacity-75 animate-ping"></span>
                       <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-[#FF4C00]"></span>
@@ -622,7 +622,7 @@ export default function SidebarVariantsPage() {
           </div>
         </div>
 
-        {/* 方案 P: H(时间轴) + K(滑动) 融合 */}
+        {/* Plan P: H (time axis) + K (sliding) fusion */}
         <div className="border rounded-xl overflow-hidden shadow-sm bg-background">
           <div className="bg-muted/50 p-3 border-b text-center font-medium">
             方案 P: 时间轴滑块 (H+K)
@@ -636,23 +636,23 @@ export default function SidebarVariantsPage() {
                 <MenuButton icon={IconRadar} label="扫描管理" active />
                 
                 <div className="relative ml-5 space-y-1 mt-2 mb-2">
-                   {/* H的贯穿线 */}
+                   {/* H's through line */}
                   <div className="absolute left-0 top-0 bottom-0 w-px bg-zinc-200 transform -translate-x-1/2"></div>
 
                   <div className="group relative flex items-center gap-2 pl-4 py-1.5 text-sm text-muted-foreground overflow-hidden rounded-md cursor-pointer">
-                     {/* K的滑动背景 (注意这里不需要覆盖节点，所以margin-left调整) */}
+                     {/* K's sliding background (note that there is no need to cover the node here, so the margin-left is adjusted) */}
                     <div className="absolute inset-y-0 right-0 left-2 bg-zinc-100 -translate-x-full group-hover:translate-x-0 transition-transform duration-300 ease-out rounded-md"></div>
                     
-                    {/* H的节点 */}
+                    {/* Node of H */}
                     <div className="absolute left-0 top-1/2 w-1.5 h-1.5 bg-zinc-300 rounded-full transform -translate-x-1/2 -translate-y-1/2 border border-white ring-2 ring-white z-10"></div>
                     <span className="relative z-10 transition-transform duration-300 group-hover:translate-x-1">扫描概览</span>
                   </div>
                   
-                  {/* 选中项 - 方案 P */}
+                  {/* Selected Item - Option P */}
                   <div className="group relative flex items-center gap-2 pl-4 py-1.5 text-sm font-semibold text-foreground overflow-hidden rounded-md cursor-pointer">
                     <div className="absolute inset-y-0 right-0 left-2 bg-zinc-100 rounded-md"></div>
                     
-                    {/* H的选中节点 */}
+                    {/* Selected node of H */}
                     <div className="absolute left-0 top-1/2 w-2.5 h-2.5 bg-[#FF4C00] rounded-full transform -translate-x-1/2 -translate-y-1/2 ring-4 ring-zinc-50 z-10"></div>
                     <span className="relative z-10">扫描历史</span>
                   </div>
@@ -671,7 +671,7 @@ export default function SidebarVariantsPage() {
           </div>
         </div>
 
-        {/* 方案 N: 动感融合 (J+K+M) */}
+        {/* Plan N: Dynamic Fusion (J+K+M) */}
         <div className="border rounded-xl overflow-hidden shadow-sm bg-background">
           <div className="bg-muted/50 p-3 border-b text-center font-medium">
             方案 N: 动感融合 (J+K+M)
@@ -685,23 +685,23 @@ export default function SidebarVariantsPage() {
                 <MenuButton icon={IconRadar} label="扫描管理" active />
                 
                 <div className="relative space-y-1 mt-1">
-                  {/* 背景粗灰线 */}
+                  {/* Background thick gray line */}
                   <div className="absolute left-3 top-0 bottom-2 w-0.5 bg-zinc-100"></div>
 
-                  {/* 普通项：K 的滑入效果 */}
+                  {/* Normal item: K's slide-in effect */}
                   <div className="group relative flex items-center gap-2 px-3 py-1.5 ml-2 text-sm text-muted-foreground overflow-hidden rounded-md cursor-pointer">
                     <div className="absolute inset-0 bg-zinc-100 -translate-x-full group-hover:translate-x-0 transition-transform duration-300 ease-out"></div>
                     <span className="relative transition-transform duration-300 group-hover:translate-x-1">扫描概览</span>
                   </div>
                   
-                  {/* 选中项：J+M 结合 */}
+                  {/* Selected item: J+M combination */}
                   <div className="group relative flex items-center gap-2 px-3 py-1.5 ml-2 text-sm font-medium text-foreground bg-zinc-50/50 overflow-hidden rounded-md cursor-pointer">
-                    {/* K: 静态背景 */}
+                    {/* K: static background */}
                     <div className="absolute inset-0 bg-zinc-100 opacity-50"></div>
                     
-                    {/* J+M: 左侧粗线 + 呼吸光晕 */}
+                    {/* J+M: thick line on the left + breathing halo */}
                     <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#FF4C00]">
-                       {/* 模拟光效流动 */}
+                       {/* Simulate the flow of light effects */}
                        <div className="absolute inset-0 bg-white/30 animate-pulse"></div>
                     </div>
                     
@@ -721,7 +721,7 @@ export default function SidebarVariantsPage() {
           </div>
         </div>
 
-        {/* 方案 O: 磁性滑块 + 活跃点 (K+M) */}
+        {/* Option O: Magnetic Slider + Active Point (K+M) */}
         <div className="border rounded-xl overflow-hidden shadow-sm bg-background">
           <div className="bg-muted/50 p-3 border-b text-center font-medium">
             方案 O: 磁性滑块 + 活跃点
@@ -738,22 +738,22 @@ export default function SidebarVariantsPage() {
                   <div className="absolute left-0 top-0 bottom-2 w-px bg-zinc-200"></div>
 
                   <div className="group relative flex items-center gap-2 px-2 py-1.5 text-sm text-muted-foreground rounded-md cursor-pointer overflow-hidden">
-                    {/* K: 滑入背景 */}
+                    {/* K: slide into background */}
                     <div className="absolute inset-0 bg-zinc-100 -translate-x-full group-hover:translate-x-0 transition-transform duration-300 ease-out"></div>
-                    {/* G: 连接线 */}
+                    {/* G: connecting line */}
                     <div className="absolute left-[-12px] top-1/2 w-3 h-px bg-zinc-200 group-hover:bg-zinc-300 transition-colors z-10"></div>
                     <span className="relative z-10 transition-transform duration-300 group-hover:translate-x-1">扫描概览</span>
                   </div>
                   
-                  {/* 选中项 - 方案 O */}
+                  {/* Selected Item - Option O */}
                   <div className="group relative flex items-center gap-2 px-2 py-1.5 text-sm font-medium text-foreground rounded-md cursor-pointer overflow-hidden">
-                    {/* 背景常驻 */}
+                    {/* Persistent background */}
                     <div className="absolute inset-0 bg-zinc-100"></div>
                     
-                    {/* 连接线变色 */}
+                    {/* Cable discoloration */}
                     <div className="absolute left-[-12px] top-1/2 w-3 h-px bg-[#FF4C00] z-10"></div>
                     
-                    {/* M: 脉冲点 */}
+                    {/* M: pulse point */}
                     <div className="relative z-10 flex items-center justify-center w-2 h-2 mr-1">
                       <span className="absolute inline-flex h-full w-full rounded-full bg-[#FF4C00] opacity-75 animate-ping"></span>
                       <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-[#FF4C00]"></span>

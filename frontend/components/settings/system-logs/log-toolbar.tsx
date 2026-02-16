@@ -46,7 +46,7 @@ export function LogToolbar({
 }: LogToolbarProps) {
   const t = useTranslations("settings.systemLogs")
 
-  // 将文件按分类分组
+  // Group files into categories
   const groupedFiles = useMemo(() => {
     const systemLogs = files.filter(
       (f) => f.category === "system" || f.category === "error" || f.category === "performance"
@@ -57,7 +57,7 @@ export function LogToolbar({
 
   return (
     <div className="flex items-center gap-3 flex-wrap">
-      {/* 日志文件选择 */}
+      {/* Log file selection */}
       <Select value={selectedFile} onValueChange={onFileChange}>
         <SelectTrigger className="w-[200px]">
           <FileText className="h-4 w-4 text-muted-foreground" />
@@ -87,7 +87,7 @@ export function LogToolbar({
         </SelectContent>
       </Select>
 
-      {/* 行数选择 */}
+      {/* Row number selection */}
       <Select value={String(lines)} onValueChange={(v) => onLinesChange(Number(v))}>
         <SelectTrigger className="w-[110px]">
           <SelectValue />
@@ -101,7 +101,7 @@ export function LogToolbar({
         </SelectContent>
       </Select>
 
-      {/* 日志级别筛选 */}
+      {/* Log level filter */}
       <Select value={logLevel} onValueChange={(v) => onLogLevelChange(v as LogLevel)}>
         <SelectTrigger className="w-[130px]">
           <SelectValue />
@@ -115,7 +115,7 @@ export function LogToolbar({
         </SelectContent>
       </Select>
 
-      {/* 搜索框 - 居中并扩展 */}
+      {/* Search box - centered and expanded */}
       <div className="relative flex-1 min-w-[280px] max-w-[500px]">
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input

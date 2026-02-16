@@ -57,7 +57,7 @@ export function MermaidDiagram({ chart, className = "" }: MermaidDiagramProps) {
         const mutedForeground = colorFromVar("--muted-foreground", "#6b7280")
         const border = colorFromVar("--border", "#e5e7eb")
 
-        // 配置 Mermaid
+        // Configure Mermaid
         mermaid.initialize({
           startOnLoad: false,
           theme: "base",
@@ -90,13 +90,13 @@ export function MermaidDiagram({ chart, className = "" }: MermaidDiagramProps) {
           },
         })
 
-        // 生成唯一 ID
+        // Generate unique ID
         const id =
           typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
             ? `mermaid-${crypto.randomUUID()}`
             : `mermaid-${Math.random().toString(36).slice(2, 11)}`
 
-        // 渲染图表
+        // Render chart
         const { svg: renderedSvg } = await mermaid.render(id, chart)
         if (cancelled) return
         setSvg(renderedSvg)

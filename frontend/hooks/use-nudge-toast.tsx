@@ -15,45 +15,45 @@ export type NudgeToastVariant = Omit<NudgeToastCardProps, "onDismiss">
 
 export interface UseNudgeToastOptions {
   /**
-   * 持久化抑制 key。
-   * - 不传：不做持久化抑制（每次 trigger 都可能弹）
-   * - 传入：会在用户关闭/点击按钮后写入 localStorage
+   * Persistence suppression key.
+   * - No transmission: no persistence suppression (every trigger may be bounced)
+   * - Passed in: will be written to localStorage after the user closes/clicks the button
    */
   storageKey?: string
 
   /**
-   * 冷却时间 (ms)。
-   * - 不传：写入 "true"，永久不再弹（直到 reset）
-   * - 传入：写入 nextAllowedAt 时间戳，到期后可再次弹
+   * Cooldown time (ms).
+   * - Not transmitted: write "true" and never play again (until reset)
+   * - Pass in: write nextAllowedAt timestamp, which can be bounced again after expiration
    */
   cooldownMs?: number
 
   /**
-   * 触发概率 (0-1)，用于测试或灰度
+   * Trigger probability (0-1), for test or grayscale
    * @default 1
    */
   probability?: number
 
   /**
-   * 延迟触发时间 (ms)
+   * Delay trigger time (ms)
    * @default 1500
    */
   delay?: number
 
   /**
-   * Toast 持续时间（Infinity 表示不自动关闭）
+   * Toast duration (Infinity means no automatic shutdown)
    * @default Infinity
    */
   duration?: number
 
   /**
-   * Toast 位置
+   * Toast location
    * @default "bottom-right"
    */
   position?: ToasterProps["position"]
 
   /**
-   * 可选的不同文案/样式变体
+   * Optional different copy/style variations
    */
   variants: NudgeToastVariant[]
 }

@@ -1,14 +1,14 @@
 /**
- * Toast 消息辅助函数
+ * Toast message helper function
  * 
- * 提供 i18n 感知的 toast 消息显示功能：
- * - success(): 显示成功消息
- * - error(): 显示错误消息
- * - errorFromCode(): 根据错误码显示错误消息
- * - loading(): 显示加载消息
- * - dismiss(): 关闭指定 toast
+ * Provide i18n-aware toast message display function:
+ * - success(): display success message
+ * - error(): display error message
+ * - errorFromCode(): Display error message based on error code
+ * - loading(): display loading message
+ * - dismiss(): close the specified toast
  * 
- * 使用方式：
+ * How to use:
  * ```tsx
  * function MyComponent() {
  *   const toastMessages = useToastMessages();
@@ -30,68 +30,68 @@ import { useTranslations } from 'next-intl';
 import { getErrorI18nKey, DEFAULT_ERROR_KEY } from './error-code-map';
 
 /**
- * Toast 消息参数类型
- * 支持字符串和数字类型的插值变量
+ * Toast message parameter type
+ * Supports interpolation variables of string and numeric types
  */
 export type ToastParams = Record<string, string | number>;
 
 /**
- * Toast 消息 Hook 返回类型
+ * Toast message Hook return type
  */
 export interface ToastMessages {
   /**
-   * 显示成功消息
-   * @param key - i18n 消息键
-   * @param params - 插值参数
-   * @param toastId - 可选的 toast ID（用于替换或关闭）
+   * Show success message
+   * @param key - i18n message key
+   * @param params - interpolation parameters
+   * @param toastId - optional toast ID (for replacement or closing)
    */
   success: (key: string, params?: ToastParams, toastId?: string) => void;
   
   /**
-   * 显示错误消息
-   * @param key - i18n 消息键
-   * @param params - 插值参数
-   * @param toastId - 可选的 toast ID（用于替换或关闭）
+   * Show error message
+   * @param key - i18n message key
+   * @param params - interpolation parameters
+   * @param toastId - optional toast ID (for replacement or closing)
    */
   error: (key: string, params?: ToastParams, toastId?: string) => void;
   
   /**
-   * 根据错误码显示错误消息
-   * @param code - 后端返回的错误码
-   * @param fallbackKey - 未知错误码的回退键（默认 'errors.unknown'）
-   * @param toastId - 可选的 toast ID（用于替换或关闭）
+   * Display error message based on error code
+   * @param code - the error code returned by the backend
+   * @param fallbackKey - fallback key for unknown error codes (default 'errors.unknown')
+   * @param toastId - optional toast ID (for replacement or closing)
    */
   errorFromCode: (code: string | null, fallbackKey?: string, toastId?: string) => void;
   
   /**
-   * 显示加载消息
-   * @param key - i18n 消息键
-   * @param params - 插值参数
-   * @param toastId - toast ID（用于后续关闭）
+   * Show loading message
+   * @param key - i18n message key
+   * @param params - interpolation parameters
+   * @param toastId - toast ID (for subsequent closing)
    */
   loading: (key: string, params?: ToastParams, toastId?: string) => void;
   
   /**
-   * 显示警告消息
-   * @param key - i18n 消息键
-   * @param params - 插值参数
-   * @param toastId - 可选的 toast ID（用于替换或关闭）
+   * Show warning message
+   * @param key - i18n message key
+   * @param params - interpolation parameters
+   * @param toastId - optional toast ID (for replacement or closing)
    */
   warning: (key: string, params?: ToastParams, toastId?: string) => void;
   
   /**
-   * 关闭指定 toast
+   * Close the specified toast
    * @param toastId - toast ID
    */
   dismiss: (toastId: string) => void;
 }
 
 /**
- * i18n 感知的 Toast 消息 Hook
+ * i18n aware Toast message Hook
  * 
- * 提供统一的 toast 消息显示接口，自动处理 i18n 翻译和参数插值。
+ * Provides a unified toast message display interface and automatically handles i18n translation and parameter interpolation.
  * 
- * @returns ToastMessages 对象，包含 success、error、errorFromCode、loading、warning、dismiss 方法
+ * @returns ToastMessages object, including success, error, errorFromCode, loading, warning, and dismiss methods
  * 
  * @example
  * ```tsx
@@ -119,7 +119,7 @@ export interface ToastMessages {
  * ```
  */
 export function useToastMessages(): ToastMessages {
-  // 使用根命名空间，允许访问所有翻译键
+  // Uses the root namespace, allowing access to all translation keys
   const t = useTranslations();
   
   return {
@@ -176,14 +176,14 @@ export function useToastMessages(): ToastMessages {
 }
 
 /**
- * 非 Hook 版本的 toast 辅助函数
+ * Non-Hook version of toast helper function
  * 
- * 用于不在 React 组件中的场景（如 API 拦截器）。
- * 注意：这些函数不支持 i18n，只能显示原始字符串。
+ * Used for scenarios not in React components (such as API interceptors).
+ * NOTE: These functions do not support i18n and can only display raw strings.
  * 
  * @example
  * ```ts
- * // 在 API 拦截器中使用
+ * // used in API interceptor
  * apiClient.interceptors.response.use(
  *   (response) => response,
  *   (error) => {

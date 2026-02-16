@@ -7,7 +7,7 @@ import type {
 import { mockWebsites } from './websites'
 import { mockEndpoints } from './endpoints'
 
-// 将 Website 转换为搜索结果格式
+// Convert Website to search results format
 function websiteToSearchResult(website: typeof mockWebsites[0]): WebsiteSearchResult {
   return {
     id: website.id,
@@ -29,7 +29,7 @@ function websiteToSearchResult(website: typeof mockWebsites[0]): WebsiteSearchRe
   }
 }
 
-// 将 Endpoint 转换为搜索结果格式
+// Convert Endpoint to search results format
 function endpointToSearchResult(endpoint: typeof mockEndpoints[0]): EndpointSearchResult {
   return {
     id: endpoint.id,
@@ -50,11 +50,11 @@ function endpointToSearchResult(endpoint: typeof mockEndpoints[0]): EndpointSear
 	}
 }
 
-// 解析搜索表达式
+// Parse search expression
 function parseSearchQuery(query: string): { field: string; operator: string; value: string }[] {
   const conditions: { field: string; operator: string; value: string }[] = []
   
-  // 简单解析：field="value" 或 field=="value" 或 field!="value"
+  // Simple analysis: field="value" or field=="value" or field!="value"
   const regex = /(\w+)(==|!=|=)"([^"]+)"/g
   let match
   while ((match = regex.exec(query)) !== null) {
@@ -68,7 +68,7 @@ function parseSearchQuery(query: string): { field: string; operator: string; val
   return conditions
 }
 
-// 检查记录是否匹配条件
+// Check if the record matches the conditions
 function matchesConditions(
   record: WebsiteSearchResult | EndpointSearchResult,
   conditions: { field: string; operator: string; value: string }[]

@@ -38,13 +38,13 @@ function useToolMutation<TData, TVariables>({
   })
 }
 
-// 获取工具列表
+// Get a list of tools
 export function useTools(params: GetToolsParams = {}) {
   return useQuery({
     queryKey: toolKeys.list(params),
     queryFn: () => ToolService.getTools(params),
     select: (response) => {
-      // RESTful 标准：直接返回数据
+      // REST-style response: return data directly.
       return {
         tools: response.tools || [],
         pagination: {
@@ -58,7 +58,7 @@ export function useTools(params: GetToolsParams = {}) {
   })
 }
 
-// 创建工具
+// Create tools
 export function useCreateTool() {
   return useToolMutation({
     mutationFn: (data: CreateToolRequest) => ToolService.createTool(data),
@@ -72,7 +72,7 @@ export function useCreateTool() {
   })
 }
 
-// 更新工具
+// Update tool
 export function useUpdateTool() {
   return useToolMutation({
     mutationFn: ({ id, data }: { id: number; data: UpdateToolRequest }) => 
@@ -87,7 +87,7 @@ export function useUpdateTool() {
   })
 }
 
-// 删除工具
+// removal tool
 export function useDeleteTool() {
   return useToolMutation({
     mutationFn: (id: number) => ToolService.deleteTool(id),

@@ -1,6 +1,6 @@
 /**
- * 颜色主题 hook
- * 只保留 Bauhaus 单一主题
+ * Color theme hook
+ * Only keep the Bauhaus single theme
  */
 import { useCallback, useEffect, useState } from "react"
 import { COLOR_THEMES, DEFAULT_COLOR_THEME_ID, type ColorThemeId } from "@/lib/color-themes"

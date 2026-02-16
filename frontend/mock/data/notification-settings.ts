@@ -28,7 +28,7 @@ export function getMockNotificationSettings(): GetNotificationSettingsResponse {
 export function updateMockNotificationSettings(
   settings: NotificationSettings
 ): UpdateNotificationSettingsResponse {
-  // 模拟更新设置
+  // Simulate update settings
   Object.assign(mockNotificationSettings, settings)
   
   return {

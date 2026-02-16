@@ -20,7 +20,7 @@ import type {
   SingleFieldProviderConfig,
 } from '@/types/api-key-settings.types'
 
-// 密码输入框组件（带显示/隐藏切换）
+// Password input box component (with show/hide switch)
 function PasswordInput({ value, onChange, placeholder, disabled, name }: {
   value: string
   onChange: (value: string) => void
@@ -75,7 +75,7 @@ type ProviderDefinition = {
   docUrl: string
 }
 
-// Provider 配置定义
+// Provider configuration definition
 const PROVIDERS: ProviderDefinition[] = [
   {
     key: 'fofa',
@@ -177,7 +177,7 @@ const PROVIDERS: ProviderDefinition[] = [
   },
 ]
 
-// 默认配置
+// Default configuration
 const DEFAULT_SETTINGS: ApiKeySettings = {
   fofa: { enabled: false, email: '', apiKey: '' },
   hunter: { enabled: false, apiKey: '' },
@@ -199,7 +199,7 @@ export default function ApiKeysSettingsPage() {
   const [formData, setFormData] = useState<ApiKeySettings>(DEFAULT_SETTINGS)
   const [hasChanges, setHasChanges] = useState(false)
 
-  // 当数据加载完成后，更新表单数据
+  // When the data is loaded, update the form data
   useEffect(() => {
     if (settings) {
       setFormData({ ...DEFAULT_SETTINGS, ...settings })
@@ -264,7 +264,7 @@ export default function ApiKeysSettingsPage() {
       />
 
       <div className="px-4 lg:px-6 space-y-6">
-        {/* Provider 卡片列表 */}
+        {/* Provider cards */}
         <div className="grid gap-4">
           {PROVIDERS.map((provider) => {
             const data = formData[provider.key]
@@ -293,7 +293,7 @@ export default function ApiKeysSettingsPage() {
                   </div>
                 </CardHeader>
 
-                {/* 展开的配置表单 */}
+                {/* Expanded configuration form */}
                 {isEnabled && (
                   <CardContent className="pt-0">
                     <Separator className="mb-4" />
@@ -342,7 +342,7 @@ export default function ApiKeysSettingsPage() {
           })}
         </div>
 
-        {/* 保存按钮 */}
+        {/* Save button */}
         <div className="flex justify-end">
           <Button 
             onClick={handleSave} 

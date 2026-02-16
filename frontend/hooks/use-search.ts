@@ -3,17 +3,17 @@ import { SearchService } from '@/services/search.service'
 import type { SearchParams, SearchResponse } from '@/types/search.types'
 
 /**
- * 资产搜索 Hook
+ * Asset Search Hook
  * 
- * @param params 搜索参数
- * @param options 查询选项
- * @returns 搜索结果
+ * @param params search parameters
+ * @param options query options
+ * @returns search results
  */
 export function useAssetSearch(
   params: SearchParams,
   options?: { enabled?: boolean }
 ) {
-  // 检查是否有有效的搜索查询
+  // Check if there is a valid search query
   const hasSearchParams = !!(params.q && params.q.trim())
 
   return useQuery<SearchResponse>({
@@ -21,6 +21,6 @@ export function useAssetSearch(
     queryFn: () => SearchService.search(params),
     enabled: (options?.enabled ?? true) && hasSearchParams,
     placeholderData: keepPreviousData,
-    staleTime: 30000, // 30 秒内不重新请求
+    staleTime: 30000, // No re-request within 30 seconds
   })
 }

@@ -30,7 +30,7 @@ const scanInvalidationKeys: ScanMutationInvalidationKeys = {
 }
 
 /**
- * 快速扫描 mutation hook
+ * Quickly scan mutation hooks
  */
 export function useQuickScan() {
   return useResourceMutation({
@@ -52,7 +52,7 @@ export function useQuickScan() {
 }
 
 /**
- * 发起扫描 mutation hook
+ * Initiate scanning mutation hook
  */
 export function useInitiateScan() {
   return useResourceMutation({
@@ -73,7 +73,7 @@ export function useInitiateScan() {
 }
 
 /**
- * 删除扫描 mutation hook
+ * Delete scan mutation hook
  */
 export function useDeleteScan() {
   return useResourceMutation({
@@ -96,7 +96,7 @@ export function useDeleteScan() {
 }
 
 /**
- * 批量删除扫描 mutation hook
+ * Batch delete scanning mutation hook
  */
 export function useBulkDeleteScans() {
   return useResourceMutation({
@@ -118,7 +118,7 @@ export function useBulkDeleteScans() {
 }
 
 /**
- * 停止扫描 mutation hook
+ * Stop scanning for mutation hooks
  */
 export function useStopScan() {
   return useResourceMutation({

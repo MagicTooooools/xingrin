@@ -130,7 +130,7 @@ export function AgentListItem({
 
   const heartbeat = agent.heartbeat
 
-  // 检查是否有指标超过阈值
+  // Check if any metric exceeds the threshold
   const hasWarnings = useMemo(() => {
     if (!heartbeat) return false
     return (
@@ -140,7 +140,7 @@ export function AgentListItem({
     )
   }, [heartbeat, agent])
 
-  // 计算最后心跳时间差（秒）
+  // Calculate last heartbeat time difference (seconds)
   const lastHeartbeatSeconds = useMemo(() => {
     if (!agent.lastHeartbeat) return null
     const now = Date.now()
@@ -148,7 +148,7 @@ export function AgentListItem({
     return Math.floor((now - lastHeartbeat) / 1000)
   }, [agent.lastHeartbeat])
 
-  // 判断心跳是否过期（超过30秒）
+  // Determine whether the heartbeat has expired (more than 30 seconds)
   const isHeartbeatStale = lastHeartbeatSeconds !== null && lastHeartbeatSeconds > 30
 
   return (
@@ -160,7 +160,7 @@ export function AgentListItem({
         agent.status === "offline" && "border-slate-300/50 opacity-75"
       )}
     >
-      {/* 第一行：基本信息 */}
+      {/* First line: basic information */}
       <div className="flex items-center gap-3 p-3 pb-2">
         <div className="flex items-center gap-2 min-w-0 flex-1">
           <Status status={getStatusVariant(agent.status)}>
@@ -227,7 +227,7 @@ export function AgentListItem({
         </div>
       </div>
 
-      {/* 第二行：指标 */}
+      {/* Second row: indicators */}
       {heartbeat ? (
         <div className="flex items-center gap-4 px-3 pb-3 pt-1 flex-wrap">
           <MetricBar

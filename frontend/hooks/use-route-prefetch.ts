@@ -44,10 +44,10 @@ const canPrefetchLowPriorityRoutes = (): boolean => {
 }
 
 /**
- * 路由预加载 Hook
- * 在页面加载完成后，后台预加载其他页面的 JS/CSS 资源
- * 不会发送 API 请求，只加载页面组件
- * @param currentPath 当前页面路径（可选），如果提供则会智能预加载相关动态路由
+ * Route preloading Hook
+ * After the page is loaded, JS/CSS resources of other pages are preloaded in the background
+ * No API requests are sent, only page components are loaded
+ * @param currentPath current page path (optional), if provided, relevant dynamic routes will be intelligently preloaded
  */
 export function useRoutePrefetch(currentPath?: string) {
   const router = useRouter()
@@ -76,7 +76,7 @@ export function useRoutePrefetch(currentPath?: string) {
       })
     }
 
-    // 使用 requestIdleCallback 在浏览器空闲时预加载，不影响当前页面渲染
+    // Use requestIdleCallback to preload when the browser is idle without affecting the rendering of the current page.
     const prefetchBaseRoutes = () => {
       prefetchBatch(BASE_CRITICAL_ROUTES)
       if (!allowSecondaryPrefetch) return
@@ -104,7 +104,7 @@ export function useRoutePrefetch(currentPath?: string) {
 
     const prefetchDynamicRoutes = () => {
       if (!currentPath || !allowSecondaryPrefetch) return
-      // 如果是目标详情页（如 /target/146），预加载子路由
+      // If it is a target details page (such as /target/146), preload the sub-route
       const targetIdMatch = currentPath.match(/\/target\/(\d+)$/)
       if (targetIdMatch) {
         const targetId = targetIdMatch[1]
@@ -113,7 +113,7 @@ export function useRoutePrefetch(currentPath?: string) {
         })
       }
       
-      // 如果是扫描历史详情页（如 /scan/history/146），预加载子路由
+      // If scanning history details page (such as /scan/history/146), preload sub-route
       const scanIdMatch = currentPath.match(/\/scan\/history\/(\d+)$/)
       if (scanIdMatch) {
         const scanId = scanIdMatch[1]
@@ -146,7 +146,7 @@ export function useRoutePrefetch(currentPath?: string) {
       }
     }
 
-    // 使用 requestIdleCallback 在浏览器空闲时执行，如果不支持则立即执行
+    // Use requestIdleCallback to execute when the browser is idle, or immediately if not supported
     if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
       const idleId = window.requestIdleCallback(runPrefetch)
       return () => {
@@ -164,9 +164,9 @@ export function useRoutePrefetch(currentPath?: string) {
 }
 
 /**
- * 智能路由预加载 Hook
- * 根据当前路径，预加载用户可能访问的下一个页面
- * @param currentPath 当前页面路径
+ * Smart route preloading Hook
+ * Preload the next page the user may visit based on the current path
+ * @param currentPath current page path
  */
 export function useSmartRoutePrefetch(currentPath: string) {
   const router = useRouter()
@@ -182,14 +182,14 @@ export function useSmartRoutePrefetch(currentPath: string) {
   useEffect(() => {
     const timer = setTimeout(() => {
       if (currentPath.includes('/organization')) {
-        // 在组织页面，预加载目标页面
+        // On the organization page, preload the target page
         prefetchOnce('/target/')
       } else if (currentPath.includes('/target')) {
-        // 在目标页面，预加载扫描和漏洞页面
+        // On the target page, preload scan and vulnerability pages
         prefetchOnce('/scan/history/')
         prefetchOnce('/vulnerabilities/')
 
-        // 如果是目标详情页（如 /target/146），预加载子路由
+        // If it is a target details page (such as /target/146), preload the sub-route
         const targetIdMatch = currentPath.match(/\/target\/(\d+)$/)
         if (targetIdMatch) {
           const targetId = targetIdMatch[1]
@@ -199,15 +199,15 @@ export function useSmartRoutePrefetch(currentPath: string) {
           })
         }
       } else if (currentPath.includes('/scan/history')) {
-        // 在扫描历史页面，预加载目标页面
+        // On the scanning history page, preload the target page
         prefetchOnce('/target/')
         prefetchOnce('/vulnerabilities/')
       } else if (currentPath === '/') {
-        // 在首页，预加载主要页面
+        // On the homepage, preload the main page
         prefetchOnce('/dashboard/')
         prefetchOnce('/organization/')
       }
-    }, 1500) // 1.5 秒后预加载
+    }, 1500) // Preload after 1.5 seconds
 
     return () => clearTimeout(timer)
   }, [currentPath, prefetchOnce])

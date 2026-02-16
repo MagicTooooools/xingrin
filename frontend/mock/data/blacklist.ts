@@ -1,9 +1,9 @@
 /**
  * Blacklist Mock Data
  * 
- * 黑名单规则 mock 数据
- * - 全局黑名单：适用于所有 Target
- * - Target 黑名单：仅适用于特定 Target
+ * Blacklist rule mock data
+ * - Global blacklist: applies to all Targets
+ * - Target blacklist: only applies to specific Targets
  */
 
 export interface BlacklistResponse {
@@ -14,7 +14,7 @@ export interface UpdateBlacklistRequest {
   patterns: string[]
 }
 
-// 全局黑名单 mock 数据
+// Global blacklist mock data
 let mockGlobalBlacklistPatterns: string[] = [
   '*.gov',
   '*.edu',
@@ -24,14 +24,14 @@ let mockGlobalBlacklistPatterns: string[] = [
   '192.168.0.0/16',
 ]
 
-// Target 黑名单 mock 数据（按 targetId 存储）
+// Target blacklist mock data (stored by targetId)
 const mockTargetBlacklistPatterns: Record<number, string[]> = {
   1: ['*.internal.example.com', '192.168.1.0/24'],
   2: ['cdn.example.com', '*.cdn.*'],
 }
 
 /**
- * 获取全局黑名单
+ * Get global blacklist
  */
 export function getMockGlobalBlacklist(): BlacklistResponse {
   return {
@@ -40,7 +40,7 @@ export function getMockGlobalBlacklist(): BlacklistResponse {
 }
 
 /**
- * 更新全局黑名单（全量替换）
+ * Update global blacklist (full replacement)
  */
 export function updateMockGlobalBlacklist(data: UpdateBlacklistRequest): BlacklistResponse {
   mockGlobalBlacklistPatterns = [...data.patterns]
@@ -50,7 +50,7 @@ export function updateMockGlobalBlacklist(data: UpdateBlacklistRequest): Blackli
 }
 
 /**
- * 获取 Target 黑名单
+ * Get Target blacklist
  */
 export function getMockTargetBlacklist(targetId: number): BlacklistResponse {
   return {
@@ -59,7 +59,7 @@ export function getMockTargetBlacklist(targetId: number): BlacklistResponse {
 }
 
 /**
- * 更新 Target 黑名单（全量替换）
+ * Update Target blacklist (full replacement)
  */
 export function updateMockTargetBlacklist(targetId: number, data: UpdateBlacklistRequest): BlacklistResponse {
   mockTargetBlacklistPatterns[targetId] = [...data.patterns]

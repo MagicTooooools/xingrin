@@ -29,7 +29,7 @@ function subdomainCascadeInvalidates() {
   ]
 }
 
-// 获取单个子域名详情
+// Get details of a single subdomain
 export function useSubdomain(id: number) {
   return useQuery({
     queryKey: subdomainKeys.detail(id),
@@ -38,7 +38,7 @@ export function useSubdomain(id: number) {
   })
 }
 
-// 获取组织的子域名列表
+// Get a list of your organization's subdomains
 export function useOrganizationSubdomains(
   organizationId: number,
   params?: { page?: number; pageSize?: number },
@@ -61,7 +61,7 @@ export function useOrganizationSubdomains(
   })
 }
 
-// 创建子域名（绑定到资产）
+// Create subdomain (bind to asset)
 export function useCreateSubdomain() {
   return useResourceMutation({
     mutationFn: (data: { domains: Array<{ name: string }>; assetId: number }) =>
@@ -87,7 +87,7 @@ export function useCreateSubdomain() {
   })
 }
 
-// 从组织中移除子域名
+// Remove subdomain from organization
 export function useDeleteSubdomainFromOrganization() {
   return useResourceMutation({
     mutationFn: (data: { organizationId: number; targetId: number }) =>
@@ -111,7 +111,7 @@ export function useDeleteSubdomainFromOrganization() {
   })
 }
 
-// 批量从组织中移除子域名
+// Remove subdomains from your organization in bulk
 export function useBatchDeleteSubdomainsFromOrganization() {
   return useResourceMutation({
     mutationFn: (data: { organizationId: number; domainIds: number[] }) => 
@@ -133,7 +133,7 @@ export function useBatchDeleteSubdomainsFromOrganization() {
   })
 }
 
-// 删除单个子域名（使用单独的 DELETE API）
+// Delete a single subdomain (using separate DELETE API)
 export function useDeleteSubdomain() {
   return useResourceMutation({
     mutationFn: (id: number) => SubdomainService.deleteSubdomain(id),
@@ -150,7 +150,7 @@ export function useDeleteSubdomain() {
   })
 }
 
-// 批量删除子域名（使用统一的批量删除接口）
+// Delete subdomain names in batches (using a unified batch deletion interface)
 export function useBatchDeleteSubdomains() {
   return useResourceMutation({
     mutationFn: (ids: number[]) => SubdomainService.batchDeleteSubdomains(ids),
@@ -169,7 +169,7 @@ export function useBatchDeleteSubdomains() {
   })
 }
 
-// 更新子域名
+// Update subdomain
 export function useUpdateSubdomain() {
   return useResourceMutation({
     mutationFn: ({ id, data }: { id: number; data: { name?: string; description?: string } }) =>
@@ -190,7 +190,7 @@ export function useUpdateSubdomain() {
   })
 }
 
-// 获取所有子域名列表
+// Get a list of all subdomains
 export function useAllSubdomains(
   params: GetAllSubdomainsParams = {},
   options?: { enabled?: boolean }
@@ -206,7 +206,7 @@ export function useAllSubdomains(
   })
 }
 
-// 获取目标的子域名列表
+// Get a list of target subdomains
 export function useTargetSubdomains(
   targetId: number,
   params?: { page?: number; pageSize?: number; filter?: string },
@@ -220,7 +220,7 @@ export function useTargetSubdomains(
   })
 }
 
-// 获取扫描的子域名列表
+// Get a list of scanned subdomains
 export function useScanSubdomains(
   scanId: number,
   params?: { page?: number; pageSize?: number; filter?: string },
@@ -234,7 +234,7 @@ export function useScanSubdomains(
   })
 }
 
-// 批量创建子域名（绑定到目标）
+// Create subdomain names in batches (bind to target)
 export function useBulkCreateSubdomains() {
   return useResourceMutation({
     mutationFn: (data: { targetId: number; subdomains: string[] }) =>

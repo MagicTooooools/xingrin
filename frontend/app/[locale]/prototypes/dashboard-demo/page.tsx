@@ -16,7 +16,7 @@ import {
   Zap,
 } from "@/components/icons"
 
-// 复用 Arknights UI 的主题变量
+// Reuse theme variables from Arknights UI
 const themeVars = {
   "--ark-bg": "#F4F5F7",
   "--ark-bg-2": "#FFFFFF",
@@ -27,9 +27,9 @@ const themeVars = {
   "--ark-text": "#1A1D21",
   "--ark-text-2": "#6F7681",
   "--ark-muted": "#9CA3AF",
-  "--ark-accent": "#1A1D21",     // 深黑作为主强调色
-  "--ark-accent-2": "#4C5159",   // 次级强调
-  "--ark-active": "#2563EB",     // 激活状态（可选蓝）
+  "--ark-accent": "#1A1D21",     // Deep black as the main accent color
+  "--ark-accent-2": "#4C5159",   // secondary emphasis
+  "--ark-active": "#2563EB",     // Activated state (optional blue)
   fontFamily: "\"HarmonyOS Sans SC\", \"IBM Plex Sans\", \"Segoe UI\", sans-serif",
 } as CSSProperties
 
@@ -67,16 +67,16 @@ const lineSeries = [12, 24, 18, 36, 30, 44, 38, 52]
 export default function DashboardDemoPage() {
   return (
     <main className="relative min-h-screen bg-[var(--ark-bg)] text-[var(--ark-text)] overflow-hidden" style={themeVars}>
-      {/* 工业风背景网格与装饰 */}
+      {/* Industrial style background grid and decoration */}
       <div className="pointer-events-none absolute inset-0 ark-grid" aria-hidden />
       
-      {/* 顶部装饰条 */}
+      {/* Top decorative strip */}
       <div className="fixed top-0 left-0 right-0 h-1 bg-[var(--ark-accent)] z-50 opacity-80" />
       
       <div className="relative mx-auto w-full max-w-[1600px] p-6 lg:p-8">
         <div className="grid gap-6 lg:grid-cols-[240px_1fr]">
           
-          {/* 侧边栏 */}
+          {/* Sidebar */}
           <aside className="flex flex-col gap-6 lg:sticky lg:top-8 lg:h-[calc(100vh-4rem)]">
             <div className="ark-panel p-4 flex items-center gap-3">
               <div className="h-10 w-10 flex items-center justify-center bg-[var(--ark-text)] text-white">
@@ -127,7 +127,7 @@ export default function DashboardDemoPage() {
             </div>
           </aside>
 
-          {/* 主内容区 */}
+          {/* Main content area */}
           <div className="flex flex-col gap-6">
             
             {/* Header */}
@@ -191,11 +191,11 @@ export default function DashboardDemoPage() {
                   </div>
                 </div>
                 <div className="p-6 flex-1 min-h-[240px] relative">
-                  {/* 网格背景装饰 */}
+                  {/* Grid background decoration */}
                   <div className="absolute inset-6 border-l border-b border-[var(--ark-border)] opacity-50 pointer-events-none" />
                   <div className="absolute inset-0 flex items-center justify-center">
                      <svg viewBox="0 0 400 140" className="h-[70%] w-full max-w-2xl overflow-visible">
-                        {/* 装饰性网格线 */}
+                        {/* Decorative grid lines */}
                         <pattern id="grid" width="40" height="140" patternUnits="userSpaceOnUse">
                           <line x1="0" y1="0" x2="0" y2="140" stroke="var(--ark-border)" strokeWidth="1" strokeDasharray="2 2" />
                         </pattern>
@@ -210,7 +210,7 @@ export default function DashboardDemoPage() {
                             .join(" ")}
                           vectorEffect="non-scaling-stroke"
                         />
-                        {/* 数据点 */}
+                        {/* data points */}
                         {lineSeries.map((value, index) => (
                            <g key={index}>
                              <circle cx={index * 55} cy={140 - value} r="3" fill="var(--ark-bg)" stroke="var(--ark-text)" strokeWidth="2" />
@@ -245,7 +245,7 @@ export default function DashboardDemoPage() {
                           className="w-full bg-[var(--ark-text-2)] opacity-20 group-hover:opacity-40 transition-opacity relative"
                           style={{ height: `${value}%` }}
                         >
-                           {/* 顶部装饰线 */}
+                           {/* Top decorative line */}
                            <div className="absolute top-0 left-0 right-0 h-[2px] bg-[var(--ark-text)] opacity-0 group-hover:opacity-100 transition-opacity" />
                         </div>
                       </div>

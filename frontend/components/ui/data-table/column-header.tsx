@@ -24,7 +24,7 @@ export function DataTableColumnHeader<TData, TValue>({
   title,
   className,
 }: DataTableColumnHeaderProps<TData, TValue>) {
-  // 不可排序的列：使用与可排序列相同的字体大小
+  // Non-sortable columns: use the same font size as sortable columns
   if (!column.getCanSort()) {
     return <div className={cn("text-left text-sm", className)}>{title}</div>
   }

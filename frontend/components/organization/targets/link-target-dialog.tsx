@@ -17,24 +17,24 @@ import {
   LinkTargetOrganizationSection,
 } from "@/components/organization/targets/link-target-dialog-sections"
 
-// 组件属性类型定义
+// Component attribute type definition
 interface LinkTargetDialogProps {
-  organizationId: number                                     // 组织ID（固定，不可修改）
-  organizationName: string                                   // 组织名称
-  onAdd?: (result: BatchCreateResponse) => void              // 添加成功回调，返回批量创建的统计信息
-  open?: boolean                                             // 外部控制对话框开关状态
-  onOpenChange?: (open: boolean) => void                     // 外部控制对话框开关回调
+  organizationId: number                                     // Organization ID (fixed, cannot be modified)
+  organizationName: string                                   // Organization name
+  onAdd?: (result: BatchCreateResponse) => void              // Add a success callback to return batch created statistics
+  open?: boolean                                             // External control dialog box switch status
+  onOpenChange?: (open: boolean) => void                     // External control dialog box switch callback
 }
 
 /**
- * 关联目标对话框组件（使用 React Query）
+ * Relevant target dialog component (using React Query)
  * 
- * 功能特性：
- * 1. 批量输入目标并关联到组织
- * 2. 自动创建不存在的目标
- * 3. 自动管理提交状态
- * 4. 自动错误处理和成功提示
- * 5. 固定组织ID，不可修改
+ * Features:
+ * 1. Enter targets in batches and associate them with organizations
+ * 2. Automatically create non-existing targets
+ * 3. Automatically manage submission status
+ * 4. Automatic error handling and success prompts
+ * 5. Fixed organization ID and cannot be modified
  */
 export function LinkTargetDialog({ 
   organizationId,
@@ -67,7 +67,7 @@ export function LinkTargetDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      {/* 触发按钮 - 仅在非外部控制时显示 */}
+      {/* Trigger button - only shown when not externally controlled */}
       {externalOpen === undefined && (
         <DialogTrigger asChild>
           <Button size="sm" variant="secondary">
@@ -77,11 +77,11 @@ export function LinkTargetDialog({
         </DialogTrigger>
       )}
       
-      {/* 对话框内容 */}
+      {/* Dialog content */}
       <DialogContent className="sm:max-w-[650px] max-h-[90vh] overflow-y-auto">
         <LinkTargetDialogHeader organizationName={organizationName} t={t} />
         
-        {/* 表单 */}
+        {/* form */}
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
             <div className="grid gap-4 py-4">
@@ -99,7 +99,7 @@ export function LinkTargetDialog({
               <LinkTargetOrganizationSection organizationName={organizationName} t={t} />
             </div>
           
-          {/* 对话框底部按钮 */}
+          {/* Button at bottom of dialog box */}
           <LinkTargetDialogFooter
             tCommon={tCommon}
             t={t}

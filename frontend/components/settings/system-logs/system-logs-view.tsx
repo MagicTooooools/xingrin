@@ -20,7 +20,7 @@ const DEFAULT_LINES = 500
 export function SystemLogsView() {
   const t = useTranslations("settings.systemLogs")
 
-  // 状态管理
+  // Status management
   const [selectedFile, setSelectedFile] = useState(DEFAULT_FILE)
   const [lines, setLines] = useState(DEFAULT_LINES)
   const [autoRefresh, setAutoRefresh] = useState(true)
@@ -28,28 +28,28 @@ export function SystemLogsView() {
   const [logLevel, setLogLevel] = useState<LogLevel>("all")
   const deferredSearchQuery = useDeferredValue(searchQuery)
 
-  // 获取日志文件列表
+  // Get a list of log files
   const { data: filesData } = useLogFiles()
   const files = useMemo(() => filesData?.files ?? [], [filesData?.files])
 
-  // 当文件列表加载完成后，如果当前选中的文件不在列表中，切换到第一个可用文件
+  // When the file list is loaded, if the currently selected file is not in the list, switch to the first available file
   useEffect(() => {
     if (files.length > 0 && !files.some((f) => f.filename === selectedFile)) {
       setSelectedFile(files[0].filename)
     }
   }, [files, selectedFile])
 
-  // 获取日志内容
+  // Get log content
   const { data: logsData } = useSystemLogs({
     file: selectedFile,
     lines,
     autoRefresh,
   })
 
-  // 保留 ANSI 颜色码，由 xterm 渲染
+  // Preserve ANSI color codes, rendered by xterm
   const content = useMemo(() => logsData?.content ?? "", [logsData])
 
-  // 下载日志
+  // Download log
   const handleDownload = useCallback(() => {
     if (!content) return
     
@@ -65,7 +65,7 @@ export function SystemLogsView() {
         description={t("description")}
       />
 
-      {/* 紧凑单行工具栏 */}
+      {/* Compact single-line toolbar */}
       <div className="px-4 lg:px-6">
         <div className="flex items-center gap-4 flex-wrap">
           <LogToolbar
@@ -79,7 +79,7 @@ export function SystemLogsView() {
             onSearchChange={setSearchQuery}
             onLogLevelChange={setLogLevel}
           />
-          {/* 下载按钮 */}
+          {/* download button */}
           <Button
             variant="outline"
             size="sm"
@@ -93,7 +93,7 @@ export function SystemLogsView() {
         </div>
       </div>
 
-      {/* 日志查看器 */}
+      {/* Log viewer */}
       <div className="px-4 lg:px-6 flex-1 min-h-0">
         <div className="flex-1 flex flex-col rounded-lg overflow-hidden border min-h-0">
           <div className="flex-1 min-h-[400px] bg-[#1e1e1e]">
@@ -106,7 +106,7 @@ export function SystemLogsView() {
             )}
           </div>
 
-          {/* 底部状态栏 */}
+          {/* bottom status bar */}
           <div className="flex items-center justify-between px-4 py-2 bg-muted/50 border-t text-xs text-muted-foreground">
             <div className="flex items-center gap-4">
               <span>{lines} {t("toolbar.linesUnit")}</span>
@@ -120,7 +120,7 @@ export function SystemLogsView() {
                 {t("description")}
               </span>
             </div>
-            {/* 自动刷新开关 */}
+            {/* Auto refresh switch */}
             <div className="flex items-center gap-2">
               <Switch
                 id="auto-refresh"

@@ -1,5 +1,5 @@
 /**
- * WebSocket 实时通知 Hook
+ * WebSocket real-time notification Hook
  */
 
 import { useCallback, useEffect, useState, useRef } from 'react'
@@ -48,14 +48,14 @@ const vulnerabilityPattern = /(漏洞|\bvulnerability\b|\bcve(?:-\d{4}-\d+)?\b)/
 const assetPattern = /(资产|\basset\b|\bsubdomain\b|\bdomain\b|\bip(?:\s+address)?\b|\bendpoint\b|\bwebsite\b)/i
 
 const inferNotificationType = (message: string, category?: string) => {
-  // 优先使用后端返回的 category
+  // Prioritize using the category returned by the backend
   if (category === 'scan' || category === 'vulnerability' || category === 'asset' || category === 'system') {
     return category
   }
 
   const normalizedMessage = message ?? ''
 
-  // 后备：通过消息内容推断
+  // Fallback: inference from message content
   if (scanPattern.test(normalizedMessage)) {
     return 'scan' as const
   }
@@ -118,7 +118,7 @@ export function useNotificationSSE(transformOptions?: NotificationTransformOptio
   const transformOptionsRef = useRef(transformOptions)
   const reconnectAttempts = useRef(0)
   const maxReconnectAttempts = 10
-  const baseReconnectDelay = 1000 // 1秒
+  const baseReconnectDelay = 1000 // 1 second
   const toastMessages = useToastMessages()
 
   useEffect(() => {
@@ -153,22 +153,22 @@ export function useNotificationSSE(transformOptions?: NotificationTransformOptio
     }))
   }, [])
 
-  // 启动心跳
+  // Start heartbeat
   const startHeartbeat = useCallback(() => {
-    // 清除旧的心跳定时器
+    // Clear old heartbeat timers
     if (heartbeatTimerRef.current) {
       clearInterval(heartbeatTimerRef.current)
     }
 
-    // 每 30 秒发送一次心跳
+    // Send heartbeat every 30 seconds
     heartbeatTimerRef.current = setInterval(() => {
       if (wsRef.current?.readyState === WebSocket.OPEN) {
         wsRef.current.send(JSON.stringify({ type: 'ping' }))
       }
-    }, 30000) // 30秒
+    }, 30000) // 30 seconds
   }, [])
 
-  // 停止心跳
+  // stop heartbeat
   const stopHeartbeat = useCallback(() => {
     if (heartbeatTimerRef.current) {
       clearInterval(heartbeatTimerRef.current)
@@ -176,39 +176,39 @@ export function useNotificationSSE(transformOptions?: NotificationTransformOptio
     }
   }, [])
 
-  // 计算重连延迟（指数退避）
+  // Calculate reconnection delay (exponential backoff)
   const getReconnectDelay = useCallback(() => {
     const delay = Math.min(baseReconnectDelay * Math.pow(2, reconnectAttempts.current), 30000)
     return delay
   }, [])
 
-  // 连接 WebSocket
+  // Connect WebSockets
   const connect = useCallback(() => {
-    // 防止重复连接
+    // Prevent duplicate connections
     if (isConnectingRef.current) {
       return
     }
 
-    // 如果已经连接，跳过
+    // If already connected, skip
     if (wsRef.current?.readyState === WebSocket.OPEN) {
       return
     }
 
     isConnectingRef.current = true
 
-    // 关闭旧连接
+    // close old connection
     if (wsRef.current && wsRef.current.readyState !== WebSocket.CLOSED) {
       wsRef.current.close()
     }
 
-    // 清除重连定时器
+    // Clear reconnect timer
     if (reconnectTimerRef.current) {
       clearTimeout(reconnectTimerRef.current)
       reconnectTimerRef.current = null
     }
 
     try {
-      // 构造 WebSocket URL
+      // Construct WebSocket URL
       const backendUrl = getBackendBaseUrl()
       const wsProtocol = backendUrl.startsWith('https') ? 'wss' : 'ws'
       const wsHost = backendUrl.replace(/^https?:\/\//, '')
@@ -221,8 +221,8 @@ export function useNotificationSSE(transformOptions?: NotificationTransformOptio
       ws.onopen = () => {
         setIsConnected(true)
         isConnectingRef.current = false
-        reconnectAttempts.current = 0 // 重置重连计数
-        // 启动心跳
+        reconnectAttempts.current = 0 // Reset reconnection count
+        // Start heartbeat
         startHeartbeat()
       }
 
@@ -237,7 +237,7 @@ export function useNotificationSSE(transformOptions?: NotificationTransformOptio
           }
 
           if (messageType === 'pong') {
-            // 心跳响应
+            // heartbeat response
             return
           }
 
@@ -247,7 +247,7 @@ export function useNotificationSSE(transformOptions?: NotificationTransformOptio
             return
           }
 
-          // 处理通知消息
+          // Handle notification messages
           if (messageType === 'notification') {
             if (isBackendNotification(data)) {
               const notification = transformBackendNotification(data, transformOptionsRef.current)
@@ -261,17 +261,17 @@ export function useNotificationSSE(transformOptions?: NotificationTransformOptio
             return
           }
 
-          // 备用处理：直接检查通知字段
+          // Alternate processing: Check notification fields directly
           if (isBackendNotification(data)) {
             const notification = transformBackendNotification(data, transformOptionsRef.current)
 
-            // 添加到通知列表
+            // Add to notification list
             setNotifications(prev => {
               const updated = [notification, ...prev.slice(0, 49)]
               return updated
             })
 
-            // 刷新通知查询
+            // Refresh notification query
             queryClient.invalidateQueries({ queryKey: ['notifications'] })
           }
         } catch (error) {
@@ -280,8 +280,8 @@ export function useNotificationSSE(transformOptions?: NotificationTransformOptio
       }
 
       ws.onerror = () => {
-        // WebSocket onerror 接收的是 Event 对象，不是 Error
-        // 实际的错误信息通常不可用，只能记录连接状态
+        // WebSocket onerror receives Event objects, not Errors
+        // The actual error message is usually not available, only the connection status is logged
         setIsConnected(false)
         isConnectingRef.current = false
       }
@@ -289,11 +289,11 @@ export function useNotificationSSE(transformOptions?: NotificationTransformOptio
       ws.onclose = (event) => {
         setIsConnected(false)
         isConnectingRef.current = false
-        // 停止心跳
+        // stop heartbeat
         stopHeartbeat()
 
-        // 自动重连（非正常关闭时）
-        if (event.code !== 1000) { // 1000 = 正常关闭
+        // Automatic reconnection (when shutting down abnormally)
+        if (event.code !== 1000) { // 1000 = Normal shutdown
           if (reconnectAttempts.current < maxReconnectAttempts) {
             const delay = getReconnectDelay()
             reconnectAttempts.current++
@@ -309,35 +309,35 @@ export function useNotificationSSE(transformOptions?: NotificationTransformOptio
     }
   }, [queryClient, startHeartbeat, stopHeartbeat, getReconnectDelay, toastMessages])
 
-  // 断开连接
+  // Disconnect
   const disconnect = useCallback(() => {
-    // 停止心跳
+    // stop heartbeat
     stopHeartbeat()
 
-    // 清除重连定时器
+    // Clear reconnect timer
     if (reconnectTimerRef.current) {
       clearTimeout(reconnectTimerRef.current)
       reconnectTimerRef.current = null
     }
 
-    // 重置重连计数
+    // Reset reconnection count
     reconnectAttempts.current = 0
     isConnectingRef.current = false
 
     if (wsRef.current) {
-      wsRef.current.close(1000, 'User disconnect') // 1000 = 正常关闭
+      wsRef.current.close(1000, 'User disconnect') // 1000 = Normal shutdown
       wsRef.current = null
     }
     setIsConnected(false)
   }, [stopHeartbeat])
 
-  // 清空通知
+  // Clear notifications
   const clearNotifications = () => {
     setNotifications([])
   }
 
-  // 组件挂载时连接，卸载时断开
-  // 注意：不依赖 connect/disconnect 避免无限循环
+  // The component is connected when it is mounted and disconnected when it is unmounted.
+  // Note: Do not rely on connect/disconnect to avoid infinite loops
   useEffect(() => {
     connect()
 

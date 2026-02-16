@@ -188,3 +188,78 @@ func TestEventsAPIStream(t *testing.T) {
 		t.Fatalf("unexpected sse body: %s", text)
 	}
 }
+
+func TestNetworkCandidatesAPI(t *testing.T) {
+	router := newRouterForAPI(t, mockInstallService{
+		startFn: func(cli.Options) (string, error) { return "job-1", nil },
+		snapshotFn: func(string) (installapp.InstallStateSnapshot, error) {
+			return installapp.InstallStateSnapshot{}, nil
+		},
+		subscribeFn: func(string, int64) (<-chan installapp.InstallEvent, func(), error) {
+			return make(chan installapp.InstallEvent), func() {}, nil
+		},
+	})
+
+	request := httptest.NewRequest(http.MethodGet, "/api/network/candidates", nil)
+	request.Host = "127.0.0.1:18083"
+	recorder := httptest.NewRecorder()
+	router.Handler().ServeHTTP(recorder, request)
+
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("unexpected status: %d body=%s", recorder.Code, recorder.Body.String())
+	}
+
+	var response networkCandidatesResponse
+	if err := json.NewDecoder(recorder.Body).Decode(&response); err != nil {
+		t.Fatalf("decode response: %v", err)
+	}
+	if response.SourceHost != "127.0.0.1" {
+		t.Fatalf("unexpected source host: %s", response.SourceHost)
+	}
+}
+
+func TestNetworkReachabilityRejectInvalidHost(t *testing.T) {
+	router := newRouterForAPI(t, mockInstallService{
+		startFn: func(cli.Options) (string, error) { return "job-1", nil },
+		snapshotFn: func(string) (installapp.InstallStateSnapshot, error) {
+			return installapp.InstallStateSnapshot{}, nil
+		},
+		subscribeFn: func(string, int64) (<-chan installapp.InstallEvent, func(), error) {
+			return make(chan installapp.InstallEvent), func() {}, nil
+		},
+	})
+
+	request := httptest.NewRequest(http.MethodGet, "/api/network/reachability?host=https://bad&port=8083", nil)
+	recorder := httptest.NewRecorder()
+	router.Handler().ServeHTTP(recorder, request)
+
+	if recorder.Code != http.StatusBadRequest {
+		t.Fatalf("unexpected status: %d body=%s", recorder.Code, recorder.Body.String())
+	}
+	if !strings.Contains(recorder.Body.String(), "INVALID_HOST") {
+		t.Fatalf("unexpected response: %s", recorder.Body.String())
+	}
+}
+
+func TestNetworkReachabilityProdRejectsLoopback(t *testing.T) {
+	router := newRouterForAPI(t, mockInstallService{
+		startFn: func(cli.Options) (string, error) { return "job-1", nil },
+		snapshotFn: func(string) (installapp.InstallStateSnapshot, error) {
+			return installapp.InstallStateSnapshot{}, nil
+		},
+		subscribeFn: func(string, int64) (<-chan installapp.InstallEvent, func(), error) {
+			return make(chan installapp.InstallEvent), func() {}, nil
+		},
+	})
+
+	request := httptest.NewRequest(http.MethodGet, "/api/network/reachability?host=localhost&port=8083", nil)
+	recorder := httptest.NewRecorder()
+	router.Handler().ServeHTTP(recorder, request)
+
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("unexpected status: %d body=%s", recorder.Code, recorder.Body.String())
+	}
+	if !strings.Contains(recorder.Body.String(), `"ok":false`) {
+		t.Fatalf("unexpected response: %s", recorder.Body.String())
+	}
+}

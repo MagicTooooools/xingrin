@@ -65,26 +65,26 @@ const STAR_VARIANTS = [
 
 interface UseStarNudgeOptions {
   /**
-   * 触发概率 (0-1)，用于测试或灰度
+   * Trigger probability (0-1), for test or grayscale
    * @default 1
    */
   probability?: number
   /**
-   * 延迟触发时间 (ms)
+   * Delay trigger time (ms)
    * @default 1500
    */
   delay?: number
 }
 
 /**
- * 智能 Star 引导 Hook (小狐狸卖萌版 🦊)
- * 在用户完成关键操作（如扫描完成）后调用 trigger()
+ * Smart Star Guide Hook (little fox cute version 🦊)
+ * trigger() is called after the user completes a critical operation (such as a scan complete)
  */
 export function useStarNudge(options: UseStarNudgeOptions = {}) {
   const { probability = 1, delay = 1500 } = options
 
   const handleConfetti = React.useCallback(() => {
-    // 简单的纸屑喷射
+    // Simple confetti spray
     const count = 200
     const defaults = {
       origin: { y: 0.7 },
@@ -142,7 +142,7 @@ export function useStarNudge(options: UseStarNudgeOptions = {}) {
           className: v.btnColor,
           onClick: () => {
             handleConfetti()
-            // 稍微延迟跳转，让用户先看到烟花
+            // Delay navigation briefly so users can see the confetti first.
             setTimeout(() => {
               window.open(GITHUB_REPO_URL, "_blank")
             }, 300)

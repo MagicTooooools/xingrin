@@ -152,7 +152,7 @@ export function useUpdateOrganization() {
 }
 
 /**
- * 删除组织的 Mutation Hook（乐观更新）
+ * Deleting an organization's Mutation Hook (optimistic update)
  */
 export function useDeleteOrganization() {
   return useResourceMutation({
@@ -189,7 +189,7 @@ export function useDeleteOrganization() {
 }
 
 /**
- * 批量删除组织的 Mutation Hook（乐观更新）
+ * Mutation Hook for bulk deletion of organizations (optimistic update)
  */
 export function useBatchDeleteOrganizations() {
   return useResourceMutation({
@@ -225,7 +225,7 @@ export function useBatchDeleteOrganizations() {
 
 
 /**
- * 解除组织与目标关联的 Mutation Hook（批量）
+ * Unorganize a Mutation Hook associated with a target (batch)
  */
 export function useUnlinkTargetsFromOrganization() {
   return useResourceMutation({

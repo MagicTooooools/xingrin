@@ -31,7 +31,7 @@ interface SearchPaginationProps {
 const DEFAULT_PAGE_SIZE_OPTIONS = [10, 20, 50, 100]
 
 /**
- * 搜索结果分页组件
+ * Search results pagination component
  */
 export function SearchPagination({
   page,
@@ -71,14 +71,14 @@ export function SearchPagination({
 
   return (
     <div className="flex items-center justify-between">
-      {/* 总数信息 */}
+      {/* Total information */}
       <div className="flex-1 text-sm text-muted-foreground">
         {t('total', { count: total })}
       </div>
 
-      {/* 分页控制 */}
+      {/* Paging control */}
       <div className="flex items-center space-x-6 lg:space-x-8">
-        {/* 每页条数选择 */}
+        {/* Select the number of items per page */}
         <div className="flex items-center space-x-2">
           <Label htmlFor="rows-per-page" className="text-sm font-medium">
             {t('rowsPerPage')}
@@ -100,12 +100,12 @@ export function SearchPagination({
           </Select>
         </div>
 
-        {/* 页码信息 */}
+        {/* Page number information */}
         <div className="flex items-center justify-center text-sm font-medium whitespace-nowrap">
           {t('page', { current: page, total: safeTotalPages })}
         </div>
 
-        {/* 分页按钮 */}
+        {/* paging button */}
         <div className="flex items-center space-x-2">
           <Button
             variant="outline"

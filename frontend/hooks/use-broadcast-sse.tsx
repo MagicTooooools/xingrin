@@ -4,17 +4,17 @@ import { useEffect, useRef, useCallback } from "react"
 import { toast } from "sonner"
 
 /**
- * LunaFox SSE 广播推送 Hook
- * 监听固定的 Deno SSE 服务，收到广播消息时弹出 Toast
+ * LunaFox SSE Broadcast Push Hook
+ * Monitor the fixed Deno SSE service and pop up a Toast when receiving a broadcast message
  */
 
-// 固定的 SSE 服务地址 - 只允许这个 URL
+// Fixed SSE service address - only this URL is allowed
 const SSE_URL = "https://lunafox-sse-push.yyhunisec.deno.net/sse"
 
-// localStorage key - 用于 "不再提醒" 功能
+// localStorage key - used for "do not remind again" function
 const SUPPRESS_KEY = "lunafox:broadcast-suppress"
 
-// 抑制时间（毫秒）- 点击不再提醒后 24 小时内不弹窗
+// Suppression time (milliseconds) - No pop-ups will occur within 24 hours after clicking Don't remind
 const SUPPRESS_DURATION = 24 * 60 * 60 * 1000
 
 interface BroadcastMessage {
@@ -61,23 +61,23 @@ function suppress() {
   }
 }
 
-// 固定的 toast ID，用于新消息覆盖旧弹窗
+// Fixed toast ID for new messages to overwrite old popups
 const BROADCAST_TOAST_ID = "lunafox-broadcast"
 
 export function useBroadcastSSE() {
   const eventSourceRef = useRef<EventSource | null>(null)
   const reconnectTimerRef = useRef<number | null>(null)
   const reconnectAttemptsRef = useRef(0)
-  const MAX_RECONNECT_DELAY = 60000 // 最大 60 秒
+  const MAX_RECONNECT_DELAY = 60000 // Maximum 60 seconds
 
   const showBroadcastToast = useCallback((data: BroadcastMessage) => {
-    // 检查是否被抑制
+    // Check if suppressed
     if (isSuppressed()) return
 
-    // 先关闭之前的弹窗
+    // Close the previous pop-up window first
     toast.dismiss(BROADCAST_TOAST_ID)
 
-    // 稍微延迟显示新弹窗，确保旧的已关闭
+    // Show new popups with a slight delay, ensuring old ones are closed
     setTimeout(() => {
       void loadNudgeToastCard().then((NudgeToastCard) => {
         toast.custom(
@@ -118,12 +118,12 @@ export function useBroadcastSSE() {
   }, [])
 
   const connect = useCallback(() => {
-    // 防止重复连接
+    // Prevent duplicate connections
     if (eventSourceRef.current?.readyState === EventSource.OPEN) {
       return
     }
 
-    // 清理旧连接
+    // Clean up old connections
     if (eventSourceRef.current) {
       eventSourceRef.current.close()
     }
@@ -133,7 +133,7 @@ export function useBroadcastSSE() {
       eventSourceRef.current = es
 
       es.onopen = () => {
-        // 连接成功，重置重试计数器
+        // Connection successful, reset retry counter
         reconnectAttemptsRef.current = 0
       }
 
@@ -141,13 +141,13 @@ export function useBroadcastSSE() {
         try {
           const data = JSON.parse(event.data) as BroadcastMessage
 
-          // 只处理广播消息
+          // Only handle broadcast messages
           if (data.type === "broadcast") {
             showBroadcastToast(data)
           }
-          // heartbeat 和 connected 消息忽略
+          // heartbeat and connected messages ignored
         } catch {
-          // JSON 解析失败，忽略
+          // JSON parsing failed, ignored
         }
       }
 
@@ -155,7 +155,7 @@ export function useBroadcastSSE() {
         es.close()
         eventSourceRef.current = null
 
-        // 指数退避: 5s, 10s, 20s, 40s, 60s (max)
+        // Exponential backoff: 5s, 10s, 20s, 40s, 60s (max)
         const delay = Math.min(
           5000 * Math.pow(2, reconnectAttemptsRef.current),
           MAX_RECONNECT_DELAY
@@ -167,7 +167,7 @@ export function useBroadcastSSE() {
         }, delay)
       }
     } catch {
-      // 连接失败，忽略
+      // Connection failed, ignored
     }
   }, [showBroadcastToast])
 
@@ -183,7 +183,7 @@ export function useBroadcastSSE() {
     }
   }, [])
 
-  // 组件挂载时连接，卸载时断开
+  // The component is connected when it is mounted and disconnected when it is unmounted.
   useEffect(() => {
     connect()
     return () => disconnect()

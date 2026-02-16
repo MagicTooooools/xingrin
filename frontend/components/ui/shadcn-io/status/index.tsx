@@ -6,7 +6,7 @@ export type StatusProps = ComponentProps<typeof Badge> & {
   status: 'online' | 'offline' | 'maintenance' | 'degraded';
 };
 
-// 状态颜色配置 - 使用语义 CSS 变量
+// State color configuration - using semantic CSS variables
 const statusStyles = {
   online: 'bg-[var(--success)]/10 text-[var(--success)] border-[var(--success)]/20',
   offline: 'bg-[var(--error)]/10 text-[var(--error)] border-[var(--error)]/20',

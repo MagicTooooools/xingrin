@@ -26,7 +26,7 @@ function directoryCascadeInvalidates() {
   ]
 }
 
-// 获取目标的目录列表
+// Get the directory listing of the target
 export function useTargetDirectories(
   targetId: number,
   params: { page: number; pageSize: number; filter?: string },
@@ -40,7 +40,7 @@ export function useTargetDirectories(
   })
 }
 
-// 获取扫描的目录列表
+// Get a list of scanned directories
 export function useScanDirectories(
   scanId: number,
   params: { page: number; pageSize: number; filter?: string },
@@ -54,7 +54,7 @@ export function useScanDirectories(
   })
 }
 
-// 删除单个目录（使用单独的 DELETE API）
+// Delete a single directory (using separate DELETE API)
 export function useDeleteDirectory() {
   return useResourceMutation({
     mutationFn: DirectoryService.deleteDirectory,
@@ -71,7 +71,7 @@ export function useDeleteDirectory() {
   })
 }
 
-// 批量删除目录（使用统一的批量删除接口）
+// Deleting directories in batches (using a unified batch deletion interface)
 export function useBulkDeleteDirectories() {
   return useResourceMutation({
     mutationFn: DirectoryService.bulkDeleteDirectories,
@@ -91,7 +91,7 @@ export function useBulkDeleteDirectories() {
 }
 
 
-// 批量创建目录（绑定到目标）
+// Create directories in batches (bind to target)
 export function useBulkCreateDirectories() {
   return useResourceMutation({
     mutationFn: (data: { targetId: number; urls: string[] }) =>

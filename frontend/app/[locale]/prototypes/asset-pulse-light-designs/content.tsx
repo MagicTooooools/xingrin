@@ -103,7 +103,7 @@ function withRealData<P extends object>(Component: React.ComponentType<P & { dat
 
 
 // ==========================================
-// 1. Clinical Clean (无菌实验室)
+// 1. Clinical Clean (sterile laboratory)
 // ==========================================
 const VariantClinical = withRealData(({ data }) => {
   return (
@@ -134,7 +134,7 @@ const VariantClinical = withRealData(({ data }) => {
 })
 
 // ==========================================
-// 2. Swiss Grid (瑞士网格)
+// 2. Swiss Grid (Swiss Grid)
 // ==========================================
 const VariantSwiss = withRealData(({ data }) => {
   return (
@@ -158,7 +158,7 @@ const VariantSwiss = withRealData(({ data }) => {
 })
 
 // ==========================================
-// 3. Architect Blueprint (建筑蓝图)
+// 3. Architect Blueprint
 // ==========================================
 const VariantBlueprint = withRealData(({ data }) => {
   return (
@@ -184,7 +184,7 @@ const VariantBlueprint = withRealData(({ data }) => {
 })
 
 // ==========================================
-// 4. E-Ink Paper (电子墨水)
+// 4. E-Ink Paper
 // ==========================================
 const VariantEInk = withRealData(({ data }) => {
   return (
@@ -210,7 +210,7 @@ const VariantEInk = withRealData(({ data }) => {
 })
 
 // ==========================================
-// 5. Financial Times (金融报表)
+// 5. Financial Times (financial statements)
 // ==========================================
 const VariantFinancial = withRealData(({ data }) => {
   return (
@@ -231,7 +231,7 @@ const VariantFinancial = withRealData(({ data }) => {
 })
 
 // ==========================================
-// 6. Soft Neumorphism (软拟态)
+// 6. Soft Neumorphism
 // ==========================================
 const VariantNeumorphism = withRealData(({ data }) => {
   return (
@@ -254,7 +254,7 @@ const VariantNeumorphism = withRealData(({ data }) => {
 })
 
 // ==========================================
-// 7. Frosted Glass Light (浅色毛玻璃)
+// 7. Frosted Glass Light (light-colored frosted glass)
 // ==========================================
 const VariantFrosted = withRealData(({ data }) => {
   return (
@@ -277,7 +277,7 @@ const VariantFrosted = withRealData(({ data }) => {
 })
 
 // ==========================================
-// 8. Technical Manual (技术手册)
+// 8. Technical Manual
 // ==========================================
 const VariantManual = withRealData(({ data }) => {
   return (
@@ -303,7 +303,7 @@ const VariantManual = withRealData(({ data }) => {
 })
 
 // ==========================================
-// 9. Ceramic Glaze (陶瓷釉面)
+// 9. Ceramic Glaze
 // ==========================================
 const VariantCeramic = withRealData(({ data }) => {
   return (
@@ -322,7 +322,7 @@ const VariantCeramic = withRealData(({ data }) => {
 })
 
 // ==========================================
-// 10. Retro OS Light (复古系统)
+// 10. Retro OS Light (retro system)
 // ==========================================
 const VariantRetroOS = withRealData(({ data }) => {
   return (
@@ -347,7 +347,7 @@ const VariantRetroOS = withRealData(({ data }) => {
 })
 
 // ==========================================
-// 11. Grid Paper (方格纸)
+// 11. Grid Paper
 // ==========================================
 const VariantGridPaper = withRealData(({ data }) => {
   return (
@@ -369,7 +369,7 @@ const VariantGridPaper = withRealData(({ data }) => {
 })
 
 // ==========================================
-// 12. Corporate Clean (企业极简)
+// 12. Corporate Clean
 // ==========================================
 const VariantCorporate = withRealData(({ data }) => {
   return (
@@ -395,7 +395,7 @@ const VariantCorporate = withRealData(({ data }) => {
 })
 
 // ==========================================
-// 13. Solar Flare (日耀)
+// 13. Solar Flare
 // ==========================================
 const VariantSolar = withRealData(({ data }) => {
   return (
@@ -422,7 +422,7 @@ const VariantSolar = withRealData(({ data }) => {
 })
 
 // ==========================================
-// 14. Ice Sheet (冰层)
+// 14. Ice Sheet
 // ==========================================
 const VariantIce = withRealData(({ data }) => {
   return (
@@ -444,7 +444,7 @@ const VariantIce = withRealData(({ data }) => {
 })
 
 // ==========================================
-// 15. Code Editor Light (代码编辑器)
+// 15. Code Editor Light
 // ==========================================
 const VariantCodeEditor = withRealData(({ data }) => {
   return (
@@ -475,7 +475,7 @@ const VariantCodeEditor = withRealData(({ data }) => {
 })
 
 // ==========================================
-// 16. Scientific Journal (科学期刊)
+// 16. Scientific Journal
 // ==========================================
 const VariantJournal = withRealData(({ data }) => {
   return (
@@ -502,7 +502,7 @@ const VariantJournal = withRealData(({ data }) => {
 })
 
 // ==========================================
-// 17. Metro UI (磁贴风格)
+// 17. Metro UI (tile style)
 // ==========================================
 const VariantMetro = withRealData(({ data }) => {
   const latest = data.length > 0 ? data[data.length-1] : { totalSubdomains: 0, totalVulns: 0 }
@@ -537,7 +537,7 @@ const VariantMetro = withRealData(({ data }) => {
 })
 
 // ==========================================
-// 18. Japanese Minimal (日式极简)
+// 18. Japanese Minimal (Japanese minimalist)
 // ==========================================
 const VariantJapanese = withRealData(({ data }) => {
   return (
@@ -564,7 +564,7 @@ const VariantJapanese = withRealData(({ data }) => {
 })
 
 // ==========================================
-// 19. Isometric Light (等轴测 - 伪3D)
+// 19. Isometric Light (Isometric – Pseudo 3D)
 // ==========================================
 const VariantIsometric = withRealData(({ data }) => {
   return (
@@ -589,7 +589,7 @@ const VariantIsometric = withRealData(({ data }) => {
 })
 
 // ==========================================
-// 20. Wireframe (线框图)
+// 20. Wireframe (wireframe)
 // ==========================================
 const VariantWireframe = withRealData(({ data }) => {
   return (

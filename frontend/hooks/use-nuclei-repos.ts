@@ -1,5 +1,5 @@
 /**
- * Nuclei 模板仓库相关 Hooks
+ * Nuclei template warehouse related Hooks
  */
 
 import { useQuery } from "@tanstack/react-query"
@@ -15,7 +15,7 @@ export const nucleiRepoKeys = {
     ["nuclei-repo-content", repoId, path] as const,
 }
 
-// ==================== 仓库 CRUD ====================
+// ==================== Warehouse CRUD ====================
 
 export interface NucleiRepo {
   id: number
@@ -28,7 +28,7 @@ export interface NucleiRepo {
   updatedAt: string
 }
 
-/** 获取仓库列表 */
+/** Get the warehouse list */
 export function useNucleiRepos() {
   return useQuery<NucleiRepo[]>({
     queryKey: nucleiRepoKeys.repos,
@@ -36,7 +36,7 @@ export function useNucleiRepos() {
   })
 }
 
-/** 获取单个仓库详情 */
+/** Get details of a single warehouse */
 export function useNucleiRepo(repoId: number | null) {
   return useQuery<NucleiRepo>({
     queryKey: nucleiRepoKeys.repo(repoId),
@@ -45,7 +45,7 @@ export function useNucleiRepo(repoId: number | null) {
   })
 }
 
-/** 创建仓库 */
+/** Create warehouse */
 export function useCreateNucleiRepo() {
   return useResourceMutation({
     mutationFn: nucleiRepoApi.createRepo,
@@ -57,7 +57,7 @@ export function useCreateNucleiRepo() {
   })
 }
 
-/** 更新仓库 */
+/** Update warehouse */
 export function useUpdateNucleiRepo() {
   return useResourceMutation({
     mutationFn: (data: {
@@ -75,7 +75,7 @@ export function useUpdateNucleiRepo() {
   })
 }
 
-/** 删除仓库 */
+/** Delete warehouse */
 export function useDeleteNucleiRepo() {
   return useResourceMutation({
     mutationFn: nucleiRepoApi.deleteRepo,
@@ -87,9 +87,9 @@ export function useDeleteNucleiRepo() {
   })
 }
 
-// ==================== Git 同步 ====================
+// ==================== Git synchronization ====================
 
-/** 刷新仓库（Git clone/pull） */
+/** Refresh the warehouse (Git clone/pull) */
 export function useRefreshNucleiRepo() {
   return useResourceMutation({
     mutationFn: nucleiRepoApi.refreshRepo,
@@ -105,9 +105,9 @@ export function useRefreshNucleiRepo() {
   })
 }
 
-// ==================== 模板只读 ====================
+// ==================== Template read only ====================
 
-/** 获取仓库模板目录树 */
+/** Get the warehouse template directory tree */
 export function useNucleiRepoTree(repoId: number | null) {
   return useQuery({
     queryKey: nucleiRepoKeys.tree(repoId),
@@ -119,7 +119,7 @@ export function useNucleiRepoTree(repoId: number | null) {
   })
 }
 
-/** 获取模板文件内容 */
+/** Get template file content */
 export function useNucleiRepoContent(repoId: number | null, path: string | null) {
   return useQuery<NucleiTemplateContent>({
     queryKey: nucleiRepoKeys.content(repoId, path),

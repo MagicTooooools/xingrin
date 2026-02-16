@@ -32,10 +32,10 @@ type EndpointListResponse = {
 export type UseTargetsResult = UseQueryResult<TargetSelectResponse, Error>
 
 /**
- * 获取所有目标列表
- * 支持两种调用方式：
- * 1. useTargets(page, pageSize, type, filter) - 直接传参数
- * 2. useTargets({ page, pageSize, organizationId, filter }, options) - 传对象
+ * Get a list of all targets
+ * Two calling methods are supported:
+ * 1. useTargets(page, pageSize, type, filter) - pass parameters directly
+ * 2. useTargets({ page, pageSize, organizationId, filter }, options) - pass object
  */
 export function useTargets(
   params: UseTargetsParams,
@@ -82,7 +82,7 @@ export function useTargets(
 }
 
 /**
- * 获取单个目标详情
+ * Get individual target details
  */
 export function useTarget(id: number, options?: { enabled?: boolean }) {
   return useQuery({
@@ -93,7 +93,7 @@ export function useTarget(id: number, options?: { enabled?: boolean }) {
 }
 
 /**
- * 获取目标的组织列表
+ * Get the target's list of organizations
  */
 export function useTargetOrganizations(targetId: number, page = 1, pageSize = 10) {
   return useQuery({
@@ -104,7 +104,7 @@ export function useTargetOrganizations(targetId: number, page = 1, pageSize = 10
 }
 
 /**
- * 获取目标的端点列表
+ * Get a list of endpoints for a target
  */
 export function useTargetEndpoints(
   targetId: number,
@@ -136,7 +136,7 @@ export function useTargetEndpoints(
 }
 
 /**
- * 获取目标的黑名单规则
+ * Get the target's blacklist rules
  */
 export function useTargetBlacklist(targetId: number) {
   return useQuery({

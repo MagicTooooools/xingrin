@@ -26,7 +26,7 @@ function websiteCascadeInvalidates() {
   ]
 }
 
-// 获取目标的网站列表
+// Get the target website list
 export function useTargetWebSites(
   targetId: number,
   params: { page: number; pageSize: number; filter?: string },
@@ -40,7 +40,7 @@ export function useTargetWebSites(
   })
 }
 
-// 获取扫描的网站列表
+// Get a list of scanned websites
 export function useScanWebSites(
   scanId: number,
   params: { page: number; pageSize: number; filter?: string },
@@ -54,7 +54,7 @@ export function useScanWebSites(
   })
 }
 
-// 删除单个网站（使用单独的 DELETE API）
+// Delete a single website (using separate DELETE API)
 export function useDeleteWebSite() {
   return useResourceMutation({
     mutationFn: WebsiteService.deleteWebSite,
@@ -71,7 +71,7 @@ export function useDeleteWebSite() {
   })
 }
 
-// 批量删除网站（使用统一的批量删除接口）
+// Delete websites in batches (using a unified batch deletion interface)
 export function useBulkDeleteWebSites() {
   return useResourceMutation({
     mutationFn: WebsiteService.bulkDeleteWebSites,
@@ -91,7 +91,7 @@ export function useBulkDeleteWebSites() {
 }
 
 
-// 批量创建网站（绑定到目标）
+// Create websites in batches (bind to targets)
 export function useBulkCreateWebsites() {
   return useResourceMutation({
     mutationFn: (data: { targetId: number; urls: string[] }) =>

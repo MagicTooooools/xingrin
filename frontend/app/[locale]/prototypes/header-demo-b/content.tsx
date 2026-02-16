@@ -4,14 +4,14 @@ import { AllTargetsDetailView } from "@/components/target/all-targets-detail-vie
 import { Button } from "@/components/ui/button"
 
 /**
- * Demo B：隐形标题
- * 设计理念：Header 完全无边框，只靠字号和间距建立层次；表格保留自己的边框
- * 关键 CSS：Header 无任何边框装饰
+ * Demo B: invisible title
+ * Design concept: Header is completely borderless, relying only on font size and spacing to establish hierarchy; tables retain their own borders
+ * Key CSS: Header without any border decoration
  */
 export default function DemoPageB() {
   return (
     <div className="flex flex-col h-full">
-      {/* 说明区域 */}
+      {/* Description area */}
       <div className="p-6 border-b bg-muted/30">
         <h1 className="text-xl font-bold">方案 B：隐形标题</h1>
         <p className="text-sm text-muted-foreground mt-1">
@@ -19,10 +19,10 @@ export default function DemoPageB() {
         </p>
       </div>
 
-      {/* 核心 Demo 区域 */}
+      {/* Core Demo area */}
       <div className="flex-1 p-6 flex flex-col min-h-0">
         
-        {/* Header 区域 - 纯文字，无任何边框 */}
+        {/* Header area - plain text, without any borders */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-4 shrink-0 px-2">
           <div className="space-y-1">
             <div className="flex items-center gap-3">
@@ -41,7 +41,7 @@ export default function DemoPageB() {
           </div>
         </div>
 
-        {/* 表格区域 - 保留表格自带边框，但加粗顶部边框以强调 */}
+        {/* Table area - keep the table's own borders, but bold the top border for emphasis */}
         <div className="flex-1 overflow-auto">
           <AllTargetsDetailView
             className="space-y-3"

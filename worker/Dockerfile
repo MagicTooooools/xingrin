@@ -4,7 +4,7 @@
 # ============================================
 # Stage 1: Build Go scanning tools
 # ============================================
-FROM golang:1.25.6 AS tools-builder
+FROM golang:1.26 AS tools-builder
 
 ARG GO111MODULE=on
 ARG GOPROXY=https://goproxy.cn,direct
@@ -42,7 +42,7 @@ RUN go install -v github.com/projectdiscovery/httpx/cmd/httpx@latest && \
 # ============================================
 # Stage 2: Build Go Worker
 # ============================================
-FROM golang:1.25.6 AS worker-builder
+FROM golang:1.26 AS worker-builder
 
 ARG GO111MODULE=on
 ARG GOPROXY=https://goproxy.cn,direct

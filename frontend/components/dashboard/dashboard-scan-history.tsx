@@ -15,13 +15,13 @@ export function DashboardScanHistory() {
   const [pagination, setPagination] = React.useState({ pageIndex: 0, pageSize: 5 })
   const locale = useLocale()
 
-  // 国际化
+  // i18n
   const tColumns = useTranslations("columns")
   const tCommon = useTranslations("common")
   const tTooltips = useTranslations("tooltips")
   const tScan = useTranslations("scan")
 
-  // 构建翻译对象
+  // Build translation map
   const translations = React.useMemo(() => ({
     columns: {
       target: tColumns("scanHistory.target"),
@@ -69,7 +69,8 @@ export function DashboardScanHistory() {
   const formatDate = React.useCallback((dateString: string) => new Date(dateString).toLocaleString(getDateLocale(locale), { hour12: false }), [locale])
   const handleDelete = React.useCallback(() => {}, [])
   const handleStop = React.useCallback(() => {
-    // 仪表盘列表暂时不提供停止逻辑，实现时可在此调用对应的停止扫描接口
+    // Stop action is not wired for the dashboard list yet.
+    // Hook the stop-scan API here when the feature is enabled.
   }, [])
 
   const columns = React.useMemo(

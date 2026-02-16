@@ -130,7 +130,7 @@ export const FingerprintService = {
   },
 
   /**
-   * 获取 Goby 指纹详情
+   * Get Goby fingerprint details
    */
   async getGobyFingerprint(id: number): Promise<GobyFingerprint> {
     const response = await apiClient.get(`/fingerprints/goby/${id}/`)
@@ -138,7 +138,7 @@ export const FingerprintService = {
   },
 
   /**
-   * 创建单条 Goby 指纹
+   * Create a single Goby fingerprint
    */
   async createGobyFingerprint(data: Omit<GobyFingerprint, 'id' | 'createdAt'>): Promise<GobyFingerprint> {
     const response = await apiClient.post("/fingerprints/goby/", data)
@@ -146,7 +146,7 @@ export const FingerprintService = {
   },
 
   /**
-   * 更新 Goby 指纹
+   * Update Goby fingerprint
    */
   async updateGobyFingerprint(id: number, data: Partial<GobyFingerprint>): Promise<GobyFingerprint> {
     const response = await apiClient.put(`/fingerprints/goby/${id}/`, data)
@@ -154,14 +154,14 @@ export const FingerprintService = {
   },
 
   /**
-   * 删除单条 Goby 指纹
+   * Delete a single Goby fingerprint
    */
   async deleteGobyFingerprint(id: number): Promise<void> {
     await apiClient.delete(`/fingerprints/goby/${id}/`)
   },
 
   /**
-   * 文件导入 Goby 指纹
+   * File import Goby fingerprint
    */
   async importGobyFingerprints(file: File): Promise<BatchCreateResponse> {
     const formData = new FormData()
@@ -173,7 +173,7 @@ export const FingerprintService = {
   },
 
   /**
-   * 批量删除 Goby 指纹
+   * Delete Goby fingerprints in batches
    */
   async bulkDeleteGobyFingerprints(ids: number[]): Promise<BulkDeleteResponse> {
     const response = await apiClient.post("/fingerprints/goby/bulk-delete/", { ids })
@@ -181,7 +181,7 @@ export const FingerprintService = {
   },
 
   /**
-   * 删除所有 Goby 指纹
+   * Delete all Goby fingerprints
    */
   async deleteAllGobyFingerprints(): Promise<BulkDeleteResponse> {
     const response = await apiClient.post("/fingerprints/goby/delete-all/")
@@ -189,7 +189,7 @@ export const FingerprintService = {
   },
 
   /**
-   * 导出 Goby 指纹
+   * Export Goby fingerprint
    */
   async exportGobyFingerprints(): Promise<Blob> {
     const response = await apiClient.get("/fingerprints/goby/export/", {
@@ -199,7 +199,7 @@ export const FingerprintService = {
   },
 
   /**
-   * 获取 Goby 指纹数量
+   * Get the number of Goby fingerprints
    */
   async getGobyCount(): Promise<number> {
     const response = await apiClient.get("/fingerprints/goby/", { params: { pageSize: 1 } })
@@ -209,7 +209,7 @@ export const FingerprintService = {
   // ==================== Wappalyzer ====================
   
   /**
-   * 获取 Wappalyzer 指纹列表
+   * Get Wappalyzer fingerprint list
    */
   async getWappalyzerFingerprints(params: QueryParams = {}): Promise<PaginatedResponse<WappalyzerFingerprint>> {
     const response = await apiClient.get("/fingerprints/wappalyzer/", { params })
@@ -217,7 +217,7 @@ export const FingerprintService = {
   },
 
   /**
-   * 获取 Wappalyzer 指纹详情
+   * Get Wappalyzer fingerprint details
    */
   async getWappalyzerFingerprint(id: number): Promise<WappalyzerFingerprint> {
     const response = await apiClient.get(`/fingerprints/wappalyzer/${id}/`)
@@ -225,7 +225,7 @@ export const FingerprintService = {
   },
 
   /**
-   * 创建单条 Wappalyzer 指纹
+   * Create a single Wappalyzer fingerprint
    */
   async createWappalyzerFingerprint(data: Omit<WappalyzerFingerprint, 'id' | 'createdAt'>): Promise<WappalyzerFingerprint> {
     const response = await apiClient.post("/fingerprints/wappalyzer/", data)
@@ -233,7 +233,7 @@ export const FingerprintService = {
   },
 
   /**
-   * 更新 Wappalyzer 指纹
+   * Update Wappalyzer fingerprint
    */
   async updateWappalyzerFingerprint(id: number, data: Partial<WappalyzerFingerprint>): Promise<WappalyzerFingerprint> {
     const response = await apiClient.put(`/fingerprints/wappalyzer/${id}/`, data)
@@ -241,14 +241,14 @@ export const FingerprintService = {
   },
 
   /**
-   * 删除单条 Wappalyzer 指纹
+   * Delete a single Wappalyzer fingerprint
    */
   async deleteWappalyzerFingerprint(id: number): Promise<void> {
     await apiClient.delete(`/fingerprints/wappalyzer/${id}/`)
   },
 
   /**
-   * 文件导入 Wappalyzer 指纹
+   * File import Wappalyzer fingerprint
    */
   async importWappalyzerFingerprints(file: File): Promise<BatchCreateResponse> {
     const formData = new FormData()
@@ -260,7 +260,7 @@ export const FingerprintService = {
   },
 
   /**
-   * 批量删除 Wappalyzer 指纹
+   * Delete Wappalyzer fingerprints in batches
    */
   async bulkDeleteWappalyzerFingerprints(ids: number[]): Promise<BulkDeleteResponse> {
     const response = await apiClient.post("/fingerprints/wappalyzer/bulk-delete/", { ids })
@@ -268,7 +268,7 @@ export const FingerprintService = {
   },
 
   /**
-   * 删除所有 Wappalyzer 指纹
+   * Remove all Wappalyzer fingerprints
    */
   async deleteAllWappalyzerFingerprints(): Promise<BulkDeleteResponse> {
     const response = await apiClient.post("/fingerprints/wappalyzer/delete-all/")
@@ -276,7 +276,7 @@ export const FingerprintService = {
   },
 
   /**
-   * 导出 Wappalyzer 指纹
+   * Export Wappalyzer fingerprints
    */
   async exportWappalyzerFingerprints(): Promise<Blob> {
     const response = await apiClient.get("/fingerprints/wappalyzer/export/", {
@@ -286,7 +286,7 @@ export const FingerprintService = {
   },
 
   /**
-   * 获取 Wappalyzer 指纹数量
+   * Get the number of Wappalyzer fingerprints
    */
   async getWappalyzerCount(): Promise<number> {
     const response = await apiClient.get("/fingerprints/wappalyzer/", { params: { pageSize: 1 } })
@@ -296,7 +296,7 @@ export const FingerprintService = {
   // ==================== Fingers ====================
 
   /**
-   * 获取 Fingers 指纹列表
+   * Get Fingers fingerprint list
    */
   async getFingersFingerprints(params: QueryParams = {}): Promise<PaginatedResponse<FingersFingerprint>> {
     const response = await apiClient.get("/fingerprints/fingers/", { params })
@@ -304,7 +304,7 @@ export const FingerprintService = {
   },
 
   /**
-   * 获取 Fingers 指纹详情
+   * Get Fingers fingerprint details
    */
   async getFingersFingerprint(id: number): Promise<FingersFingerprint> {
     const response = await apiClient.get(`/fingerprints/fingers/${id}/`)
@@ -312,7 +312,7 @@ export const FingerprintService = {
   },
 
   /**
-   * 创建单条 Fingers 指纹
+   * Create a single Fingerprint
    */
   async createFingersFingerprint(data: Omit<FingersFingerprint, 'id' | 'createdAt'>): Promise<FingersFingerprint> {
     const response = await apiClient.post("/fingerprints/fingers/", data)
@@ -320,7 +320,7 @@ export const FingerprintService = {
   },
 
   /**
-   * 更新 Fingers 指纹
+   * Update Fingers
    */
   async updateFingersFingerprint(id: number, data: Partial<FingersFingerprint>): Promise<FingersFingerprint> {
     const response = await apiClient.put(`/fingerprints/fingers/${id}/`, data)
@@ -328,14 +328,14 @@ export const FingerprintService = {
   },
 
   /**
-   * 删除单条 Fingers 指纹
+   * Delete a single Fingerprint
    */
   async deleteFingersFingerprint(id: number): Promise<void> {
     await apiClient.delete(`/fingerprints/fingers/${id}/`)
   },
 
   /**
-   * 文件导入 Fingers 指纹
+   * File import Fingers fingerprint
    */
   async importFingersFingerprints(file: File): Promise<BatchCreateResponse> {
     const formData = new FormData()
@@ -347,7 +347,7 @@ export const FingerprintService = {
   },
 
   /**
-   * 批量删除 Fingers 指纹
+   * Delete Fingers in batches
    */
   async bulkDeleteFingersFingerprints(ids: number[]): Promise<BulkDeleteResponse> {
     const response = await apiClient.post("/fingerprints/fingers/bulk-delete/", { ids })
@@ -355,7 +355,7 @@ export const FingerprintService = {
   },
 
   /**
-   * 删除所有 Fingers 指纹
+   * Delete all Fingers
    */
   async deleteAllFingersFingerprints(): Promise<BulkDeleteResponse> {
     const response = await apiClient.post("/fingerprints/fingers/delete-all/")
@@ -363,7 +363,7 @@ export const FingerprintService = {
   },
 
   /**
-   * 导出 Fingers 指纹
+   * Export Fingers
    */
   async exportFingersFingerprints(): Promise<Blob> {
     const response = await apiClient.get("/fingerprints/fingers/export/", {
@@ -373,7 +373,7 @@ export const FingerprintService = {
   },
 
   /**
-   * 获取 Fingers 指纹数量
+   * Get the number of Fingers
    */
   async getFingersCount(): Promise<number> {
     const response = await apiClient.get("/fingerprints/fingers/", { params: { pageSize: 1 } })
@@ -383,7 +383,7 @@ export const FingerprintService = {
   // ==================== FingerPrintHub ====================
 
   /**
-   * 获取 FingerPrintHub 指纹列表
+   * Get FingerPrintHub fingerprint list
    */
   async getFingerPrintHubFingerprints(params: QueryParams = {}): Promise<PaginatedResponse<FingerPrintHubFingerprint>> {
     const response = await apiClient.get("/fingerprints/fingerprinthub/", { params })
@@ -391,7 +391,7 @@ export const FingerprintService = {
   },
 
   /**
-   * 获取 FingerPrintHub 指纹详情
+   * Get FingerPrintHub fingerprint details
    */
   async getFingerPrintHubFingerprint(id: number): Promise<FingerPrintHubFingerprint> {
     const response = await apiClient.get(`/fingerprints/fingerprinthub/${id}/`)
@@ -399,7 +399,7 @@ export const FingerprintService = {
   },
 
   /**
-   * 创建单条 FingerPrintHub 指纹
+   * Create a single FingerPrintHub fingerprint
    */
   async createFingerPrintHubFingerprint(data: Omit<FingerPrintHubFingerprint, 'id' | 'createdAt'>): Promise<FingerPrintHubFingerprint> {
     const response = await apiClient.post("/fingerprints/fingerprinthub/", data)
@@ -407,7 +407,7 @@ export const FingerprintService = {
   },
 
   /**
-   * 更新 FingerPrintHub 指纹
+   * Update FingerPrintHub fingerprint
    */
   async updateFingerPrintHubFingerprint(id: number, data: Partial<FingerPrintHubFingerprint>): Promise<FingerPrintHubFingerprint> {
     const response = await apiClient.put(`/fingerprints/fingerprinthub/${id}/`, data)
@@ -415,14 +415,14 @@ export const FingerprintService = {
   },
 
   /**
-   * 删除单条 FingerPrintHub 指纹
+   * Delete a single FingerPrintHub fingerprint
    */
   async deleteFingerPrintHubFingerprint(id: number): Promise<void> {
     await apiClient.delete(`/fingerprints/fingerprinthub/${id}/`)
   },
 
   /**
-   * 文件导入 FingerPrintHub 指纹
+   * File import FingerPrintHub fingerprint
    */
   async importFingerPrintHubFingerprints(file: File): Promise<BatchCreateResponse> {
     const formData = new FormData()
@@ -434,7 +434,7 @@ export const FingerprintService = {
   },
 
   /**
-   * 批量删除 FingerPrintHub 指纹
+   * Delete FingerPrintHub fingerprints in batches
    */
   async bulkDeleteFingerPrintHubFingerprints(ids: number[]): Promise<BulkDeleteResponse> {
     const response = await apiClient.post("/fingerprints/fingerprinthub/bulk-delete/", { ids })
@@ -442,7 +442,7 @@ export const FingerprintService = {
   },
 
   /**
-   * 删除所有 FingerPrintHub 指纹
+   * Delete all FingerPrintHub fingerprints
    */
   async deleteAllFingerPrintHubFingerprints(): Promise<BulkDeleteResponse> {
     const response = await apiClient.post("/fingerprints/fingerprinthub/delete-all/")
@@ -450,7 +450,7 @@ export const FingerprintService = {
   },
 
   /**
-   * 导出 FingerPrintHub 指纹
+   * Export FingerPrintHub fingerprints
    */
   async exportFingerPrintHubFingerprints(): Promise<Blob> {
     const response = await apiClient.get("/fingerprints/fingerprinthub/export/", {
@@ -460,7 +460,7 @@ export const FingerprintService = {
   },
 
   /**
-   * 获取 FingerPrintHub 指纹数量
+   * Get the number of FingerPrintHub fingerprints
    */
   async getFingerPrintHubCount(): Promise<number> {
     const response = await apiClient.get("/fingerprints/fingerprinthub/", { params: { pageSize: 1 } })
@@ -470,7 +470,7 @@ export const FingerprintService = {
   // ==================== ARL ====================
 
   /**
-   * 获取 ARL 指纹列表
+   * Get a list of ARL fingerprints
    */
   async getARLFingerprints(params: QueryParams = {}): Promise<PaginatedResponse<ARLFingerprint>> {
     const response = await apiClient.get("/fingerprints/arl/", { params })
@@ -478,7 +478,7 @@ export const FingerprintService = {
   },
 
   /**
-   * 获取 ARL 指纹详情
+   * Get ARL fingerprint details
    */
   async getARLFingerprint(id: number): Promise<ARLFingerprint> {
     const response = await apiClient.get(`/fingerprints/arl/${id}/`)
@@ -486,7 +486,7 @@ export const FingerprintService = {
   },
 
   /**
-   * 创建单条 ARL 指纹
+   * Create a single ARL fingerprint
    */
   async createARLFingerprint(data: Omit<ARLFingerprint, 'id' | 'createdAt'>): Promise<ARLFingerprint> {
     const response = await apiClient.post("/fingerprints/arl/", data)
@@ -494,7 +494,7 @@ export const FingerprintService = {
   },
 
   /**
-   * 更新 ARL 指纹
+   * Update ARL fingerprint
    */
   async updateARLFingerprint(id: number, data: Partial<ARLFingerprint>): Promise<ARLFingerprint> {
     const response = await apiClient.put(`/fingerprints/arl/${id}/`, data)
@@ -502,14 +502,14 @@ export const FingerprintService = {
   },
 
   /**
-   * 删除单条 ARL 指纹
+   * Delete a single ARL fingerprint
    */
   async deleteARLFingerprint(id: number): Promise<void> {
     await apiClient.delete(`/fingerprints/arl/${id}/`)
   },
 
   /**
-   * 文件导入 ARL 指纹（支持 YAML 和 JSON）
+   * File import ARL fingerprint (supports YAML and JSON)
    */
   async importARLFingerprints(file: File): Promise<BatchCreateResponse> {
     const formData = new FormData()
@@ -521,7 +521,7 @@ export const FingerprintService = {
   },
 
   /**
-   * 批量删除 ARL 指纹
+   * Delete ARL fingerprints in batches
    */
   async bulkDeleteARLFingerprints(ids: number[]): Promise<BulkDeleteResponse> {
     const response = await apiClient.post("/fingerprints/arl/bulk-delete/", { ids })
@@ -529,7 +529,7 @@ export const FingerprintService = {
   },
 
   /**
-   * 删除所有 ARL 指纹
+   * Remove all ARL fingerprints
    */
   async deleteAllARLFingerprints(): Promise<BulkDeleteResponse> {
     const response = await apiClient.post("/fingerprints/arl/delete-all/")
@@ -537,7 +537,7 @@ export const FingerprintService = {
   },
 
   /**
-   * 导出 ARL 指纹（YAML 格式）
+   * Export ARL fingerprint (YAML format)
    */
   async exportARLFingerprints(): Promise<Blob> {
     const response = await apiClient.get("/fingerprints/arl/export/", {
@@ -547,20 +547,20 @@ export const FingerprintService = {
   },
 
   /**
-   * 获取 ARL 指纹数量
+   * Get the number of ARL fingerprints
    */
   async getARLCount(): Promise<number> {
     const response = await apiClient.get("/fingerprints/arl/", { params: { pageSize: 1 } })
     return response.data.total || 0
   },
 
-  // ==================== 统计 ====================
+  // ==================== Statistics ====================
 
   /**
-   * 获取所有指纹库统计
+   * Get all fingerprint database statistics
    */
   async getStats(): Promise<FingerprintStats> {
-    // 并行获取各指纹库数量
+    // Obtain the number of each fingerprint database in parallel
     const [eholeCount, gobyCount, wappalyzerCount, fingersCount, fingerprinthubCount, arlCount] = await Promise.all([
       this.getEholeCount(),
       this.getGobyCount(),

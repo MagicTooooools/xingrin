@@ -210,7 +210,7 @@ const MILESTONE_VARIANTS = [
   },
 ]
 
-// --- 本地触发规则 (useNudgeGuardian 中的文案) ---
+// --- Local trigger rules (mirrors useNudgeGuardian) ---
 const LOCAL_TRIGGER_VARIANTS = [
   {
     id: "late-night-1",
@@ -433,7 +433,7 @@ function AiNudgeTestPanel() {
       const data = await res.json()
       setResults((prev) => ({ ...prev, [label]: data }))
       
-      // 同时弹出 Toast
+      // Pop up Toast at the same time
       toast.custom((t) => (
         <NudgeToastCard
           title={data.title}

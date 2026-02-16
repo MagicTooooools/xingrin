@@ -11,11 +11,11 @@ const PENGUIN_LOGISTICS_BARCODE_HEIGHTS = [2, 4, 3, 5, 2, 4] as const
 export default function GithubButtonDemoPage() {
   const [stars, setStars] = useState<number | null>(null)
   
-  // 模拟加载星数，实际项目中会调用 API
+  // Simulate loading of stars, the API will be called in the actual project
   useEffect(() => {
-    // 延迟 800ms 模拟网络请求
+    // Delay 800ms to simulate network requests
     const timer = setTimeout(() => {
-      setStars(1286) // 模拟一个数字
+      setStars(1286) // simulate a number
     }, 800)
     return () => clearTimeout(timer)
   }, [])

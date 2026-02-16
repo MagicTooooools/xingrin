@@ -28,7 +28,7 @@ export function SearchResultsTable({ results }: SearchResultsTableProps) {
     })
   }, [format])
 
-  // 基础列定义（Website 和 Endpoint 共用）
+  // Basic column definitions (common to Website and Endpoint)
   const baseColumns: ColumnDef<SearchResult, unknown>[] = useMemo(() => [
     {
       id: "url",

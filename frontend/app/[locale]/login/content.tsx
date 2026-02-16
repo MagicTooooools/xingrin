@@ -82,7 +82,7 @@ export default function LoginPage() {
     }
   }, [])
 
-  // 提取预加载逻辑为可复用函数
+  // Extract preloading logic into reusable functions
   const prefetchDashboardData = React.useCallback(async () => {
     const scansParams = { page: 1, pageSize: 10 }
     const vulnsParams = { page: 1, pageSize: 10 }
@@ -172,13 +172,13 @@ export default function LoginPage() {
     setLoginReady(false)
     setLoginProcessing(true)
 
-    // 并行执行独立操作：登录验证 + 预加载 dashboard bundle
+    // Execute independent operations in parallel: login verification + preloading dashboard bundle
     const [loginRes] = await Promise.all([
       login({ username, password }),
       router.prefetch(withLocale("/dashboard/")),
     ])
 
-    // 预加载 dashboard 数据
+    // Preload dashboard data
     await prefetchDashboardData()
 
     // Prime auth cache so AuthLayout doesn't flash a full-screen loading state.

@@ -10,9 +10,9 @@ import {
 import { useTargetsDetailViewState } from "./targets-detail-view-state"
 
 /**
- * 组织目标详情视图组件（使用 React Query）
- * 用于显示和管理组织下的目标列表
- * 支持通过组织ID获取数据
+ * Organization goal details view component (using React Query)
+ * Used to display and manage target lists under an organization
+ * Supports obtaining data by organization ID
  */
 export function OrganizationTargetsDetailView({
   organizationId,

@@ -12,7 +12,7 @@ import { useNudgeToast, type NudgeToastVariant } from "@/hooks/use-nudge-toast"
 const STORAGE_FIRST_SEEN_KEY = "lunafox:milestone:first-seen"
 const STORAGE_MILESTONE_PREFIX = "lunafox:milestone:triggered:"
 
-// 定义里程碑（天数 -> 变体）
+// Define milestones (number of days -> variations)
 const MILESTONES: Record<number, NudgeToastVariant> = {
   1: {
     icon: <IconHeart className="size-6 text-pink-500" />,
@@ -42,25 +42,25 @@ const MILESTONES: Record<number, NudgeToastVariant> = {
 }
 
 /**
- * 纯前端里程碑 Hook
- * 记录用户首次访问时间，并在特定天数（1, 7, 30, 100）触发一次性纪念弹窗
+ * Pure front-end milestone Hook
+ * Record the user's first visit time and trigger a one-time commemorative pop-up window on a specific number of days (1, 7, 30, 100)
  */
 export function useMilestoneNudge() {
   const [targetVariant, setTargetVariant] = React.useState<NudgeToastVariant[]>([])
   const [storageKey, setStorageKey] = React.useState<string | undefined>(undefined)
 
-  // 初始化检查
+  // Initialization check
   React.useEffect(() => {
     if (typeof window === "undefined") return
 
     const now = Date.now()
     const firstSeenStr = localStorage.getItem(STORAGE_FIRST_SEEN_KEY)
 
-    // 1. 如果是第一次来，记录时间
+    // 1. If this is your first time, record the time
     if (!firstSeenStr) {
       localStorage.setItem(STORAGE_FIRST_SEEN_KEY, now.toString())
-      // 第 1 天的里程碑可以立刻触发（或者等下一次刷新）
-      // 这里选择立刻触发 Day 1
+      // Day 1 milestones can be triggered immediately (or wait for the next refresh)
+      // Here choose to trigger Day 1 immediately
       const variant = MILESTONES[1]
       const key = `${STORAGE_MILESTONE_PREFIX}1`
       if (!localStorage.getItem(key)) {
@@ -70,15 +70,15 @@ export function useMilestoneNudge() {
       return
     }
 
-    // 2. 计算已使用天数
+    // 2. Calculate the number of days used
     const firstSeen = parseInt(firstSeenStr, 10)
     const daysPassed = Math.floor((now - firstSeen) / (1000 * 60 * 60 * 24)) + 1
 
-    // 3. 检查是否命中了某个里程碑
+    // 3. Check if a certain milestone is hit
     const milestone = MILESTONES[daysPassed]
     if (milestone) {
       const key = `${STORAGE_MILESTONE_PREFIX}${daysPassed}`
-      // 检查这个里程碑是否已经弹过（永久不弹，所以不用 cooldown，直接用 storageKey 控制）
+      // Check whether this milestone has been ejected (it will never be ejected, so there is no need for cooldown and it is directly controlled by storageKey)
       if (!localStorage.getItem(key)) {
         setTargetVariant([milestone])
         setStorageKey(key)
@@ -86,20 +86,20 @@ export function useMilestoneNudge() {
     }
   }, [])
 
-  // 使用通用 Hook 触发
+  // Trigger using universal Hook
   const { trigger } = useNudgeToast({
-    storageKey, // 这里的 key 是动态的（e.g. triggered:30），弹过一次就会写入 true
-    delay: 2000, // 稍微晚一点弹，让页面先加载完
-    probability: 1, // 里程碑是硬性触发，不随机
+    storageKey, // The key here is dynamic (e.g. triggered:30). If it is played once, true will be written.
+    delay: 2000, // Play a little later to let the page load first
+    probability: 1, // Milestones are hard triggers, not random
     variants: targetVariant,
   })
 
-  // 当检测到有待触发的里程碑时，执行
+  // When a milestone to be triggered is detected, execute
   React.useEffect(() => {
     if (targetVariant.length > 0 && storageKey) {
       trigger()
     }
   }, [targetVariant, storageKey, trigger])
 
-  return null // 不需要暴露方法，全自动
+  return null // No need to expose methods, fully automatic
 }

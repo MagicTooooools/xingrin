@@ -253,7 +253,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     // collapsible="icon" means the sidebar can be collapsed to icon-only mode
     <Sidebar collapsible="icon" {...props}>
       <AppSidebarBackgroundTasks />
-      {/* Sidebar main content area - Logo 已移至顶栏 */}
+      {/* Sidebar main content area - Logo has been moved to the top bar */}
       <SidebarContent>
         {/* Main navigation menu */}
         <SidebarGroup>

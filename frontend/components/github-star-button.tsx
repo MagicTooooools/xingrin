@@ -12,7 +12,7 @@ export function GithubStarButton({ className }: GithubStarButtonProps) {
   const [stars, setStars] = useState<number | null>(null)
 
   useEffect(() => {
-    // 简单的缓存机制，避免开发时频繁刷新导致 rate limit
+    // Simple caching mechanism to avoid rate limit caused by frequent refresh during development
     const cached = sessionStorage.getItem("github-stars")
     const cachedTime = sessionStorage.getItem("github-stars-time")
     const now = Date.now()
@@ -35,7 +35,7 @@ export function GithubStarButton({ className }: GithubStarButtonProps) {
         }
       })
       .catch(() => {
-        // 静默失败，不影响用户体验
+        // Fail silently without affecting user experience
       })
   }, [])
 

@@ -27,7 +27,7 @@ import {
 } from "@/components/ui/tooltip"
 import type { SearchResult, Vulnerability, WebsiteSearchResult } from "@/types/search.types"
 
-// 类型守卫：检查是否为 WebsiteSearchResult
+// Type guard: Check if it is WebsiteSearchResult
 function isWebsiteResult(result: SearchResult): result is WebsiteSearchResult {
   return 'vulnerabilities' in result
 }
@@ -39,7 +39,7 @@ interface SearchResultCardProps {
 
 import { SEVERITY_STYLES } from "@/lib/severity-config"
 
-// 漏洞严重程度颜色配置
+// Vulnerability severity color configuration
 const severityColors: Record<string, string> = {
   critical: SEVERITY_STYLES.critical.className,
   high: SEVERITY_STYLES.high.className,
@@ -48,7 +48,7 @@ const severityColors: Record<string, string> = {
   info: SEVERITY_STYLES.info.className,
 }
 
-// 状态码 Badge variant
+// Status code Badge variant
 function getStatusVariant(status: number | null): "default" | "secondary" | "destructive" | "outline" {
   if (!status) return "outline"
   if (status >= 200 && status < 300) return "default"
@@ -70,7 +70,7 @@ export function SearchResultCard({ result, onViewVulnerability }: SearchResultCa
       .join("\n")
   }
 
-  // 格式化字节数
+  // Number of formatted bytes
   const formatBytes = (bytes: number | null) => {
     if (bytes === null || bytes === undefined) return null
     if (bytes < 1024) return `${bytes} B`
@@ -78,7 +78,7 @@ export function SearchResultCard({ result, onViewVulnerability }: SearchResultCa
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
   }
 
-  // 检测内容是否溢出
+  // Check if content overflows
   const maxHeight = 26 * 4
   
   useEffect(() => {
@@ -106,12 +106,12 @@ export function SearchResultCard({ result, onViewVulnerability }: SearchResultCa
   return (
     <Card className="overflow-hidden py-0 gap-0">
       <CardContent className="p-0">
-        {/* 顶部 URL + Badge 行 */}
+        {/* Top URL + Badge row */}
         <div className="px-4 py-2 bg-muted/30 border-b space-y-2">
           <h3 className="font-mono text-sm break-all">
             {result.url || result.host}
           </h3>
-          {/* Badge 行 */}
+          {/* Badge row */}
           <div className="flex flex-wrap items-center gap-2">
             <Badge variant={getStatusVariant(result.statusCode)} className="font-mono text-xs">
               {result.statusCode ?? '-'}
@@ -135,9 +135,9 @@ export function SearchResultCard({ result, onViewVulnerability }: SearchResultCa
           </div>
         </div>
 
-        {/* 中间左右分栏 */}
+        {/* Center left and right columns */}
         <div className="flex flex-col md:flex-row">
-          {/* 左侧信息区 */}
+          {/* Information area on the left */}
           <div className="w-full md:w-[320px] md:shrink-0 px-4 py-3 border-b md:border-b-0 md:border-r flex flex-col">
             <div className="space-y-1.5 text-sm">
               <div className="flex items-baseline">
@@ -190,7 +190,7 @@ export function SearchResultCard({ result, onViewVulnerability }: SearchResultCa
             )}
           </div>
 
-          {/* 右侧 Tab 区 */}
+          {/* Right Tab area */}
           <div className="w-full md:flex-1 flex flex-col">
             <Tabs defaultValue="header" className="w-full h-full flex flex-col gap-0">
               <TabsList className="h-[28px] gap-4 rounded-none border-b bg-transparent px-4 pt-1">
@@ -236,7 +236,7 @@ export function SearchResultCard({ result, onViewVulnerability }: SearchResultCa
           </div>
         </div>
 
-        {/* 底部漏洞区 - 仅 Website 类型显示 */}
+        {/* Bottom vulnerability section - shown only for Website results */}
         {isWebsiteResult(result) && result.vulnerabilities && result.vulnerabilities.length > 0 && (
           <div className="border-t">
             <Collapsible open={vulnOpen} onOpenChange={setVulnOpen}>

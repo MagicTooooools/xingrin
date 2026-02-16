@@ -1,29 +1,29 @@
 /**
- * API Key 配置类型定义
- * 用于 subfinder 第三方数据源配置
+ * API Key configuration type definition
+ * For subfinder third-party data source configuration
  */
 
-// 单字段 Provider 配置（hunter, shodan, zoomeye, securitytrails, threatbook, quake）
+// Single field Provider configuration (hunter, shodan, zoomeye, securitytrails, threatbook, quake)
 export interface SingleFieldProviderConfig {
   enabled: boolean
   apiKey: string
 }
 
-// FOFA Provider 配置（email + apiKey）
+// FOFA Provider configuration (email + apiKey)
 export interface FofaProviderConfig {
   enabled: boolean
   email: string
   apiKey: string
 }
 
-// Censys Provider 配置（apiId + apiSecret）
+// Censys Provider configuration (apiId + apiSecret)
 export interface CensysProviderConfig {
   enabled: boolean
   apiId: string
   apiSecret: string
 }
 
-// 完整的 API Key 配置
+// Complete API Key configuration
 export interface ApiKeySettings {
   fofa: FofaProviderConfig
   hunter: SingleFieldProviderConfig
@@ -35,8 +35,8 @@ export interface ApiKeySettings {
   quake: SingleFieldProviderConfig
 }
 
-// Provider 类型
+// Provider type
 export type ProviderKey = keyof ApiKeySettings
 
-// Provider 配置联合类型
+// Provider configuration union type
 export type ProviderConfig = FofaProviderConfig | CensysProviderConfig | SingleFieldProviderConfig

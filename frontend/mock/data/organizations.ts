@@ -119,7 +119,7 @@ export function getMockOrganizations(params?: {
   const pageSize = params?.pageSize || 10
   const search = params?.search?.toLowerCase() || ''
 
-  // 过滤搜索
+  // Filter search
   let filtered = mockOrganizations
   if (search) {
     filtered = mockOrganizations.filter(
@@ -129,7 +129,7 @@ export function getMockOrganizations(params?: {
     )
   }
 
-  // 分页
+  // Pagination
   const total = filtered.length
   const totalPages = Math.ceil(total / pageSize)
   const start = (page - 1) * pageSize

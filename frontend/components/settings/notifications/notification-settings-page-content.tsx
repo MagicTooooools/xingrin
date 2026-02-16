@@ -208,7 +208,7 @@ export default function NotificationSettingsPageContent() {
                 </CardHeader>
               </Card>
 
-              {/* 企业微信 */}
+              {/* Enterprise WeChat */}
               <Card>
                 <CardHeader className="pb-4">
                   <div className="flex items-center justify-between">

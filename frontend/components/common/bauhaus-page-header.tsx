@@ -6,31 +6,31 @@ import type { LucideIcon } from "@/components/icons"
 import { cn } from "@/lib/utils"
 
 interface BauhausPageHeaderProps {
-  /** 页面代号，如 "TGT-01" */
+  /** Page code, such as "TGT-01" */
   code: string
-  /** 副标题/分类，如 "Asset Management" */
+  /** Subtitle or category, such as "Asset Management" */
   subtitle: string
-  /** 主标题 */
+  /** Main title */
   title: string
-  /** 描述信息（可选） */
+  /** Description text (optional) */
   description?: string
-  /** 是否显示描述（默认 false） */
+  /** Whether to show the description (default: false) */
   showDescription?: boolean
-  /** 图标组件 */
+  /** Icon component */
   icon?: LucideIcon
-  /** 是否显示图标（默认 false） */
+  /** Whether to show the icon (default: false) */
   showIcon?: boolean
-  /** 状态文本，默认 "ACTIVE" */
+  /** Status text, default "ACTIVE" */
   statusText?: string
-  /** 是否在线状态，默认 true */
+  /** Whether online, default true */
   isOnline?: boolean
-  /** 外层容器的自定义 class */
+  /** Custom class for outer container */
   className?: string
 }
 
 /**
- * Bauhaus 风格的页面头部组件
- * 仅在 Bauhaus 主题下显示，提供统一的工业风格视觉效果
+ * Bauhaus-style page header component.
+ * Shown only in the Bauhaus theme to provide a consistent industrial look.
  */
 export function BauhausPageHeader({
   code,
@@ -104,7 +104,7 @@ export function BauhausPageHeader({
     <div className={cn("hidden [[data-theme=bauhaus]_&]:block px-4 lg:px-6", className)}>
       <div className="bg-card border border-border border-t-2 border-t-primary p-5">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-          {/* 左侧标题区 */}
+          {/* Left title area */}
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <span className="px-1.5 py-0.5 text-[10px] font-mono bg-primary text-primary-foreground tracking-wider">
@@ -123,7 +123,7 @@ export function BauhausPageHeader({
             ) : null}
           </div>
 
-          {/* 右侧状态栏 */}
+          {/* Right status bar */}
           <div className="flex gap-2">
             <div className="px-3 py-1.5 flex items-center gap-2 text-xs font-mono bg-secondary border border-border">
               <span

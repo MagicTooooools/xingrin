@@ -31,9 +31,9 @@ const NotificationDrawer = dynamic(
 )
 
 /**
- * 统一顶栏组件
- * 包含 Logo、侧边栏触发器、快捷操作按钮
- * 横跨整个页面宽度，Logo 在最左侧
+ * Unified top bar component
+ * Contains logo, sidebar triggers, shortcut action buttons
+ * Across the entire width of the page, the logo is on the far left
  */
 export function UnifiedHeader() {
   const t = useTranslations("navigation")
@@ -44,7 +44,7 @@ export function UnifiedHeader() {
       data-slot="unified-header"
       className="flex h-(--header-height) shrink-0 items-center border-b bg-background"
     >
-      {/* Logo 区域 - 固定宽度，与侧边栏宽度一致 */}
+      {/* Logo area - fixed width, consistent with sidebar width */}
       <div className="flex h-full w-(--sidebar-width) shrink-0 items-center px-4">
         <Link href="/" className="flex items-center gap-3">
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -66,12 +66,12 @@ export function UnifiedHeader() {
         </Link>
       </div>
 
-      {/* 右侧内容区 */}
+      {/* Right content area */}
       <div className="flex flex-1 items-center gap-2 px-4">
-        {/* 侧边栏触发器 - 仅移动端显示 */}
+        {/* Sidebar trigger - mobile only */}
         <SidebarTrigger className="-ml-1 md:hidden" />
 
-        {/* 右侧按钮区 */}
+        {/* Right button area */}
         <div className="ml-auto flex items-center gap-2">
           <QuickScanDialog />
           <NotificationDrawer />

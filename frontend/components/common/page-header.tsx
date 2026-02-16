@@ -3,23 +3,23 @@
 import { cn } from "@/lib/utils"
 
 interface PageHeaderProps {
-  /** 页面代号，如 "TGT-01" */
+  /** Page code, such as "TGT-01" */
   code?: string
-  /** 主标题 */
+  /** Main title */
   title: string
-  /** 描述信息（可选） */
+  /** Description text (optional) */
   description?: string
-  /** 面包屑（兼容旧页面参数） */
+  /** Breadcrumbs (compatible with old page parameters) */
   breadcrumbItems?: Array<{ label: string; href: string }>
-  /** 外层容器的自定义 class */
+  /** Custom class for outer container */
   className?: string
-  /** 右侧操作区域（可选） */
+  /** Right action area (optional) */
   action?: React.ReactNode
 }
 
 /**
- * 工业风页面头部组件 - 极简下划线风格 (Option C)
- * 仅保留底部强调线，去除背景和边框，强调内容本身的层次
+ * Industrial-style page header using the minimalist underline variant (Option C).
+ * Keeps only the bottom accent line and removes extra background/border decoration.
  */
 export function PageHeader({
   code,

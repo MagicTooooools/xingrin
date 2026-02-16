@@ -19,7 +19,7 @@ import type {
 import { targetKeys } from "./keys"
 
 /**
- * 创建目标
+ * create goals
  */
 export function useCreateTarget() {
   return useResourceMutation({
@@ -33,7 +33,7 @@ export function useCreateTarget() {
 }
 
 /**
- * 更新目标
+ * update target
  */
 export function useUpdateTarget() {
   return useResourceMutation({
@@ -51,7 +51,7 @@ export function useUpdateTarget() {
 }
 
 /**
- * 删除目标（RESTful 204 No Content）
+ * Delete target (RESTful 204 No Content)
  */
 export function useDeleteTarget() {
   return useResourceMutation({
@@ -73,7 +73,7 @@ export function useDeleteTarget() {
 }
 
 /**
- * 批量删除目标
+ * Delete targets in batches
  */
 export function useBatchDeleteTargets() {
   return useResourceMutation({
@@ -89,7 +89,7 @@ export function useBatchDeleteTargets() {
 }
 
 /**
- * 批量创建目标
+ * Create goals in batches
  */
 export function useBatchCreateTargets() {
   return useResourceMutation({
@@ -106,7 +106,7 @@ export function useBatchCreateTargets() {
 }
 
 /**
- * 关联目标与组织
+ * Link goals and organizations
  */
 export function useLinkTargetOrganizations() {
   return useResourceMutation({
@@ -127,7 +127,7 @@ export function useLinkTargetOrganizations() {
 }
 
 /**
- * 取消目标与组织的关联
+ * Disassociate a target from an organization
  */
 export function useUnlinkTargetOrganizations() {
   return useResourceMutation({
@@ -148,7 +148,7 @@ export function useUnlinkTargetOrganizations() {
 }
 
 /**
- * 更新目标的黑名单规则
+ * Update target's blacklist rules
  */
 export function useUpdateTargetBlacklist() {
   return useResourceMutation({

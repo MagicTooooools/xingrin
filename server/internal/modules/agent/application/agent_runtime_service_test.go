@@ -2,7 +2,6 @@ package application
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"testing"
 	"time"
@@ -75,16 +74,20 @@ func TestAgentRuntimeServiceHeartbeatAndUpdateRequired(t *testing.T) {
 		"img",
 	)
 
-	payload, _ := json.Marshal(agentproto.Message{
-		Type: agentproto.MessageTypeHeartbeat,
-		Payload: func() json.RawMessage {
-			p, _ := json.Marshal(agentproto.HeartbeatPayload{Version: "1.0.0", Hostname: "node1", CPU: 1, Mem: 2, Disk: 3, Tasks: 1, Uptime: 10})
-			return p
-		}(),
-		Timestamp: time.Now().UTC(),
-	})
+	message := RuntimeMessageInput{
+		Type: RuntimeMessageTypeHeartbeat,
+		Heartbeat: &HeartbeatItem{
+			Version:  "1.0.0",
+			Hostname: "node1",
+			CPU:      1,
+			Mem:      2,
+			Disk:     3,
+			Tasks:    1,
+			Uptime:   10,
+		},
+	}
 
-	err := service.HandleMessage(context.Background(), &agentdomain.Agent{ID: 1}, payload)
+	err := service.HandleMessage(context.Background(), 1, message)
 	if err != nil {
 		t.Fatalf("HandleMessage error: %v", err)
 	}
@@ -124,15 +127,15 @@ func TestAgentRuntimeServiceCacheFailureNonBlocking(t *testing.T) {
 	repo := &runtimeRepoStub{}
 	cacheStore := &cacheStub{setErr: errors.New("boom")}
 	service := NewAgentRuntimeService(repo, cacheStore, &publisherStub{}, fixedClock{now: time.Now().UTC()}, "", "")
-	payload, _ := json.Marshal(agentproto.Message{
-		Type: agentproto.MessageTypeHeartbeat,
-		Payload: func() json.RawMessage {
-			p, _ := json.Marshal(agentproto.HeartbeatPayload{Version: "1.0.0", Hostname: "node1"})
-			return p
-		}(),
-	})
+	message := RuntimeMessageInput{
+		Type: RuntimeMessageTypeHeartbeat,
+		Heartbeat: &HeartbeatItem{
+			Version:  "1.0.0",
+			Hostname: "node1",
+		},
+	}
 
-	if err := service.HandleMessage(context.Background(), &agentdomain.Agent{ID: 1}, payload); err != nil {
+	if err := service.HandleMessage(context.Background(), 1, message); err != nil {
 		t.Fatalf("expected non-blocking cache write, got %v", err)
 	}
 }
@@ -140,13 +143,9 @@ func TestAgentRuntimeServiceCacheFailureNonBlocking(t *testing.T) {
 func TestAgentRuntimeServiceHandleMessageUnknownTypeIgnored(t *testing.T) {
 	repo := &runtimeRepoStub{}
 	service := NewAgentRuntimeService(repo, nil, &publisherStub{}, fixedClock{now: time.Now().UTC()}, "", "")
-	raw, _ := json.Marshal(agentproto.Message{
-		Type:      "unknown",
-		Payload:   json.RawMessage(`{}`),
-		Timestamp: time.Now().UTC(),
-	})
+	message := RuntimeMessageInput{Type: "unknown"}
 
-	if err := service.HandleMessage(context.Background(), &agentdomain.Agent{ID: 1}, raw); err != nil {
+	if err := service.HandleMessage(context.Background(), 1, message); err != nil {
 		t.Fatalf("expected unknown message type to be ignored, got %v", err)
 	}
 }
@@ -154,13 +153,12 @@ func TestAgentRuntimeServiceHandleMessageUnknownTypeIgnored(t *testing.T) {
 func TestAgentRuntimeServiceHandleMessageInvalidHeartbeatPayload(t *testing.T) {
 	repo := &runtimeRepoStub{}
 	service := NewAgentRuntimeService(repo, nil, &publisherStub{}, fixedClock{now: time.Now().UTC()}, "", "")
-	raw, _ := json.Marshal(agentproto.Message{
-		Type:      agentproto.MessageTypeHeartbeat,
-		Payload:   json.RawMessage(`{"version":`),
-		Timestamp: time.Now().UTC(),
-	})
+	message := RuntimeMessageInput{
+		Type:      RuntimeMessageTypeHeartbeat,
+		Heartbeat: nil,
+	}
 
-	if err := service.HandleMessage(context.Background(), &agentdomain.Agent{ID: 1}, raw); err == nil {
+	if err := service.HandleMessage(context.Background(), 1, message); err == nil {
 		t.Fatalf("expected heartbeat payload decode error")
 	}
 }

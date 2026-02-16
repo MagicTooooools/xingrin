@@ -27,8 +27,8 @@ export function QueryProvider({ children }: QueryProviderProps) {
   const [queryClient] = React.useState(() => new QueryClient({
     defaultOptions: {
       queries: {
-        // 设置合理的 staleTime，减少不必要的请求
-        staleTime: 30 * 1000, // 30秒内数据视为新鲜
+        // Set a reasonable staleTime to reduce unnecessary requests
+        staleTime: 30 * 1000, // Data within 30 seconds is considered fresh
         // Cache time (5 minutes) - keep short-term cache for quick returns
         gcTime: 5 * 60 * 1000,
         // Retry configuration
