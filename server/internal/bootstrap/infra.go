@@ -3,9 +3,11 @@ package bootstrap
 import (
 	"context"
 	"embed"
+	"fmt"
 	"os"
 	"strings"
 	"time"
+	"unicode"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis/v8"
@@ -14,7 +16,6 @@ import (
 	"github.com/yyhuni/lunafox/server/internal/config"
 	"github.com/yyhuni/lunafox/server/internal/database"
 	"github.com/yyhuni/lunafox/server/internal/pkg"
-	"github.com/yyhuni/lunafox/server/internal/pkg/imagecfg"
 	pkgvalidator "github.com/yyhuni/lunafox/server/internal/pkg/validator"
 	"github.com/yyhuni/lunafox/server/internal/preset"
 	ws "github.com/yyhuni/lunafox/server/internal/websocket"
@@ -23,24 +24,39 @@ import (
 )
 
 type infra struct {
-	db             *gorm.DB
-	redisClient    *redis.Client
-	heartbeatCache cache.HeartbeatCache
-	wsHub          *ws.Hub
-	jwtManager     *auth.JWTManager
-	presetLoader   *preset.Loader
-	serverVersion  string
-	agentImage     string
-	workerImage    string
+	db                   *gorm.DB
+	redisClient          *redis.Client
+	heartbeatCache       cache.HeartbeatCache
+	wsHub                *ws.Hub
+	jwtManager           *auth.JWTManager
+	presetLoader         *preset.Loader
+	serverVersion        string
+	agentImageRef        string
+	workerImageRef       string
+	sharedDataVolumeBind string
 }
 
 func initInfra(cfg *config.Config, migrationsFS embed.FS) *infra {
+	// Runtime update contract:
+	// - IMAGE_TAG is the server-side version anchor used in update_required.
+	// - AGENT_IMAGE_REF / WORKER_IMAGE_REF are immutable image targets.
+	// - LUNAFOX_SHARED_DATA_VOLUME_BIND is the single source of shared volume mapping.
 	serverVersion := strings.TrimSpace(os.Getenv("IMAGE_TAG"))
 	if serverVersion == "" {
 		pkg.Fatal("IMAGE_TAG environment variable is required")
 	}
-	agentImage := resolveAgentImage()
-	workerImage := resolveWorkerImage(agentImage)
+	agentImageRef, err := resolveAgentImageRef()
+	if err != nil {
+		pkg.Fatal("AGENT_IMAGE_REF environment variable is invalid", zap.Error(err))
+	}
+	workerImageRef, err := resolveWorkerImageRef()
+	if err != nil {
+		pkg.Fatal("WORKER_IMAGE_REF environment variable is invalid", zap.Error(err))
+	}
+	sharedDataVolumeBind, err := resolveSharedDataVolumeBind()
+	if err != nil {
+		pkg.Fatal("LUNAFOX_SHARED_DATA_VOLUME_BIND environment variable is invalid", zap.Error(err))
+	}
 
 	if err := pkgvalidator.Init(); err != nil {
 		pkg.Fatal("Failed to initialize validator", zap.Error(err))
@@ -106,28 +122,99 @@ func initInfra(cfg *config.Config, migrationsFS embed.FS) *infra {
 	gin.SetMode(cfg.Server.Mode)
 
 	return &infra{
-		db:             db,
-		redisClient:    redisClient,
-		heartbeatCache: heartbeatCache,
-		wsHub:          wsHub,
-		jwtManager:     jwtManager,
-		presetLoader:   presetLoader,
-		serverVersion:  serverVersion,
-		agentImage:     agentImage,
-		workerImage:    workerImage,
+		db:                   db,
+		redisClient:          redisClient,
+		heartbeatCache:       heartbeatCache,
+		wsHub:                wsHub,
+		jwtManager:           jwtManager,
+		presetLoader:         presetLoader,
+		serverVersion:        serverVersion,
+		agentImageRef:        agentImageRef,
+		workerImageRef:       workerImageRef,
+		sharedDataVolumeBind: sharedDataVolumeBind,
 	}
 }
 
-func resolveAgentImage() string {
-	if image := strings.TrimSpace(os.Getenv("AGENT_IMAGE")); image != "" {
-		return image
+func resolveAgentImageRef() (string, error) {
+	imageRef := strings.TrimSpace(os.Getenv("AGENT_IMAGE_REF"))
+	if imageRef == "" {
+		return "", fmt.Errorf("AGENT_IMAGE_REF is required")
 	}
-	return imagecfg.BuildAgentImage(os.Getenv("IMAGE_REGISTRY"), os.Getenv("IMAGE_NAMESPACE"))
+	if !hasImageTagOrDigest(imageRef) {
+		return "", fmt.Errorf("AGENT_IMAGE_REF must include tag or digest")
+	}
+	return imageRef, nil
 }
 
-func resolveWorkerImage(agentImage string) string {
-	if image := strings.TrimSpace(os.Getenv("WORKER_IMAGE")); image != "" {
-		return image
+func resolveWorkerImageRef() (string, error) {
+	imageRef := strings.TrimSpace(os.Getenv("WORKER_IMAGE_REF"))
+	if imageRef == "" {
+		return "", fmt.Errorf("WORKER_IMAGE_REF is required")
 	}
-	return imagecfg.FallbackWorkerImage(agentImage)
+	if !hasImageTagOrDigest(imageRef) {
+		return "", fmt.Errorf("WORKER_IMAGE_REF must include tag or digest")
+	}
+	return imageRef, nil
+}
+
+func resolveSharedDataVolumeBind() (string, error) {
+	raw := strings.TrimSpace(os.Getenv("LUNAFOX_SHARED_DATA_VOLUME_BIND"))
+	if raw == "" {
+		return "", fmt.Errorf("LUNAFOX_SHARED_DATA_VOLUME_BIND is required")
+	}
+
+	// Only Docker named volume format is allowed:
+	// <named-volume>:/opt/lunafox[:mode]
+	parts := strings.Split(raw, ":")
+	if len(parts) < 2 || len(parts) > 3 {
+		return "", fmt.Errorf("LUNAFOX_SHARED_DATA_VOLUME_BIND must be '<named-volume>:/opt/lunafox[:mode]'")
+	}
+
+	source := strings.TrimSpace(parts[0])
+	target := strings.TrimSpace(parts[1])
+	if source == "" {
+		return "", fmt.Errorf("LUNAFOX_SHARED_DATA_VOLUME_BIND source is empty")
+	}
+	if !isValidNamedVolumeName(source) {
+		return "", fmt.Errorf("LUNAFOX_SHARED_DATA_VOLUME_BIND source must be Docker named volume")
+	}
+	if target != "/opt/lunafox" {
+		return "", fmt.Errorf("LUNAFOX_SHARED_DATA_VOLUME_BIND target must be /opt/lunafox")
+	}
+	if len(parts) == 3 && strings.TrimSpace(parts[2]) == "" {
+		return "", fmt.Errorf("LUNAFOX_SHARED_DATA_VOLUME_BIND mode is empty")
+	}
+	return raw, nil
+}
+
+func hasImageTagOrDigest(imageRef string) bool {
+	if strings.Contains(imageRef, "@") {
+		return true
+	}
+	return strings.LastIndex(imageRef, ":") > strings.LastIndex(imageRef, "/")
+}
+
+func isValidNamedVolumeName(value string) bool {
+	trimmed := strings.TrimSpace(value)
+	if trimmed == "" {
+		return false
+	}
+	for idx, r := range trimmed {
+		if idx == 0 {
+			if !unicode.IsLetter(r) && !unicode.IsDigit(r) {
+				return false
+			}
+			continue
+		}
+		if unicode.IsLetter(r) || unicode.IsDigit(r) {
+			continue
+		}
+		switch r {
+		case '_', '.', '-':
+			continue
+		default:
+			return false
+		}
+	}
+	return true
 }

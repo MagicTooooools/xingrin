@@ -3,7 +3,7 @@
 # ============================================
 # Go Server - build
 # ============================================
-FROM golang:1.25.6 AS builder
+FROM golang:1.26 AS builder
 
 WORKDIR /src
 

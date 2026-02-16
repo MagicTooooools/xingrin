@@ -41,8 +41,8 @@ type ConfigUpdatePayload struct {
 
 // UpdateRequiredPayload instructs agents to self-update.
 type UpdateRequiredPayload struct {
-	Version string `json:"version"`
-	Image   string `json:"image"`
+	Version  string `json:"version"`
+	ImageRef string `json:"imageRef"`
 }
 
 // TaskCancelPayload instructs agent to cancel a task.

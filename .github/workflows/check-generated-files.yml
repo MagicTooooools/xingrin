@@ -15,7 +15,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.24'  # Keep in sync with go.mod
+          go-version: '1.26'  # Keep in sync with go.mod
 
       - name: Generate files for all workflows
         working-directory: worker

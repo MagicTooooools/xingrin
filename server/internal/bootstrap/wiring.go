@@ -384,7 +384,7 @@ func wireAgentModule(
 		ws.NewAgentMessagePublisher(infra.wsHub),
 		agentClock,
 		infra.serverVersion,
-		infra.agentImage,
+		infra.agentImageRef,
 	)
 	agentTaskSvc := agentservice.NewAgentTaskService(scanTaskRuntime)
 
@@ -393,8 +393,9 @@ func wireAgentModule(
 			agentSvc,
 			agentRuntimeSvc,
 			infra.serverVersion,
-			infra.agentImage,
-			infra.workerImage,
+			infra.agentImageRef,
+			infra.workerImageRef,
+			infra.sharedDataVolumeBind,
 			cfg.Worker.Token,
 			infra.heartbeatCache,
 		),

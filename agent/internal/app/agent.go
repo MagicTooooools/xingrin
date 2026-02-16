@@ -78,7 +78,7 @@ func Run(ctx context.Context, cfg config.Config, wsURL string) error {
 	}
 	logger.Log.Info("worker token loaded")
 
-	executor := task.NewExecutor(dockerClient, taskClient, taskCounter, cfg.ServerURL, workerToken, version)
+	executor := task.NewExecutor(dockerClient, taskClient, taskCounter, cfg.ServerURL, workerToken)
 	defer func() {
 		shutdownCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 		defer cancel()

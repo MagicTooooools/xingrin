@@ -31,7 +31,7 @@ services:
       retries: 5
 
   server:
-    image: golang:1.25.6
+    image: golang:1.26
     restart: "on-failure:3"
     env_file:
       - .env

@@ -49,13 +49,15 @@ type publisherStub struct {
 	configSent        bool
 	updateSent        bool
 	updateSendSuccess bool
+	lastUpdatePayload agentproto.UpdateRequiredPayload
 }
 
 func (publisher *publisherStub) SendConfigUpdate(int, agentproto.ConfigUpdatePayload) {
 	publisher.configSent = true
 }
-func (publisher *publisherStub) SendUpdateRequired(int, agentproto.UpdateRequiredPayload) bool {
+func (publisher *publisherStub) SendUpdateRequired(_ int, payload agentproto.UpdateRequiredPayload) bool {
 	publisher.updateSent = true
+	publisher.lastUpdatePayload = payload
 	return publisher.updateSendSuccess
 }
 func (publisher *publisherStub) SendTaskCancel(int, int) {}
@@ -95,6 +97,12 @@ func TestAgentRuntimeServiceHeartbeatAndUpdateRequired(t *testing.T) {
 	if !publisher.updateSent {
 		t.Fatalf("expected update_required notification")
 	}
+	if publisher.lastUpdatePayload.Version != "2.0.0" {
+		t.Fatalf("expected update payload version 2.0.0, got %q", publisher.lastUpdatePayload.Version)
+	}
+	if publisher.lastUpdatePayload.ImageRef != "img" {
+		t.Fatalf("expected update payload imageRef img, got %q", publisher.lastUpdatePayload.ImageRef)
+	}
 }
 
 func TestAgentRuntimeServiceOnDisconnected(t *testing.T) {
@@ -126,5 +134,33 @@ func TestAgentRuntimeServiceCacheFailureNonBlocking(t *testing.T) {
 
 	if err := service.HandleMessage(context.Background(), &agentdomain.Agent{ID: 1}, payload); err != nil {
 		t.Fatalf("expected non-blocking cache write, got %v", err)
+	}
+}
+
+func TestAgentRuntimeServiceHandleMessageUnknownTypeIgnored(t *testing.T) {
+	repo := &runtimeRepoStub{}
+	service := NewAgentRuntimeService(repo, nil, &publisherStub{}, fixedClock{now: time.Now().UTC()}, "", "")
+	raw, _ := json.Marshal(agentproto.Message{
+		Type:      "unknown",
+		Payload:   json.RawMessage(`{}`),
+		Timestamp: time.Now().UTC(),
+	})
+
+	if err := service.HandleMessage(context.Background(), &agentdomain.Agent{ID: 1}, raw); err != nil {
+		t.Fatalf("expected unknown message type to be ignored, got %v", err)
+	}
+}
+
+func TestAgentRuntimeServiceHandleMessageInvalidHeartbeatPayload(t *testing.T) {
+	repo := &runtimeRepoStub{}
+	service := NewAgentRuntimeService(repo, nil, &publisherStub{}, fixedClock{now: time.Now().UTC()}, "", "")
+	raw, _ := json.Marshal(agentproto.Message{
+		Type:      agentproto.MessageTypeHeartbeat,
+		Payload:   json.RawMessage(`{"version":`),
+		Timestamp: time.Now().UTC(),
+	})
+
+	if err := service.HandleMessage(context.Background(), &agentdomain.Agent{ID: 1}, raw); err == nil {
+		t.Fatalf("expected heartbeat payload decode error")
 	}
 }

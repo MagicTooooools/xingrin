@@ -7,27 +7,23 @@ import (
 )
 
 func TestResolveWorkerImage(t *testing.T) {
-	if _, err := resolveWorkerImage(""); err == nil {
-		t.Fatalf("expected error for empty version")
-	}
-
 	t.Setenv("WORKER_IMAGE_REF", "")
-	if _, err := resolveWorkerImage("v1.2.3"); err == nil {
+	if _, err := resolveWorkerImage(); err == nil {
 		t.Fatalf("expected error for missing WORKER_IMAGE_REF")
 	}
 
 	t.Setenv("WORKER_IMAGE_REF", "ghcr.io/acme/lunafox-worker:v1.9.9")
-	if got, err := resolveWorkerImage("v1.2.3"); err != nil || got != "ghcr.io/acme/lunafox-worker:v1.9.9" {
+	if got, err := resolveWorkerImage(); err != nil || got != "ghcr.io/acme/lunafox-worker:v1.9.9" {
 		t.Fatalf("expected WORKER_IMAGE_REF image, got %s, err: %v", got, err)
 	}
 
 	t.Setenv("WORKER_IMAGE_REF", "ghcr.io/acme/lunafox-worker")
-	if _, err := resolveWorkerImage("v1.2.3"); err == nil {
+	if _, err := resolveWorkerImage(); err == nil {
 		t.Fatalf("expected error for WORKER_IMAGE_REF without tag/digest")
 	}
 
 	t.Setenv("WORKER_IMAGE_REF", "ghcr.io/acme/lunafox-worker@sha256:abc")
-	if got, err := resolveWorkerImage("v1.2.3"); err != nil || got != "ghcr.io/acme/lunafox-worker@sha256:abc" {
+	if got, err := resolveWorkerImage(); err != nil || got != "ghcr.io/acme/lunafox-worker@sha256:abc" {
 		t.Fatalf("expected digest WORKER_IMAGE_REF, got %s, err: %v", got, err)
 	}
 }
@@ -69,21 +65,21 @@ func TestBuildWorkerEnv(t *testing.T) {
 func TestResolveSharedDataBind(t *testing.T) {
 	t.Run("missing env", func(t *testing.T) {
 		t.Setenv(sharedDataVolumeBindEnvKey, "")
-		if _, err := resolveSharedDataBind(); err == nil {
+		if _, err := resolveSharedDataVolumeBind(); err == nil {
 			t.Fatalf("expected missing %s to fail", sharedDataVolumeBindEnvKey)
 		}
 	})
 
 	t.Run("reject volume name only", func(t *testing.T) {
 		t.Setenv(sharedDataVolumeBindEnvKey, "custom_data")
-		if _, err := resolveSharedDataBind(); err == nil {
+		if _, err := resolveSharedDataVolumeBind(); err == nil {
 			t.Fatalf("expected missing target to fail")
 		}
 	})
 
 	t.Run("full bind with mode", func(t *testing.T) {
 		t.Setenv(sharedDataVolumeBindEnvKey, "custom_data:/opt/lunafox:ro")
-		got, err := resolveSharedDataBind()
+		got, err := resolveSharedDataVolumeBind()
 		if err != nil {
 			t.Fatalf("resolve bind with mode: %v", err)
 		}
@@ -94,14 +90,14 @@ func TestResolveSharedDataBind(t *testing.T) {
 
 	t.Run("reject invalid target", func(t *testing.T) {
 		t.Setenv(sharedDataVolumeBindEnvKey, "custom_data:/tmp")
-		if _, err := resolveSharedDataBind(); err == nil {
+		if _, err := resolveSharedDataVolumeBind(); err == nil {
 			t.Fatalf("expected invalid target to fail")
 		}
 	})
 
 	t.Run("reject host path bind mount", func(t *testing.T) {
 		t.Setenv(sharedDataVolumeBindEnvKey, "/data/lunafox:/opt/lunafox")
-		if _, err := resolveSharedDataBind(); err == nil {
+		if _, err := resolveSharedDataVolumeBind(); err == nil {
 			t.Fatalf("expected host path bind mount to fail")
 		}
 	})

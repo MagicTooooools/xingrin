@@ -3,7 +3,7 @@
 # ============================================
 # Go Agent - build
 # ============================================
-FROM golang:1.25.6 AS builder
+FROM golang:1.26 AS builder
 
 ARG GO111MODULE=on
 ARG GOPROXY=https://goproxy.cn,direct

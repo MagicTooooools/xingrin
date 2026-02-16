@@ -14,18 +14,18 @@ type fakeReporter struct {
 }
 
 type fakeDockerRunner struct {
-	startWorkerFn func(ctx context.Context, t *domain.Task, serverURL, serverToken, agentVersion string) (string, error)
+	startWorkerFn func(ctx context.Context, t *domain.Task, serverURL, serverToken string) (string, error)
 	waitFn        func(ctx context.Context, containerID string) (int64, error)
 	stopFn        func(ctx context.Context, containerID string) error
 	removeFn      func(ctx context.Context, containerID string) error
 	tailLogsFn    func(ctx context.Context, containerID string, lines int) (string, error)
 }
 
-func (fake *fakeDockerRunner) StartWorker(ctx context.Context, t *domain.Task, serverURL, serverToken, agentVersion string) (string, error) {
+func (fake *fakeDockerRunner) StartWorker(ctx context.Context, t *domain.Task, serverURL, serverToken string) (string, error) {
 	if fake.startWorkerFn == nil {
 		return "container-1", nil
 	}
-	return fake.startWorkerFn(ctx, t, serverURL, serverToken, agentVersion)
+	return fake.startWorkerFn(ctx, t, serverURL, serverToken)
 }
 
 func (fake *fakeDockerRunner) Wait(ctx context.Context, containerID string) (int64, error) {
@@ -155,7 +155,7 @@ func TestExecutorFailurePathUsesTimeoutContexts(t *testing.T) {
 	removeHasDeadline := false
 
 	fakeDocker := &fakeDockerRunner{
-		startWorkerFn: func(ctx context.Context, t *domain.Task, serverURL, serverToken, agentVersion string) (string, error) {
+		startWorkerFn: func(ctx context.Context, t *domain.Task, serverURL, serverToken string) (string, error) {
 			return "container-1", nil
 		},
 		waitFn: func(ctx context.Context, containerID string) (int64, error) {
@@ -171,7 +171,7 @@ func TestExecutorFailurePathUsesTimeoutContexts(t *testing.T) {
 		},
 	}
 
-	exec := NewExecutor(fakeDocker, reporter, nil, "https://server", "token", "v1")
+	exec := NewExecutor(fakeDocker, reporter, nil, "https://server", "token")
 	exec.execute(context.Background(), &domain.Task{ID: 10, ScanID: 20})
 
 	if reporter.status != "failed" {
@@ -196,7 +196,7 @@ func TestExecutorHandleTimeoutUsesDeadlineOnStop(t *testing.T) {
 		},
 	}
 
-	exec := NewExecutor(fakeDocker, reporter, nil, "https://server", "token", "v1")
+	exec := NewExecutor(fakeDocker, reporter, nil, "https://server", "token")
 	exec.handleTimeout(context.Background(), &domain.Task{ID: 1, ScanID: 2}, "container-1")
 
 	if !stopHasDeadline {

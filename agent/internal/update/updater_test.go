@@ -55,3 +55,30 @@ func TestResolveWorkerImageRef(t *testing.T) {
 		t.Fatalf("expected digest worker image ref passthrough, got %s, err: %v", got, err)
 	}
 }
+
+func TestResolveSharedDataBind(t *testing.T) {
+	t.Setenv(sharedDataVolumeBindEnvKey, "")
+	if _, err := resolveSharedDataVolumeBind(); err == nil {
+		t.Fatalf("expected missing shared data bind env error")
+	}
+
+	t.Setenv(sharedDataVolumeBindEnvKey, "custom_data")
+	if _, err := resolveSharedDataVolumeBind(); err == nil {
+		t.Fatalf("expected missing target error")
+	}
+
+	t.Setenv(sharedDataVolumeBindEnvKey, "custom_data:/opt/lunafox:ro")
+	if got, err := resolveSharedDataVolumeBind(); err != nil || got != "custom_data:/opt/lunafox:ro" {
+		t.Fatalf("expected bind with mode, got %s, err: %v", got, err)
+	}
+
+	t.Setenv(sharedDataVolumeBindEnvKey, "custom_data:/tmp")
+	if _, err := resolveSharedDataVolumeBind(); err == nil {
+		t.Fatalf("expected invalid target error")
+	}
+
+	t.Setenv(sharedDataVolumeBindEnvKey, "/data/lunafox:/opt/lunafox")
+	if _, err := resolveSharedDataVolumeBind(); err == nil {
+		t.Fatalf("expected host path bind mount error")
+	}
+}

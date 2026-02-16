@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"unicode"
 
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/network"
@@ -12,11 +13,13 @@ import (
 	"github.com/yyhuni/lunafox/agent/internal/domain"
 )
 
-const workerImagePrefix = "yyhuni/lunafox-worker:"
-const sharedDataVolumeBind = "lunafox_data:/opt/lunafox"
+const (
+	sharedDataVolumeBindEnvKey = "LUNAFOX_SHARED_DATA_VOLUME_BIND"
+	defaultSharedDataMountPath = "/opt/lunafox"
+)
 
 // StartWorker starts a worker container for a task and returns the container ID.
-func (c *Client) StartWorker(ctx context.Context, t *domain.Task, serverURL, serverToken, agentVersion string) (string, error) {
+func (c *Client) StartWorker(ctx context.Context, t *domain.Task, serverURL, serverToken string) (string, error) {
 	if t == nil {
 		return "", fmt.Errorf("task is nil")
 	}
@@ -24,7 +27,11 @@ func (c *Client) StartWorker(ctx context.Context, t *domain.Task, serverURL, ser
 		return "", fmt.Errorf("prepare workspace: %w", err)
 	}
 
-	image, err := resolveWorkerImage(agentVersion)
+	image, err := resolveWorkerImage()
+	if err != nil {
+		return "", err
+	}
+	sharedDataVolumeBind, err := resolveSharedDataVolumeBind()
 	if err != nil {
 		return "", err
 	}
@@ -54,12 +61,79 @@ func (c *Client) StartWorker(ctx context.Context, t *domain.Task, serverURL, ser
 	return resp.ID, nil
 }
 
-func resolveWorkerImage(version string) (string, error) {
-	version = strings.TrimSpace(version)
-	if version == "" {
-		return "", fmt.Errorf("worker version is required")
+func resolveWorkerImage() (string, error) {
+	imageRef := strings.TrimSpace(os.Getenv("WORKER_IMAGE_REF"))
+	if imageRef == "" {
+		return "", fmt.Errorf("WORKER_IMAGE_REF environment variable is required")
 	}
-	return workerImagePrefix + version, nil
+	if !hasImageTagOrDigest(imageRef) {
+		return "", fmt.Errorf("WORKER_IMAGE_REF must include tag or digest")
+	}
+	return imageRef, nil
+}
+
+func hasImageTagOrDigest(imageRef string) bool {
+	if strings.Contains(imageRef, "@") {
+		return true
+	}
+	return strings.LastIndex(imageRef, ":") > strings.LastIndex(imageRef, "/")
+}
+
+func resolveSharedDataVolumeBind() (string, error) {
+	raw := strings.TrimSpace(os.Getenv(sharedDataVolumeBindEnvKey))
+	if raw == "" {
+		return "", fmt.Errorf("%s environment variable is required", sharedDataVolumeBindEnvKey)
+	}
+
+	parts := strings.Split(raw, ":")
+	if len(parts) < 2 || len(parts) > 3 {
+		return "", fmt.Errorf("%s must be '<named-volume>:%s[:mode]'", sharedDataVolumeBindEnvKey, defaultSharedDataMountPath)
+	}
+
+	source := strings.TrimSpace(parts[0])
+	target := strings.TrimSpace(parts[1])
+	if source == "" {
+		return "", fmt.Errorf("%s source is empty", sharedDataVolumeBindEnvKey)
+	}
+	if !isValidNamedVolumeName(source) {
+		return "", fmt.Errorf("%s source must be a Docker named volume", sharedDataVolumeBindEnvKey)
+	}
+	if target != defaultSharedDataMountPath {
+		return "", fmt.Errorf("%s target must be %s", sharedDataVolumeBindEnvKey, defaultSharedDataMountPath)
+	}
+
+	if len(parts) == 3 {
+		mode := strings.TrimSpace(parts[2])
+		if mode == "" {
+			return "", fmt.Errorf("%s mode is empty", sharedDataVolumeBindEnvKey)
+		}
+	}
+	return raw, nil
+}
+
+func isValidNamedVolumeName(value string) bool {
+	trimmed := strings.TrimSpace(value)
+	if trimmed == "" {
+		return false
+	}
+	for idx, r := range trimmed {
+		if idx == 0 {
+			if !unicode.IsLetter(r) && !unicode.IsDigit(r) {
+				return false
+			}
+			continue
+		}
+		if unicode.IsLetter(r) || unicode.IsDigit(r) {
+			continue
+		}
+		switch r {
+		case '_', '.', '-':
+			continue
+		default:
+			return false
+		}
+	}
+	return true
 }
 
 func buildWorkerEnv(t *domain.Task, serverURL, serverToken string) []string {

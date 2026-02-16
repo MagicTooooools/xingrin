@@ -9,6 +9,7 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"unicode"
 
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/network"
@@ -35,6 +36,11 @@ type Updater struct {
 	backoff    time.Duration
 	maxBackoff time.Duration
 }
+
+const (
+	sharedDataVolumeBindEnvKey = "LUNAFOX_SHARED_DATA_VOLUME_BIND"
+	defaultSharedDataMountPath = "/opt/lunafox"
+)
 
 type dockerClient interface {
 	ImagePull(ctx context.Context, imageRef string) (io.ReadCloser, error)
@@ -126,41 +132,51 @@ func (u *Updater) updateOnce(payload domain.UpdateRequiredPayload) error {
 	if u.docker == nil {
 		return fmt.Errorf("docker client unavailable")
 	}
-	image := strings.TrimSpace(payload.Image)
+	imageRef := strings.TrimSpace(payload.ImageRef)
 	version := strings.TrimSpace(payload.Version)
-	if image == "" || version == "" {
+	if imageRef == "" || version == "" {
 		return fmt.Errorf("invalid update payload")
 	}
 
-	// Strict validation: reject invalid data from server
-	if err := validateImageName(image); err != nil {
-		logger.Log.Warn("invalid image name from server", zap.String("image", image), zap.Error(err))
-		return fmt.Errorf("invalid image name from server: %w", err)
+	// Strict validation: reject invalid data from server.
+	// Note: version is used for runtime metadata/container naming,
+	// while imageRef is the real upgrade target.
+	if err := validateImageRef(imageRef); err != nil {
+		logger.Log.Warn("invalid image ref from server", zap.String("imageRef", imageRef), zap.Error(err))
+		return fmt.Errorf("invalid image ref from server: %w", err)
 	}
 	if err := validateVersion(version); err != nil {
 		logger.Log.Warn("invalid version from server", zap.String("version", version), zap.Error(err))
 		return fmt.Errorf("invalid version from server: %w", err)
 	}
 
-	fullImage := fmt.Sprintf("%s:%s", image, version)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
 	defer cancel()
 
-	reader, err := u.docker.ImagePull(ctx, fullImage)
+	reader, err := u.docker.ImagePull(ctx, imageRef)
 	if err != nil {
 		return err
 	}
 	_, _ = io.Copy(io.Discard, reader)
 	_ = reader.Close()
 
-	if err := u.startNewContainer(ctx, image, version); err != nil {
+	if err := u.startNewContainer(ctx, imageRef, version); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (u *Updater) startNewContainer(ctx context.Context, image, version string) error {
+func (u *Updater) startNewContainer(ctx context.Context, imageRef, version string) error {
+	workerImageRef, err := resolveWorkerImageRef()
+	if err != nil {
+		return err
+	}
+	sharedDataVolumeBind, err := resolveSharedDataVolumeBind()
+	if err != nil {
+		return err
+	}
+
 	env := []string{
 		fmt.Sprintf("SERVER_URL=%s", u.cfg.Snapshot().ServerURL),
 		fmt.Sprintf("API_KEY=%s", u.apiKey),
@@ -169,13 +185,15 @@ func (u *Updater) startNewContainer(ctx context.Context, image, version string) 
 		fmt.Sprintf("LUNAFOX_AGENT_MEM_THRESHOLD=%d", u.cfg.Snapshot().MemThreshold),
 		fmt.Sprintf("LUNAFOX_AGENT_DISK_THRESHOLD=%d", u.cfg.Snapshot().DiskThreshold),
 		fmt.Sprintf("AGENT_VERSION=%s", version),
+		fmt.Sprintf("WORKER_IMAGE_REF=%s", workerImageRef),
+		fmt.Sprintf("%s=%s", sharedDataVolumeBindEnvKey, sharedDataVolumeBind),
 	}
 	if u.token != "" {
 		env = append(env, fmt.Sprintf("WORKER_TOKEN=%s", u.token))
 	}
 
 	cfg := &container.Config{
-		Image: fmt.Sprintf("%s:%s", image, version),
+		Image: imageRef,
 		Env:   env,
 		Cmd:   strslice.StrSlice{},
 	}
@@ -183,7 +201,7 @@ func (u *Updater) startNewContainer(ctx context.Context, image, version string) 
 	hostConfig := &container.HostConfig{
 		Binds: []string{
 			"/var/run/docker.sock:/var/run/docker.sock",
-			"lunafox_data:/opt/lunafox",
+			sharedDataVolumeBind,
 		},
 		RestartPolicy: container.RestartPolicy{Name: "unless-stopped"},
 		OomScoreAdj:   -500,
@@ -204,6 +222,81 @@ func (u *Updater) startNewContainer(ctx context.Context, image, version string) 
 	return nil
 }
 
+func resolveWorkerImageRef() (string, error) {
+	configured := strings.TrimSpace(os.Getenv("WORKER_IMAGE_REF"))
+	if configured == "" {
+		return "", fmt.Errorf("WORKER_IMAGE_REF environment variable is required")
+	}
+	if !hasImageTagOrDigest(configured) {
+		return "", fmt.Errorf("WORKER_IMAGE_REF must include tag or digest")
+	}
+	return configured, nil
+}
+
+func resolveSharedDataVolumeBind() (string, error) {
+	raw := strings.TrimSpace(os.Getenv(sharedDataVolumeBindEnvKey))
+	if raw == "" {
+		return "", fmt.Errorf("%s environment variable is required", sharedDataVolumeBindEnvKey)
+	}
+
+	parts := strings.Split(raw, ":")
+	if len(parts) < 2 || len(parts) > 3 {
+		return "", fmt.Errorf("%s must be '<named-volume>:%s[:mode]'", sharedDataVolumeBindEnvKey, defaultSharedDataMountPath)
+	}
+
+	source := strings.TrimSpace(parts[0])
+	target := strings.TrimSpace(parts[1])
+	if source == "" {
+		return "", fmt.Errorf("%s source is empty", sharedDataVolumeBindEnvKey)
+	}
+	if !isValidNamedVolumeName(source) {
+		return "", fmt.Errorf("%s source must be a Docker named volume", sharedDataVolumeBindEnvKey)
+	}
+	if target != defaultSharedDataMountPath {
+		return "", fmt.Errorf("%s target must be %s", sharedDataVolumeBindEnvKey, defaultSharedDataMountPath)
+	}
+
+	if len(parts) == 3 {
+		mode := strings.TrimSpace(parts[2])
+		if mode == "" {
+			return "", fmt.Errorf("%s mode is empty", sharedDataVolumeBindEnvKey)
+		}
+	}
+	return raw, nil
+}
+
+func isValidNamedVolumeName(value string) bool {
+	trimmed := strings.TrimSpace(value)
+	if trimmed == "" {
+		return false
+	}
+	for idx, r := range trimmed {
+		if idx == 0 {
+			if !unicode.IsLetter(r) && !unicode.IsDigit(r) {
+				return false
+			}
+			continue
+		}
+		if unicode.IsLetter(r) || unicode.IsDigit(r) {
+			continue
+		}
+		switch r {
+		case '_', '.', '-':
+			continue
+		default:
+			return false
+		}
+	}
+	return true
+}
+
+func hasImageTagOrDigest(imageRef string) bool {
+	if strings.Contains(imageRef, "@") {
+		return true
+	}
+	return strings.LastIndex(imageRef, ":") > strings.LastIndex(imageRef, "/")
+}
+
 func withJitter(delay time.Duration, src *rand.Rand) time.Duration {
 	if delay <= 0 || src == nil {
 		return delay
@@ -212,34 +305,38 @@ func withJitter(delay time.Duration, src *rand.Rand) time.Duration {
 	return delay + time.Duration(float64(delay)*jitter)
 }
 
-// validateImageName validates that the image name contains only safe characters.
+// validateImageRef validates that the image reference contains only safe characters.
 // Returns error if validation fails.
-func validateImageName(image string) error {
-	if len(image) == 0 {
-		return fmt.Errorf("image name cannot be empty")
+func validateImageRef(imageRef string) error {
+	if len(imageRef) == 0 {
+		return fmt.Errorf("image ref cannot be empty")
 	}
-	if len(image) > 255 {
-		return fmt.Errorf("image name too long: %d characters", len(image))
+	if len(imageRef) > 255 {
+		return fmt.Errorf("image ref too long: %d characters", len(imageRef))
 	}
 
-	// Allow: alphanumeric, dots, hyphens, underscores, slashes (for registry paths)
-	for i, r := range image {
+	// Allow: alphanumeric, dots, hyphens, underscores, slashes, colons and @ (for tag/digest refs)
+	for i, r := range imageRef {
 		if !((r >= 'a' && r <= 'z') ||
 			(r >= 'A' && r <= 'Z') ||
 			(r >= '0' && r <= '9') ||
-			r == '.' || r == '-' || r == '_' || r == '/') {
-			return fmt.Errorf("invalid character at position %d: %c", i, r)
+			r == '.' || r == '-' || r == '_' || r == '/' || r == ':' || r == '@') {
+			return fmt.Errorf("invalid character in image ref at position %d: %c", i, r)
 		}
 	}
 
-	// Must not start or end with special characters
-	first := rune(image[0])
-	last := rune(image[len(image)-1])
-	if first == '.' || first == '-' || first == '/' {
-		return fmt.Errorf("image name cannot start with special character: %c", first)
+	if !hasImageTagOrDigest(imageRef) {
+		return fmt.Errorf("image ref must include tag or digest")
 	}
-	if last == '.' || last == '-' || last == '/' {
-		return fmt.Errorf("image name cannot end with special character: %c", last)
+
+	// Must not start or end with path separators.
+	first := rune(imageRef[0])
+	last := rune(imageRef[len(imageRef)-1])
+	if first == '/' {
+		return fmt.Errorf("image ref cannot start with /")
+	}
+	if last == '/' || last == ':' || last == '@' {
+		return fmt.Errorf("image ref cannot end with special character: %c", last)
 	}
 
 	return nil

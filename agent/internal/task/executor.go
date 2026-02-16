@@ -22,13 +22,12 @@ const (
 
 // Executor runs tasks inside worker containers.
 type Executor struct {
-	docker       DockerRunner
-	client       statusReporter
-	counter      *Counter
-	serverURL    string
-	workerToken  string
-	agentVersion string
-	maxRuntime   time.Duration
+	docker      DockerRunner
+	client      statusReporter
+	counter     *Counter
+	serverURL   string
+	workerToken string
+	maxRuntime  time.Duration
 
 	mu        sync.Mutex
 	running   map[int]context.CancelFunc
@@ -44,7 +43,7 @@ type statusReporter interface {
 }
 
 type DockerRunner interface {
-	StartWorker(ctx context.Context, t *domain.Task, serverURL, serverToken, agentVersion string) (string, error)
+	StartWorker(ctx context.Context, t *domain.Task, serverURL, serverToken string) (string, error)
 	Wait(ctx context.Context, containerID string) (int64, error)
 	Stop(ctx context.Context, containerID string) error
 	Remove(ctx context.Context, containerID string) error
@@ -52,17 +51,16 @@ type DockerRunner interface {
 }
 
 // NewExecutor creates an Executor.
-func NewExecutor(dockerClient DockerRunner, taskClient statusReporter, counter *Counter, serverURL, workerToken, agentVersion string) *Executor {
+func NewExecutor(dockerClient DockerRunner, taskClient statusReporter, counter *Counter, serverURL, workerToken string) *Executor {
 	return &Executor{
-		docker:       dockerClient,
-		client:       taskClient,
-		counter:      counter,
-		serverURL:    serverURL,
-		workerToken:  workerToken,
-		agentVersion: agentVersion,
-		maxRuntime:   defaultMaxRuntime,
-		running:      map[int]context.CancelFunc{},
-		cancelled:    map[int]struct{}{},
+		docker:      dockerClient,
+		client:      taskClient,
+		counter:     counter,
+		serverURL:   serverURL,
+		workerToken: workerToken,
+		maxRuntime:  defaultMaxRuntime,
+		running:     map[int]context.CancelFunc{},
+		cancelled:   map[int]struct{}{},
 	}
 }
 
@@ -80,7 +78,8 @@ func (e *Executor) Start(ctx context.Context, tasks <-chan *domain.Task) {
 				continue
 			}
 			if e.stopping.Load() {
-				// During shutdown/update: drain the queue but don't start new work.
+				// During shutdown/update: keep draining queue to avoid producer blocking,
+				// but do not start any new container task.
 				continue
 			}
 			if e.isCancelled(t.ID) {
@@ -151,7 +150,7 @@ func (e *Executor) execute(ctx context.Context, t *domain.Task) {
 	runCtx, cancel := context.WithTimeout(ctx, e.maxRuntime)
 	defer cancel()
 
-	containerID, err := e.docker.StartWorker(runCtx, t, e.serverURL, e.workerToken, e.agentVersion)
+	containerID, err := e.docker.StartWorker(runCtx, t, e.serverURL, e.workerToken)
 	if err != nil {
 		logger.Log.Warn("failed to start worker container",
 			zap.Int("taskId", t.ID),
@@ -325,6 +324,8 @@ func (e *Executor) CancelAll() {
 
 // Shutdown cancels running tasks and waits for completion.
 func (e *Executor) Shutdown(ctx context.Context) error {
+	// Shutdown ordering is strict: block new starts, cancel in-flight work,
+	// then wait for all execute goroutines to return.
 	e.stopping.Store(true)
 	e.CancelAll()
 

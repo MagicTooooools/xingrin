@@ -18,7 +18,7 @@ normalize_exit_codes
 RELEASE_CHANNEL_BRANCH="${LUNAFOX_RELEASE_CHANNEL_BRANCH:-release-channel}"
 GITHUB_REPO="${LUNAFOX_RELEASE_GITHUB_REPO:-yyhuni/lunafox}"
 GITEE_REPO="${LUNAFOX_RELEASE_GITEE_REPO:-yyhuni/lunafox}"
-CHANNEL_SCHEMA_VERSION="${LUNAFOX_CHANNEL_SCHEMA_VERSION:-1}"
+CHANNEL_SCHEMA_VERSION="${LUNAFOX_CHANNEL_SCHEMA_VERSION:-2}"
 
 # CI smoke only: override manifest raw endpoints.
 GITHUB_RAW_BASE="${LUNAFOX_RELEASE_GITHUB_RAW_BASE:-https://raw.githubusercontent.com}"
@@ -211,6 +211,42 @@ require_env_value() {
   printf '%s' "$value"
 }
 
+is_digest_ref() {
+  local ref="$1"
+  printf '%s' "$ref" | grep -Eq '^.+@sha256:[a-f0-9]{64}$'
+}
+
+normalize_digest_ref_list() {
+  local raw="$1"
+  local key_name="$2"
+  local -a parts=()
+  local -a normalized=()
+  local seen=","
+  local part=""
+  local trimmed=""
+  IFS=',' read -r -a parts <<< "$raw"
+  for part in "${parts[@]}"; do
+    trimmed="$(printf '%s' "$part" | xargs)"
+    if [ -z "$trimmed" ]; then
+      continue
+    fi
+    if ! is_digest_ref "$trimmed"; then
+      error "版本清单 ${key_name} 存在非法值（必须为 digest 引用）: $trimmed"
+      exit 1
+    fi
+    case "$seen" in
+      *,"$trimmed",*) continue ;;
+    esac
+    seen="${seen}${trimmed},"
+    normalized+=("$trimmed")
+  done
+  if [ "${#normalized[@]}" -eq 0 ]; then
+    error "版本清单 ${key_name} 不能为空"
+    exit 1
+  fi
+  (IFS=','; printf '%s' "${normalized[*]}")
+}
+
 validate_manifest_schema() {
   local file="$1"
   local kind="$2"
@@ -286,12 +322,16 @@ ASSET_NAME="$(require_env_value "$VERSION_MANIFEST" "$ASSET_KEY")"
 EXPECTED_SHA="$(require_env_value "$VERSION_MANIFEST" "$SHA_KEY")"
 GITHUB_BASE_URL="$(require_env_value "$VERSION_MANIFEST" "GITHUB_BASE_URL")"
 GITEE_BASE_URL="$(require_env_value "$VERSION_MANIFEST" "GITEE_BASE_URL")"
+# Schema v2 contract: only digest candidate lists are accepted.
+AGENT_IMAGE_REFS_RAW="$(require_env_value "$VERSION_MANIFEST" "AGENT_IMAGE_REFS")"
+WORKER_IMAGE_REFS_RAW="$(require_env_value "$VERSION_MANIFEST" "WORKER_IMAGE_REFS")"
+AGENT_IMAGE_REFS="$(normalize_digest_ref_list "$AGENT_IMAGE_REFS_RAW" "AGENT_IMAGE_REFS")"
+WORKER_IMAGE_REFS="$(normalize_digest_ref_list "$WORKER_IMAGE_REFS_RAW" "WORKER_IMAGE_REFS")"
 
 if [ -z "$ASSET_NAME" ] || [ -z "$EXPECTED_SHA" ]; then
   error "版本清单缺少 ${ASSET_KEY} 或 ${SHA_KEY}"
   exit 1
 fi
-
 INSTALLER_BIN="$TMP_DIR/lunafox-installer"
 DOWNLOADED=0
 for source in $(source_candidates); do
@@ -324,7 +364,13 @@ fi
 
 chmod +x "$INSTALLER_BIN"
 
-INSTALLER_ARGS=(--root-dir "$ROOT_DIR" --version "$TARGET_VERSION")
+INSTALLER_ARGS=(
+  --root-dir "$ROOT_DIR"
+  --version "$TARGET_VERSION"
+  # Installer selects first successful ref from ordered candidates.
+  --agent-image-refs "$AGENT_IMAGE_REFS"
+  --worker-image-refs "$WORKER_IMAGE_REFS"
+)
 if [ -n "$LISTEN_ADDR" ]; then
   INSTALLER_ARGS+=(--listen "$LISTEN_ADDR")
 fi

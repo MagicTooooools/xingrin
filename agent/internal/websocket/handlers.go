@@ -82,7 +82,7 @@ func (h *Handler) Handle(raw []byte) {
 		if err := json.Unmarshal(msg.Data, &payload); err != nil {
 			return
 		}
-		if payload.Version == "" || payload.Image == "" {
+		if payload.Version == "" || payload.ImageRef == "" {
 			return
 		}
 		h.onUpdateReq(payload)
