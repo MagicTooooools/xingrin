@@ -393,6 +393,7 @@ func wireAgentModule(
 			agentSvc,
 			agentRuntimeSvc,
 			infra.serverVersion,
+			cfg.PublicURL,
 			infra.agentImageRef,
 			infra.workerImageRef,
 			infra.sharedDataVolumeBind,

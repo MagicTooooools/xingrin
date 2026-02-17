@@ -2,18 +2,14 @@
 
 import { useAgentInstallDialogState } from "@/components/settings/workers/agent-install-dialog-state"
 import { useTranslations } from "next-intl"
-import { DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { DialogClose, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { useFormatRelativeTime } from "@/lib/i18n-format"
+import { Button } from "@/components/ui/button"
 import type { RegistrationTokenResponse } from "@/types/agent.types"
 import {
   AgentInstallCommandPanel,
   AgentInstallCommandTips,
-  AgentInstallConfigPanel,
-  AgentInstallFooter,
-  AgentInstallStepIndicator,
   AgentInstallTokenCard,
-  AgentInstallVerificationPanel,
-  AgentInstallVerificationTips,
 } from "@/components/settings/workers/agent-install-dialog-sections"
 
 type AgentInstallDialogProps = {
@@ -35,12 +31,6 @@ export function AgentInstallDialog({
   const formatRelativeTime = useFormatRelativeTime()
   const {
     dialogRef,
-    registerUrlInput,
-    setRegisterUrlInput,
-    configOpen,
-    setConfigOpen,
-    step,
-    verificationState,
     copied,
     hasToken,
     isTokenValid,
@@ -48,25 +38,22 @@ export function AgentInstallDialog({
     installCommand,
     canCopyCommand,
     showLocalOnlyWarning,
-    canGoNext,
-    goNext,
-    goPrev,
   } = useAgentInstallDialogState({
     open,
     token,
-    isGenerating,
     tToast,
   })
 
   return (
-    <DialogContent ref={dialogRef} className="sm:max-w-[860px]">
-      <DialogHeader>
+    <DialogContent
+      ref={dialogRef}
+      className="sm:max-w-[860px] max-h-[calc(100vh-2rem)] overflow-hidden p-0 gap-0 flex flex-col"
+    >
+      <DialogHeader className="shrink-0 border-b px-6 pt-6 pb-4 pr-12">
         <DialogTitle>{t("install.title")}</DialogTitle>
         <DialogDescription>{t("install.desc")}</DialogDescription>
       </DialogHeader>
-      <div className="space-y-4">
-        <AgentInstallStepIndicator t={t} step={step} />
-
+      <div className="flex-1 min-h-0 overflow-y-auto px-6 py-4 space-y-4">
         <AgentInstallTokenCard
           t={t}
           token={token}
@@ -77,62 +64,29 @@ export function AgentInstallDialog({
           onGenerate={onGenerate}
         />
 
-        {step === 1 && (
-          <div className="space-y-3">
-            {!hasToken && (
-              <div className="rounded-lg border bg-muted/20 p-3 space-y-1">
-                <p className="text-xs font-medium text-muted-foreground">{t("install.tokenGuideTitle")}</p>
-                <p className="text-xs text-muted-foreground">
-                  {t("install.tokenGuideDesc")}
-                </p>
-              </div>
-            )}
-            <AgentInstallConfigPanel
-              t={t}
-              registerUrlInput={registerUrlInput}
-              setRegisterUrlInput={setRegisterUrlInput}
-              configOpen={configOpen}
-              setConfigOpen={setConfigOpen}
-              showLocalOnlyWarning={showLocalOnlyWarning}
-              hasToken={hasToken}
-            />
-          </div>
-        )}
-
-        {step === 3 && (
-          <div className="space-y-3">
-            <AgentInstallVerificationPanel t={t} verificationState={verificationState} />
-            <AgentInstallVerificationTips t={t} />
-          </div>
-        )}
-
-        {step === 2 && (
-          <div className="space-y-3">
-            <AgentInstallCommandPanel
-              t={t}
-              tActions={tActions}
-              tToast={tToast}
-              token={token}
-              installCommand={installCommand}
-              isGenerating={isGenerating}
-              canCopyCommand={canCopyCommand}
-              copied={copied}
-              onCopy={handleCopy}
-            />
-          </div>
-        )}
-
-        {step === 2 && (
-          <AgentInstallCommandTips t={t} />
-        )}
-
-        <AgentInstallFooter
+        <AgentInstallCommandPanel
+          t={t}
           tActions={tActions}
-          step={step}
-          canGoNext={canGoNext}
-          onPrev={goPrev}
-          onNext={goNext}
+          tToast={tToast}
+          token={token}
+          installCommand={installCommand}
+          isGenerating={isGenerating}
+          canCopyCommand={canCopyCommand}
+          copied={copied}
+          onCopy={handleCopy}
         />
+        {showLocalOnlyWarning && (
+          <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-3">
+            <p className="text-[11px] text-amber-700 dark:text-amber-400">{t("install.localOnlyWarning")}</p>
+          </div>
+        )}
+        <AgentInstallCommandTips t={t} />
+
+        <div className="flex justify-end pt-1">
+          <DialogClose asChild>
+            <Button size="sm">{tActions("close")}</Button>
+          </DialogClose>
+        </div>
       </div>
     </DialogContent>
   )

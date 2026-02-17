@@ -1,7 +1,7 @@
 name: lunafox
 
 services:
-  # Agents should be registered and started via install script (/api/agents/install-script)
+  # Agents should be registered and started via install script (/api/agent/install-script)
   postgres:
     image: postgres:16.3-alpine
     restart: "on-failure:3"

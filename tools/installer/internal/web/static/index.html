@@ -3,268 +3,319 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>LunaFox 安装向导</title>
+  <title>LunaFox 快速安装</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
     :root {
-      --bg-primary: #0F172A;
-      --bg-secondary: #1E293B;
-      --bg-tertiary: #334155;
-      --text-primary: #F8FAFC;
-      --text-secondary: #CBD5E1;
-      --text-muted: #94A3B8;
-      --accent-green: #22C55E;
-      --accent-blue: #3B82F6;
-      --border: #334155;
-      --error: #EF4444;
-      --success: #22C55E;
+      --bg-page: #f5f7fb;
+      --bg-card: #ffffff;
+      --bg-soft: #f8fafc;
+      --ink-strong: #111827;
+      --ink-main: #1f2937;
+      --ink-muted: #6b7280;
+      --line: #e5e7eb;
+      --line-strong: #d1d5db;
+      --brand: #2563eb;
+      --brand-soft: #eff6ff;
+      --success: #15803d;
+      --warning: #b45309;
+      --danger: #b91c1c;
+      --radius-lg: 14px;
+      --radius-md: 10px;
+      --radius-sm: 8px;
+      --shadow: 0 16px 32px rgba(17, 24, 39, 0.08);
     }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
-      background: var(--bg-primary);
-      color: var(--text-primary);
-      line-height: 1.6;
+      font-family: "Avenir Next", "SF Pro Text", "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+      background: var(--bg-page);
+      color: var(--ink-main);
       min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
+      padding: 18px;
+      line-height: 1.5;
     }
 
-    .wizard-container {
-      max-width: 700px;
-      width: 100%;
-      background: var(--bg-secondary);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 40px;
-      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+    .wizard {
+      width: min(860px, 100%);
+      margin: 0 auto;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      background: var(--bg-card);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .hidden {
+      display: none !important;
     }
 
     .wizard-header {
-      text-align: center;
-      margin-bottom: 40px;
+      padding: 22px 24px 16px;
+      border-bottom: 1px solid var(--line);
+      background: #fafbff;
     }
 
     .wizard-title {
-      font-size: 28px;
+      font-size: 24px;
       font-weight: 700;
-      margin-bottom: 8px;
-      color: var(--text-primary);
+      color: var(--ink-strong);
+      letter-spacing: 0.2px;
     }
 
     .wizard-subtitle {
-      font-size: 14px;
-      color: var(--text-muted);
+      margin-top: 6px;
+      font-size: 13px;
+      color: var(--ink-muted);
     }
 
-    /* Progress Steps */
-    .progress-steps {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 40px;
-      position: relative;
+    .entry-screen {
+      padding: 30px 24px;
     }
 
-    .progress-steps::before {
-      content: '';
-      position: absolute;
-      top: 20px;
-      left: 0;
-      right: 0;
-      height: 2px;
-      background: var(--bg-tertiary);
-      z-index: 0;
-    }
-
-    .progress-line {
-      position: absolute;
-      top: 20px;
-      left: 0;
-      height: 2px;
-      background: var(--accent-green);
-      transition: width 0.3s ease;
-      z-index: 1;
-    }
-
-    .step {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      position: relative;
-      z-index: 2;
-      flex: 1;
-    }
-
-    .step-circle {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background: var(--bg-tertiary);
-      border: 2px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 600;
-      font-size: 14px;
-      color: var(--text-muted);
-      transition: all 0.3s ease;
+    .entry-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--ink-strong);
+      text-align: center;
       margin-bottom: 8px;
     }
 
-    .step.active .step-circle {
-      background: var(--accent-green);
-      border-color: var(--accent-green);
-      color: var(--bg-primary);
-    }
-
-    .step.completed .step-circle {
-      background: var(--accent-green);
-      border-color: var(--accent-green);
-      color: var(--bg-primary);
-    }
-
-    .step-label {
-      font-size: 12px;
-      color: var(--text-muted);
+    .entry-desc {
+      font-size: 13px;
+      color: var(--ink-muted);
       text-align: center;
-      transition: color 0.3s ease;
+      margin-bottom: 20px;
     }
 
-    .step.active .step-label {
-      color: var(--text-primary);
-      font-weight: 500;
+    .entry-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
     }
 
-    /* Step Content */
-    .step-content {
+    .entry-card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      background: #fff;
+      padding: 16px;
+      cursor: pointer;
+      text-align: left;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+      font-family: inherit;
+    }
+
+    .entry-card:hover {
+      border-color: #93c5fd;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+      background: var(--brand-soft);
+    }
+
+    .entry-card-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--ink-strong);
+      margin-bottom: 6px;
+    }
+
+    .entry-card-desc {
+      font-size: 12px;
+      color: var(--ink-muted);
+      line-height: 1.55;
+    }
+
+    .flow-shell {
+      border-top: 1px solid var(--line);
+    }
+
+    .flow-status {
+      padding: 10px 24px;
+      border-bottom: 1px solid var(--line);
+      background: #fff;
+      font-size: 12px;
+      color: #4b5563;
+      font-weight: 600;
+      letter-spacing: 0.1px;
+    }
+
+    .wizard-content {
+      padding: 20px 24px 24px;
+    }
+
+    .wizard-step {
+      display: none;
+      animation: fade-in 0.2s ease;
+    }
+
+    .wizard-step.active {
+      display: block;
+    }
+
+    @keyframes fade-in {
+      from {
+        opacity: 0;
+        transform: translateY(4px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .step-title {
+      font-size: 19px;
+      font-weight: 700;
+      color: var(--ink-strong);
+      margin-bottom: 5px;
+    }
+
+    .step-desc {
+      font-size: 13px;
+      color: var(--ink-muted);
+      margin-bottom: 16px;
+    }
+
+    .hint-box,
+    .info-box,
+    .warning-box,
+    .success-box {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      background: var(--bg-soft);
+      padding: 10px 12px;
+      font-size: 13px;
+      line-height: 1.6;
+      margin-bottom: 14px;
+    }
+
+    .hint-box {
+      color: #334155;
+    }
+
+    .info-box {
+      border-color: #cfe0ff;
+      background: #f5f9ff;
+      color: #1e3a8a;
+    }
+
+    .warning-box {
+      border-color: #fed7aa;
+      background: #fff7ed;
+      color: #9a3412;
+    }
+
+    .success-box {
+      border-color: #bbf7d0;
+      background: #f0fdf4;
+      color: #166534;
+    }
+
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    .advanced-toggle {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      background: #fff;
+      margin-bottom: 14px;
+      overflow: hidden;
+    }
+
+    .advanced-toggle > summary {
+      list-style: none;
+      cursor: pointer;
+      padding: 10px 12px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #4b5563;
+      background: var(--bg-soft);
+    }
+
+    .advanced-toggle > summary::-webkit-details-marker {
       display: none;
     }
 
-    .step-content.active {
-      display: block;
-      animation: fadeIn 0.3s ease;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .step-content h2 {
-      font-size: 20px;
-      font-weight: 600;
-      margin-bottom: 8px;
-      color: var(--text-primary);
-    }
-
-    .step-content p {
-      font-size: 14px;
-      color: var(--text-secondary);
-      margin-bottom: 24px;
-    }
-
-    /* Form Elements */
-    .form-group {
-      margin-bottom: 20px;
+    .advanced-content {
+      padding: 12px;
+      border-top: 1px solid var(--line);
+      background: #fff;
     }
 
     label {
       display: block;
-      font-size: 14px;
-      font-weight: 500;
-      color: var(--text-primary);
-      margin-bottom: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--ink-main);
+      margin-bottom: 6px;
     }
 
     label .required {
-      color: var(--error);
+      color: var(--danger);
       margin-left: 4px;
     }
 
     label .optional {
-      color: var(--text-muted);
-      font-weight: 400;
+      color: var(--ink-muted);
       font-size: 12px;
+      font-weight: 500;
       margin-left: 4px;
     }
 
-    input, select {
+    input,
+    select {
       width: 100%;
-      background: var(--bg-primary);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 12px 16px;
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius-md);
+      background: #fff;
+      color: var(--ink-strong);
       font-size: 14px;
-      color: var(--text-primary);
       font-family: inherit;
-      transition: all 0.2s ease;
-    }
-
-    input:focus, select:focus {
-      outline: none;
-      border-color: var(--accent-green);
-      box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+      padding: 10px 12px;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
     }
 
     input::placeholder {
-      color: var(--text-muted);
+      color: #9ca3af;
     }
 
-    input.error, select.error {
-      border-color: var(--error);
+    input:focus,
+    select:focus {
+      outline: none;
+      border-color: var(--brand);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.14);
+    }
+
+    input[aria-invalid="true"],
+    select[aria-invalid="true"] {
+      border-color: var(--danger);
+      box-shadow: 0 0 0 3px rgba(185, 28, 28, 0.12);
+      background: #fff5f5;
+    }
+
+    input[readonly] {
+      background: #f3f4f6;
+      color: #4b5563;
+      border-color: #d1d5db;
     }
 
     .error-message {
-      color: var(--error);
-      font-size: 12px;
       margin-top: 6px;
-      display: none;
-    }
-
-    .error-message.show {
-      display: block;
-    }
-
-    .info-box {
-      background: rgba(59, 130, 246, 0.1);
-      border: 1px solid rgba(59, 130, 246, 0.3);
-      border-radius: 8px;
-      padding: 12px 16px;
-      margin-bottom: 20px;
-      font-size: 13px;
-      color: var(--text-secondary);
-      line-height: 1.5;
-    }
-
-    .warning-box {
-      background: rgba(245, 158, 11, 0.1);
-      border: 1px solid rgba(245, 158, 11, 0.3);
-      border-radius: 8px;
-      padding: 12px 16px;
-      margin-bottom: 20px;
-      font-size: 13px;
-      color: var(--text-secondary);
-      line-height: 1.5;
-    }
-
-    .success-box {
-      background: rgba(34, 197, 94, 0.1);
-      border: 1px solid rgba(34, 197, 94, 0.3);
-      border-radius: 8px;
-      padding: 12px 16px;
-      margin-bottom: 20px;
-      font-size: 13px;
-      color: var(--text-secondary);
-      line-height: 1.5;
+      color: var(--danger);
+      font-size: 12px;
+      min-height: 18px;
     }
 
     .checkbox-group {
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 8px;
+      margin-top: 8px;
+      margin-bottom: 14px;
     }
 
     .checkbox-label {
@@ -273,179 +324,249 @@
       gap: 8px;
       cursor: pointer;
       user-select: none;
+      font-size: 13px;
+      color: var(--ink-main);
     }
 
     input[type="checkbox"] {
       width: 18px;
       height: 18px;
+      accent-color: var(--brand);
       cursor: pointer;
-      accent-color: var(--accent-green);
+      flex-shrink: 0;
     }
 
-    /* Buttons */
-    .wizard-actions {
+    .summary-card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      background: #fafbfd;
+      padding: 12px;
+      margin-bottom: 14px;
+    }
+
+    .summary-title {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.28px;
+      color: #4b5563;
+      margin-bottom: 10px;
+      font-weight: 700;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: minmax(92px, auto) 1fr;
+      column-gap: 10px;
+      row-gap: 6px;
+      font-size: 12px;
+      margin: 0;
+    }
+
+    .summary-grid dt {
+      color: #6b7280;
+    }
+
+    .summary-grid dd {
+      margin: 0;
+      color: #111827;
+      font-weight: 600;
+      word-break: break-all;
+    }
+
+    .summary-foot {
+      margin-top: 9px;
+      padding-top: 9px;
+      border-top: 1px dashed var(--line);
+      font-size: 12px;
+      color: #4b5563;
+    }
+
+    .status-wrap {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      background: #fafbfd;
+      padding: 12px;
+    }
+
+    .status-head {
       display: flex;
       justify-content: space-between;
-      margin-top: 32px;
-      gap: 12px;
-    }
-
-    .btn {
-      padding: 12px 24px;
-      font-size: 14px;
-      font-weight: 600;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      font-family: inherit;
-      display: inline-flex;
       align-items: center;
-      justify-content: center;
       gap: 8px;
+      margin-bottom: 10px;
     }
 
-    .btn-primary {
-      background: var(--accent-green);
-      color: var(--bg-primary);
+    .status-caption {
+      font-size: 12px;
+      color: var(--ink-muted);
     }
 
-    .btn-primary:hover:not(:disabled) {
-      background: #16A34A;
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
-    }
-
-    .btn-secondary {
-      background: var(--bg-tertiary);
-      color: var(--text-primary);
-    }
-
-    .btn-secondary:hover:not(:disabled) {
-      background: #475569;
-    }
-
-    .btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    .btn:focus-visible {
-      outline: 2px solid var(--accent-green);
-      outline-offset: 2px;
-    }
-
-    .spinner {
-      display: inline-block;
-      width: 14px;
-      height: 14px;
-      border: 2px solid rgba(15, 23, 42, 0.3);
-      border-top-color: var(--bg-primary);
-      border-radius: 50%;
-      animation: spin 0.6s linear infinite;
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
-    /* Status Badge */
     .status-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 6px 12px;
-      border-radius: 6px;
-      font-size: 13px;
-      font-weight: 500;
-      margin-top: 16px;
-    }
-
-    .status-badge.idle {
-      background: var(--bg-tertiary);
-      color: var(--text-secondary);
+      border: 1px solid #d1d5db;
+      border-radius: 999px;
+      padding: 5px 10px;
+      background: #f3f4f6;
+      color: #4b5563;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: lowercase;
+      min-width: 82px;
+      text-align: center;
     }
 
     .status-badge.running {
-      background: rgba(59, 130, 246, 0.2);
-      color: var(--accent-blue);
+      border-color: #bfdbfe;
+      background: #eff6ff;
+      color: #1d4ed8;
     }
 
     .status-badge.success {
-      background: rgba(34, 197, 94, 0.2);
-      color: var(--accent-green);
+      border-color: #bbf7d0;
+      background: #f0fdf4;
+      color: #166534;
     }
 
     .status-badge.failed {
-      background: rgba(239, 68, 68, 0.2);
-      color: var(--error);
+      border-color: #fecaca;
+      background: #fef2f2;
+      color: #991b1b;
     }
 
-    /* Logs */
     .logs-container {
-      margin-top: 24px;
-      background: var(--bg-primary);
-      border: 1px solid var(--border);
+      border: 1px solid #d1d5db;
       border-radius: 8px;
-      padding: 16px;
-      max-height: 400px;
-      overflow: auto;
-      font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+      background: #0f172a;
+      color: #dbe7ff;
+      font-family: "SFMono-Regular", "Menlo", "Consolas", monospace;
       font-size: 12px;
-      line-height: 1.6;
-      color: var(--text-secondary);
+      line-height: 1.55;
       white-space: pre-wrap;
       word-break: break-word;
+      height: clamp(240px, 40vh, 420px);
+      overflow: auto;
+      padding: 10px;
     }
 
     .logs-container::-webkit-scrollbar {
       width: 8px;
-    }
-
-    .logs-container::-webkit-scrollbar-track {
-      background: transparent;
+      height: 8px;
     }
 
     .logs-container::-webkit-scrollbar-thumb {
-      background: var(--border);
-      border-radius: 4px;
+      background: rgba(156, 163, 175, 0.45);
+      border-radius: 999px;
     }
 
-    /* Responsive */
-    @media (max-width: 640px) {
-      .wizard-container {
-        padding: 24px;
+    .actions {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .actions.right {
+      justify-content: flex-end;
+    }
+
+    .btn {
+      min-height: 42px;
+      min-width: 110px;
+      border-radius: 10px;
+      border: 1px solid transparent;
+      font-size: 14px;
+      font-weight: 700;
+      font-family: inherit;
+      padding: 10px 14px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+
+    .btn-primary {
+      color: #fff;
+      background: var(--brand);
+      border-color: var(--brand);
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: #1d4ed8;
+      border-color: #1d4ed8;
+    }
+
+    .btn-secondary {
+      color: var(--ink-main);
+      background: #fff;
+      border-color: var(--line-strong);
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background: #f9fafb;
+    }
+
+    .btn:focus-visible {
+      outline: 2px solid rgba(37, 99, 235, 0.45);
+      outline-offset: 2px;
+    }
+
+    .btn:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
+    .empty-log {
+      margin-top: 12px;
+      color: var(--ink-muted);
+      font-size: 12px;
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding: 10px;
       }
 
-      .wizard-title {
-        font-size: 24px;
+      .wizard {
+        width: 100%;
       }
 
-      .progress-steps {
-        margin-bottom: 32px;
+      .wizard-header {
+        padding: 16px;
       }
 
-      .step-label {
-        font-size: 10px;
+      .entry-grid {
+        grid-template-columns: 1fr;
       }
 
-      .step-circle {
-        width: 36px;
-        height: 36px;
-        font-size: 12px;
+      .flow-status {
+        padding: 10px 16px;
       }
 
-      .wizard-actions {
+      .wizard-content {
+        padding: 16px;
+      }
+
+      .actions {
         flex-direction: column-reverse;
+      }
+
+      .actions.right {
+        flex-direction: column;
       }
 
       .btn {
         width: 100%;
       }
+
+      .logs-container {
+        height: 300px;
+      }
     }
 
     @media (prefers-reduced-motion: reduce) {
-      * {
+      *,
+      *::before,
+      *::after {
         animation-duration: 0.01ms !important;
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
@@ -454,96 +575,113 @@
   </style>
 </head>
 <body>
+  <main class="wizard">
+    <header class="wizard-header">
+      <h1 class="wizard-title">LunaFox 快速安装</h1>
+      <p class="wizard-subtitle" id="wizardSubtitle">先选部署方式，再开始安装</p>
+    </header>
 
-  <div class="wizard-container">
-    <!-- Header -->
-    <div class="wizard-header">
-      <h1 class="wizard-title">LunaFox 安装向导</h1>
-      <p class="wizard-subtitle" id="wizardSubtitle">默认只需公网主机和端口</p>
-    </div>
-
-    <div class="step-content active" id="quickInstall">
-      <h2 id="step1Title">安装配置</h2>
-      <p id="step1Desc">默认只需填写公网主机和端口</p>
-
-      <div class="warning-box" id="modeWarning">
-        <strong>生产模式要求：</strong><br>
-        • 必须配置公网主机（域名或 IP）<br>
-        • 默认使用 HTTPS，端口可自定义（默认 8083）<br>
-        • 将用于 Agent 注册与回连
-      </div>
-
-      <div class="form-group" id="publicHostGroup">
-        <label for="publicHost">公网主机（IP / 域名）<span class="required" id="publicHostRequired">*</span><span class="optional">（生产模式必填，开发模式可留空）</span></label>
-        <input
-          id="publicHost"
-          type="text"
-          inputmode="url"
-          value="{{ .DefaultPublicHost }}"
-          placeholder="example.com 或 1.2.3.4（不带 https:// 和端口）"
-          aria-label="公网主机"
-          aria-required="false"
-        />
-        <div class="error-message" id="publicHostError" role="alert" aria-live="polite"></div>
-      </div>
-
-      <div class="form-group" id="publicHostPresetGroup">
-        <label for="publicHostPreset">快捷选择（自动探测）<span class="optional">（可选）</span></label>
-        <select id="publicHostPreset" aria-label="公网主机快捷选择">
-          <option value="">手动输入</option>
-        </select>
-      </div>
-
-      <div class="form-group" id="publicPortGroup">
-        <label for="publicPort">公网端口<span class="required">*</span></label>
-        <input
-          id="publicPort"
-          type="text"
-          inputmode="numeric"
-          value="{{ .DefaultPublicPort }}"
-          placeholder="8083"
-          aria-label="公网端口"
-        />
-        <div class="error-message" id="publicPortError" role="alert" aria-live="polite"></div>
-      </div>
-
-      <div class="info-box">
-        <strong>说明：</strong><br>
-        • Agent 相关参数使用系统默认值，不再需要手动填写<br>
-        • 开发模式固定使用本地镜像（跳过远端 pull）<br>
-        • 生产模式不需要 Go 代理配置
-      </div>
-
-      {{ if .ShowGoProxy }}
-      <div class="info-box" id="goProxyHint" style="margin-bottom: 12px;">
-        开发模式可选开启 <strong>goproxy.cn</strong> 加速 Go 依赖下载
-      </div>
-
-      <div class="checkbox-group" id="goProxyGroup" style="margin-bottom: 20px;">
-        <label class="checkbox-label">
-          <input type="checkbox" id="useGoProxyCN" />
-          <span>使用国内 Go 代理 (goproxy.cn)</span>
-        </label>
-      </div>
-      {{ end }}
-
-      <div class="info-box" id="hostReachability">正在等待地址预检查...</div>
-
-      <div class="info-box" id="configSummary"></div>
-
-      <div class="wizard-actions">
-        <div></div>
-        <button class="btn btn-primary" id="startBtn" onclick="startInstall()">
-          <span id="btnText">开始安装</span>
+    <section class="entry-screen" id="entryScreen">
+      <h2 class="entry-title">选择部署方式</h2>
+      <div class="entry-grid">
+        <button type="button" class="entry-card" id="choosePublicBtn">
+          <div class="entry-card-title">公网部署</div>
+          <div class="entry-card-desc">用于 VPS 或云服务器，手动填写公网ip和端口。</div>
+        </button>
+        <button type="button" class="entry-card" id="chooseLocalBtn">
+          <div class="entry-card-title">本地部署</div>
+          <div class="entry-card-desc">通信地址默认为localhost</div>
         </button>
       </div>
+    </section>
 
-      <div id="installStatus" style="display: none;">
-        <div class="status-badge idle" id="status" role="status" aria-live="polite">idle</div>
-        <div class="logs-container" id="logs" role="log" aria-live="polite" aria-atomic="false"></div>
+    <div class="flow-shell hidden" id="wizardFlow">
+      <div class="flow-status" id="flowStatus">当前：填写地址</div>
+
+      <div class="wizard-content" id="quickInstall">
+        <section class="wizard-step active" id="stepConfig" aria-labelledby="stepConfigTitle">
+          <h2 class="step-title" id="stepConfigTitle">步骤 1：填写地址并开始安装</h2>
+          <p class="step-desc" id="stepConfigDesc">填写主机和端口，系统自动检查后安装。</p>
+
+          <div class="hint-box" id="modeWarning">只填主机和端口，不要带协议和路径。</div>
+
+          <div class="form-group" id="publicHostGroup">
+            <label for="publicHost">主机（IP / 域名）<span class="required" id="publicHostRequired">*</span></label>
+            <input
+              id="publicHost"
+              type="text"
+              inputmode="url"
+              value="{{ .DefaultPublicHost }}"
+              placeholder="example.com 或 1.2.3.4"
+              aria-label="主机"
+              aria-required="true"
+            />
+            <div class="error-message" id="publicHostError" role="alert" aria-live="polite"></div>
+          </div>
+
+          <div class="form-group" id="publicPortGroup">
+            <label for="publicPort">端口<span class="required">*</span></label>
+            <input
+              id="publicPort"
+              type="text"
+              inputmode="numeric"
+              value="{{ .DefaultPublicPort }}"
+              placeholder="8083"
+              aria-label="端口"
+            />
+            <div class="error-message" id="publicPortError" role="alert" aria-live="polite"></div>
+          </div>
+
+          <div class="info-box hidden" id="hostReachability"></div>
+
+          <details class="advanced-toggle">
+            <summary>高级选项（可选）</summary>
+            <div class="advanced-content">
+              {{ if .ShowGoProxy }}
+              <div class="info-box" id="goProxyHint">开发模式可选开启 goproxy.cn。</div>
+              <div class="checkbox-group" id="goProxyGroup">
+                <label class="checkbox-label">
+                  <input type="checkbox" id="useGoProxyCN" />
+                  <span>使用国内 Go 代理 (goproxy.cn)</span>
+                </label>
+              </div>
+              {{ end }}
+
+              <div class="summary-card" id="configSummary"></div>
+            </div>
+          </details>
+
+          <div class="actions">
+            <button type="button" class="btn btn-secondary" id="backToEntryBtn">返回选择部署方式</button>
+            <button type="button" class="btn btn-primary" id="startBtn">
+              <span id="btnText">开始安装</span>
+            </button>
+          </div>
+        </section>
+
+        <section class="wizard-step" id="stepInstall" aria-labelledby="stepInstallTitle">
+          <h2 class="step-title" id="stepInstallTitle">步骤 2：安装结果</h2>
+          <p class="step-desc">日志实时显示，可随时返回修改。</p>
+
+          <div class="status-wrap" id="installStatus">
+            <div class="status-head">
+              <span class="status-caption">安装状态</span>
+              <div class="status-badge idle" id="status" role="status" aria-live="polite">idle</div>
+            </div>
+            <div class="logs-container" id="logs" role="log" aria-live="polite" aria-atomic="false"></div>
+          </div>
+
+          <p class="empty-log" id="logPlaceholder">等待安装启动...</p>
+
+          <div class="actions">
+            <button type="button" class="btn btn-secondary" id="backToConfigBtn">返回修改地址</button>
+            <button type="button" class="btn btn-primary" id="retryInstallBtn">重新开始</button>
+          </div>
+        </section>
       </div>
     </div>
-  </div>
+  </main>
+
   <script>
     let pollTimer = null;
     let eventSource = null;
@@ -551,12 +689,52 @@
     let lastEventId = 0;
     let probeTimer = null;
     let lastProbeResult = null;
+    let currentStep = 1;
+    let deploymentType = "";
+    let currentInstallStatus = "idle";
 
     const INSTALL_MODE = "{{ .InstallMode }}";
     const IS_PROD = INSTALL_MODE === "prod";
 
     function $(id) {
       return document.getElementById(id);
+    }
+
+    function showEntry() {
+      const entryScreen = $("entryScreen");
+      const wizardFlow = $("wizardFlow");
+      if (entryScreen) entryScreen.classList.remove("hidden");
+      if (wizardFlow) wizardFlow.classList.add("hidden");
+      currentInstallStatus = "idle";
+    }
+
+    function showFlow() {
+      const entryScreen = $("entryScreen");
+      const wizardFlow = $("wizardFlow");
+      if (entryScreen) entryScreen.classList.add("hidden");
+      if (wizardFlow) wizardFlow.classList.remove("hidden");
+    }
+
+    function showStep(step) {
+      currentStep = step;
+      const config = $("stepConfig");
+      const install = $("stepInstall");
+      if (config) config.classList.toggle("active", step === 1);
+      if (install) install.classList.toggle("active", step === 2);
+      updateFlowStatus();
+    }
+
+    function updateFlowStatus() {
+      const statusNode = $("flowStatus");
+      if (!statusNode) return;
+      let phase = "填写地址";
+      if (currentStep === 2) {
+        phase = "安装中";
+        if (currentInstallStatus === "success") phase = "安装完成";
+        if (currentInstallStatus === "failed") phase = "安装失败";
+      }
+      const prefix = deploymentType ? `部署方式：${deploymentLabel()} · ` : "";
+      statusNode.textContent = `${prefix}当前：${phase}`;
     }
 
     function clearErrors() {
@@ -580,9 +758,22 @@
       return normalized === "localhost" || normalized === "127.0.0.1" || normalized === "::1";
     }
 
+    function browserHostCandidate() {
+      const host = (window.location && window.location.hostname ? window.location.hostname : "").trim();
+      if (!host || isLoopbackLike(host)) return "";
+      return host;
+    }
+
     function setReachability(level, message) {
       const box = $("hostReachability");
       if (!box) return;
+      const quietInfo = level === "info" && message && message.includes("自动检查");
+      if (quietInfo) {
+        box.classList.add("hidden");
+        box.textContent = "";
+        return;
+      }
+      box.classList.remove("hidden");
       box.className = "info-box";
       if (level === "warning") box.className = "warning-box";
       if (level === "success") box.className = "success-box";
@@ -607,6 +798,8 @@
       const status = $("status");
       status.className = `status-badge ${kind}`;
       status.textContent = text;
+      currentInstallStatus = kind;
+      updateFlowStatus();
     }
 
     function closeEventStream() {
@@ -623,26 +816,57 @@
       const wizardSubtitle = $("wizardSubtitle");
 
       if (IS_PROD) {
-        if (wizardSubtitle) wizardSubtitle.textContent = "默认只需公网主机和端口";
-        $("step1Title").textContent = "生产安装配置";
-        $("step1Desc").textContent = "当前为生产模式，请填写公网主机和端口";
-        $("modeWarning").style.display = "block";
-        $("publicHostRequired").textContent = "*";
-        $("publicHost").setAttribute("aria-required", "true");
+        if (wizardSubtitle) wizardSubtitle.textContent = "生产模式：选方式后直接安装";
+        $("stepConfigTitle").textContent = "步骤 1：填写生产访问地址";
+        $("stepConfigDesc").textContent = "填写可访问的主机和端口。";
         if (goProxyHint) goProxyHint.style.display = "none";
         if (goProxyGroup) goProxyGroup.style.display = "none";
         if (goProxyCheckbox) goProxyCheckbox.checked = false;
         return;
       }
 
-      if (wizardSubtitle) wizardSubtitle.textContent = "默认只需公网主机和端口，开发模式可选开启 goproxy.cn";
-      $("step1Title").textContent = "开发安装配置";
-      $("step1Desc").textContent = "当前为开发模式，可留空公网主机（默认 https://localhost:<公网端口>）";
-      $("modeWarning").style.display = "none";
-      $("publicHostRequired").textContent = "";
-      $("publicHost").setAttribute("aria-required", "false");
+      if (wizardSubtitle) wizardSubtitle.textContent = "开发模式：选方式后直接安装";
+      $("stepConfigTitle").textContent = "步骤 1：填写开发访问地址";
+      $("stepConfigDesc").textContent = "填写开发机可访问的主机和端口。";
       if (goProxyHint) goProxyHint.style.display = "block";
       if (goProxyGroup) goProxyGroup.style.display = "flex";
+    }
+
+    function applyDeploymentChoice(type) {
+      deploymentType = type;
+      const hostInput = $("publicHost");
+      const modeWarning = $("modeWarning");
+
+      if (!hostInput || !modeWarning) return;
+
+      if (type === "local") {
+        hostInput.value = "localhost";
+        hostInput.readOnly = true;
+        modeWarning.textContent = "本机部署：主机固定为 localhost，只需确认端口。";
+        setReachability("success", "已切换为本机部署（localhost）");
+      } else {
+        hostInput.readOnly = false;
+        const currentHost = hostInput.value.trim();
+        const hasManualHost = currentHost !== "" && !isLoopbackLike(currentHost);
+        const candidate = browserHostCandidate();
+        if (!hasManualHost && candidate) {
+          hostInput.value = candidate;
+          modeWarning.textContent = `公网部署：已按当前访问地址预填主机（${candidate}），可按需修改。`;
+        } else {
+          if (isLoopbackLike(currentHost)) {
+            hostInput.value = "";
+          }
+          modeWarning.textContent = "公网部署：填写可访问的 IP/域名和端口。";
+        }
+        setReachability("info", "将自动检查地址连通性。");
+      }
+
+      showFlow();
+      showStep(1);
+      refreshSummary();
+      if (type === "public") {
+        scheduleProbe();
+      }
     }
 
     function isLikelyIPv4(value) {
@@ -689,9 +913,7 @@
       if (/[/?#]/.test(raw)) return false;
 
       if (raw.startsWith("[") !== raw.endsWith("]")) return false;
-      const host = raw.startsWith("[") && raw.endsWith("]")
-        ? raw.slice(1, -1)
-        : raw;
+      const host = raw.startsWith("[") && raw.endsWith("]") ? raw.slice(1, -1) : raw;
       if (!host) return false;
       if (raw.startsWith("[") && raw.endsWith("]") && !host.includes(":")) return false;
 
@@ -715,20 +937,20 @@
       clearErrors();
       const publicHost = $("publicHost").value.trim();
       const publicPort = $("publicPort").value.trim();
-      if (IS_PROD && !publicHost) {
-        setError("publicHost", "生产模式必须填写公网主机（IP 或域名）");
+      if (!publicHost) {
+        setError("publicHost", "请填写主机（IP 或域名）");
         return false;
       }
       if (publicHost && !isValidHost(publicHost)) {
-        setError("publicHost", "公网主机格式不合法（只填 IP/域名，不要带协议或端口）");
+        setError("publicHost", "主机格式不合法（不要带协议或端口）");
         return false;
       }
-      if (IS_PROD && publicHost && isLoopbackLike(publicHost)) {
-        setError("publicHost", "生产模式不能使用 localhost，请填写服务器 IP 或域名");
+      if (deploymentType === "public" && IS_PROD && publicHost && isLoopbackLike(publicHost)) {
+        setError("publicHost", "公网部署不能使用 localhost");
         return false;
       }
       if (!isValidPort(publicPort)) {
-        setError("publicPort", "公网端口必须是 1-65535");
+        setError("publicPort", "端口必须是 1-65535");
         return false;
       }
       return true;
@@ -736,64 +958,17 @@
 
     function collectPayload() {
       const goProxyCheckbox = $("useGoProxyCN");
+      const hostInput = $("publicHost");
+      let host = hostInput ? hostInput.value.trim() : "";
+      if (deploymentType === "local") {
+        host = "localhost";
+        if (hostInput) hostInput.value = host;
+      }
       return {
-        publicHost: $("publicHost").value.trim(),
+        publicHost: host,
         publicPort: $("publicPort").value.trim(),
         useGoProxyCN: !IS_PROD && !!goProxyCheckbox && goProxyCheckbox.checked
       };
-    }
-
-    function applyPresetHost(value) {
-      const trimmed = (value || "").trim();
-      if (!trimmed) return;
-      $("publicHost").value = trimmed;
-      refreshSummary();
-      scheduleProbe();
-    }
-
-    async function loadHostCandidates() {
-      const preset = $("publicHostPreset");
-      if (!preset) return;
-
-      try {
-        const response = await fetch("/api/network/candidates", { cache: "no-store" });
-        if (!response.ok) return;
-        const data = await response.json();
-        const options = [{ value: "", label: "手动输入" }];
-
-        if (data.sourceHost) {
-          options.push({ value: data.sourceHost, label: `当前访问地址 (${data.sourceHost})` });
-        }
-        if (Array.isArray(data.candidates)) {
-          data.candidates.forEach((item) => {
-            if (!item || !item.ip) return;
-            options.push({ value: item.ip, label: item.label || item.ip });
-          });
-        }
-
-        const unique = new Map();
-        options.forEach((item) => {
-          if (!unique.has(item.value)) {
-            unique.set(item.value, item);
-          }
-        });
-
-        preset.innerHTML = "";
-        unique.forEach((item) => {
-          const option = document.createElement("option");
-          option.value = item.value;
-          option.textContent = item.label;
-          preset.appendChild(option);
-        });
-
-        const currentHost = $("publicHost").value.trim();
-        const suggestedHost = (data.suggestedHost || "").trim();
-        if ((isLoopbackLike(currentHost) || !currentHost) && suggestedHost && isValidHost(suggestedHost)) {
-          preset.value = suggestedHost;
-          applyPresetHost(suggestedHost);
-        }
-      } catch (_) {
-      }
     }
 
     async function probeReachability() {
@@ -801,26 +976,27 @@
       const port = $("publicPort").value.trim();
 
       if (!host) {
-        if (IS_PROD) {
-          const result = { ok: false, level: "error", message: "生产模式必须填写公网主机" };
-          lastProbeResult = result;
-          setReachability(result.level, result.message);
-          return result;
-        }
-        const result = { ok: true, level: "info", message: "开发模式允许留空公网主机，将使用默认 localhost" };
+        const result = { ok: false, level: "error", message: "请填写主机" };
         lastProbeResult = result;
         setReachability(result.level, result.message);
         return result;
       }
 
       if (!isValidHost(host)) {
-        const result = { ok: false, level: "error", message: "公网主机格式不合法（只填 IP/域名）" };
+        const result = { ok: false, level: "error", message: "主机格式不合法" };
         lastProbeResult = result;
         setReachability(result.level, result.message);
         return result;
       }
       if (!isValidPort(port)) {
-        const result = { ok: false, level: "error", message: "公网端口必须是 1-65535" };
+        const result = { ok: false, level: "error", message: "端口必须是 1-65535" };
+        lastProbeResult = result;
+        setReachability(result.level, result.message);
+        return result;
+      }
+
+      if (deploymentType === "local") {
+        const result = { ok: true, level: "success", message: "本机部署将使用 localhost" };
         lastProbeResult = result;
         setReachability(result.level, result.message);
         return result;
@@ -831,7 +1007,7 @@
           cache: "no-store"
         });
         if (!response.ok) {
-          const result = { ok: false, level: "error", message: "地址预检查失败，请检查输入后重试" };
+          const result = { ok: false, level: "error", message: "地址检查失败，请重试" };
           lastProbeResult = result;
           setReachability(result.level, result.message);
           return result;
@@ -840,13 +1016,13 @@
         const result = {
           ok: !!data.ok,
           level: data.level || "info",
-          message: data.message || "地址预检查完成"
+          message: data.message || "地址检查完成"
         };
         lastProbeResult = result;
         setReachability(result.level, result.message);
         return result;
       } catch (_) {
-        const result = { ok: false, level: "warning", message: "预检查请求失败，将在安装步骤继续检查" };
+        const result = { ok: false, level: "warning", message: "检查请求失败，安装时会再次确认" };
         lastProbeResult = result;
         setReachability(result.level, result.message);
         return result;
@@ -871,22 +1047,45 @@
         .replaceAll("'", "&#39;");
     }
 
+    function deploymentLabel() {
+      if (deploymentType === "local") return "本机部署";
+      if (deploymentType === "public") return "公网部署";
+      return "未选择";
+    }
+
     function refreshSummary() {
       const payload = collectPayload();
-      const inferredPublicUrl = payload.publicHost
-        ? `https://${payload.publicHost}:${payload.publicPort}`
-        : `(默认 https://localhost:${payload.publicPort})`;
-      const goProxyLine = IS_PROD ? "" : `<br><strong>goproxy.cn:</strong> ${payload.useGoProxyCN ? "true" : "false"}`;
-      $("configSummary").innerHTML = `
-        <strong>运行模式:</strong> ${escapeHTML(INSTALL_MODE)}（由启动参数决定）<br>
-        <strong>公网主机:</strong> ${escapeHTML(payload.publicHost || "(空)")}<br>
-        <strong>公网端口:</strong> ${escapeHTML(payload.publicPort)}<br>
-        <strong>PUBLIC_URL:</strong> ${escapeHTML(inferredPublicUrl)}${goProxyLine}
+      const inferredPublicUrl = `https://${payload.publicHost}:${payload.publicPort}`;
+      const goProxyLine = IS_PROD
+        ? ""
+        : `<div class="summary-foot"><strong>goproxy.cn：</strong>${payload.useGoProxyCN ? "开启" : "关闭"}</div>`;
+
+      const summary = $("configSummary");
+      if (!summary) return;
+
+      summary.innerHTML = `
+        <div class="summary-title">安装配置摘要</div>
+        <dl class="summary-grid">
+          <dt>部署方式</dt>
+          <dd>${escapeHTML(deploymentLabel())}</dd>
+          <dt>运行模式</dt>
+          <dd>${escapeHTML(INSTALL_MODE)}</dd>
+          <dt>主机</dt>
+          <dd>${escapeHTML(payload.publicHost)}</dd>
+          <dt>端口</dt>
+          <dd>${escapeHTML(payload.publicPort)}</dd>
+          <dt>安装地址</dt>
+          <dd>${escapeHTML(inferredPublicUrl)}</dd>
+        </dl>
+        ${goProxyLine}
       `;
     }
 
     function applySnapshot(snapshot) {
       if (!snapshot) return;
+      showStep(2);
+      const placeholder = $("logPlaceholder");
+      if (placeholder) placeholder.style.display = "none";
       replaceLogs(snapshot.logs || "");
       const state = snapshot.state || "idle";
       if (state === "running") {
@@ -902,7 +1101,6 @@
       }
       if (state !== "running") {
         $("btnText").textContent = "开始安装";
-        $("startBtn").disabled = false;
       }
     }
 
@@ -986,18 +1184,29 @@
     }
 
     async function startInstall() {
-      if (!validateForm()) return;
+      if (!deploymentType) {
+        showEntry();
+        return;
+      }
+      if (!validateForm()) {
+        showStep(1);
+        return;
+      }
+
       const probeResult = await probeReachability();
       if (!probeResult || !probeResult.ok) {
         if (probeResult && probeResult.level === "error") {
-          setError("publicHost", probeResult.message || "地址预检查失败");
+          showStep(1);
+          setError("publicHost", probeResult.message || "地址检查失败");
         }
         return;
       }
+
       const payload = collectPayload();
 
-      $("installStatus").style.display = "block";
-      $("startBtn").disabled = true;
+      showStep(2);
+      const placeholder = $("logPlaceholder");
+      if (placeholder) placeholder.style.display = "none";
       $("btnText").textContent = "安装中...";
       setStatus("running", "running");
       replaceLogs("");
@@ -1021,7 +1230,6 @@
           }
           setStatus("failed", "failed");
           replaceLogs(`${message}\n`);
-          $("startBtn").disabled = false;
           $("btnText").textContent = "开始安装";
           return;
         }
@@ -1035,35 +1243,59 @@
       } catch (err) {
         setStatus("failed", "failed");
         replaceLogs(String(err));
-        $("startBtn").disabled = false;
         $("btnText").textContent = "开始安装";
       }
     }
 
     window.startInstall = startInstall;
     applyModeDefaults();
+    showEntry();
     refreshSummary();
+
     ["publicHost", "publicPort", "useGoProxyCN"].forEach((id) => {
       const element = $(id);
       if (!element) return;
       const eventName = element.type === "checkbox" ? "change" : "input";
       element.addEventListener(eventName, () => {
         refreshSummary();
-        if (id === "publicHost" || id === "publicPort") {
+        if (deploymentType === "public" && (id === "publicHost" || id === "publicPort")) {
           scheduleProbe();
         }
       });
     });
 
-    const hostPreset = $("publicHostPreset");
-    if (hostPreset) {
-      hostPreset.addEventListener("change", () => {
-        applyPresetHost(hostPreset.value);
+    const choosePublicBtn = $("choosePublicBtn");
+    if (choosePublicBtn) {
+      choosePublicBtn.addEventListener("click", () => applyDeploymentChoice("public"));
+    }
+
+    const chooseLocalBtn = $("chooseLocalBtn");
+    if (chooseLocalBtn) {
+      chooseLocalBtn.addEventListener("click", () => applyDeploymentChoice("local"));
+    }
+
+    const backToEntryBtn = $("backToEntryBtn");
+    if (backToEntryBtn) {
+      backToEntryBtn.addEventListener("click", () => {
+        showEntry();
       });
     }
 
-    loadHostCandidates();
-    scheduleProbe();
+    const backToConfigBtn = $("backToConfigBtn");
+    if (backToConfigBtn) {
+      backToConfigBtn.addEventListener("click", () => showStep(1));
+    }
+
+    const startBtn = $("startBtn");
+    if (startBtn) {
+      startBtn.addEventListener("click", startInstall);
+    }
+
+    const retryInstallBtn = $("retryInstallBtn");
+    if (retryInstallBtn) {
+      retryInstallBtn.addEventListener("click", startInstall);
+    }
+
   </script>
 </body>
 </html>

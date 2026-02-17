@@ -27,6 +27,8 @@ func NewAgentWebSocketHandler(hub *ws.Hub, runtimeService *agentapp.AgentRuntime
 		hub:            hub,
 		runtimeService: runtimeService,
 		upgrader: websocket.Upgrader{
+			// Agent WebSocket authentication is enforced by middleware before upgrade.
+			// Origin check is intentionally relaxed because agent clients are non-browser.
 			CheckOrigin: func(r *http.Request) bool {
 				return true
 			},
@@ -57,7 +59,9 @@ func (h *AgentWebSocketHandler) Handle(c *gin.Context) {
 	}
 	pkg.Info("Agent websocket connected", zap.Int("agent_id", agent.ID), zap.String("name", agent.Name), zap.String("ip", agent.IPAddress))
 
+	// writePump runs asynchronously to flush outbound messages from hub -> client.
 	go h.writePump(client)
+	// readPump blocks the request lifecycle and exits on disconnect/read errors.
 	h.readPump(c.Request.Context(), client, agent)
 }
 
@@ -65,6 +69,8 @@ func (h *AgentWebSocketHandler) readPump(ctx context.Context, client *ws.Client,
 	defer func() {
 		h.hub.Unregister(client)
 		_ = client.Conn.Close()
+		// Use background context to ensure offline state is persisted
+		// even if the original request context is already canceled.
 		if err := h.runtimeService.OnDisconnected(context.Background(), agent.ID); err != nil {
 			pkg.Warn("Failed to mark agent offline on disconnect", zap.Error(err), zap.Int("agent_id", agent.ID))
 		}
@@ -80,7 +86,13 @@ func (h *AgentWebSocketHandler) readPump(ctx context.Context, client *ws.Client,
 			}
 			return
 		}
-		if err := h.runtimeService.HandleMessage(ctx, agent, message); err != nil {
+			input, err := toRuntimeMessageInput(message)
+			if err != nil {
+				// Keep the connection alive for recoverable per-message decode failures.
+				pkg.Warn("Failed to decode WebSocket message", zap.Error(err), zap.Int("agent_id", agent.ID))
+				continue
+			}
+		if err := h.runtimeService.HandleMessage(ctx, agent.ID, input); err != nil {
 			pkg.Warn("Failed to handle WebSocket message", zap.Error(err), zap.Int("agent_id", agent.ID))
 		}
 	}

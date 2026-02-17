@@ -30,12 +30,6 @@ type networkCandidate struct {
 	Label     string `json:"label"`
 }
 
-type networkCandidatesResponse struct {
-	SourceHost    string             `json:"sourceHost,omitempty"`
-	SuggestedHost string             `json:"suggestedHost,omitempty"`
-	Candidates    []networkCandidate `json:"candidates"`
-}
-
 type networkReachabilityResponse struct {
 	OK        bool   `json:"ok"`
 	Level     string `json:"level"`

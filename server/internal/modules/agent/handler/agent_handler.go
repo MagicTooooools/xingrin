@@ -14,6 +14,8 @@ type AgentHandler struct {
 	facade               *agentapp.AgentFacade
 	runtimeService       *agentapp.AgentRuntimeService
 	serverVersion        string
+	publicURL            string
+	agentInternalURL     string
 	agentImageRef        string
 	workerImageRef       string
 	sharedDataVolumeBind string
@@ -23,6 +25,8 @@ type AgentHandler struct {
 
 type installTemplateData struct {
 	Token                string
+	RegisterURL          string
+	AgentServerURL       string
 	AgentImageRef        string
 	WorkerImageRef       string
 	SharedDataVolumeBind string
@@ -36,13 +40,15 @@ var agentInstallSHTemplate = template.Must(template.New("agent_install.sh").Pars
 func NewAgentHandler(
 	facade *agentapp.AgentFacade,
 	runtimeService *agentapp.AgentRuntimeService,
-	serverVersion, agentImageRef, workerImageRef, sharedDataVolumeBind, workerToken string,
+	serverVersion, publicURL, agentImageRef, workerImageRef, sharedDataVolumeBind, workerToken string,
 	heartbeatCache cache.HeartbeatCache,
 ) *AgentHandler {
 	return &AgentHandler{
 		facade:               facade,
 		runtimeService:       runtimeService,
 		serverVersion:        strings.TrimSpace(serverVersion),
+		publicURL:            strings.TrimSpace(publicURL),
+		agentInternalURL:     "http://server:8080",
 		agentImageRef:        strings.TrimSpace(agentImageRef),
 		workerImageRef:       strings.TrimSpace(workerImageRef),
 		sharedDataVolumeBind: strings.TrimSpace(sharedDataVolumeBind),

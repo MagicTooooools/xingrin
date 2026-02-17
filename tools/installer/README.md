@@ -50,6 +50,9 @@ LunaFox 安装器以 Go 实现，默认通过 Web 页面引导安装。
 - 下载源策略：`--source auto` 时按 `GitHub -> Gitee` 顺序重试。
 - 发布通道清单当前 schema 为 `SCHEMA_VERSION=2`，并强制 `AGENT_IMAGE_REFS`/`WORKER_IMAGE_REFS` 使用 digest 列表。
 - `SCHEMA_VERSION=2` 下不再接受旧单值键 `AGENT_IMAGE_REF`/`WORKER_IMAGE_REF`。
+- 安装器路径锚点采用单一真相：`--root-dir` 必填，不再读取 `LUNAFOX_INSTALLER_ROOT_DIR`，也不再自动按 `cwd` 探测。
+- `--root-dir` 必须是有效项目根目录（需包含 `docker/docker-compose.yml`、`docker/docker-compose.dev.yml`、`tools/installer/cmd/lunafox-installer/main.go`）。
+- 安装开始时会输出 `ROOT_DIR`、`DOCKER_DIR`、`ENV_FILE`，用于快速确认路径正确性。
 
 ## 本地调试入口（源码运行）
 

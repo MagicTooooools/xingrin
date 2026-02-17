@@ -41,7 +41,7 @@ func NewAgentRuntimeService(
 		serverVersion:   serverVersion,
 		agentImageRef:   agentImageRef,
 		updateNotifier:  newUpdateNotifier(messageBus, serverVersion, agentImageRef),
-		messageHandlers: newRuntimeMessageHandlers(),
+		messageHandlers: newRuntimeMessageDispatcher(),
 	}
 }
 
@@ -87,7 +87,7 @@ func (service *AgentRuntimeService) HandleMessage(ctx context.Context, agentID i
 	handlers := service.messageHandlers
 	if handlers == nil {
 		// Keep a safe fallback for partially-initialized instances used in tests.
-		handlers = newRuntimeMessageHandlers()
+		handlers = newRuntimeMessageDispatcher()
 		service.messageHandlers = handlers
 	}
 

@@ -80,11 +80,68 @@ func TestIssueRegistrationTokenSuccess(t *testing.T) {
 	}
 }
 
+func TestDownloadInstallScriptUsesModeQuery(t *testing.T) {
+	server := httptest.NewTLSServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		if request.URL.Path != "/api/agent/install-script" {
+			writer.WriteHeader(http.StatusNotFound)
+			return
+		}
+		if got := request.URL.Query().Get("token"); got != "reg-token" {
+			t.Fatalf("unexpected token query: %s", got)
+		}
+		if got := request.URL.Query().Get("mode"); got != "local" {
+			t.Fatalf("unexpected mode query: %s", got)
+		}
+		writer.WriteHeader(http.StatusOK)
+		_, _ = writer.Write([]byte("#!/usr/bin/env bash\necho ok\n"))
+	}))
+	defer server.Close()
+
+	client := newTLSClientForServer(t, server)
+	script, installURL, err := client.DownloadInstallScript(context.Background(), server.URL, "reg-token", "local")
+	if err != nil {
+		t.Fatalf("DownloadInstallScript error: %v", err)
+	}
+	if !strings.Contains(script, "echo ok") {
+		t.Fatalf("unexpected script body: %s", script)
+	}
+	if !strings.Contains(installURL, "mode=local") {
+		t.Fatalf("install url should include mode=local: %s", installURL)
+	}
+}
+
+func TestDownloadInstallScriptInvalidModeFallsBackToRemote(t *testing.T) {
+	server := httptest.NewTLSServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		if request.URL.Path != "/api/agent/install-script" {
+			writer.WriteHeader(http.StatusNotFound)
+			return
+		}
+		if got := request.URL.Query().Get("mode"); got != "remote" {
+			t.Fatalf("unexpected mode query: %s", got)
+		}
+		writer.WriteHeader(http.StatusOK)
+		_, _ = writer.Write([]byte("#!/usr/bin/env bash\necho ok\n"))
+	}))
+	defer server.Close()
+
+	client := newTLSClientForServer(t, server)
+	_, _, err := client.DownloadInstallScript(context.Background(), server.URL, "reg-token", "bad-mode")
+	if err != nil {
+		t.Fatalf("DownloadInstallScript error: %v", err)
+	}
+}
+
 func TestBuildInstallEnv(t *testing.T) {
-	env := BuildInstallEnv(Config{Mode: "dev", RegisterURL: "https://a", AgentServerURL: "http://b", NetworkName: "luna", WorkerToken: "w"})
+	env, err := BuildInstallEnv(Config{Mode: "dev", RegisterURL: "https://a", AgentServerURL: "http://b", NetworkName: "luna", WorkerToken: "w"})
+	if err != nil {
+		t.Fatalf("BuildInstallEnv error: %v", err)
+	}
 	flatten := map[string]string{}
 	for _, item := range env {
 		flatten[item.Key] = item.Value
+	}
+	if flatten["LUNAFOX_AGENT_DOCKER_NETWORK"] != "luna" {
+		t.Fatalf("expected docker network")
 	}
 	if flatten["WORKER_TOKEN"] != "w" {
 		t.Fatalf("expected worker token")
@@ -92,12 +149,24 @@ func TestBuildInstallEnv(t *testing.T) {
 }
 
 func TestBuildInstallEnvProd(t *testing.T) {
-	env := BuildInstallEnv(Config{Mode: "prod", RegisterURL: "https://a", AgentServerURL: "http://b", NetworkName: "luna"})
+	env, err := BuildInstallEnv(Config{Mode: "prod", RegisterURL: "https://a", AgentServerURL: "http://b", NetworkName: "luna"})
+	if err != nil {
+		t.Fatalf("BuildInstallEnv error: %v", err)
+	}
 	flatten := map[string]string{}
 	for _, item := range env {
 		flatten[item.Key] = item.Value
 	}
 	if _, exists := flatten["WORKER_TOKEN"]; exists {
 		t.Fatalf("worker token should be empty when not provided")
+	}
+}
+
+func TestBuildInstallEnvRequiresURLs(t *testing.T) {
+	if _, err := BuildInstallEnv(Config{RegisterURL: "", AgentServerURL: "http://b"}); err == nil {
+		t.Fatalf("expected missing register url error")
+	}
+	if _, err := BuildInstallEnv(Config{RegisterURL: "https://a", AgentServerURL: ""}); err == nil {
+		t.Fatalf("expected missing agent server url error")
 	}
 }

@@ -10,16 +10,29 @@ fi
 set -e
 
 TOKEN="{{.Token}}"
-SERVER_URL="{{.ServerURL}}"
-REGISTER_URL="${LUNAFOX_AGENT_REGISTER_URL:-}"
-AGENT_SERVER_URL="${LUNAFOX_AGENT_SERVER_URL:-$REGISTER_URL}"
+REGISTER_URL="{{.RegisterURL}}"
+AGENT_SERVER_URL="{{.AgentServerURL}}"
 NETWORK_NAME="${LUNAFOX_AGENT_DOCKER_NETWORK:-off}"
-AGENT_IMAGE="{{.AgentImage}}"
+AGENT_IMAGE_REF="{{.AgentImageRef}}"
 AGENT_VERSION="{{.AgentVersion}}"
 DEFAULT_WORKER_TOKEN="{{.WorkerToken}}"
-WORKER_IMAGE="yyhuni/lunafox-worker"
-SKIP_PULL="${LUNAFOX_AGENT_SKIP_PULL:-}"
+WORKER_IMAGE_REF="{{.WorkerImageRef}}"
 LOCAL_AGENT_CONFIG="${LUNAFOX_AGENT_USE_LOCAL_LIMITS:-}"
+SHARED_DATA_VOLUME_BIND="{{.SharedDataVolumeBind}}"
+
+IFS=':' read -r DATA_VOLUME DATA_TARGET _ <<< "$SHARED_DATA_VOLUME_BIND"
+if [ -z "${DATA_VOLUME:-}" ] || [ -z "${DATA_TARGET:-}" ]; then
+  echo "LUNAFOX_SHARED_DATA_VOLUME_BIND must be '<named-volume>:/opt/lunafox[:mode]'" >&2
+  exit 1
+fi
+if ! [[ "$DATA_VOLUME" =~ ^[A-Za-z0-9][A-Za-z0-9_.-]*$ ]]; then
+  echo "LUNAFOX_SHARED_DATA_VOLUME_BIND source must be Docker named volume (not host path)." >&2
+  exit 1
+fi
+if [ "$DATA_TARGET" != "/opt/lunafox" ]; then
+  echo "LUNAFOX_SHARED_DATA_VOLUME_BIND target must be /opt/lunafox" >&2
+  exit 1
+fi
 
 require_cmd() {
   if ! command -v "$1" >/dev/null 2>&1; then
@@ -30,15 +43,16 @@ require_cmd() {
 
 require_cmd curl
 
-if [ -z "$REGISTER_URL" ]; then
-  echo "LUNAFOX_AGENT_REGISTER_URL is required (no defaults)." >&2
-  exit 1
-fi
-
 echo "Configuration:"
 echo "Register URL: $REGISTER_URL"
 echo "Agent server URL: $AGENT_SERVER_URL"
 echo "Network: $NETWORK_NAME"
+echo "Data bind: $SHARED_DATA_VOLUME_BIND"
+
+force_local_images=0
+if [ "$AGENT_VERSION" = "dev" ]; then
+  force_local_images=1
+fi
 
 curl_opts=("-fsSL" "--connect-timeout" "10" "--max-time" "30" "-k")
 
@@ -81,7 +95,6 @@ if [ -z "${WORKER_TOKEN:-}" ]; then
 fi
 
 HOSTNAME="${AGENT_HOSTNAME:-$(hostname)}"
-DATA_DIR="${AGENT_DATA_DIR:-/opt/lunafox}"
 
 echo "Installing LunaFox Agent $AGENT_VERSION..."
 echo "Registering agent..."
@@ -123,37 +136,35 @@ if [ -z "$API_KEY" ]; then
   exit 1
 fi
 
-sudo mkdir -p "$DATA_DIR"
-
 echo "Pulling agent image..."
-if [ "$SKIP_PULL" = "1" ] || [ "$SKIP_PULL" = "true" ]; then
-  if image_exists "$AGENT_IMAGE:$AGENT_VERSION"; then
-    echo "Using local agent image: $AGENT_IMAGE:$AGENT_VERSION"
+if [ "$force_local_images" -eq 1 ]; then
+  if image_exists "$AGENT_IMAGE_REF"; then
+    echo "Using local agent image: $AGENT_IMAGE_REF"
   else
-    echo "Local agent image not found and LUNAFOX_AGENT_SKIP_PULL is set." >&2
+    echo "Local agent image not found for dev mode: $AGENT_IMAGE_REF" >&2
     exit 1
   fi
 else
-  if image_exists "$AGENT_IMAGE:$AGENT_VERSION"; then
-    echo "Local agent image exists, skip pull: $AGENT_IMAGE:$AGENT_VERSION"
+  if image_exists "$AGENT_IMAGE_REF"; then
+    echo "Local agent image exists, skip pull: $AGENT_IMAGE_REF"
   else
-    $DOCKER_CMD pull "$AGENT_IMAGE:$AGENT_VERSION"
+    $DOCKER_CMD pull "$AGENT_IMAGE_REF"
   fi
 fi
 
 echo "Pulling worker image..."
-if [ "$SKIP_PULL" = "1" ] || [ "$SKIP_PULL" = "true" ]; then
-  if image_exists "$WORKER_IMAGE:$AGENT_VERSION"; then
-    echo "Using local worker image: $WORKER_IMAGE:$AGENT_VERSION"
+if [ "$force_local_images" -eq 1 ]; then
+  if image_exists "$WORKER_IMAGE_REF"; then
+    echo "Using local worker image: $WORKER_IMAGE_REF"
   else
-    echo "Local worker image not found and LUNAFOX_AGENT_SKIP_PULL is set." >&2
+    echo "Local worker image not found for dev mode: $WORKER_IMAGE_REF" >&2
     exit 1
   fi
 else
-  if image_exists "$WORKER_IMAGE:$AGENT_VERSION"; then
-    echo "Local worker image exists, skip pull: $WORKER_IMAGE:$AGENT_VERSION"
+  if image_exists "$WORKER_IMAGE_REF"; then
+    echo "Local worker image exists, skip pull: $WORKER_IMAGE_REF"
   else
-    $DOCKER_CMD pull "$WORKER_IMAGE:$AGENT_VERSION"
+    $DOCKER_CMD pull "$WORKER_IMAGE_REF"
   fi
 fi
 
@@ -164,10 +175,12 @@ $DOCKER_CMD run -d --restart unless-stopped --name lunafox-agent \
   -e SERVER_URL="$AGENT_SERVER_URL" \
   -e API_KEY="$API_KEY" \
   -e WORKER_TOKEN="$WORKER_TOKEN" \
+  -e WORKER_IMAGE_REF="$WORKER_IMAGE_REF" \
+  -e LUNAFOX_SHARED_DATA_VOLUME_BIND="$SHARED_DATA_VOLUME_BIND" \
   -e AGENT_VERSION="$AGENT_VERSION" \
   -e AGENT_HOSTNAME="$HOSTNAME" \
   -v /var/run/docker.sock:/var/run/docker.sock \
-  -v "$DATA_DIR:/opt/lunafox" \
-  "$AGENT_IMAGE:$AGENT_VERSION" >/dev/null
+  -v "$SHARED_DATA_VOLUME_BIND" \
+  "$AGENT_IMAGE_REF" >/dev/null
 
 echo "Agent installed and running (container: lunafox-agent)"

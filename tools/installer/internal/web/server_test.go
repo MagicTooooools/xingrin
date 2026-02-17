@@ -31,7 +31,7 @@ func newBaseOptions(t *testing.T, mode string) cli.Options {
 func TestBuildOptionsProdRequiresPublicHost(t *testing.T) {
 	server := NewServer(newBaseOptions(t, cli.ModeProd), nil, io.Discard, io.Discard)
 
-	_, err := buildInstallOptions(server.baseOptions, startRequest{})
+	_, err := buildInstallOptions(server.baseOptions, startRequest{PublicPort: "8083"})
 	if err == nil {
 		t.Fatalf("expected error when prod without public host")
 	}
@@ -93,41 +93,51 @@ func TestBuildOptionsProdOverridesAndGoProxy(t *testing.T) {
 	}
 }
 
-func TestBuildOptionsDevAllowsEmptyPublicURL(t *testing.T) {
+func TestBuildOptionsDevRequiresPublicHost(t *testing.T) {
 	server := NewServer(newBaseOptions(t, cli.ModeDev), nil, io.Discard, io.Discard)
 
-	opts, err := buildInstallOptions(server.baseOptions, startRequest{})
-	if err != nil {
-		t.Fatalf("build options: %v", err)
+	opts, err := buildInstallOptions(server.baseOptions, startRequest{PublicPort: "8083"})
+	if err == nil {
+		t.Fatalf("expected error when dev without public host, got options: %+v", opts)
 	}
-	if opts.Mode != cli.ModeDev {
-		t.Fatalf("expected dev mode, got %s", opts.Mode)
-	}
-	if opts.PublicURL != "https://base.example.com:8083" {
-		t.Fatalf("unexpected public url: %s", opts.PublicURL)
-	}
-	if opts.PublicPort != "8083" {
-		t.Fatalf("unexpected public port: %s", opts.PublicPort)
-	}
-	if opts.ComposeFile != opts.ComposeDev {
-		t.Fatalf("expected dev compose file, got %s", opts.ComposeFile)
+	if !strings.Contains(err.Error(), "必须填写公网主机") {
+		t.Fatalf("unexpected error: %v", err)
 	}
 }
 
-func TestBuildOptionsDevAllowsPortOverrideWithoutHost(t *testing.T) {
+func TestBuildOptionsRequiresPublicPort(t *testing.T) {
+	server := NewServer(newBaseOptions(t, cli.ModeProd), nil, io.Discard, io.Discard)
+
+	_, err := buildInstallOptions(server.baseOptions, startRequest{
+		PublicHost: "prod.example.com",
+		PublicPort: "",
+	})
+	if err == nil {
+		t.Fatalf("expected error when public port is empty")
+	}
+	if !strings.Contains(err.Error(), "必须填写公网端口") {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
+func TestBuildOptionsDevWithPublicHost(t *testing.T) {
 	server := NewServer(newBaseOptions(t, cli.ModeDev), nil, io.Discard, io.Discard)
 
 	opts, err := buildInstallOptions(server.baseOptions, startRequest{
+		PublicHost: "dev.example.com",
 		PublicPort: "18443",
 	})
 	if err != nil {
 		t.Fatalf("build options: %v", err)
 	}
-	if opts.PublicURL != "https://base.example.com:18443" {
+	if opts.PublicURL != "https://dev.example.com:18443" {
 		t.Fatalf("unexpected public url: %s", opts.PublicURL)
 	}
 	if opts.PublicPort != "18443" {
 		t.Fatalf("unexpected public port: %s", opts.PublicPort)
+	}
+	if opts.ComposeFile != opts.ComposeDev {
+		t.Fatalf("expected dev compose file, got %s", opts.ComposeFile)
 	}
 }
 

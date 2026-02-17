@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"net/url"
 	"strings"
 	"text/template"
 
@@ -13,6 +14,11 @@ import (
 	agentdomain "github.com/yyhuni/lunafox/server/internal/modules/agent/domain"
 	"github.com/yyhuni/lunafox/server/internal/modules/agent/dto"
 	"github.com/yyhuni/lunafox/server/internal/pkg/timeutil"
+)
+
+const (
+	installScriptModeRemote = "remote"
+	installScriptModeLocal  = "local"
 )
 
 // CreateRegistrationToken creates a new registration token.
@@ -64,7 +70,7 @@ func (h *AgentHandler) Register(c *gin.Context) {
 }
 
 // InstallScript returns an agent installation script.
-// GET /api/agent/install-script?token=...
+// GET /api/agent/install-script?token=...&mode=<remote|local>
 func (h *AgentHandler) InstallScript(c *gin.Context) {
 	token := strings.TrimSpace(c.Query("token"))
 	if token == "" {
@@ -82,30 +88,50 @@ func (h *AgentHandler) InstallScript(c *gin.Context) {
 		}
 	}
 
-	serverURL := h.publicURL
-	if serverURL == "" {
-		serverURL = inferServerURL(c)
-	}
-	if serverURL == "" {
-		dto.InternalError(c, "Failed to infer server URL")
+	mode := normalizeInstallScriptMode(c.Query("mode"))
+	publicURL, err := validateInstallScriptPublicURL(h.publicURL)
+	if err != nil {
+		dto.InternalError(c, err.Error())
 		return
+	}
+	agentServerURL := publicURL
+	if mode == installScriptModeLocal {
+		agentServerURL = h.agentInternalURL
 	}
 
 	version := h.serverVersion
 	if version == "" {
+		// Keep explicit fallback to avoid generating an empty AGENT_VERSION in script.
 		version = "unknown"
 	}
-	image := h.agentImage
-	if image == "" {
-		image = "yyhuni/lunafox-agent"
+	// Fail fast on missing runtime contracts so the generated script never carries
+	// ambiguous defaults.
+	agentImageRef := h.agentImageRef
+	if agentImageRef == "" {
+		dto.InternalError(c, "Agent image ref is not configured")
+		return
+	}
+
+	workerImageRef := h.workerImageRef
+	if workerImageRef == "" {
+		dto.InternalError(c, "Worker image ref is not configured")
+		return
+	}
+	sharedDataVolumeBind := h.sharedDataVolumeBind
+	if sharedDataVolumeBind == "" {
+		dto.InternalError(c, "Shared data volume bind is not configured")
+		return
 	}
 
 	script, err := renderInstallScript(agentInstallSHTemplate, installTemplateData{
-		Token:        token,
-		ServerURL:    serverURL,
-		AgentImage:   image,
-		AgentVersion: version,
-		WorkerToken:  h.workerToken,
+		Token:                token,
+		RegisterURL:          publicURL,
+		AgentServerURL:       agentServerURL,
+		AgentImageRef:        agentImageRef,
+		WorkerImageRef:       workerImageRef,
+		SharedDataVolumeBind: sharedDataVolumeBind,
+		AgentVersion:         version,
+		WorkerToken:          h.workerToken,
 	})
 	if err != nil {
 		dto.InternalError(c, "Failed to build install script")
@@ -122,4 +148,33 @@ func renderInstallScript(tpl *template.Template, data installTemplateData) (stri
 		return "", err
 	}
 	return buf.String(), nil
+}
+
+func normalizeInstallScriptMode(raw string) string {
+	switch strings.ToLower(strings.TrimSpace(raw)) {
+	case "", installScriptModeRemote:
+		return installScriptModeRemote
+	case installScriptModeLocal:
+		return installScriptModeLocal
+	default:
+		return installScriptModeRemote
+	}
+}
+
+func validateInstallScriptPublicURL(raw string) (string, error) {
+	trimmed := strings.TrimSpace(raw)
+	if trimmed == "" {
+		return "", fmt.Errorf("PUBLIC_URL is required for install script generation")
+	}
+	parsed, err := url.Parse(trimmed)
+	if err != nil {
+		return "", fmt.Errorf("PUBLIC_URL is invalid: %w", err)
+	}
+	if parsed.Scheme != "https" {
+		return "", fmt.Errorf("PUBLIC_URL must use https scheme")
+	}
+	if parsed.Host == "" {
+		return "", fmt.Errorf("PUBLIC_URL host is required")
+	}
+	return strings.TrimRight(trimmed, "/"), nil
 }

@@ -47,10 +47,15 @@ func (mockNotFoundErr) IsJobNotFound() bool { return true }
 
 func newRouterForAPI(t *testing.T, service InstallService) *Router {
 	t.Helper()
+	return newRouterForAPIWithMode(t, cli.ModeProd, service)
+}
+
+func newRouterForAPIWithMode(t *testing.T, mode string, service InstallService) *Router {
+	t.Helper()
 	root := t.TempDir()
 	dockerDir := filepath.Join(root, "docker")
 	return NewRouter(cli.Options{
-		Mode:           cli.ModeProd,
+		Mode:           mode,
 		PublicURL:      "https://example.com:8083",
 		PublicPort:     "8083",
 		AgentServerURL: "http://server:8080",
@@ -123,6 +128,33 @@ func TestStartAPIConflict(t *testing.T) {
 	}
 }
 
+func TestStartAPIDevRejectsEmptyPublicHost(t *testing.T) {
+	router := newRouterForAPIWithMode(t, cli.ModeDev, mockInstallService{
+		startFn: func(cli.Options) (string, error) {
+			t.Fatalf("service start should not be called when options are invalid")
+			return "", nil
+		},
+		snapshotFn: func(string) (installapp.InstallStateSnapshot, error) {
+			return installapp.InstallStateSnapshot{}, nil
+		},
+		subscribeFn: func(string, int64) (<-chan installapp.InstallEvent, func(), error) {
+			return make(chan installapp.InstallEvent), func() {}, nil
+		},
+	})
+
+	body := bytes.NewBufferString(`{"publicHost":"","publicPort":"8083","useGoProxyCN":true}`)
+	request := httptest.NewRequest(http.MethodPost, "/api/start", body)
+	recorder := httptest.NewRecorder()
+	router.Handler().ServeHTTP(recorder, request)
+
+	if recorder.Code != http.StatusBadRequest {
+		t.Fatalf("unexpected status: %d body=%s", recorder.Code, recorder.Body.String())
+	}
+	if !strings.Contains(recorder.Body.String(), "必须填写公网主机") {
+		t.Fatalf("unexpected response: %s", recorder.Body.String())
+	}
+}
+
 func TestStateAPINotFound(t *testing.T) {
 	router := newRouterForAPI(t, mockInstallService{
 		startFn: func(cli.Options) (string, error) { return "job-1", nil },
@@ -189,35 +221,6 @@ func TestEventsAPIStream(t *testing.T) {
 	}
 }
 
-func TestNetworkCandidatesAPI(t *testing.T) {
-	router := newRouterForAPI(t, mockInstallService{
-		startFn: func(cli.Options) (string, error) { return "job-1", nil },
-		snapshotFn: func(string) (installapp.InstallStateSnapshot, error) {
-			return installapp.InstallStateSnapshot{}, nil
-		},
-		subscribeFn: func(string, int64) (<-chan installapp.InstallEvent, func(), error) {
-			return make(chan installapp.InstallEvent), func() {}, nil
-		},
-	})
-
-	request := httptest.NewRequest(http.MethodGet, "/api/network/candidates", nil)
-	request.Host = "127.0.0.1:18083"
-	recorder := httptest.NewRecorder()
-	router.Handler().ServeHTTP(recorder, request)
-
-	if recorder.Code != http.StatusOK {
-		t.Fatalf("unexpected status: %d body=%s", recorder.Code, recorder.Body.String())
-	}
-
-	var response networkCandidatesResponse
-	if err := json.NewDecoder(recorder.Body).Decode(&response); err != nil {
-		t.Fatalf("decode response: %v", err)
-	}
-	if response.SourceHost != "127.0.0.1" {
-		t.Fatalf("unexpected source host: %s", response.SourceHost)
-	}
-}
-
 func TestNetworkReachabilityRejectInvalidHost(t *testing.T) {
 	router := newRouterForAPI(t, mockInstallService{
 		startFn: func(cli.Options) (string, error) { return "job-1", nil },
@@ -237,6 +240,32 @@ func TestNetworkReachabilityRejectInvalidHost(t *testing.T) {
 		t.Fatalf("unexpected status: %d body=%s", recorder.Code, recorder.Body.String())
 	}
 	if !strings.Contains(recorder.Body.String(), "INVALID_HOST") {
+		t.Fatalf("unexpected response: %s", recorder.Body.String())
+	}
+}
+
+func TestNetworkReachabilityRejectEmptyHost(t *testing.T) {
+	router := newRouterForAPI(t, mockInstallService{
+		startFn: func(cli.Options) (string, error) { return "job-1", nil },
+		snapshotFn: func(string) (installapp.InstallStateSnapshot, error) {
+			return installapp.InstallStateSnapshot{}, nil
+		},
+		subscribeFn: func(string, int64) (<-chan installapp.InstallEvent, func(), error) {
+			return make(chan installapp.InstallEvent), func() {}, nil
+		},
+	})
+
+	request := httptest.NewRequest(http.MethodGet, "/api/network/reachability?host=&port=8083", nil)
+	recorder := httptest.NewRecorder()
+	router.Handler().ServeHTTP(recorder, request)
+
+	if recorder.Code != http.StatusBadRequest {
+		t.Fatalf("unexpected status: %d body=%s", recorder.Code, recorder.Body.String())
+	}
+	if !strings.Contains(recorder.Body.String(), "INVALID_HOST") {
+		t.Fatalf("unexpected response: %s", recorder.Body.String())
+	}
+	if !strings.Contains(recorder.Body.String(), "必须填写公网主机") {
 		t.Fatalf("unexpected response: %s", recorder.Body.String())
 	}
 }

@@ -2,6 +2,7 @@ package steps
 
 import (
 	"crypto/tls"
+	"crypto/x509"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -73,9 +74,14 @@ func TestCheckURLReadyAndWarm(t *testing.T) {
 	}))
 	defer server.Close()
 
+	pool := x509.NewCertPool()
+	pool.AddCert(server.Certificate())
 	client := &http.Client{
 		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, //nolint:gosec
+			TLSClientConfig: &tls.Config{
+				RootCAs:    pool,
+				MinVersion: tls.VersionTLS12,
+			},
 		},
 	}
 
@@ -91,16 +97,46 @@ func TestCheckURLReadyAndWarm(t *testing.T) {
 }
 
 func TestResolvePublicPort(t *testing.T) {
-	if got := resolvePublicPort("https://example.com:8443", ""); got != "8443" {
-		t.Fatalf("unexpected port from url: %s", got)
+	got, err := resolvePublicPort("18083")
+	if err != nil {
+		t.Fatalf("resolve port failed: %v", err)
 	}
-	if got := resolvePublicPort("https://example.com", ""); got != "443" {
-		t.Fatalf("unexpected https default port: %s", got)
-	}
-	if got := resolvePublicPort("", "18083"); got != "18083" {
+	if got != "18083" {
 		t.Fatalf("unexpected preferred port: %s", got)
 	}
-	if got := resolvePublicPort("", ""); got != cli.DefaultPublicPort {
-		t.Fatalf("unexpected fallback port: %s", got)
+
+	if _, err := resolvePublicPort(""); err == nil {
+		t.Fatalf("expected empty port to fail")
+	}
+	if _, err := resolvePublicPort("abc"); err == nil {
+		t.Fatalf("expected non-numeric port to fail")
+	}
+	if _, err := resolvePublicPort("70000"); err == nil {
+		t.Fatalf("expected out-of-range port to fail")
+	}
+}
+
+func TestParseHostPortForProbe(t *testing.T) {
+	host, port, err := parseHostPortForProbe("https://example.com:8443")
+	if err != nil {
+		t.Fatalf("parse host port: %v", err)
+	}
+	if host != "example.com" || port != "8443" {
+		t.Fatalf("unexpected parse result: host=%s port=%s", host, port)
+	}
+
+	host, port, err = parseHostPortForProbe("https://example.com")
+	if err != nil {
+		t.Fatalf("parse host port: %v", err)
+	}
+	if host != "example.com" || port != "443" {
+		t.Fatalf("unexpected parse result: host=%s port=%s", host, port)
+	}
+}
+
+func TestParseHostPortForProbeRejectInvalidURL(t *testing.T) {
+	_, _, err := parseHostPortForProbe("://bad")
+	if err == nil {
+		t.Fatalf("expected parse failure")
 	}
 }
