@@ -3,9 +3,14 @@ package application
 import (
 	"context"
 	"errors"
+	"expvar"
 
 	scandomain "github.com/yyhuni/lunafox/server/internal/modules/scan/domain"
+	"github.com/yyhuni/lunafox/server/internal/pkg"
+	"go.uber.org/zap"
 )
+
+var scanDeleteStopIgnoredTotal = expvar.NewInt("scan_delete_stop_ignored_total")
 
 type LifecycleService struct {
 	scanStore      ScanCommandStore
@@ -78,10 +83,16 @@ func (service *LifecycleService) stopActiveForDelete(ctx context.Context, scan *
 	if err == nil {
 		return count, nil
 	}
-	if errors.Is(err, scandomain.ErrScanCannotStop) || errors.Is(err, scandomain.ErrInvalidStatusChange) {
-		return 0, nil
+	if !errors.Is(err, scandomain.ErrScanCannotStop) && !errors.Is(err, scandomain.ErrInvalidStatusChange) {
+		return 0, err
 	}
-	return 0, err
+	scanDeleteStopIgnoredTotal.Add(1)
+	pkg.Warn("ignoring stop error during scan deletion",
+		zap.Int("scanId", scan.ID),
+		zap.String("scanStatus", scan.Status),
+		zap.Error(err),
+	)
+	return 0, nil
 }
 
 func (service *LifecycleService) applyStopTransition(ctx context.Context, scanID int) error {

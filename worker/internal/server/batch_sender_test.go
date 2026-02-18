@@ -4,9 +4,9 @@ import (
 	"context"
 	"testing"
 
-	"github.com/yyhuni/lunafox/worker/internal/pkg"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/yyhuni/lunafox/worker/internal/pkg"
 	"go.uber.org/zap"
 )
 
@@ -29,6 +29,7 @@ type captureClient struct {
 	failCount int
 	err       error
 	batches   [][]any
+	onPost    func()
 }
 
 func (c *captureClient) GetProviderConfig(ctx context.Context, scanID int, toolName string) (*ProviderConfig, error) {
@@ -43,6 +44,9 @@ func (c *captureClient) PostBatch(ctx context.Context, scanID, targetID int, dat
 	c.calls++
 	copied := append([]any(nil), items...)
 	c.batches = append(c.batches, copied)
+	if c.onPost != nil {
+		c.onPost()
+	}
 	if c.calls <= c.failCount && c.err != nil {
 		return c.err
 	}
@@ -156,4 +160,79 @@ func TestBatchSender_DefaultBatchSize(t *testing.T) {
 	withNopLogger(t)
 	sender := NewBatchSender(context.Background(), &captureClient{}, 1, 2, "subdomain", 0)
 	assert.Equal(t, 1000, sender.batchSize)
+	assert.Equal(t, 10000, sender.maxQueuedItems)
+}
+
+func TestBatchSender_QueueMetrics(t *testing.T) {
+	withNopLogger(t)
+	client := &captureClient{
+		failCount: 1,
+		err:       &HTTPError{StatusCode: 500, Body: "server error"},
+	}
+	sender := NewBatchSender(context.Background(), client, 1, 2, "subdomain", 2)
+
+	require.NoError(t, sender.Add("a"))
+	err := sender.Add("b")
+	require.Error(t, err)
+
+	queued, retries, dropped := sender.QueueMetrics()
+	assert.Equal(t, 2, queued)
+	assert.Equal(t, 1, retries)
+	assert.Equal(t, 0, dropped)
+
+	require.NoError(t, sender.Flush())
+	queued, retries, dropped = sender.QueueMetrics()
+	assert.Equal(t, 0, queued)
+	assert.Equal(t, 1, retries)
+	assert.Equal(t, 0, dropped)
+}
+
+func TestBatchSender_AddFailsFastWhenQueueLimitExceeded(t *testing.T) {
+	withNopLogger(t)
+	client := &captureClient{
+		failCount: 1,
+		err:       &HTTPError{StatusCode: 500, Body: "server error"},
+	}
+	sender := NewBatchSenderWithQueueLimit(context.Background(), client, 1, 2, "subdomain", 2, 2)
+
+	require.NoError(t, sender.Add("a"))
+	err := sender.Add("b")
+	require.Error(t, err)
+
+	err = sender.Add("c")
+	require.Error(t, err)
+	require.ErrorIs(t, err, ErrBatchQueueOverflow)
+
+	queued, retries, dropped := sender.QueueMetrics()
+	assert.Equal(t, 2, queued)
+	assert.Equal(t, 1, retries)
+	assert.Equal(t, 1, dropped)
+}
+
+func TestBatchSender_RequeueOverflowDropsNewest(t *testing.T) {
+	withNopLogger(t)
+	client := &captureClient{
+		failCount: 1,
+		err:       &HTTPError{StatusCode: 500, Body: "server error"},
+	}
+	sender := NewBatchSenderWithQueueLimit(context.Background(), client, 1, 2, "subdomain", 2, 2)
+
+	client.onPost = func() {
+		client.onPost = nil
+		require.NoError(t, sender.Add("c"))
+	}
+
+	require.NoError(t, sender.Add("a"))
+	err := sender.Add("b")
+	require.Error(t, err)
+	require.ErrorIs(t, err, ErrBatchQueueOverflow)
+
+	sender.mu.Lock()
+	require.Equal(t, []any{"a", "b"}, sender.batch)
+	sender.mu.Unlock()
+
+	queued, retries, dropped := sender.QueueMetrics()
+	assert.Equal(t, 2, queued)
+	assert.Equal(t, 1, retries)
+	assert.Equal(t, 1, dropped)
 }

@@ -34,6 +34,7 @@ type Executor struct {
 	cancelMu  sync.Mutex
 	cancelled map[int]struct{}
 	wg        sync.WaitGroup
+	startMu   sync.RWMutex
 
 	stopping atomic.Bool
 }
@@ -88,11 +89,19 @@ func (e *Executor) Start(ctx context.Context, tasks <-chan *domain.Task) {
 				continue
 			}
 
+			e.startMu.RLock()
+			if e.stopping.Load() {
+				e.startMu.RUnlock()
+				// During shutdown/update: keep draining queue to avoid producer blocking,
+				// but do not start any new container task.
+				continue
+			}
 			e.wg.Add(1)
 			go func(task *domain.Task) {
 				defer e.wg.Done()
 				e.execute(ctx, task)
 			}(t)
+			e.startMu.RUnlock()
 		}
 	}
 }
@@ -326,6 +335,9 @@ func (e *Executor) CancelAll() {
 func (e *Executor) Shutdown(ctx context.Context) error {
 	// Shutdown ordering is strict: block new starts, cancel in-flight work,
 	// then wait for all execute goroutines to return.
+	e.startMu.Lock()
+	defer e.startMu.Unlock()
+
 	e.stopping.Store(true)
 	e.CancelAll()
 

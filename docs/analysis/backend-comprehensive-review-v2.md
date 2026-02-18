@@ -1,192 +1,250 @@
-# Backend 综合代码审查报告（V2 精简版）
+# Backend 综合代码审查报告（V2 执行版）
 
-**审查日期**: 2026-02-13  
-**审查范围**: Server 端与 Worker 端代码库  
-**审查维度**: 并发安全、错误处理、代码质量、资源管理、性能优化  
-**基线来源**: `backend-comprehensive-review.md` 的逐条复核结果
+**修订日期**: 2026-02-14  
+**审查范围**: `server/`、`worker/`、`agent/`  
+**目标**: 给出“能直接排期执行”的结论，减少二次讨论成本。  
+**结论口径**: 以当前代码状态为准（非历史快照）。
 
-## 执行摘要
+---
 
-本版仅保留可执行审计结论，聚焦“确认问题 + 待定问题”：
+## 1. 执行摘要（先看这里）
 
-- 原始显式条目：55
-- 已确认问题（保留）：6
-- 待定问题（需补证据）：4
-- 已转优化建议（降级）：24
-- 已剔除误报：21
+当前最关键结论：
 
-建议你后续评审按以下顺序：
-1. 先处理 6 条确认问题。
-2. 并行补齐 4 条待定问题的运行证据。
-3. 将 24 条优化建议纳入技术债迭代，不和缺陷修复混排。
+1. 原“确认问题”中的 6 条，已基本完成修复并落地。  
+2. 新增 1 条应升级为**确认缺陷**（`agent Executor` 的 `WaitGroup` 使用时序）。  
+3. 4 条“待定问题”中：2 条建议升级处理，2 条维持观测项。  
+4. 其余优化建议不建议与缺陷修复混排，应纳入技术债迭代。
 
-## 1. 已确认问题（6 条）
+**建议排期**：
 
-### 1.1 高优先级（稳定性/数据正确性）
+1. 本周（P0/P1）：修 `Executor` 并发缺陷 + Docker 清理超时保护。  
+2. 下周（P2）：补 `BatchSender` 队列上限与指标。  
+3. 持续：保留性能优化项，基于压测数据再动刀。
 
-#### 1) Subdomain 解析输出通道可能阻塞
-- **文件**: `worker/internal/results/subdomain_parser.go:20`
-- **问题**: `ParseSubdomains()` 返回 `out` channel；若调用方未持续消费，生产 goroutine 会阻塞在发送处。
-- **影响**: 长任务可出现 goroutine 堆积，导致流程悬停。
+---
+
+## 2. 总览矩阵（可直接用于排期）
+
+| ID | 项目 | 当前状态 | 风险等级 | 是否必须修 | 建议优先级 |
+|---|---|---|---|---|---|
+| C1 | Subdomain 解析输出 channel 阻塞 | 已修复 | 中 | 否（已完成） | 已完成 |
+| C2 | Wordlist 行数错误吞掉并写 0 | 已修复 | 高 | 否（已完成） | 已完成 |
+| C3 | Redis ping 失败未显式 close | 已修复 | 中 | 否（已完成） | 已完成 |
+| C4 | `buildDependencies()` 复杂度过高 | 已修复（结构拆分） | 中 | 否（已完成） | 已完成 |
+| C5 | `runner.go` 复杂度过高 | 已修复（职责拆分） | 中 | 否（已完成） | 已完成 |
+| C6 | `doc-gen/main.go` 复杂度过高 | 已修复（分层+测试） | 低 | 否（已完成） | 已完成 |
+| N1 | `Executor` WaitGroup Add/Wait 时序风险 | **确认缺陷** | **高** | **是** | **P0** |
+| D1 | 删除扫描时吞部分 domain 错误语义 | 待业务定案 | 中 | 建议小修 | P2 |
+| D2 | Wordlist 扫描器 64KB 缓冲疑虑 | 已转“约束策略” | 低 | 否 | 关闭 |
+| D3 | BatchSender 失败回队策略 | 观测项（可增强） | 中 | 建议增强 | P2 |
+
+---
+
+## 3. 已完成修复项（6 条）
+
+### C1) Subdomain 解析输出通道可能阻塞
+- **文件**: `/Users/yangyang/Desktop/lunafox/worker/internal/results/subdomain_parser.go`
+- **现状**: `ParseSubdomains` 已引入 `context.Context`，发送时使用 `select` 监听 `ctx.Done()`，上游取消可及时收敛。
+- **优点**:
+1. 生产协程不再无限阻塞在 `out <- item`。
+2. 任务取消时能尽快退出，减少 goroutine 堆积。
+- **残余风险**:
+1. `seen` map 在超大结果集下仍有峰值内存压力（这是容量问题，不是逻辑 bug）。
+- **是否继续修**: 否（当前可接受）。
+- **后续建议**: 若压测触发 OOM，再评估分片去重/外部去重策略。
+
+### C2) Wordlist 行数错误被吞掉并写 0
+- **文件**: `/Users/yangyang/Desktop/lunafox/server/internal/modules/catalog/application/local_wordlist_file_store.go`
+- **现状**: 行数统计失败会返回错误，保存流程不再“假成功 + lineCount=0”。
+- **优点**:
+1. 元数据可靠性恢复。
+2. 避免下游基于错误行数做错误决策。
+- **残余风险**:
+1. 严格模式下，异常输入会被拒绝（这是预期行为）。
+- **是否继续修**: 否（已达标）。
+
+### C3) Redis ping 失败时未显式关闭
+- **文件**: `/Users/yangyang/Desktop/lunafox/server/internal/bootstrap/infra.go`
+- **现状**: `Ping` 失败后先 `Close()`，并记录 close 异常日志。
+- **优点**:
+1. 初始化失败路径资源释放更完整。
+2. 运维排查有日志可追踪。
+- **残余风险**: 无显著风险。
+- **是否继续修**: 否。
+
+### C4) `buildDependencies()` 复杂度过高
+- **文件**: `/Users/yangyang/Desktop/lunafox/server/internal/bootstrap/wiring.go`
+- **现状**: 主流程以模块编排为主，细节分发到模块 wiring。
+- **优点**:
+1. 接入新模块时影响面更可控。
+2. 故障定位能按模块切片排查。
+- **残余风险**:
+1. 单文件 import 仍偏重，但已显著优于单巨函数。
+- **是否继续修**: 否（非阻断）。
+
+### C5) `runner.go` 复杂度过高
+- **文件**:
+  - `/Users/yangyang/Desktop/lunafox/worker/internal/activity/runner.go`
+  - `/Users/yangyang/Desktop/lunafox/worker/internal/activity/runner_execution.go`
+  - `/Users/yangyang/Desktop/lunafox/worker/internal/activity/runner_output.go`
+- **现状**: 已按“执行生命周期/输出处理/公共结构”拆分。
+- **优点**:
+1. 错误路径更容易做单测覆盖。
+2. 输出处理逻辑可独立演进。
+- **残余风险**:
+1. 极端清理路径（外部依赖阻塞）仍可继续增强超时保护。
+- **是否继续修**: 否（主问题已解决）。
+
+### C6) `doc-gen/main.go` 复杂度过高
+- **文件**:
+  - `/Users/yangyang/Desktop/lunafox/worker/cmd/doc-gen/main.go`
+  - `/Users/yangyang/Desktop/lunafox/worker/cmd/doc-gen/loader.go`
+  - `/Users/yangyang/Desktop/lunafox/worker/cmd/doc-gen/renderer.go`
+  - `/Users/yangyang/Desktop/lunafox/worker/cmd/doc-gen/writer.go`
+  - `/Users/yangyang/Desktop/lunafox/worker/cmd/doc-gen/types.go`
+  - `/Users/yangyang/Desktop/lunafox/worker/cmd/doc-gen/doc_gen_test.go`
+- **现状**: 已完成 loader/renderer/writer 抽离，`main` 只编排，且补了覆盖关键分支的测试。
+- **优点**:
+1. 变更耦合大幅下降。
+2. 回归成本可控。
+- **残余风险**: 无明显风险。
+- **是否继续修**: 否。
+
+---
+
+## 4. 新增确认缺陷（必须修）
+
+### N1) `Executor` 的 `WaitGroup` Add/Wait 存在并发时序风险
+- **文件**: `/Users/yangyang/Desktop/lunafox/agent/internal/task/executor.go`
+- **问题描述**:
+1. `Start()` 中先 `go e.execute(...)`。
+2. `execute()` 内部才 `e.wg.Add(1)`。
+3. `Shutdown()` 同时调用 `e.wg.Wait()`。
+
+这会导致 `Add` 和 `Wait` 并发交错，存在 `WaitGroup` 误用风险（可能出现等待遗漏或 panic，取决于时序）。
+
+- **优点（当前实现）**:
+1. 有 `Shutdown(ctx)` + `CancelAll()` + `Wait()` 的完整框架。
+2. 任务取消流程设计方向正确。
+
+- **缺点/风险**:
+1. 并发时序不安全，属于基础并发正确性问题。
+2. 在高并发或停机窗口更容易暴露。
+
+- **修复方式（建议一次到位）**:
+1. 在 `Start()` 启 goroutine 前先 `e.wg.Add(1)`。
+2. 用 goroutine 包装 `execute()` 并 `defer e.wg.Done()`。
+3. `execute()` 内删除 `wg.Add/Done`。
+4. 增加并发关闭场景单测，并跑 `go test -race`。
+
+- **是否修复**: **是（必须）**。  
+- **优先级**: **P0**。
+
+---
+
+## 5. 待定问题复核结论（给出是否要修）
+
+### D1) 扫描删除流程“吞错误”是否合理
+- **文件**: `/Users/yangyang/Desktop/lunafox/server/internal/modules/scan/application/scan_lifecycle_service.go`
+- **现状**: 删除场景下，`ErrScanCannotStop` / `ErrInvalidStatusChange` 被转为 `nil`，删除继续。
+- **优点**:
+1. 删除接口幂等性更好，不因状态漂移阻塞删除。
+- **风险**:
+1. 可观测性下降，难还原“为什么没真正 stop”。
 - **建议修复**:
-1. 增加 `context.Context` 入参用于取消。
-2. 发送处改为 `select { case out<-...; case <-ctx.Done(): ... }`。
-3. 在上层确保消费协程生命周期和解析协程绑定。
+1. 保留当前业务语义不改。
+2. 增加 warning 日志 + 指标（如 `scan_delete_stop_ignored_total`）。
+- **是否修复**: 建议修（小改，非阻断）。
+- **优先级**: P2。
 
-#### 2) Wordlist 行数错误被吞掉并写 0
-- **文件**: `server/internal/modules/catalog/application/local_wordlist_file_store.go:54`
-- **问题**: `countWordlistLines` 出错后直接 `lineCount = 0` 返回成功。
-- **影响**: 元数据可能长期不准确，影响依赖行数的后续逻辑。
+### D2) Wordlist 扫描器默认缓冲区是否是问题
+- **文件**: `/Users/yangyang/Desktop/lunafox/server/internal/modules/catalog/application/local_wordlist_file_store.go`
+- **现状**: 已不依赖 `Scanner` 行分词，改为字节流计数，并且明确单行最大 64KB 的强约束。
+- **优点**:
+1. 行长控制明确、可预测。
+2. 避开 `Scanner` token 限制语义歧义。
+- **风险**:
+1. 超长行会被拒绝（属于策略）。
+- **是否修复**: 否，建议关闭该待定项。
+
+### D3) BatchSender 失败回队策略是否要重构
+- **文件**: `/Users/yangyang/Desktop/lunafox/worker/internal/server/batch_sender.go`
+- **现状**: 发送失败后 `append(toSend, s.batch...)` 回队，错误上抛调用方。
+- **优点**:
+1. 不丢数据、顺序保持直观。
+2. 与上层错误处理链路兼容。
+- **风险**:
+1. 若上层持续重试且持续失败，内存队列可能增长。
 - **建议修复**:
-1. 返回带上下文的错误（推荐）。
-2. 或保留成功返回，但增加“行数不可信”标记字段并记录 warning。
+1. 增加队列上限 `maxQueuedItems`（超限快速失败）。
+2. 增加观测指标：当前队列长度、重试次数、最终丢弃次数。
+- **是否修复**: 建议修（增强项）。
+- **优先级**: P2。
 
-#### 3) Redis 连接在 ping 失败时未显式关闭
-- **文件**: `server/internal/bootstrap/infra.go:77`
-- **问题**: `redisClient.Ping()` 失败后直接 `redisClient = nil`。
-- **影响**: 初始化失败路径可能残留连接资源。
-- **建议修复**:
-1. 在置空前执行 `redisClient.Close()`。
-2. 记录 close 失败日志，避免静默。
+---
 
-### 1.2 中优先级（可维护性/演进风险）
+## 6. 技术债优化项（不与缺陷混排）
 
-#### 4) `buildDependencies()` 复杂度过高
-- **文件**: `server/internal/bootstrap/wiring.go:1`
-- **问题**: 单函数承载大量装配职责（279 行）。
-- **影响**: 新模块接入和回归排查成本高。
-- **建议修复**: 按模块拆分装配函数（agent/asset/scan/snapshot 等），主函数仅编排顺序。
+以下继续保留为技术债，不建议本轮“立刻改”：
 
-#### 5) `runner.go` 复杂度过高
-- **文件**: `worker/internal/activity/runner.go:1`
-- **问题**: `Run()` + `streamOutput()` 逻辑集中（451 行文件）。
-- **影响**: 错误路径多，测试覆盖和定位成本高。
-- **建议修复**:
-1. 拆分为进程生命周期、输出处理、日志落盘三层。
-2. 为每层提供独立单测。
+1. 各类 mapper 的拷贝/分配优化。  
+2. 查询层 `Count + Find` 热点分页优化。  
+3. WebSocket/Hub 的统一关闭路径进一步收敛。  
+4. 构造函数参数对象化（降低签名膨胀）。  
 
-#### 6) `doc-gen/main.go` 复杂度过高
-- **文件**: `worker/cmd/doc-gen/main.go:1`
-- **问题**: 单入口函数承载完整文档生成流程（474 行）。
-- **影响**: 变更耦合重，难以回归。
-- **建议修复**: 抽离 loader/renderer/writer，`main` 仅做参数和流程编排。
+执行原则：
 
-## 2. 待定问题（4 条）
+1. 没有压测证据，不做“先验优化”。  
+2. 有明确 CPU/内存/延迟收益，再进排期。  
 
-> 以下条目需要运行时证据，不建议现在直接定性为缺陷。
+---
 
-#### 1) Executor 是否存在真实 goroutine 泄漏
-- **文件**: `agent/internal/task/executor.go:292`
-- **当前观察**: 已有 `Shutdown(ctx)` + `wg.Wait()`。
-- **待确认证据**:
-1. 压测中 shutdown 前后 goroutine 数变化。
-2. Docker API 超时/阻塞场景下是否可收敛。
+## 7. 推荐排期（可直接抄到迭代计划）
 
-#### 2) 扫描生命周期中“吞错误”是否符合业务语义
-- **文件**: `server/internal/modules/scan/application/scan_lifecycle_service.go:81`
-- **当前观察**: 特定 domain 错误会转换为 `nil`。
-- **待确认证据**:
-1. 业务是否明确允许“删除时忽略不可停止状态”。
-2. 是否存在由此导致的状态不一致案例。
+### Sprint A（本周）
 
-#### 3) Wordlist 扫描器默认缓冲区是否构成真实瓶颈
-- **文件**: `server/internal/modules/catalog/application/local_wordlist_file_store.go:162`
-- **当前观察**: 未设置 `Scanner.Buffer`，更偏超长行兼容性问题。
-- **待确认证据**:
-1. 实际 wordlist 行长分布。
-2. 失败样本与性能指标（CPU、GC、失败率）。
+1. 修复 N1：`Executor` WaitGroup 并发时序（P0）。  
+2. 给 `Executor` 的 Docker `Stop/Remove` 路径增加超时 context（P1）。  
 
-#### 4) BatchSender 重试队列策略是否需重构
-- **文件**: `worker/internal/server/batch_sender.go:123`
-- **当前观察**: 失败后 `append(toSend, s.batch...)` 回队。
-- **待确认证据**:
-1. 失败率、批次长度、重试次数分布。
-2. 是否出现明显内存抖动或长尾延迟。
+**验收标准**:
 
-## 3. 优化建议区（24 条，原降级项）
+1. 并发停机压测下无 panic。  
+2. `go test -race ./agent/internal/task/...` 通过。  
+3. Shutdown 在外部依赖阻塞时可按超时返回，不无限挂起。  
 
-以下条目建议纳入技术债看板，不作为本轮“缺陷修复”强约束。
+### Sprint B（下周）
 
-### 3.1 并发与运行控制
+1. D1 可观测性增强：删除流程忽略 stop 错误时打日志+指标（P2）。  
+2. D3 批量发送增强：回队上限+指标（P2）。  
 
-1. `server/internal/websocket/hub.go`：channel 关闭流程可做统一封装，降低结构脆弱性。  
-2. `agent/internal/update/updater.go`：无限重试流程可增强可观测性（重试上限、健康告警节流、可停机控制）。
+**验收标准**:
 
-### 3.2 错误处理一致性
+1. 失败场景下可观测字段完整（scanID/taskID/error type）。  
+2. 压测中无异常队列膨胀。  
 
-1. `server/internal/modules/agent/application/agent_registration_service.go`：构造函数 panic 可改返回 error。  
-2. `server/internal/modules/agent/application/agent_runtime_service.go`：缓存失败策略可显式化（日志规范、指标计数）。  
-3. `server/internal/pkg/csv/export.go` 等：`defer Close` 错误可统一记录。  
-4. `server/internal/auth/jwt.go`：内部错误上下文可增强可观测性。
+---
 
-### 3.3 代码组织与接口设计
+## 8. 建议补充的回归检查命令
 
-1. `server/internal/bootstrap/wiring/snapshot/`：适配器重复可用生成或模板减少维护成本。  
-2. `server/internal/bootstrap/wiring/asset/`：同类适配器可收敛模式。  
-3. `server/internal/bootstrap/wiring/snapshot/wiring_snapshot_vulnerability_query_store_adapter.go`：长参数签名可考虑参数对象。  
-4. `worker/internal/server/batch_sender.go`：构造函数参数可对象化，便于扩展。
+```bash
+# Worker
+cd /Users/yangyang/Desktop/lunafox/worker
+go test ./internal/activity ./internal/results ./internal/workflow/subdomain_discovery ./cmd/doc-gen
 
-### 3.4 资源管理与容量规划
+# Server
+cd /Users/yangyang/Desktop/lunafox/server
+go test ./internal/modules/catalog/application ./internal/modules/scan/application ./internal/bootstrap
 
-1. `server/internal/modules/agent/handler/agent_ws_handler.go`：WebSocket 关闭动作可统一到单路径。  
-2. `server/internal/websocket/hub.go`：常驻循环可补可控停机机制。  
-3. `server/internal/database/database.go`：可补 `SetConnMaxIdleTime`。  
-4. `server/internal/modules/agent/handler/agent_ws_handler.go`：`Send` 缓冲区建议基于压测调参。  
-5. `worker/internal/results/subdomain_parser.go`：大 `seen` map 可按批次或窗口策略控制峰值。
+# Agent（重点）
+cd /Users/yangyang/Desktop/lunafox/agent
+go test -race ./internal/task/...
+```
 
-### 3.5 性能优化候选
+---
 
-1. `server/internal/modules/snapshot/repository/vulnerability_snapshot_mapper.go`：字节切片安全拷贝策略可按热点决定是否保留。  
-2. `server/internal/modules/snapshot/repository/endpoint_snapshot_mapper.go`：字符串切片拷贝同上。  
-3. `server/internal/modules/snapshot/repository/screenshot_snapshot_mapper.go`：大对象拷贝可结合 pprof 决策。  
-4. `server/internal/modules/security/repository/vulnerability_mapper.go`：映射循环可做轻量分配优化。  
-5. `server/internal/modules/asset/repository/subdomain_mapper.go`：同类 mapper 可统一优化策略。  
-6. `server/internal/modules/asset/repository/endpoint_mapper.go`：同上。  
-7. `server/internal/modules/asset/repository/website_mapper.go`：同上。  
-8. `worker/internal/server/client.go`：错误分支 `ReadAll` 可视负载决定是否限制读取大小。  
-9. `server/internal/modules/security/repository/vulnerability_query.go`：分页 `Count + Find` 可在热点场景优化。  
-10. `server/internal/modules/snapshot/repository/vulnerability_snapshot_query.go`：同上。  
-11. `server/internal/modules/asset/repository/website_query.go`：同上。  
-12. `server/internal/modules/asset/repository/directory_query.go`：同上。  
-13. `server/internal/cache/heartbeat.go`：JSON 编解码可在高吞吐场景评估替代序列化。  
-14. `server/internal/modules/asset/repository/endpoint_command.go`：批大小策略可由压测统一。  
-15. `server/internal/modules/asset/repository/website_command.go`：同上。  
-16. `server/internal/modules/asset/repository/subdomain_command.go`：同上。  
-17. `server/internal/modules/scan/domain/workflow_planner.go`：预分配策略可微调。
+## 9. 结论（供决策）
 
-## 4. 已剔除误报（21 条）
+当前代码质量相较初版审计已明显改善，主要堵点已从“普遍结构问题”收敛到“少量并发正确性与可观测性细节”。  
+下一步最关键动作只有一个：**先修 `Executor` 的 WaitGroup 并发时序问题**。修完后，系统级稳定性风险会再下降一个量级。
 
-以下在当前代码下不成立，建议从审计缺陷列表删除：
-
-1. Agent Puller 共享变量并发竞争（`blocked/lastBlockReason`）。  
-2. Agent Executor 锁顺序死锁。  
-3. Worker BatchSender 并发竞态导致状态不一致。  
-4. Agent WebSocket Client send channel 阻塞泄漏。  
-5. Agent Puller `emptyIdx` 并发竞争。  
-6. Agent Executor `CancelTask` 缺少 defer unlock 导致死锁。  
-7. Hub 向已关闭 channel 发送。  
-8. Wordlist Save 文件创建后未清理泄漏。  
-9. Run 阶段 DB/Redis close 错误“未返回”属于缺陷。  
-10. CSV 导出“HTTP 响应体未关闭”（与 rows 语义混淆）。  
-11. stage_merge 循环 defer 文件句柄泄漏。  
-12. `jobCtx` 取消泄漏。  
-13. worker client 错误分支未消费响应体。  
-14. wordlist 下载临时文件清理不完整。  
-15. Runner 信号量泄漏。  
-16. Runner 扫描器缓冲区“溢出”。  
-17. snapshot handler 测试字符串 `+=` 性能问题。  
-18. command builder `+=` 性能问题。  
-19. Hub 重复 close 必然 panic（定性过度）。  
-20. 资源清理中 `_ = Close()` 一律高风险（定级过高，不宜作为缺陷）。  
-21. 多处“安全拷贝”直接定性为不必要分配（结论过度）。
-
-## 5. 本轮修复建议（可直接排期）
-
-### P1（本周）
-1. 修复 `subdomain_parser.go` channel 阻塞问题。  
-2. 修复 `local_wordlist_file_store.go` 行数错误吞掉问题。  
-3. 修复 `infra.go` Redis ping 失败后的连接关闭问题。
-
-### P2（下周）
-1. 拆分 `wiring.go`、`runner.go`、`doc-gen/main.go`。  
-2. 完成 4 条待定问题的压测/观测验证，决定是否升级为缺陷。

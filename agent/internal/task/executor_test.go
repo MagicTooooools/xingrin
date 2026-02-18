@@ -149,6 +149,74 @@ func TestExecutorShutdownTimeout(t *testing.T) {
 	}
 }
 
+func TestExecutorShutdownPreventsLateStartAfterDrainRace(t *testing.T) {
+	started := make(chan int, 1)
+
+	fakeDocker := &fakeDockerRunner{
+		startWorkerFn: func(ctx context.Context, t *domain.Task, serverURL, serverToken string) (string, error) {
+			started <- t.ID
+			return "container-1", nil
+		},
+		waitFn: func(ctx context.Context, containerID string) (int64, error) {
+			return 0, nil
+		},
+	}
+
+	exec := NewExecutor(fakeDocker, nil, nil, "https://server", "token")
+	runCtx, runCancel := context.WithCancel(context.Background())
+	defer runCancel()
+
+	tasks := make(chan *domain.Task)
+	go exec.Start(runCtx, tasks)
+
+	// Hold cancelMu so Start() gets past the first stopping check, then blocks
+	// before wg.Add(1). This reproduces the Add/Wait race window deterministically.
+	exec.cancelMu.Lock()
+	locked := true
+	defer func() {
+		if locked {
+			exec.cancelMu.Unlock()
+		}
+	}()
+
+	sent := make(chan struct{})
+	go func() {
+		tasks <- &domain.Task{ID: 42}
+		close(sent)
+	}()
+
+	select {
+	case <-sent:
+	case <-time.After(time.Second):
+		t.Fatalf("timed out sending task to executor")
+	}
+
+	shutdownDone := make(chan error, 1)
+	go func() {
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+		defer cancel()
+		shutdownDone <- exec.Shutdown(ctx)
+	}()
+
+	select {
+	case err := <-shutdownDone:
+		if err != nil {
+			t.Fatalf("unexpected shutdown error: %v", err)
+		}
+	case <-time.After(time.Second):
+		t.Fatalf("shutdown did not finish in time")
+	}
+
+	exec.cancelMu.Unlock()
+	locked = false
+
+	select {
+	case taskID := <-started:
+		t.Fatalf("task %d started after shutdown", taskID)
+	case <-time.After(80 * time.Millisecond):
+	}
+}
+
 func TestExecutorFailurePathUsesTimeoutContexts(t *testing.T) {
 	reporter := &fakeReporter{}
 	tailLogsHasDeadline := false
